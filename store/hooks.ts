@@ -1,8 +1,8 @@
 // store/hooks.ts
 // Typed hooks for Redux usage
 
-import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import type { RootState, AppDispatch } from './index';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from './index';
 
 // Use throughout the app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -20,9 +20,8 @@ export const useMetricsLoading = () => useAppSelector(state => state.metrics.isL
 export const useMetricsError = () => useAppSelector(state => state.metrics.error);
 
 export const useSelectedTimeRange = () => useAppSelector(state => state.ui.selectedTimeRange);
-export const useAddAccountFormVisible = () => useAppSelector(state => state.ui.isAddAccountFormVisible);
 export const useTheme = () => useAppSelector(state => state.ui.theme);
-export const useHasEverHadAccounts = () => useAppSelector(state => state.ui.hasEverHadAccounts);
+export const useIsFirstLaunch = () => useAppSelector(state => state.ui.isFirstLaunch);
 
 // Combined selectors for convenience
 export const useAppLoading = () => {

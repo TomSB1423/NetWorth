@@ -1,22 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Alert, Platform } from "react-native";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AccountsList from "../components/AccountsList";
-import AddAccountForm from "../components/AddAccountForm";
 import BankTransactions from "../components/BankTransactions";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useColorSchemeToggle } from "../hooks/useColorSchemeToggle";
 import { usePalette } from "../hooks/usePalette";
 import { Account } from "../services/accountMockService";
-import { 
-  useAppDispatch, 
-  useAccounts, 
-  useAppLoading, 
+import {
+  useAccounts,
   useAccountsError,
-  useAddAccountFormVisible,
-  useHasEverHadAccounts
+  useAppDispatch,
+  useAppLoading
 } from "../store/hooks";
-import { addAccount, clearError, removeAccount } from "../store/slices/accountsSlice";
-import { setAddAccountFormVisible } from "../store/slices/uiSlice";
+import { clearError, removeAccount } from "../store/slices/accountsSlice";
 
 export default function AccountsScreen() {
   const colors = usePalette();
@@ -28,8 +25,6 @@ export default function AccountsScreen() {
   const accounts = useAccounts();
   const isLoading = useAppLoading();
   const error = useAccountsError();
-  const showAddForm = useAddAccountFormVisible();
-  const hasEverHadAccounts = useHasEverHadAccounts();
 
   // Show error if any
   useEffect(() => {
@@ -47,14 +42,6 @@ export default function AccountsScreen() {
     }
   }, [error, dispatch]);
 
-  // Automatically open add account form only if no accounts exist on initial load
-  useEffect(() => {
-    // Only auto-open if user has never had accounts before (true onboarding)
-    if (!isLoading && accounts.length === 0 && !showAddForm && !hasEverHadAccounts) {
-      dispatch(setAddAccountFormVisible(true));
-    }
-  }, [accounts.length, isLoading, showAddForm, hasEverHadAccounts, dispatch]);
-
   const handleAccountSelect = (account: Account) => {
     setSelectedAccount(account);
   };
@@ -63,14 +50,8 @@ export default function AccountsScreen() {
     setSelectedAccount(null);
   };
 
-  const handleAddAccount = async (accountData: Omit<Account, 'id' | 'transactions'>) => {
-    try {
-      await dispatch(addAccount(accountData)).unwrap();
-      dispatch(setAddAccountFormVisible(false));
-    } catch (error) {
-      // Error is handled by the global error state
-      console.error('Failed to add account:', error);
-    }
+  const handleAddAccount = () => {
+    router.push('/select-bank');
   };
 
   const handleDeleteAccount = async (accountId: string) => {
@@ -90,6 +71,8 @@ export default function AccountsScreen() {
   if (isLoading) {
     return <LoadingSpinner message="Loading accounts..." />;
   }
+
+
 
   if (selectedAccount) {
     // Show transactions for the selected account
@@ -129,7 +112,7 @@ export default function AccountsScreen() {
         <Text style={[styles.headerTitle, { color: colors.text }]}>Accounts</Text>
         <TouchableOpacity
           style={[styles.addButton, { backgroundColor: colors.primary }]}
-          onPress={() => dispatch(setAddAccountFormVisible(true))}
+          onPress={handleAddAccount}
         >
           <Text style={[styles.addButtonText, { color: colors.background }]}>+ Add</Text>
         </TouchableOpacity>
@@ -140,12 +123,6 @@ export default function AccountsScreen() {
         onAccountSelect={handleAccountSelect}
         onAccountDelete={handleDeleteAccount}
       />
-      
-      <AddAccountForm
-        visible={showAddForm}
-        onClose={() => dispatch(setAddAccountFormVisible(false))}
-        onAddAccount={handleAddAccount}
-      />
     </View>
   );
 }
@@ -153,7 +130,7 @@ export default function AccountsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? 32 : Platform.OS === 'ios' ? 44 : 0,
+    paddingTop: Platform.OS === 'android' ? 60 : Platform.OS === 'ios' ? 80 : 20,
     paddingHorizontal: 20,
     backgroundColor: 'transparent',
   },

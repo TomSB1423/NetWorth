@@ -2,7 +2,7 @@
 // Error boundary component for catching and handling React errors
 
 import React, { Component, ReactNode } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface Props {
   children: ReactNode;

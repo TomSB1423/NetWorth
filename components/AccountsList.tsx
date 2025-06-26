@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { usePalette } from "../hooks/usePalette";
 import { Account } from "../services/accountMockService";
 
@@ -30,21 +30,19 @@ export default function AccountsList({ accounts, onAccountSelect, onAccountDelet
     );
   };
 
-  if (!accounts || accounts.length === 0) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.card }]}>
-        <View style={styles.emptyStateContainer}>
-          <Text style={styles.emptyStateEmoji}>🏦</Text>
-          <Text style={[styles.emptyStateTitle, { color: colors.text }]}>
-            No Accounts Yet
-          </Text>
-          <Text style={[styles.emptyStateDescription, { color: colors.secondaryText }]}>
-            Add your first account to start tracking your finances
-          </Text>
-        </View>
-      </View>
-    );
-  }
+  // Helper function to format bank name for display
+  const formatBankName = (bank: string) => {
+    // Handle special cases
+    const bankMap: Record<string, string> = {
+      'bank_of_america': 'Bank of America',
+      'wells_fargo': 'Wells Fargo',
+      'td_bank': 'TD Bank',
+      'capital_one': 'Capital One',
+      'pnc': 'PNC Bank',
+    };
+    
+    return bankMap[bank] || bank.charAt(0).toUpperCase() + bank.slice(1);
+  };
 
   // Helper function to format account type for display
   const formatAccountType = (type: string) => {
@@ -102,38 +100,44 @@ export default function AccountsList({ accounts, onAccountSelect, onAccountDelet
                 >
                   <View style={styles.accountHeader}>
                     <View style={styles.accountInfo}>
-                      <Text style={[styles.accountName, { color: colors.text }]}>{account.name}</Text>
-                    <Text style={[
-                      styles.accountType, 
-                      { color: getAccountTypeColor(account.type) }
-                    ]}>
-                      {formatAccountType(account.type)}
+                      <View style={styles.accountNameRow}>
+                        {account.emoji && (
+                          <Text style={styles.accountEmoji}>{account.emoji}</Text>
+                        )}
+                        <Text style={[styles.accountName, { color: colors.text }]}>{account.name}</Text>
+                      </View>
+                      <Text style={[
+                        styles.accountType, 
+                        { color: getAccountTypeColor(account.type) }
+                      ]}>
+                        {formatAccountType(account.type)}
+                        {account.bank && ` • ${formatBankName(account.bank)}`}
+                      </Text>
+                    </View>
+                    <Text 
+                      style={[
+                        styles.accountBalance, 
+                        { color: getBalanceColor(balance) }
+                      ]}
+                    >
+                      {balance < 0 ? '-$' : '$'}{Math.abs(balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </Text>
                   </View>
-                  <Text 
-                    style={[
-                      styles.accountBalance, 
-                      { color: getBalanceColor(balance) }
-                    ]}
-                  >
-                    {balance < 0 ? '-$' : '$'}{Math.abs(balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </Text>
-                </View>
-                <View style={styles.accountFooter}>
-                  <Text style={[styles.transactionCount, { color: colors.secondaryText }]}>
-                    {account.transactions.length} transactions
-                  </Text>
-                  {account.creditLimit && (
-                    <Text style={[styles.creditLimit, { color: colors.secondaryText }]}>
-                      Limit: ${account.creditLimit.toLocaleString()}
+                  <View style={styles.accountFooter}>
+                    <Text style={[styles.transactionCount, { color: colors.secondaryText }]}>
+                      {account.transactions.length} transactions
                     </Text>
-                  )}
-                  {account.interestRate && (
-                    <Text style={[styles.interestRate, { color: colors.secondaryText }]}>
-                      {(account.interestRate * 100).toFixed(2)}% APR
-                    </Text>
-                  )}
-                </View>
+                    {account.creditLimit && (
+                      <Text style={[styles.creditLimit, { color: colors.secondaryText }]}>
+                        Limit: ${account.creditLimit.toLocaleString()}
+                      </Text>
+                    )}
+                    {account.interestRate && (
+                      <Text style={[styles.interestRate, { color: colors.secondaryText }]}>
+                        {(account.interestRate * 100).toFixed(2)}% APR
+                      </Text>
+                    )}
+                  </View>
                 </TouchableOpacity>
                 
                 {/* Delete Button */}
@@ -174,33 +178,39 @@ export default function AccountsList({ accounts, onAccountSelect, onAccountDelet
                 >
                   <View style={styles.accountHeader}>
                     <View style={styles.accountInfo}>
-                      <Text style={[styles.accountName, { color: colors.text }]}>{account.name}</Text>
-                    <Text style={[
-                      styles.accountType, 
-                      { color: getAccountTypeColor(account.type) }
-                    ]}>
-                      {formatAccountType(account.type)}
+                      <View style={styles.accountNameRow}>
+                        {account.emoji && (
+                          <Text style={styles.accountEmoji}>{account.emoji}</Text>
+                        )}
+                        <Text style={[styles.accountName, { color: colors.text }]}>{account.name}</Text>
+                      </View>
+                      <Text style={[
+                        styles.accountType, 
+                        { color: getAccountTypeColor(account.type) }
+                      ]}>
+                        {formatAccountType(account.type)}
+                        {account.bank && ` • ${formatBankName(account.bank)}`}
+                      </Text>
+                    </View>
+                    <Text 
+                      style={[
+                        styles.accountBalance, 
+                        { color: getBalanceColor(balance) }
+                      ]}
+                    >
+                      {balance < 0 ? '-$' : '$'}{Math.abs(balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </Text>
                   </View>
-                  <Text 
-                    style={[
-                      styles.accountBalance, 
-                      { color: getBalanceColor(balance) }
-                    ]}
-                  >
-                    {balance < 0 ? '-$' : '$'}{Math.abs(balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </Text>
-                </View>
-                <View style={styles.accountFooter}>
-                  <Text style={[styles.transactionCount, { color: colors.secondaryText }]}>
-                    {account.transactions.length} payments
-                  </Text>
-                  {account.interestRate && (
-                    <Text style={[styles.interestRate, { color: colors.secondaryText }]}>
-                      {(account.interestRate * 100).toFixed(2)}% APR
+                  <View style={styles.accountFooter}>
+                    <Text style={[styles.transactionCount, { color: colors.secondaryText }]}>
+                      {account.transactions.length} payments
                     </Text>
-                  )}
-                </View>
+                    {account.interestRate && (
+                      <Text style={[styles.interestRate, { color: colors.secondaryText }]}>
+                        {(account.interestRate * 100).toFixed(2)}% APR
+                      </Text>
+                    )}
+                  </View>
                 </TouchableOpacity>
                 
                 {/* Delete Button */}
@@ -224,35 +234,6 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 24,
     flex: 1,
-  },
-  container: {
-    width: "100%",
-    marginTop: 24,
-    padding: 16,
-    borderRadius: 16,
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 16,
-  },
-  emptyStateContainer: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyStateEmoji: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptyStateDescription: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 22,
   },
   heading: {
     fontSize: 18,
@@ -285,10 +266,18 @@ const styles = StyleSheet.create({
   accountInfo: {
     flex: 1,
   },
+  accountNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   accountName: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 2,
+  },
+  accountEmoji: {
+    fontSize: 16,
+    marginRight: 8,
   },
   accountType: {
     fontSize: 12,

@@ -2,7 +2,7 @@
 // Reusable loading component with accessibility
 
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { usePalette } from '../hooks/usePalette';
 
 interface LoadingSpinnerProps {

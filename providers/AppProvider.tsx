@@ -4,11 +4,11 @@
 import React, { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor } from '../store/index';
-import { ColorSchemeProvider } from '../hooks/ColorSchemeContext';
-import AppEffects from '../store/effects/AppEffects';
 import ErrorBoundary from '../components/ErrorBoundary';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { ColorSchemeProvider } from '../hooks/ColorSchemeContext';
+import AppEffects from '../store/effects/AppEffects';
+import { persistor, store } from '../store/index';
 
 interface AppProviderProps {
   children: ReactNode;

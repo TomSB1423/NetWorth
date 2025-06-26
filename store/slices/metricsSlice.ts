@@ -1,10 +1,10 @@
 // store/slices/metricsSlice.ts
 // Metrics slice for Redux store
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { MetricsService, MetricsData } from '../../services/metricsService';
-import { NetWorthEntry } from '../../services/netWorthService';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { Transaction } from '../../services/accountMockService';
+import { MetricsData, MetricsService } from '../../services/metricsService';
+import { NetWorthEntry } from '../../services/netWorthService';
 
 // State interface
 interface MetricsState {

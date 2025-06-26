@@ -20,6 +20,8 @@ export type Account = {
   transactions: Transaction[];
   creditLimit?: number; // for credit accounts
   interestRate?: number; // for savings/credit/mortgage
+  emoji?: string; // optional emoji for the account
+  bank?: string; // bank identifier
 };
 
 interface TransactionPattern {

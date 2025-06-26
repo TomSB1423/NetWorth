@@ -6,17 +6,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // State interface
 interface UIState {
   selectedTimeRange: string;
-  isAddAccountFormVisible: boolean;
   theme: 'light' | 'dark' | 'auto';
-  hasEverHadAccounts: boolean; // Track if user has ever had accounts
+  isFirstLaunch: boolean; // Track if this is the first launch after reset
 }
 
 // Initial state
 const initialState: UIState = {
   selectedTimeRange: 'all',
-  isAddAccountFormVisible: false,
   theme: 'auto',
-  hasEverHadAccounts: false,
+  isFirstLaunch: true, // Default to true for new users
 };
 
 // Slice
@@ -27,23 +25,19 @@ const uiSlice = createSlice({
     setSelectedTimeRange: (state, action: PayloadAction<string>) => {
       state.selectedTimeRange = action.payload;
     },
-    setAddAccountFormVisible: (state, action: PayloadAction<boolean>) => {
-      state.isAddAccountFormVisible = action.payload;
-    },
     setTheme: (state, action: PayloadAction<'light' | 'dark' | 'auto'>) => {
       state.theme = action.payload;
     },
-    setHasEverHadAccounts: (state, action: PayloadAction<boolean>) => {
-      state.hasEverHadAccounts = action.payload;
+    setFirstLaunch: (state, action: PayloadAction<boolean>) => {
+      state.isFirstLaunch = action.payload;
     },
   },
 });
 
 export const {
   setSelectedTimeRange,
-  setAddAccountFormVisible,
   setTheme,
-  setHasEverHadAccounts,
+  setFirstLaunch,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

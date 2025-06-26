@@ -1,13 +1,12 @@
 // store/slices/accountsSlice.ts
 // Accounts slice for Redux store
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Account, AccountType, Transaction } from '../../services/accountMockService';
-import { MetricsService } from '../../services/metricsService';
-import { 
-  sanitizeString, 
-  rateLimiter,
-  generateSecureId
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Account, Transaction } from '../../services/accountMockService';
+import {
+    generateSecureId,
+    rateLimiter,
+    sanitizeString
 } from '../../utils/security';
 import { validateAccount, validateTransaction } from '../../utils/validation';
 
@@ -72,15 +71,17 @@ export const addAccount = createAsyncThunk(
         throw new Error('An account with this name already exists');
       }
 
-      // Generate a secure ID
-      const newId = generateSecureId();
+      // Use the account service to create the account with realistic transaction data
+      const { getNetWorthService } = await import('../../services/serviceProvider');
+      const netWorthService = getNetWorthService();
       
-      const newAccount: Account = {
+      // Create account with sanitized name and generated transactions
+      const accountWithSanitizedName = {
         ...accountData,
-        id: newId,
-        transactions: [],
         name: sanitizedName,
       };
+      
+      const newAccount = netWorthService.accountService.addAccount(accountWithSanitizedName);
 
       return newAccount;
     } catch (error) {

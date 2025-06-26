@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import DebugMenu from "../../components/DebugMenu";
 import { useColorSchemeToggle } from "../../hooks/useColorSchemeToggle";
 import { usePalette } from "../../hooks/usePalette";
 
@@ -35,6 +36,9 @@ export default function SettingsScreen() {
           <Text style={[styles.buttonText, { color: colors.text }]}>Dark</Text>
         </Pressable>
       </View>
+      
+      {/* Debug Menu - Only visible in development */}
+      <DebugMenu colors={colors} style={styles.debugMenuPosition} />
     </View>
   );
 }
@@ -67,5 +71,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: "bold",
+  },
+  debugMenuPosition: {
+    top: 80, // Position below the status bar on settings screen
+    right: 20,
   },
 });

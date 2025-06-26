@@ -2,7 +2,7 @@
 // Shared validation functions for accounts and transactions
 
 import { Account, Transaction } from '../services/accountMockService';
-import { sanitizeString, isValidAccountName, isValidAmount, isValidTransactionDate } from './security';
+import { isValidAccountName, isValidAmount, isValidTransactionDate, sanitizeString } from './security';
 
 export const validateAccount = (account: Partial<Account>): string | null => {
   if (!account.name) {

@@ -1,11 +1,11 @@
 // store/Provider.tsx
 // Redux Provider wrapper with persistence
 
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor } from './index';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { persistor, store } from './index';
 
 interface ReduxProviderProps {
   children: ReactNode;

@@ -1,9 +1,9 @@
 // store/index.ts
 // Redux store configuration with RTK and persistence
 
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from 'redux-persist';
 
 // Import slices
 import accountsReducer from './slices/accountsSlice';
@@ -22,7 +22,7 @@ const persistConfig = {
   key: 'networth-root',
   version: 1,
   storage: AsyncStorage,
-  // Persist accounts and UI state (for hasEverHadAccounts flag), metrics can be recalculated
+  // Persist accounts and UI state, metrics can be recalculated
   whitelist: ['accounts', 'ui'],
 };
 
@@ -47,6 +47,18 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 // Helper to reset store (useful for logout or data reset)
-export const resetStore = () => {
-  persistor.purge();
+export const resetStore = async () => {
+  try {
+    // Purge the persistor to clear all persisted data
+    await persistor.purge();
+    await persistor.flush();
+    
+    // Dispatch reset actions to all slices if needed
+    // (Note: purge should handle this, but we can be explicit)
+    
+    console.log('🔄 Redux store reset complete');
+  } catch (error) {
+    console.error('❌ Store reset failed:', error);
+    throw error;
+  }
 };
