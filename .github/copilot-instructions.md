@@ -14,36 +14,15 @@
 - Avoid inline styles; use StyleSheet for styling.
 - make sure to have a consistent style. Colour palette is under constants folder.
 
+Try to group related move files together to speed up the development process.
+
 ## Project Structure Best Practices
 
+Documentation is found at [docs](./docs/*)
 
-File structure:
+File structure can be found by running `tree /Users/tom/Code/NetWorth/app -I "node_modules"`
 
-── app
-│   └── (tabs)
-├── assets
-│   ├── fonts
-│   └── images
-├── components
-├── constants
-├── context
-├── hooks
-├── screens
-├── services
-├── store
-│   ├── effects
-│   └── slices
-└── utils
-
-- When adding new features or code, organize files into the following folders as appropriate:
-  - `components`: For reusable UI components.
-  - `screens`: For top-level screens/pages.
-  - `services`: For business logic and data access (already in use).
-  - `hooks`: For custom React hooks.
-  - `utils` or `lib`: For utility/helper functions.
-  - `types` or `models`: For TypeScript types and interfaces.
-  - `constants`: For app-wide constants.
-  - `navigation`: For navigation setup.
+- When adding new features or code, organize files into the correct folders according to best practices and the existing file structure.
 - Only create folders as needed to keep the project organized and maintainable.
 - Always update imports when moving files to new folders.
 - Use clear naming conventions and keep related files together.
@@ -52,3 +31,6 @@ File structure:
 
 - If you are unsure where a new file should go, prefer creating a new folder following the above structure.
 - Keep this file updated as the project evolves.
+
+
+Ensure you write tests to programatically assert major changes or where you see gaps.

@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../hooks/usePalette";
 import { Transaction } from "../services/accountMockService";
 
@@ -42,7 +42,11 @@ export default function BankTransactions({ transactions }: BankTransactionsProps
   const total = transactions.reduce((sum, t) => sum + t.amount, 0);
   const totalColor = colors.warning;
   return (
-    <View style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scrollContent}
+    >
       <View style={styles.headerRow}>
         <Text style={[styles.header, { color: colors.text }]}>Bank Transactions</Text>
         <Text style={[styles.total, { color: totalColor }]}>
@@ -71,14 +75,17 @@ export default function BankTransactions({ transactions }: BankTransactionsProps
           <View style={[styles.separator, { borderBottomColor: colors.border }]} />
         </View>
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     marginTop: 24,
-    marginBottom: 32,
+  },
+  scrollContent: {
+    paddingBottom: 32,
   },
   headerRow: {
     flexDirection: "row",

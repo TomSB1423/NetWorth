@@ -3,15 +3,20 @@
 
 import React, { useState } from 'react';
 import {
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { DEBUG_MODE, DebugCommands, DebugMenuProps } from '../utils/debug';
+import { DEBUG_MODE, DebugCommands } from '../utils/debug';
+
+export interface DebugMenuProps {
+  colors: any;
+  style?: any;
+}
 
 export default function DebugMenu({ colors, style }: DebugMenuProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -31,15 +36,15 @@ export default function DebugMenu({ colors, style }: DebugMenuProps) {
 
   const debugCommands = [
     {
-      title: 'Add Sample Checking Account',
-      description: 'Adds a single checking account for testing',
-      action: () => handleCommand(DebugCommands.addSampleCheckingAccount),
+      title: 'Add Sample Account',
+      description: 'Adds a single test account for testing',
+      action: () => handleCommand(DebugCommands.addSampleAccount),
       color: colors.primary,
     },
     {
       title: 'Add Multiple Sample Accounts',
       description: 'Adds checking, savings, credit, investment, and mortgage accounts',
-      action: () => handleCommand(DebugCommands.addMultipleSampleAccounts),
+      action: () => handleCommand(DebugCommands.addSampleAccounts),
       color: colors.success,
     },
     {
@@ -49,21 +54,15 @@ export default function DebugMenu({ colors, style }: DebugMenuProps) {
       color: colors.error,
     },
     {
-      title: 'Reset to Fresh Start',
-      description: 'Completely resets user to new user state',
-      action: () => handleCommand(DebugCommands.resetToFreshStart),
+      title: 'Reset App',
+      description: 'Completely resets app to fresh state',
+      action: () => handleCommand(DebugCommands.resetApp),
       color: colors.error,
     },
     {
-      title: 'Show Debug Info',
+      title: 'Show App Info',
       description: 'Shows current app state information',
-      action: () => DebugCommands.showDebugInfo(),
-      color: colors.primary,
-    },
-    {
-      title: 'Force Navigate to Welcome',
-      description: 'Navigate to onboarding welcome screen for testing',
-      action: () => DebugCommands.forceNavigateToWelcome(),
+      action: () => DebugCommands.showAppInfo(),
       color: colors.primary,
     },
   ];

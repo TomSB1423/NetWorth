@@ -1,19 +1,20 @@
 import React from "react";
 import { Platform, ScrollView, StyleSheet, View } from "react-native";
-import CategoryBreakdown from "../components/CategoryBreakdown";
-import MetricsCard from "../components/MetricsCard";
-import MonthlyFlowChart from "../components/MonthlyFlowChart";
-import NetWorthChart from "../components/NetWorthChart";
+import CategoryBreakdown from "../../components/CategoryBreakdown";
+import MetricsCard from "../../components/MetricsCard";
+import MonthlyFlowChart from "../../components/MonthlyFlowChart";
+import NetWorthChart from "../../components/NetWorthChart";
 import {
-    useAccounts,
-    useAppDispatch,
-    useAppLoading,
-    useMetrics,
-    useNetWorthHistory,
-    usePalette,
-    useSelectedTimeRange
-} from "../hooks";
-import { setSelectedTimeRange } from "../store/slices/uiSlice";
+  useAccounts,
+  useAppDispatch,
+  useAppLoading,
+  useMetrics,
+  useNetWorthHistory,
+  usePalette,
+  useSelectedTimeRange
+} from "../../hooks";
+import { calculateMetrics } from "../../store/slices/metricsSlice";
+import { setSelectedTimeRange } from "../../store/slices/uiSlice";
 
 const TIME_RANGE_DAYS: Record<string, number> = {
   all: 365,
@@ -24,7 +25,6 @@ const TIME_RANGE_DAYS: Record<string, number> = {
 };
 
 export default function Dashboard() {
-  // ALL HOOKS MUST BE CALLED FIRST - before any conditional logic
   const colors = usePalette();
   const dispatch = useAppDispatch();
   
@@ -34,6 +34,13 @@ export default function Dashboard() {
   const netWorthHistory = useNetWorthHistory();
   const isLoading = useAppLoading();
   const selectedRange = useSelectedTimeRange();
+
+  // Recalculate metrics when accounts change
+  React.useEffect(() => {
+    if (accounts.length > 0) {
+      dispatch(calculateMetrics());
+    }
+  }, [accounts, dispatch]);
 
   // Filter net worth history based on selected range
   const filteredHistory = React.useMemo(() => {
@@ -45,8 +52,8 @@ export default function Dashboard() {
     dispatch(setSelectedTimeRange(range));
   };
 
-  // Return empty view if no metrics available
-  if (!metrics) {
+  // Return loading or empty view if no metrics available
+  if (isLoading || !metrics) {
     return <View style={[styles.container, { backgroundColor: colors.background }]} />;
   }
 

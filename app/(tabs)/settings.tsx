@@ -15,11 +15,11 @@ export default function SettingsScreen() {
       <Text style={[styles.text, { color: colors.text }]}>Current color scheme: {mode}</Text>
       <View style={styles.buttonRow}>
         <Pressable
-          style={[styles.button, { backgroundColor: colors.card, borderColor: colors.primary }, mode === "system" && { backgroundColor: colors.highlight }]}
-          onPress={() => setMode("system")}
+          style={[styles.button, { backgroundColor: colors.card, borderColor: colors.primary }, mode === "auto" && { backgroundColor: colors.highlight }]}
+          onPress={() => setMode("auto")}
           accessibilityRole="button"
         >
-          <Text style={[styles.buttonText, { color: colors.text }]}>System</Text>
+          <Text style={[styles.buttonText, { color: colors.text }]}>Auto</Text>
         </Pressable>
         <Pressable
           style={[styles.button, { backgroundColor: colors.card, borderColor: colors.primary }, mode === "light" && { backgroundColor: colors.highlight }]}

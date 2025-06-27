@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useColorSchemeToggle } from '../../hooks/useColorSchemeToggle';
 import { usePalette } from '../../hooks/usePalette';
@@ -5,6 +6,7 @@ import { usePalette } from '../../hooks/usePalette';
 export default function TabLayout() {
   const colors = usePalette();
   const [colorScheme] = useColorSchemeToggle();
+
   return (
     <Tabs
       key={colorScheme}
@@ -15,12 +17,39 @@ export default function TabLayout() {
           backgroundColor: colors.card,
           borderTopColor: colors.border,
         },
-        headerShown: false, // Hide the header at the top of each tab screen
+        headerShown: false,
       }}
     >
-      <Tabs.Screen name="index" options={{}} />
-      <Tabs.Screen name="transactions" options={{ title: 'Accounts', tabBarLabel: 'Accounts' }} />
-      <Tabs.Screen name="settings" options={{ title: 'Settings', tabBarLabel: 'Settings' }} />
+      <Tabs.Screen 
+        name="dashboard" 
+        options={{ 
+          tabBarLabel: 'Dashboard',
+          title: 'Dashboard',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="stats-chart" size={size} color={color} />
+          ),
+        }} 
+      />
+      <Tabs.Screen 
+        name="transactions" 
+        options={{ 
+          tabBarLabel: 'Accounts',
+          title: 'Accounts',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="wallet" size={size} color={color} />
+          ),
+        }} 
+      />
+      <Tabs.Screen 
+        name="settings" 
+        options={{ 
+          tabBarLabel: 'Settings',
+          title: 'Settings',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings" size={size} color={color} />
+          ),
+        }} 
+      />
     </Tabs>
   );
 }

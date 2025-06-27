@@ -4,9 +4,9 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Account, Transaction } from '../../services/accountMockService';
 import {
-    generateSecureId,
-    rateLimiter,
-    sanitizeString
+  generateSecureId,
+  rateLimiter,
+  sanitizeString
 } from '../../utils/security';
 import { validateAccount, validateTransaction } from '../../utils/validation';
 

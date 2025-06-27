@@ -1,0 +1,22 @@
+{
+  "preset": "@testing-library/react-native",
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+  "transformIgnorePatterns": [
+    "node_modules/(?!(react-native|@react-native|expo|@expo|react-native-vector-icons|@react-navigation|react-redux|@reduxjs|@testing-library)/)"
+  ],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+  "testMatch": [
+    "**/__tests__/**/*.(ts|tsx|js)",
+    "**/*.(test|spec).(ts|tsx|js)"
+  ],
+  "collectCoverageFrom": [
+    "**/*.{ts,tsx,js,jsx}",
+    "!**/*.d.ts",
+    "!**/coverage/**",
+    "!**/node_modules/**",
+    "!**/babel.config.js",
+    "!**/expo-env.d.ts",
+    "!**/.expo/**"
+  ],
+  "testEnvironment": "jsdom"
+}

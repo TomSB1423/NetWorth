@@ -8,8 +8,7 @@ export {
 } from '../store/hooks';
 
 // Color scheme hooks
-export { useColorSchemeContext } from './ColorSchemeContext';
-export { useColorSchemeToggle } from './useColorSchemeToggle';
+export { useColorSchemeToggle, type ColorSchemeMode, type EffectiveColorScheme } from './useColorSchemeToggle';
 
 // UI hooks
 export { usePalette } from './usePalette';

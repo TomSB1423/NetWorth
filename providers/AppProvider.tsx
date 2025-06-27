@@ -6,8 +6,6 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import ErrorBoundary from '../components/ErrorBoundary';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { ColorSchemeProvider } from '../hooks/ColorSchemeContext';
-import AppEffects from '../store/effects/AppEffects';
 import { persistor, store } from '../store/index';
 
 interface AppProviderProps {
@@ -16,10 +14,8 @@ interface AppProviderProps {
 
 /**
  * Single unified provider that wraps the entire application with:
- * - Redux state management with persistence
- * - Color scheme/theme management
+ * - Redux state management with persistence (including theme)
  * - Error boundary for crash protection
- * - App-wide side effects
  */
 export default function AppProvider({ children }: AppProviderProps) {
   return (
@@ -29,10 +25,7 @@ export default function AppProvider({ children }: AppProviderProps) {
           loading={<LoadingSpinner message="Loading your data..." />} 
           persistor={persistor}
         >
-          <ColorSchemeProvider>
-            <AppEffects />
-            {children}
-          </ColorSchemeProvider>
+          {children}
         </PersistGate>
       </Provider>
     </ErrorBoundary>

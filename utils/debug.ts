@@ -1,74 +1,131 @@
 // utils/debug.ts
-// Debug utilities and commands
+// Development debug utilities - single consolidated file
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { Alert } from 'react-native';
 import { AccountType } from '../services/accountMockService';
-import { store } from '../store';
+import { persistor, resetStore, store } from '../store/index';
 import { addAccount, removeAccount } from '../store/slices/accountsSlice';
+import { setFirstLaunch } from '../store/slices/uiSlice';
 
-// Debug mode flag - set to false in production
+// Debug mode flag
 export const DEBUG_MODE = __DEV__ && true;
 
 // Sample account data for testing
 const SAMPLE_ACCOUNTS = [
-  {
-    name: 'Main Checking',
-    type: 'checking' as AccountType,
-  },
-  {
-    name: 'Emergency Savings',
-    type: 'savings' as AccountType,
-  },
-  {
-    name: 'Credit Card',
-    type: 'credit' as AccountType,
-  },
-  {
-    name: 'Investment Account',
-    type: 'investment' as AccountType,
-  },
-  {
-    name: 'Home Mortgage',
-    type: 'mortgage' as AccountType,
-  },
+  { name: 'Main Checking', type: 'checking' as AccountType, emoji: '🏦', bank: 'chase' },
+  { name: 'Emergency Savings', type: 'savings' as AccountType, emoji: '💰', bank: 'hsbc' },
+  { name: 'Credit Card', type: 'credit' as AccountType, emoji: '💳', bank: 'capital_one' },
+  { name: 'Investment Account', type: 'investment' as AccountType, emoji: '📈', bank: 'schwab' },
+  { name: 'Home Mortgage', type: 'mortgage' as AccountType, emoji: '🏠', bank: 'wells_fargo' },
 ];
 
 export class DebugCommands {
   /**
-   * Add a sample checking account
+   * Complete app reset - clears all data and returns to fresh state
    */
-  static async addSampleCheckingAccount(): Promise<void> {
+  static async resetApp(): Promise<void> {
     if (!DEBUG_MODE) return;
     
     try {
-      await store.dispatch(addAccount({
-        name: `Test Checking ${Date.now()}`,
-        type: 'checking',
-      })).unwrap();
+      console.log('🧹 Starting complete app reset...');
       
-      Alert.alert('Debug', 'Added sample checking account');
+      // 1. Purge Redux persist store
+      await persistor.purge();
+      await persistor.flush();
+      
+      // 2. Clear AsyncStorage completely for our app
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+        const netWorthKeys = keys.filter(key => 
+          key.startsWith('persist:networth') || 
+          key.includes('networth') ||
+          key.startsWith('redux-persist')
+        );
+        
+        if (netWorthKeys.length > 0) {
+          await AsyncStorage.multiRemove(netWorthKeys);
+          console.log(`🗑️ Cleared ${netWorthKeys.length} AsyncStorage keys`);
+        }
+      } catch (asyncStorageError) {
+        console.warn('⚠️ AsyncStorage clear failed:', asyncStorageError);
+      }
+      
+      // 3. Reset Redux store
+      resetStore();
+      
+      // 4. Set first launch flag to true so welcome screen shows
+      store.dispatch(setFirstLaunch(true));
+      
+      // 5. For web, also clear localStorage if available
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const keys = Object.keys(window.localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('persist:networth') || 
+              key.includes('networth') || 
+              key.startsWith('redux-persist')) {
+            window.localStorage.removeItem(key);
+          }
+        });
+        console.log('🌐 Cleared web localStorage');
+      }
+      
+      console.log('✅ App reset completed successfully');
+      
+      // 6. Navigate to fresh start
+      try {
+        router.replace('/');
+        
+        // For web, reload the page
+        if (typeof window !== 'undefined') {
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        }
+      } catch (navigationError) {
+        console.warn('⚠️ Navigation reset failed:', navigationError);
+      }
+      
     } catch (error) {
-      Alert.alert('Debug Error', 'Failed to add checking account');
+      console.error('❌ Failed to reset app:', error);
+      throw error;
     }
   }
 
   /**
-   * Add multiple sample accounts
+   * Add a sample checking account
    */
-  static async addMultipleSampleAccounts(): Promise<void> {
+  static async addSampleAccount(): Promise<void> {
+    if (!DEBUG_MODE) return;
+    
+    try {
+      await store.dispatch(addAccount({
+        name: `Test Account ${Date.now()}`,
+        type: 'checking',
+        emoji: '🏦',
+        bank: 'chase'
+      })).unwrap();
+      
+      console.log('✅ Added sample account');
+    } catch (error) {
+      console.error('❌ Failed to add sample account:', error);
+    }
+  }
+
+  /**
+   * Add multiple sample accounts for testing
+   */
+  static async addSampleAccounts(): Promise<void> {
     if (!DEBUG_MODE) return;
     
     try {
       for (const account of SAMPLE_ACCOUNTS) {
-        await store.dispatch(addAccount({
-          name: `${account.name} ${Date.now()}`,
-          type: account.type,
-        })).unwrap();
+        await store.dispatch(addAccount(account)).unwrap();
       }
-      
-      Alert.alert('Debug', `Added ${SAMPLE_ACCOUNTS.length} sample accounts`);
+      console.log(`✅ Added ${SAMPLE_ACCOUNTS.length} sample accounts`);
     } catch (error) {
-      Alert.alert('Debug Error', 'Failed to add sample accounts');
+      console.error('❌ Failed to add sample accounts:', error);
     }
   }
 
@@ -78,116 +135,55 @@ export class DebugCommands {
   static async removeAllAccounts(): Promise<void> {
     if (!DEBUG_MODE) return;
     
-    Alert.alert(
-      'Debug - Remove All Accounts',
-      'This will remove ALL accounts. Are you sure?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const state = store.getState();
-              const accounts = state.accounts.accounts;
-              
-              for (const account of accounts) {
-                await store.dispatch(removeAccount(account.id)).unwrap();
-              }
-              
-              Alert.alert('Debug', `Removed ${accounts.length} accounts`);
-            } catch (error) {
-              Alert.alert('Debug Error', 'Failed to remove accounts');
-            }
-          },
-        },
-      ]
-    );
+    try {
+      const state = store.getState();
+      const accounts = state.accounts.accounts;
+      
+      for (const account of accounts) {
+        await store.dispatch(removeAccount(account.id)).unwrap();
+      }
+      
+      console.log(`✅ Removed ${accounts.length} accounts`);
+    } catch (error) {
+      console.error('❌ Failed to remove accounts:', error);
+    }
   }
 
   /**
-   * Reset user to fresh start (new user state)
+   * Show current app state info
    */
-  static async resetToFreshStart(): Promise<void> {
-    if (!DEBUG_MODE) return;
-    
-    Alert.alert(
-      'Debug - Fresh Start Reset',
-      'This will completely reset the app to fresh state and restart.\n\nAre you sure?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Import the reset utilities
-              const { clearPersistedData } = await import('./clearStorage');
-              
-              // Clear all persisted data including AsyncStorage
-              await clearPersistedData();
-              
-              Alert.alert('Debug', 'Reset complete! App will restart.');
-            } catch (error) {
-              console.error('Reset error:', error);
-              Alert.alert('Debug Error', 'Failed to reset app state');
-            }
-          },
-        },
-      ]
-    );
-  }
-
-  /**
-   * Show debug info about current state
-   */
-  static showDebugInfo(): void {
+  static showAppInfo(): void {
     if (!DEBUG_MODE) return;
     
     const state = store.getState();
     const accounts = state.accounts.accounts;
     const isInitialized = state.accounts.isInitialized;
     
-    const debugInfo = [
-      `=== APP STATE DEBUG ===`,
+    const info = [
+      `=== APP DEBUG INFO ===`,
       `Accounts: ${accounts.length}`,
-      `Is Initialized: ${isInitialized}`,
+      `Initialized: ${isInitialized}`,
       `Account Types: ${accounts.map(a => a.type).join(', ') || 'None'}`,
       `Debug Mode: ${DEBUG_MODE}`,
-      ``,
-      `=== ROUTING LOGIC ===`,
       `Should show onboarding: ${accounts.length === 0}`,
-      `Should go to main app: ${accounts.length > 0}`,
     ].join('\n');
     
-    Alert.alert('Debug Info', debugInfo, [
-      { text: 'OK' },
-      { 
-        text: 'Copy to Clipboard', 
-        onPress: () => {
-          // Simple clipboard copy for debugging
-          console.log('DEBUG INFO:', debugInfo);
-        }
-      }
-    ]);
-  }
-
-  /**
-   * Force navigate to welcome screen (for testing onboarding)
-   */
-  static forceNavigateToWelcome(): void {
-    if (!DEBUG_MODE) return;
-    
-    const { router } = require('expo-router');
-    router.push('/onboarding/welcome');
-    Alert.alert('Debug', 'Navigated to welcome screen');
+    console.log(info);
   }
 }
 
-/**
- * Debug menu component props
- */
-export interface DebugMenuProps {
-  colors: any;
-  style?: any;
+// Register global debug helpers in development
+if (DEBUG_MODE && typeof global !== 'undefined') {
+  (global as any).resetApp = DebugCommands.resetApp;
+  (global as any).addSampleAccount = DebugCommands.addSampleAccount;
+  (global as any).addSampleAccounts = DebugCommands.addSampleAccounts;
+  (global as any).removeAllAccounts = DebugCommands.removeAllAccounts;
+  (global as any).showAppInfo = DebugCommands.showAppInfo;
+  
+  console.log('🔧 Debug helpers available:');
+  console.log('   - resetApp() - Reset app to fresh state');
+  console.log('   - addSampleAccount() - Add one test account');
+  console.log('   - addSampleAccounts() - Add multiple test accounts');
+  console.log('   - removeAllAccounts() - Remove all accounts');
+  console.log('   - showAppInfo() - Show current app state');
 }
