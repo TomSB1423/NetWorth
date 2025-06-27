@@ -112,6 +112,50 @@ export default function NetWorthChart({ data, setScrollEnabled, selectedRange, o
   const formatCurrency = (value: number) =>
     `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  // Helper function to format dates minimally
+  const formatDateLabel = (dateStr: string, range: string) => {
+    const date = new Date(dateStr);
+    
+    switch (range) {
+      case '1w':
+        return date.toLocaleDateString('en-US', { weekday: 'short' }); // Mon, Tue, etc.
+      case '1m':
+      case '3m':
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Jan 15
+      case '6m':
+      case '1y':
+        return date.toLocaleDateString('en-US', { month: 'short' }); // Jan, Feb, etc.
+      case 'all':
+      default:
+        return date.getFullYear().toString(); // 2023, 2024, etc.
+    }
+  };
+
+  // Calculate which data points should have date labels (max 4-5 labels for clean look)
+  const getDateLabelIndices = (dataLength: number) => {
+    if (dataLength <= 4) return Array.from({ length: dataLength }, (_, i) => i);
+    
+    const maxLabels = 4;
+    const indices = [];
+    
+    // Always include first and last
+    indices.push(0);
+    if (dataLength > 1) indices.push(dataLength - 1);
+    
+    // Add intermediate points
+    if (maxLabels > 2) {
+      const step = Math.floor((dataLength - 1) / (maxLabels - 1));
+      for (let i = 1; i < maxLabels - 1; i++) {
+        const index = Math.min(i * step, dataLength - 2);
+        if (!indices.includes(index)) {
+          indices.push(index);
+        }
+      }
+    }
+    
+    return indices.sort((a, b) => a - b);
+  };
+
   const range = selectedRange ?? internalRange;
   const handleRangeChange = (rangeValue: string) => {
     if (onRangeChange) {
@@ -146,6 +190,21 @@ export default function NetWorthChart({ data, setScrollEnabled, selectedRange, o
               strokeLinejoin="round"
             />
           )}
+          
+          {/* Minimalist date labels */}
+          {data.length > 1 && getDateLabelIndices(data.length).map(index => (
+            <SvgText
+              key={`date-${index}`}
+              x={points[index].x}
+              y={chartHeight - 8}
+              fontSize="10"
+              fill={colors.secondaryText}
+              textAnchor="middle"
+              opacity={0.7}
+            >
+              {formatDateLabel(data[index].date, range)}
+            </SvgText>
+          ))}
           
           {/* Y-axis marks for highest and lowest points */}
           {points.length > 1 && minValue !== maxValue && (
