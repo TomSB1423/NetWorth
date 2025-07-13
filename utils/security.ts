@@ -114,7 +114,7 @@ export const rateLimiter = new RateLimiter();
  */
 export function generateSecureId(): string {
   const timestamp = Date.now().toString(36);
-  const randomPart = Math.random().toString(36).substr(2, 9);
+  const randomPart = crypto.randomUUID();
   return `${timestamp}_${randomPart}`;
 }
 
