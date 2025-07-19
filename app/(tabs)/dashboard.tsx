@@ -1,9 +1,9 @@
 import React from "react";
 import { Platform, ScrollView, StyleSheet, View } from "react-native";
-import CategoryBreakdown from "../../components/CategoryBreakdown";
-import MetricsCard from "../../components/MetricsCard";
-import MonthlyFlowChart from "../../components/MonthlyFlowChart";
-import NetWorthChart from "../../components/NetWorthChart";
+import CategoryBreakdown from "../../components/charts/CategoryBreakdown";
+import MetricsCard from "../../components/cards/MetricsCard";
+import MonthlyFlowChart from "../../components/charts/MonthlyFlowChart";
+import NetWorthChart from "../../components/charts/NetWorthChart";
 import {
   useAccounts,
   useAppDispatch,

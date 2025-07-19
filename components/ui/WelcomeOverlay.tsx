@@ -7,8 +7,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { usePalette } from '../hooks/usePalette';
-import { useAccounts } from '../store/hooks';
+import { usePalette } from '../../hooks/usePalette';
+import { useAccounts } from '../../store/hooks';
 
 export default function WelcomeOverlay() {
   const colors = usePalette();

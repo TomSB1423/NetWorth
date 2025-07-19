@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import DebugMenu from "../../components/DebugMenu";
+import DebugMenu from "../../components/features/DebugMenu";
 import { useColorSchemeToggle } from "../../hooks/useColorSchemeToggle";
 import { usePalette } from "../../hooks/usePalette";
 

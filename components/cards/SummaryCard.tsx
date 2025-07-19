@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { usePalette } from "../hooks/usePalette";
-import { FinancialSummary } from "../services/types";
+import { usePalette } from "../../hooks/usePalette";
+import { FinancialSummary } from "../../services/types";
 
 interface SummaryCardProps {
   summary: FinancialSummary;

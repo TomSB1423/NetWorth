@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, View } from "react-native";
-import AccountsList from "../../components/AccountsList";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import AccountsList from "../../components/features/AccountsList";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import { useColorSchemeToggle } from "../../hooks/useColorSchemeToggle";
 import { usePalette } from "../../hooks/usePalette";
 import { Account } from "../../services/accountMockService";

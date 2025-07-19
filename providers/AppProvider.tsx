@@ -4,8 +4,8 @@
 import React, { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import ErrorBoundary from '../components/ErrorBoundary';
-import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { persistor, store } from '../store/index';
 
 interface AppProviderProps {

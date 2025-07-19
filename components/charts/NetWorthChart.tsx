@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Line, Path, Text as SvgText } from "react-native-svg";
-import { usePalette } from "../hooks/usePalette";
-import { NetWorthEntry } from "../services/netWorthService";
+import { usePalette } from "../../hooks/usePalette";
+import { NetWorthEntry } from "../../services/netWorthService";
 
 const screenWidth = Dimensions.get("window").width;
 const chartHeight = 140;

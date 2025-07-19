@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { usePalette } from "../hooks/usePalette";
-import { Transaction } from "../services/accountMockService";
+import { usePalette } from "../../hooks/usePalette";
+import { Transaction } from "../../services/accountMockService";
 
 interface BankTransactionsProps {
   transactions: Transaction[];

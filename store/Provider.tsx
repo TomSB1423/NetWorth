@@ -4,7 +4,7 @@
 import { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import LoadingSpinner from '../components/LoadingSpinner';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { persistor, store } from './index';
 
 interface ReduxProviderProps {

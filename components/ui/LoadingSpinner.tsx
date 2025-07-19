@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { usePalette } from '../hooks/usePalette';
+import { usePalette } from '../../hooks/usePalette';
 
 interface LoadingSpinnerProps {
   message?: string;

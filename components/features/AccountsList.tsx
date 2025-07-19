@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { usePalette } from "../hooks/usePalette";
-import { Account } from "../services/accountMockService";
+import { usePalette } from "../../hooks/usePalette";
+import { Account } from "../../services/accountMockService";
 
 interface AccountsListProps {
   accounts: Account[];

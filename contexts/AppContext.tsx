@@ -1,4 +1,4 @@
-// context/AppContext.tsx
+// contexts/AppContext.tsx
 // Global state management using React Context with error boundaries and security
 
 import { createContext, ReactNode, useContext, useEffect, useReducer } from 'react';

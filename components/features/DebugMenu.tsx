@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { DEBUG_MODE, DebugCommands } from '../utils/debug';
+import { DEBUG_MODE, DebugCommands } from '../../utils/debug';
 
 export interface DebugMenuProps {
   colors: any;
