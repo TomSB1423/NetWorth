@@ -8,7 +8,7 @@ var functions = builder.AddAzureFunctionsProject<Projects.Networth_Backend_Funct
     .WithExternalHttpEndpoints()
     .WithReference(postgresdb);
 
-builder.AddNpmApp("react", "../AspireJavaScript.React")
+builder.AddNpmApp("react", "../Networth.Frontend/Networth.Frontend.React")
     .WithReference(functions)
     .WaitFor(functions)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
