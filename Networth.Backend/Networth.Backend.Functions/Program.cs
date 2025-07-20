@@ -1,16 +1,27 @@
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Networth.Backend.Infrastructure.Extensions;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication()
+    #pragma warning disable AZFW0014 // ConfigureFunctionsWebApplication is called indirectly
+    .ConfigureFunctionsWorkerDefaults(worker => worker.UseNewtonsoftJson())
+    .ConfigureAppConfiguration((context, config) =>
+    {
+        config.AddJsonFile("local.settings.json", optional: true)
+            .AddEnvironmentVariables();
+    })
     .ConfigureServices((context, services) =>
     {
+        var logger = services.BuildServiceProvider().GetService<ILogger<Program>>();
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
         services.AddInfrastructure(context.Configuration);
     })
+    .ConfigureOpenApi()
     .Build();
 
 host.Run();

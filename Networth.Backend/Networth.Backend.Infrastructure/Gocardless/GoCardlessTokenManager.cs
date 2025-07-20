@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace Networth.Backend.Infrastructure.Gocardless;
 
-internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options, string accessToken) : IDisposable
+internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options) : IDisposable
 {
     private readonly HttpClient _httpClient = new();
     private readonly string _baseUrl = options.Value.BankAccountDataBaseUrl + "/token/new";
@@ -12,7 +12,7 @@ internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options, strin
     private readonly GocardlessOptions _options = options.Value;
     private bool _disposed;
 
-    private string? _accessToken = accessToken;
+    private string? _accessToken;
     private DateTime _tokenExpiry;
 
     public async Task<string> GetValidTokenAsync(CancellationToken cancellationToken = default)
