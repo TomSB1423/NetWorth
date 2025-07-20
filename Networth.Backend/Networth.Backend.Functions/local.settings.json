@@ -1,9 +1,7 @@
 {
-    "Values": {
-        "Gocardless": {
-            "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2",
-            "SecretId": "SECRET_ID_PLACEHOLDER",
-            "SecretKey": "SECRET_KEY_PLACEHOLDER"
-        }
+    "Gocardless": {
+        "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2",
+        "SecretId": "SECRET_ID",
+        "SecretKey": "SECRET_KEY",
     }
 }
