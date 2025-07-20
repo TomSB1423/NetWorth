@@ -1,0 +1,7 @@
+{
+    "gocardless": {
+    "bankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2",
+    "secretId": "your-secret-id",
+    "secretKey": "your-secret-key"
+    }
+}

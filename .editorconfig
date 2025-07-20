@@ -162,14 +162,19 @@ dotnet_diagnostic.SA1127.severity = none # Generic type constraints should be on
 dotnet_diagnostic.SA1200.severity = none # Using directive should appear within a namespace declaration
 dotnet_diagnostic.SA1309.severity = none # Field '_logger' should not begin with an underscore
 dotnet_diagnostic.SA1413.severity = suggestion # Use trailing comma in multi-line initializers
+dotnet_diagnostic.SA1507.severity = suggestion # Code should not contain multiple blank lines in a row
 dotnet_diagnostic.SA1512.severity = none # Single-line comments should not be followed by blank line
 dotnet_diagnostic.SA1515.severity = none # Single-line comment should be preceded by blank line
-dotnet_diagnostic.SA1600.severity = suggestion # Elements should be documented
-dotnet_diagnostic.SA1615.severity = suggestion # Element return value should be documented
-dotnet_diagnostic.SA1633.severity = none # A call to an instance member of the local class or a base class is not prefixed with 'this.'
 dotnet_diagnostic.SA1518.severity = none # File is required to end with a single newline character
 dotnet_diagnostic.CS1591.severity = suggestion # Missing XML comment for publicly visible type or member
-dotnet_diagnostic.SA1507.severity = suggestion # Code should not contain multiple blank lines in a row
+dotnet_diagnostic.SA1600.severity = suggestion # Elements should be documented
+dotnet_diagnostic.SA1611.severity = suggestion # The documentation for parameter 'req' is missing
+dotnet_diagnostic.SA1615.severity = suggestion # Element return value should be documented
+dotnet_diagnostic.SA1633.severity = none # A call to an instance member of the local class or a base class is not prefixed with 'this.'
+dotnet_diagnostic.SA1648.severity = none # inheritdoc should be used with inheriting clas
+
+# VSTHRD Analyzers
+dotnet_diagnostic.VSTHRD200.severity = none # Use "Async" suffix in names of methods that return an awaitable typ
 
 # C++ Files
 [*.{cpp,h,in}]
