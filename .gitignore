@@ -435,3 +435,4 @@ FodyWeavers.xsd
 # Python virtual environment files
 **/.venv/*
 .azure
+**/local.settings.json
