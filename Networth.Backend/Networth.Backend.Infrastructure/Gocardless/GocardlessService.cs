@@ -13,7 +13,7 @@ internal class GocardlessService(IGocardlessClient gocardlessClient)
     /// <inheritdoc />
     public async Task<IEnumerable<Institution>> GetInstitutionsAsync(CancellationToken cancellationToken = default)
     {
-        var response = await gocardlessClient.GetInstitutions(cancellationToken);
+        var response = await gocardlessClient.GetInstitutions("GB", cancellationToken);
         return response;
     }
 }

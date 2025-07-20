@@ -7,7 +7,8 @@ namespace Networth.Backend.Infrastructure.Gocardless;
 internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options) : IDisposable
 {
     private readonly HttpClient _httpClient = new();
-    private readonly string _baseUrl = options.Value.BankAccountDataBaseUrl + "/token/new";
+    // Ensure that the base URL ends with a slash due to GoCardless redirection behavior
+    private readonly string _baseUrl = options.Value.BankAccountDataBaseUrl + "/token/new/";
     private readonly SemaphoreSlim _tokenSemaphore = new(1, 1);
     private readonly GocardlessOptions _options = options.Value;
     private bool _disposed;
@@ -61,7 +62,12 @@ internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options) : IDi
         var json = JsonSerializer.Serialize(payload);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(_baseUrl, content, cancellationToken);
+        var request = new HttpRequestMessage(HttpMethod.Post, _baseUrl)
+        {
+            Content = content
+        };
+
+        var response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var responseContent = await response.Content.ReadAsStringAsync();

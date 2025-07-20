@@ -3,7 +3,6 @@ using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Networth.Backend.Infrastructure.Extensions;
 
 var host = new HostBuilder()
@@ -16,7 +15,6 @@ var host = new HostBuilder()
     })
     .ConfigureServices((context, services) =>
     {
-        var logger = services.BuildServiceProvider().GetService<ILogger<Program>>();
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
         services.AddInfrastructure(context.Configuration);

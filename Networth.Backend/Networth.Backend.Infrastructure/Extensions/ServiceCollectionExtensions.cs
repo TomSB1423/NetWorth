@@ -15,14 +15,14 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         // Configure GoCardless options from settings
-        // services.AddOptionsWithValidateOnStart<GocardlessOptions>()
-        //     .Bind(configuration.GetSection(Constants.OptionsNames.GocardlessSection))
-        //     .Validate(
-        //         options => !string.IsNullOrWhiteSpace(options.BankAccountDataBaseUrl),
-        //         "BankAccountDataBaseUrl configuration is required")
-        //     .Validate(
-        //         options => Uri.TryCreate(options.BankAccountDataBaseUrl, UriKind.Absolute, out _),
-        //         "BankAccountDataBaseUrl must be a valid absolute URI");
+        services.AddOptionsWithValidateOnStart<GocardlessOptions>()
+            .Bind(configuration.GetSection(Constants.OptionsNames.GocardlessSection))
+            .Validate(
+                options => !string.IsNullOrWhiteSpace(options.BankAccountDataBaseUrl),
+                "BankAccountDataBaseUrl configuration is required")
+            .Validate(
+                options => Uri.TryCreate(options.BankAccountDataBaseUrl, UriKind.Absolute, out _),
+                "BankAccountDataBaseUrl must be a valid absolute URI");
 
         // Configure HTTP client for GoCardless
         services.AddTransient<GoCardlessAuthHandler>();
@@ -32,18 +32,18 @@ public static class ServiceCollectionExtensions
             return new GoCardlessTokenManager(options);
         });
 
-        services.AddRefitClient<IGocardlessClient>(_ => new RefitSettings(new NewtonsoftJsonContentSerializer(
-                new JsonSerializerSettings()
-                {
-                    Culture = CultureInfo.InvariantCulture,
-                    MissingMemberHandling = MissingMemberHandling.Ignore,
-                })))
+        services.AddRefitClient<IGocardlessClient>(_ =>
+                new RefitSettings(
+                    new NewtonsoftJsonContentSerializer(
+                        new JsonSerializerSettings()
+                        {
+                            Culture = CultureInfo.InvariantCulture,
+                            MissingMemberHandling = MissingMemberHandling.Ignore,
+                        })))
             .ConfigureHttpClient((serviceProvider, httpClient) =>
             {
                 var gocardlessOptions = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>().Value;
                 httpClient.BaseAddress = new Uri(gocardlessOptions.BankAccountDataBaseUrl);
-                httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
-                httpClient.DefaultRequestHeaders.Add("GoCardless-Version", Gocardless.Constants.GocardlessBankAccountDataApiVersion);
             })
             .AddHttpMessageHandler<GoCardlessAuthHandler>();
 

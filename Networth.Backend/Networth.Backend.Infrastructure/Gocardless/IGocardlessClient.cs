@@ -9,5 +9,5 @@ internal interface IGocardlessClient
     Task<TokenResponse> GetAccessTokenAsync([Body] TokenRequest request);
 
     [Get("/institutions")]
-    Task<IEnumerable<Institution>> GetInstitutions(CancellationToken cancellationToken = default);
+    Task<IEnumerable<Institution>> GetInstitutions([Query] string country, CancellationToken cancellationToken = default);
 }
