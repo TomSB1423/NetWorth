@@ -15,6 +15,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  padding: 20px;
 }
 
 .App-header h1 {
@@ -24,6 +25,9 @@
 table {
   border: none;
   border-collapse: collapse;
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px 0;
 }
 
 tr:nth-child(even) {
@@ -32,9 +36,32 @@ tr:nth-child(even) {
 
 th {
   border-bottom: solid 0.2rem var(--react-blue);
+  background-color: #1a1e25;
 }
 
 th,
 td {
   padding: 1rem;
+  text-align: left;
+}
+
+button {
+  background-color: var(--react-blue);
+  color: #282c34;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  background-color: #4db8d4;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -1,7 +1,10 @@
 {
     "Gocardless": {
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2",
-        "SecretId": "SECRET_ID",
-        "SecretKey": "SECRET_KEY"
+        "SecretId": "24fe1834-ce1d-4ca9-ad90-24a4b6272da4",
+        "SecretKey": "ab76ff0c604f33897e1d3ecece2fd8c0f28190e1406880d19b7b3c6bbb551c0ca21292c0f46555c6ef5d7b4882ced72898450c022ad1c4366650c36e5bc47538"
+    },
+    "Host": {
+        "CORS": "*"
     }
 }
