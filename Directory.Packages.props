@@ -8,6 +8,7 @@
     <PackageVersion Include="Aspire.Hosting.Azure.Functions" Version="9.3.1-preview.1.25305.6" />
     <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="9.3.1" />
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.3.1" />
+    <PackageVersion Include="Aspire.Hosting.Azure.ApplicationInsights" Version="9.3.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
