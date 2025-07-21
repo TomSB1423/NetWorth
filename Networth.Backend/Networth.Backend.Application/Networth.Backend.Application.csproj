@@ -9,6 +9,10 @@
       <ProjectReference Include="..\Networth.Backend.Domain\Networth.Backend.Domain.csproj" />
     </ItemGroup>   
     <ItemGroup>
+      <PackageReference Include="FluentValidation" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    </ItemGroup>
+    <ItemGroup>
       <Folder Include="Commands\" />
       <Folder Include="Handlers\" />
       <Folder Include="Queries\" />

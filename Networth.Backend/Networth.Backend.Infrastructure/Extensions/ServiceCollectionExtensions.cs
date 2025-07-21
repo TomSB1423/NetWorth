@@ -16,13 +16,7 @@ public static class ServiceCollectionExtensions
     {
         // Configure GoCardless options from settings
         services.AddOptionsWithValidateOnStart<GocardlessOptions>()
-            .Bind(configuration.GetSection(Constants.OptionsNames.GocardlessSection))
-            .Validate(
-                options => !string.IsNullOrWhiteSpace(options.BankAccountDataBaseUrl),
-                "BankAccountDataBaseUrl configuration is required")
-            .Validate(
-                options => Uri.TryCreate(options.BankAccountDataBaseUrl, UriKind.Absolute, out _),
-                "BankAccountDataBaseUrl must be a valid absolute URI");
+            .Bind(configuration.GetSection(Constants.OptionsNames.GocardlessSection));
 
         // Configure HTTP client for GoCardless
         services.AddTransient<GoCardlessAuthHandler>();

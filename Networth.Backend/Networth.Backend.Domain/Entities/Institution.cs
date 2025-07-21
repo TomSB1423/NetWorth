@@ -8,7 +8,7 @@ public record Institution
     /// <summary>
     /// Gets the unique identifier for the institution.
     /// </summary>
-    public required Guid Id { get; init; }
+    public required string Id { get; init; }
 
     /// <summary>
     /// Gets the name of the bank.
@@ -16,9 +16,19 @@ public record Institution
     public required string Name { get; init; }
 
     /// <summary>
-    /// Gets the unique identifier for the institution.
+    /// Gets the transaction history available in days.
     /// </summary>
-    public required string InstitutionId { get; init; }
+    public int? TransactionTotalDays { get; init; }
+
+    /// <summary>
+    /// Gets the maximum number of days the authorization is valid for.
+    /// </summary>
+    public int? MaxAccessValidForDays { get; init; }
+
+    /// <summary>
+    /// Gets the logo URL of the bank institution.
+    /// </summary>
+    public string? LogoUrl { get; init; }
 
     /// <summary>
     /// Gets the list of bank accounts associated with this bank.

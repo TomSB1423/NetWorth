@@ -1,13 +1,14 @@
-using Networth.Backend.Domain.Entities;
+using Networth.Backend.Infrastructure.Gocardless.Entities;
 using Refit;
 
 namespace Networth.Backend.Infrastructure.Gocardless;
 
 internal interface IGocardlessClient
 {
-    [Post("/token/new")]
+    [Post("/token/new/")]
     Task<TokenResponse> GetAccessTokenAsync([Body] TokenRequest request);
 
-    [Get("/institutions")]
-    Task<IEnumerable<Institution>> GetInstitutions([Query] string country, CancellationToken cancellationToken = default);
+    [Get("/institutions/")]
+    [Headers("Authorization: Bearer")]
+    Task<IEnumerable<InstitutionDto>> GetInstitutions([Query("country")] string country = "GB", CancellationToken cancellationToken = default);
 }
