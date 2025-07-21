@@ -39,6 +39,14 @@ module resources 'resources.bicep' = {
   }
 }
 
+module MyApplicationInsights 'MyApplicationInsights/MyApplicationInsights.module.bicep' = {
+  name: 'MyApplicationInsights'
+  scope: rg
+  params: {
+    location: location
+    logAnalyticsWorkspaceId: resources.outputs.AZURE_LOG_ANALYTICS_WORKSPACE_ID
+  }
+}
 module funcstoragef2721 'funcstoragef2721/funcstoragef2721.module.bicep' = {
   name: 'funcstoragef2721'
   scope: rg
@@ -69,3 +77,4 @@ output AZURE_CONTAINER_APPS_ENVIRONMENT_DEFAULT_DOMAIN string = resources.output
 output FUNCSTORAGEF2721_BLOBENDPOINT string = funcstoragef2721.outputs.blobEndpoint
 output FUNCSTORAGEF2721_QUEUEENDPOINT string = funcstoragef2721.outputs.queueEndpoint
 output FUNCSTORAGEF2721_TABLEENDPOINT string = funcstoragef2721.outputs.tableEndpoint
+output MYAPPLICATIONINSIGHTS_APPINSIGHTSCONNECTIONSTRING string = MyApplicationInsights.outputs.appInsightsConnectionString
