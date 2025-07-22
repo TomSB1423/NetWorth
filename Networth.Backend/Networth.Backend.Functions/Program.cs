@@ -1,29 +1,26 @@
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
+using Microsoft.ApplicationInsights.WorkerService;
+using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Networth.Backend.Infrastructure.Extensions;
 
-var host = new HostBuilder()
-    #pragma warning disable AZFW0014 // ConfigureFunctionsWebApplication is called indirectly
-    .ConfigureFunctionsWorkerDefaults(worker => worker.UseNewtonsoftJson())
-    .ConfigureAppConfiguration((context, config) =>
-    {
-        config.AddJsonFile("local.settings.json", optional: true)
-            .AddEnvironmentVariables();
-    })
-    .ConfigureServices((context, services) =>
-    {
-        services.AddApplicationInsightsTelemetryWorkerService();
-        if (!context.HostingEnvironment.IsDevelopment())
-        {
-            services.ConfigureFunctionsApplicationInsights();
-        }
+var builder = FunctionsApplication.CreateBuilder(args);
 
-        services.AddInfrastructure(context.Configuration);
-    })
-    .ConfigureOpenApi()
-    .Build();
+builder.AddServiceDefaults()
+    .ConfigureFunctionsWebApplication();
+
+// Configure additional app settings
+builder.Configuration
+    .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
+// Configure services
+builder.Services.AddApplicationInsightsTelemetryWorkerService();
+
+// Add infrastructure services
+builder.Services.AddInfrastructure(builder.Configuration);
+
+var host = builder.Build();
 
 host.Run();

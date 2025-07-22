@@ -12,8 +12,8 @@ module.exports = (env) => {
           target:
             process.env.services__NetworthBackendFunctions__https__0 ||
             process.env.services__NetworthBackendFunctions__http__0,
-          secure: false,
           pathRewrite: { "^/api": "" },
+          secure: false,
         },
       ],
     },
