@@ -1,0 +1,10 @@
+{
+    "Gocardless": {
+        "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2",
+        "SecretId": "SECRET_ID",
+        "SecretKey": "SECRET_KEY"
+    },
+    "Host": {
+        "CORS": "*"
+    }
+}
