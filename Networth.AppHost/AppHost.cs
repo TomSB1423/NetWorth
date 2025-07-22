@@ -10,8 +10,9 @@ var functions = builder
     .WithExternalHttpEndpoints()
     .WithReference(postgresdb);
 
+var ep = functions.GetEndpoint("FunctionsHttpEndpoint");
 var frontend = builder.AddNpmApp("NetworthFrontendReact", "../Networth.Frontend/Networth.Frontend.React")
-    .WithReference(functions)
+    .WithReference(ep)
     .WaitFor(functions)
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
