@@ -1,25 +1,28 @@
+using Microsoft.Extensions.Hosting;
 using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
-var insights = builder.AddAzureApplicationInsights("MyApplicationInsights");
-var postgres = builder.AddPostgres("postgres");
-var postgresdb = postgres.AddDatabase("postgresdb");
+var postgres = builder.AddPostgres("Postgres");
+var postgresdb = postgres.AddDatabase("Postgresdb");
 
 var functions = builder
-    .AddAzureFunctionsProject<Projects.Networth_Backend_Functions>("functions")
+    .AddAzureFunctionsProject<Projects.Networth_Backend_Functions>("NetworthBackendFunctions")
     .WithExternalHttpEndpoints()
-    .WithReference(postgresdb)
-    .WithReference(insights);
+    .WithReference(postgresdb);
 
-builder.AddNpmApp("react", "../Networth.Frontend/Networth.Frontend.React")
+var frontend = builder.AddNpmApp("NetworthFrontendReact", "../Networth.Frontend/Networth.Frontend.React")
     .WithReference(functions)
     .WaitFor(functions)
-    .WithEnvironment("BACKEND_URL", $"https+http://_dashboard.{functions.Resource.Name}")
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
-    .PublishAsDockerFile()
-    .WithReference(insights);
+    .PublishAsDockerFile();
 
+if (!builder.Environment.IsDevelopment())
+{
+    var insights = builder.AddAzureApplicationInsights("ApplicationInsights");
+    functions.WithReference(insights);
+    frontend.WithReference(insights);
+}
 
 var scalar = builder.AddScalarApiReference(options =>
 {
