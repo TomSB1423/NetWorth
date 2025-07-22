@@ -16,7 +16,11 @@ var host = new HostBuilder()
     .ConfigureServices((context, services) =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();
+        if (!context.HostingEnvironment.IsDevelopment())
+        {
+            services.ConfigureFunctionsApplicationInsights();
+        }
+
         services.AddInfrastructure(context.Configuration);
     })
     .ConfigureOpenApi()
