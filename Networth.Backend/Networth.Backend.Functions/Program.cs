@@ -10,6 +10,7 @@ builder.ConfigureFunctionsWebApplication();
 
 // Configure additional app settings
 builder.Configuration
+    .AddJsonFile("settings.json", false, true)
     .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables()
     .AddUserSecrets<Program>();
