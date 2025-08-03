@@ -3,12 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-  <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.3.1" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Functions" Version="9.3.1-preview.1.25305.6" />
-    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="9.3.1" />
-    <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.3.1" />
-    <PackageVersion Include="Aspire.Hosting.Azure.ApplicationInsights" Version="9.3.1" />
+  <ItemGroup Label="Azure Functions">
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
@@ -17,18 +12,14 @@
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.3.1" />
     <PackageVersion Include="Refit" Version="8.0.0" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="8.0.0" />
     <PackageVersion Include="Refit.Newtonsoft.Json" Version="8.0.0" />
-    <PackageVersion Include="Scalar.Aspire" Version="0.1.8" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
-  </ItemGroup>
-  <ItemGroup Label="Azure Functions">
     <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="2.0.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.2" />
@@ -38,8 +29,9 @@
     <PackageVersion Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
     <PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0" />
-    <PackageVersion Include="FluentValidation" Version="11.11.0" />
-    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageVersion Include="FluentValidation" Version="12.0.0"/>
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.7"/>
   </ItemGroup>
   <ItemGroup Label="Code Analysis">
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />

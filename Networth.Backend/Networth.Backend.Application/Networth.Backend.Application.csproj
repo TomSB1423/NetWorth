@@ -5,11 +5,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FluentValidation" />
-      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Folder Include="Commands\" />
       <Folder Include="Handlers\" />
       <Folder Include="Queries\" />

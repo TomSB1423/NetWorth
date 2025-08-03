@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Networth.Backend.Domain.Entities;
 
 /// <summary>

@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -34,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Networth.Backend.Application\Networth.Backend.Application.csproj" />
     <ProjectReference Include="..\Networth.Backend.Infrastructure\Networth.Backend.Infrastructure.csproj" />
   </ItemGroup>

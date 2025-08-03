@@ -1,4 +1,3 @@
-using Microsoft.ApplicationInsights.WorkerService;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,13 +6,13 @@ using Networth.Backend.Infrastructure.Extensions;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults()
-    .ConfigureFunctionsWebApplication();
+builder.ConfigureFunctionsWebApplication();
 
 // Configure additional app settings
 builder.Configuration
     .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-    .AddEnvironmentVariables();
+    .AddEnvironmentVariables()
+    .AddUserSecrets<Program>();
 
 // Configure services
 builder.Services.AddApplicationInsightsTelemetryWorkerService();

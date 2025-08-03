@@ -17,15 +17,11 @@ public class GocardlessOptionsValidator : AbstractValidator<GocardlessOptions>
 
         RuleFor(x => x.SecretId)
             .NotEmpty()
-            .WithMessage("Secret ID is required")
-            .MinimumLength(1)
-            .WithMessage("Secret ID cannot be empty");
+            .WithMessage("Secret ID is required");
 
         RuleFor(x => x.SecretKey)
             .NotEmpty()
-            .WithMessage("Secret Key is required")
-            .MinimumLength(1)
-            .WithMessage("Secret Key cannot be empty");
+            .WithMessage("Secret Key is required");
     }
 
     /// <summary>

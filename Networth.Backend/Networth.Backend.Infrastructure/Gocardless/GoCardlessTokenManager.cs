@@ -48,12 +48,14 @@ internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options) : IDi
 
     public void Dispose()
     {
-        if (!_disposed)
+        if (_disposed)
         {
-            _tokenSemaphore.Dispose();
-            _httpClient.Dispose();
-            _disposed = true;
+            return;
         }
+
+        _tokenSemaphore.Dispose();
+        _httpClient.Dispose();
+        _disposed = true;
     }
 
     private async Task RefreshTokenAsync(CancellationToken cancellationToken)
