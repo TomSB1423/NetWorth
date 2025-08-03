@@ -1,6 +1,6 @@
-namespace Networth.Backend.Infrastructure.Gocardless;
+namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
 
-internal class TokenResponse
+internal class GetTokenResponseDto
 {
     public required string Access { get; set; }
 

@@ -6,4 +6,3 @@ public class Constants
 
     internal const string CountryCode = "GB";
 }
-

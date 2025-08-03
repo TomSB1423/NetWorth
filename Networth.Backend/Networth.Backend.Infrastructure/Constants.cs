@@ -1,11 +1,11 @@
 namespace Networth.Backend.Infrastructure;
 
-internal class Constants
+internal static class Constants
 {
     /// <summary>
-    /// Constants for option configuration Names.
+    ///     Constants for option configuration Names.
     /// </summary>
-    public class OptionsNames
+    public static class OptionsNames
     {
         public const string GocardlessSection = "Gocardless";
     }

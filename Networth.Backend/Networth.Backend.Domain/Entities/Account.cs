@@ -1,37 +1,62 @@
 namespace Networth.Backend.Domain.Entities;
 
 /// <summary>
-/// Represents a bank account with its transactions and balance information.
+///     Represents a bank account with its metadata according to GoCardless API.
 /// </summary>
-public record Account
+public class Account
 {
     /// <summary>
-    /// Gets the unique identifier for the bank account.
+    ///     Gets or sets the unique identifier for the bank account.
     /// </summary>
-    public required string Id { get; init; }
+    public required string Id { get; set; }
 
     /// <summary>
-    /// Gets the name of the bank account.
+    ///     Gets or sets the date and time at which the account object was created.
     /// </summary>
-    public required string Name { get; init; }
+    public required DateTime Created { get; set; }
 
     /// <summary>
-    /// Gets the current balance of the bank account.
+    ///     Gets or sets the date and time at which the account object was last accessed.
     /// </summary>
-    public decimal Balance { get; init; }
+    public required DateTime LastAccessed { get; set; }
 
     /// <summary>
-    /// Gets the list of transactions for the bank account.
+    ///     Gets or sets the Account IBAN.
     /// </summary>
-    public IReadOnlyList<Transaction> Transactions { get; init; } = new List<Transaction>();
+    public string? Iban { get; set; }
 
     /// <summary>
-    /// Gets the currency of the bank account balance.
+    ///     Gets or sets the Account BBAN.
     /// </summary>
-    public required string Currency { get; init; }
+    public string? Bban { get; set; }
 
     /// <summary>
-    /// Gets the type of the bank account.
+    ///     Gets or sets the processing status of this account.
     /// </summary>
-    public required BankAccountType Type { get; init; }
+    public required string Status { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the ASPSP associated with this account.
+    /// </summary>
+    public required string InstitutionId { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the name of the account owner.
+    /// </summary>
+    public string? OwnerName { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the name of account.
+    /// </summary>
+    public string? Name { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the currency of the bank account.
+    /// </summary>
+    public string? Currency { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the account type.
+    /// </summary>
+    public BankAccountType AccountType { get; set; }
 }

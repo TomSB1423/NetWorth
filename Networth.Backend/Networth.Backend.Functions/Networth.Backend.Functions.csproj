@@ -7,17 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" />
-    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" />
-    <PackageReference Include="Microsoft.Azure.Functions.Extensions" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker"/>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http"/>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore"/>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi"/>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk"/>
+    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService"/>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights"/>
+    <PackageReference Include="Microsoft.Azure.Functions.Extensions"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting"/>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
+    <PackageReference Include="FluentValidation"/>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -31,17 +33,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
+    <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Networth.Backend.Application\Networth.Backend.Application.csproj" />
-    <ProjectReference Include="..\Networth.Backend.Infrastructure\Networth.Backend.Infrastructure.csproj" />
+    <ProjectReference Include="..\Networth.Backend.Application\Networth.Backend.Application.csproj"/>
+    <ProjectReference Include="..\Networth.Backend.Infrastructure\Networth.Backend.Infrastructure.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Requests\" />
-    <Folder Include="Models\Responses\" />
+    <Folder Include="Models\Requests\"/>
+    <Folder Include="Models\Responses\"/>
   </ItemGroup>
 
 </Project>

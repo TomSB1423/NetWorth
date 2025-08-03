@@ -1,10 +1,15 @@
 using System.Globalization;
-using System.Text;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Networth.Backend.Application.Commands;
+using Networth.Backend.Application.Handlers;
 using Networth.Backend.Application.Interfaces;
+using Networth.Backend.Application.Validators;
 using Networth.Backend.Infrastructure.Gocardless;
+using Networth.Backend.Infrastructure.Gocardless.Auth;
+using Networth.Backend.Infrastructure.Gocardless.Options;
 using Newtonsoft.Json;
 using Refit;
 
@@ -22,26 +27,29 @@ public static class ServiceCollectionExtensions
         services.AddTransient<GoCardlessAuthHandler>();
         services.AddSingleton<GoCardlessTokenManager>(serviceProvider =>
         {
-            var options = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>();
+            IOptions<GocardlessOptions> options = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>();
             return new GoCardlessTokenManager(options);
         });
 
         services.AddRefitClient<IGocardlessClient>(_ =>
                 new RefitSettings(
                     new NewtonsoftJsonContentSerializer(
-                        new JsonSerializerSettings()
-                        {
-                            Culture = CultureInfo.InvariantCulture,
-                            MissingMemberHandling = MissingMemberHandling.Ignore,
-                        })))
+                        new JsonSerializerSettings { Culture = CultureInfo.InvariantCulture, MissingMemberHandling = MissingMemberHandling.Ignore })))
             .ConfigureHttpClient((serviceProvider, httpClient) =>
             {
-                var gocardlessOptions = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>().Value;
+                GocardlessOptions gocardlessOptions = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>().Value;
                 httpClient.BaseAddress = new Uri(gocardlessOptions.BankAccountDataBaseUrl);
             })
             .AddHttpMessageHandler<GoCardlessAuthHandler>();
 
         services.AddTransient<IFinancialProvider, GocardlessService>();
+
+        // Add application services
+        services.AddTransient<ILinkAccountCommandHandler, LinkAccountCommandHandler>();
+
+        // Add FluentValidation validators from Application layer
+        services.AddTransient<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
+
         return services;
     }
 }

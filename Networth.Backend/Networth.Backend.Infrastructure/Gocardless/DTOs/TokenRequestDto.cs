@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace Networth.Backend.Infrastructure.Gocardless;
+namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
 
-internal record TokenRequest(string SecretId, string SecretKey)
+internal record TokenRequestDto(string SecretId, string SecretKey)
 {
     [JsonPropertyName("secret_id")]
     public required string SecretId { get; init; } = SecretId;

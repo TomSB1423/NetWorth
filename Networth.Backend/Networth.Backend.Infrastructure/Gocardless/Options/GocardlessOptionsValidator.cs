@@ -1,9 +1,9 @@
 using FluentValidation;
 
-namespace Networth.Backend.Infrastructure.Gocardless;
+namespace Networth.Backend.Infrastructure.Gocardless.Options;
 
 /// <summary>
-/// Validator for GoCardless options configuration.
+///     Validator for GoCardless options configuration.
 /// </summary>
 public class GocardlessOptionsValidator : AbstractValidator<GocardlessOptions>
 {
@@ -25,13 +25,11 @@ public class GocardlessOptionsValidator : AbstractValidator<GocardlessOptions>
     }
 
     /// <summary>
-    /// Validates if the provided string is a valid URL.
+    ///     Validates if the provided string is a valid URL.
     /// </summary>
     /// <param name="url">The URL to validate.</param>
     /// <returns>True if the URL is valid, otherwise false.</returns>
-    private static bool BeValidUrl(string url)
-    {
-        return Uri.TryCreate(url, UriKind.Absolute, out var result)
-               && (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
-    }
+    private static bool BeValidUrl(string url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out Uri? result)
+        && (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
 }

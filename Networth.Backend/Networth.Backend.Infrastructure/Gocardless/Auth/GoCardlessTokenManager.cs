@@ -1,20 +1,34 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using Networth.Backend.Infrastructure.Gocardless.DTOs;
+using Networth.Backend.Infrastructure.Gocardless.Options;
 
-namespace Networth.Backend.Infrastructure.Gocardless;
+namespace Networth.Backend.Infrastructure.Gocardless.Auth;
 
 internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options) : IDisposable
 {
-    private readonly HttpClient _httpClient = new();
     // Ensure that the base URL ends with a slash due to GoCardless redirection behavior
     private readonly string _baseUrl = options.Value.BankAccountDataBaseUrl + "/token/new/";
-    private readonly SemaphoreSlim _tokenSemaphore = new(1, 1);
+    private readonly HttpClient _httpClient = new();
     private readonly GocardlessOptions _options = options.Value;
-    private bool _disposed;
+    private readonly SemaphoreSlim _tokenSemaphore = new(1, 1);
 
     private string? _accessToken;
+    private bool _disposed;
     private DateTime _tokenExpiry;
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _tokenSemaphore.Dispose();
+        _httpClient.Dispose();
+        _disposed = true;
+    }
 
     public async Task<string> GetValidTokenAsync(CancellationToken cancellationToken = default)
     {
@@ -46,51 +60,27 @@ internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options) : IDi
         }
     }
 
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _tokenSemaphore.Dispose();
-        _httpClient.Dispose();
-        _disposed = true;
-    }
-
     private async Task RefreshTokenAsync(CancellationToken cancellationToken)
     {
         var payload = new { secret_id = _options.SecretId, secret_key = _options.SecretKey };
-        var json = JsonSerializer.Serialize(payload);
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
+        string json = JsonSerializer.Serialize(payload);
+        using StringContent content = new(json, Encoding.UTF8, "application/json");
 
-        var request = new HttpRequestMessage(HttpMethod.Post, _baseUrl)
-        {
-            Content = content
-        };
+        HttpRequestMessage request = new(HttpMethod.Post, _baseUrl) { Content = content };
 
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-        });
+        string responseContent = await response.Content.ReadAsStringAsync();
+        GetTokenResponseDto? tokenResponse = JsonSerializer.Deserialize<GetTokenResponseDto>(
+            responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
 
         // Handle potential null response from deserialization
-        if (tokenResponse?.Access == null)
-        {
-            throw new InvalidOperationException("Invalid token response received from GoCardless API.");
-        }
 
-        _accessToken = tokenResponse.Access;
-        var expiresInSeconds = tokenResponse.AccessExpires ?? 3600;
+        _accessToken = tokenResponse?.Access ?? throw new InvalidOperationException("Invalid token response received from GoCardless API.");
+        int expiresInSeconds = tokenResponse.AccessExpires ?? 3600;
         _tokenExpiry = DateTime.UtcNow.AddSeconds(expiresInSeconds - 60);
     }
 
-    private bool IsTokenValid()
-    {
-        return !string.IsNullOrEmpty(_accessToken) && DateTime.UtcNow < _tokenExpiry;
-    }
+    private bool IsTokenValid() => !string.IsNullOrEmpty(_accessToken) && DateTime.UtcNow < _tokenExpiry;
 }

@@ -1,0 +1,45 @@
+using System.Text.Json.Serialization;
+
+namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
+
+/// <summary>
+///     Balance after transaction schema according to GoCardless API specification.
+/// </summary>
+public record BalanceAfterTransactionDto
+{
+    /// <summary>
+    ///     Gets the balance amount and currency.
+    /// </summary>
+    [JsonPropertyName("balanceAmount")]
+    public required BalanceAmountDto BalanceAmount { get; init; }
+
+    /// <summary>
+    ///     Gets the type of balance.
+    /// </summary>
+    [JsonPropertyName("balanceType")]
+    public required string BalanceType { get; init; }
+
+    /// <summary>
+    ///     Gets a value indicating whether credit limit is included.
+    /// </summary>
+    [JsonPropertyName("creditLimitIncluded")]
+    public bool? CreditLimitIncluded { get; init; }
+
+    /// <summary>
+    ///     Gets the last change date time.
+    /// </summary>
+    [JsonPropertyName("lastChangeDateTime")]
+    public string? LastChangeDateTime { get; init; }
+
+    /// <summary>
+    ///     Gets the reference date.
+    /// </summary>
+    [JsonPropertyName("referenceDate")]
+    public string? ReferenceDate { get; init; }
+
+    /// <summary>
+    ///     Gets the last committed transaction.
+    /// </summary>
+    [JsonPropertyName("lastCommittedTransaction")]
+    public string? LastCommittedTransaction { get; init; }
+}
