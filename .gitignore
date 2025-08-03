@@ -437,3 +437,4 @@ FodyWeavers.xsd
 .azure
 local.settings.json
 Networth.Frontend/Networth.Frontend.React/.env
+.vscode
