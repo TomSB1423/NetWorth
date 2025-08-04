@@ -7,6 +7,9 @@
     "Gocardless": {
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2"
     },
+    "Database": {
+        "PostgreSQLConnectionString": "Host=localhost;Port=5432;Database=networth;Username=networth_user;Password=networth_password;Pooling=true;Minimum Pool Size=1;Maximum Pool Size=20;"
+    },
     "Host": {
         "CORS": "*"
     }

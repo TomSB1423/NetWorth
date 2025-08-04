@@ -55,7 +55,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IFinancialProvider, GocardlessService>();
 
         // Add application services
-        services.AddTransient<ILinkAccountCommandHandler, LinkAccountCommandHandler>();
+        services.AddTransient<LinkAccountCommandHandler>();
 
         // Add FluentValidation validators from Application layer
         services.AddTransient<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();

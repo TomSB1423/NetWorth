@@ -19,8 +19,4 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Gocardless\Enums\"/>
-  </ItemGroup>
-
 </Project>
