@@ -14,17 +14,14 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
     /// <inheritdoc />
     public async Task<LinkAccountCommandResult> HandleAsync(LinkAccountCommand command, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "Starting account link process for institution {InstitutionId} with reference {Reference}",
-            command.InstitutionId,
-            command.Reference);
+        logger.LogInformation("Starting account link process for institution {InstitutionId}.", command.InstitutionId);
 
-        // Step 1: Create the agreement
-        logger.LogInformation("Creating agreement for institution {InstitutionId}", command.InstitutionId);
+        Institution institutions = await financialProvider.GetInstitutionAsync(command.InstitutionId, cancellationToken);
+
         Agreement agreement = await financialProvider.CreateAgreementAsync(
             command.InstitutionId,
-            command.MaxHistoricalDays,
-            command.AccessValidForDays,
+            institutions.TransactionTotalDays,
+            institutions.MaxAccessValidForDays,
             cancellationToken);
 
         logger.LogInformation(
@@ -32,18 +29,12 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
             agreement.Id,
             command.InstitutionId);
 
-        // Step 2: Create the requisition using the agreement
-        logger.LogInformation(
-            "Creating requisition for institution {InstitutionId} with agreement {AgreementId}",
-            command.InstitutionId,
-            agreement.Id);
-
         Requisition requisition = await financialProvider.CreateRequisitionAsync(
-            command.RedirectUrl,
             command.InstitutionId,
             agreement.Id,
-            command.Reference,
-            command.UserLanguage,
+            "https://example.com/callback", // Replace with actual redirect URL
+            "Networth",
+            "EN",
             cancellationToken);
 
         logger.LogInformation(
@@ -51,15 +42,9 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
             requisition.Id,
             command.InstitutionId);
 
-        logger.LogInformation(
-            "Account link process completed successfully. Agreement: {AgreementId}, Requisition: {RequisitionId}",
-            agreement.Id,
-            requisition.Id);
-
         return new LinkAccountCommandResult
         {
-            Agreement = agreement,
-            Requisition = requisition,
+            AuthorizationLink = requisition.AuthorizationLink, Status = requisition.Status,
         };
     }
 }

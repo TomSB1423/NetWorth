@@ -25,36 +25,21 @@ internal record CreateRequisitionRequestDto
     /// <summary>
     ///     Gets the agreement ID associated with this requisition.
     /// </summary>
+    [Required]
     [JsonPropertyName("agreement")]
-    public string? Agreement { get; init; }
+    public required string Agreement { get; init; }
 
     /// <summary>
     ///     Gets the reference identifier for the requisition.
     /// </summary>
+    [Required]
     [JsonPropertyName("reference")]
-    public string? Reference { get; init; }
+    public required string Reference { get; init; }
 
     /// <summary>
     ///     Gets the user language preference.
     /// </summary>
+    [Required]
     [JsonPropertyName("user_language")]
-    public string? UserLanguage { get; init; }
-
-    /// <summary>
-    ///     Gets the optional SSN field to verify ownership of the account.
-    /// </summary>
-    [JsonPropertyName("ssn")]
-    public string? Ssn { get; init; }
-
-    /// <summary>
-    ///     Gets a value indicating whether gets the option to enable account selection view for the end user.
-    /// </summary>
-    [JsonPropertyName("account_selection")]
-    public bool AccountSelection { get; init; } = false;
-
-    /// <summary>
-    ///     Gets a value indicating whether gets the option to enable redirect back to the client after account list received.
-    /// </summary>
-    [JsonPropertyName("redirect_immediate")]
-    public bool RedirectImmediate { get; init; } = false;
+    public required string UserLanguage { get; init; }
 }

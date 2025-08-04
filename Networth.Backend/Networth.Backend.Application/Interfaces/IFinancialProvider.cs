@@ -8,11 +8,20 @@ namespace Networth.Backend.Application.Interfaces;
 public interface IFinancialProvider
 {
     /// <summary>
-    ///     Gets a list of available institutions for a given country.
+    ///     Gets a single institutions.
     /// </summary>
+    /// <param name="institutionId">The institution id.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A collection of available institutions.</returns>
-    Task<IEnumerable<Institution>> GetInstitutionsAsync(CancellationToken cancellationToken = default);
+    Task<Institution> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Gets a list of available institutions for a given country.
+    /// </summary>
+    /// <param name="country">The institution country.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A collection of available institutions.</returns>
+    Task<IEnumerable<Institution>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates an agreement for accessing bank account data.
@@ -24,26 +33,26 @@ public interface IFinancialProvider
     /// <returns>The created agreement.</returns>
     Task<Agreement> CreateAgreementAsync(
         string institutionId,
-        int maxHistoricalDays = 90,
-        int accessValidForDays = 90,
+        int? maxHistoricalDays,
+        int? accessValidForDays,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates a requisition for connecting to a bank account.
     /// </summary>
-    /// <param name="redirectUrl">The URL to redirect to after authentication.</param>
     /// <param name="institutionId">The ID of the financial institution.</param>
     /// <param name="agreementId">The agreement ID for the connection.</param>
+    /// <param name="redirectUrl">The URL to redirect to after authentication.</param>
     /// <param name="reference">A reference identifier for the requisition.</param>
     /// <param name="userLanguage">The user's preferred language (default: EN).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The created requisition with authorization link.</returns>
     Task<Requisition> CreateRequisitionAsync(
-        string redirectUrl,
         string institutionId,
         string agreementId,
+        string redirectUrl,
         string reference,
-        string userLanguage = "EN",
+        string userLanguage,
         CancellationToken cancellationToken = default);
 
     /// <summary>

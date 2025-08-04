@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Networth.Backend.Application.Commands;
 using Networth.Backend.Application.Handlers;
 using Networth.Backend.Functions.Models.Requests;
+using FromBodyAttributes = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 namespace Networth.Backend.Functions.Functions;
 
@@ -23,7 +25,7 @@ public class LinkAccount(
     /// <summary>
     ///     Links a bank account by creating an agreement and requisition in sequence.
     /// </summary>
-    /// <param name="req">The HTTP request containing link account parameters.</param>
+    /// <param name="request">The HTTP request containing link account parameters.</param>
     /// <returns>The created requisition details with authorization link.</returns>
     [Function("LinkAccount")]
     [OpenApiOperation(
@@ -47,24 +49,13 @@ public class LinkAccount(
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "account/link")]
-        HttpRequest req)
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "account/link")] [FromBodyAttributes]
+        LinkAccountRequest request)
     {
         try
         {
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            LinkAccountRequest? request = JsonSerializer.Deserialize<LinkAccountRequest>(
-                requestBody,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            if (request == null)
-            {
-                logger.LogWarning("Invalid request body for LinkAccount");
-                return new BadRequestObjectResult("Invalid request body");
-            }
-
             // Validate the request using FluentValidation
-            FluentValidation.Results.ValidationResult validationResult = await validator.ValidateAsync(request);
+            ValidationResult validationResult = await validator.ValidateAsync(request);
             if (!validationResult.IsValid)
             {
                 logger.LogWarning(
@@ -81,21 +72,10 @@ public class LinkAccount(
             LinkAccountCommand command = new()
             {
                 InstitutionId = request.InstitutionId,
-                RedirectUrl = request.RedirectUrl,
-                Reference = request.Reference,
-                MaxHistoricalDays = request.MaxHistoricalDays,
-                AccessValidForDays = request.AccessValidForDays,
-                UserLanguage = request.UserLanguage,
             };
 
             LinkAccountCommandResult result = await linkAccountHandler.HandleAsync(command);
-
-            logger.LogInformation(
-                "Successfully linked account for institution {InstitutionId}. Agreement: {AgreementId}, Requisition: {RequisitionId}",
-                request.InstitutionId,
-                result.Agreement.Id,
-                result.Requisition.Id);
-
+            logger.LogInformation("Successfully linked account for institution {InstitutionId}.", request.InstitutionId);
             return new OkObjectResult(result);
         }
         catch (JsonException ex)

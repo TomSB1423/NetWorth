@@ -1,4 +1,4 @@
-using Networth.Backend.Domain.Entities;
+using Networth.Backend.Domain.Enums;
 
 namespace Networth.Backend.Application.Commands;
 
@@ -8,12 +8,12 @@ namespace Networth.Backend.Application.Commands;
 public class LinkAccountCommandResult
 {
     /// <summary>
-    ///     Gets or sets the created agreement.
+    ///     Gets or sets the authorization link for the user to complete bank authentication.
     /// </summary>
-    public required Agreement Agreement { get; set; }
+    public required string AuthorizationLink { get; set; }
 
     /// <summary>
-    ///     Gets or sets the created requisition.
+    ///     Gets or sets status of the link.
     /// </summary>
-    public required Requisition Requisition { get; set; }
+    public required AccountLinkStatus Status { get; set; }
 }

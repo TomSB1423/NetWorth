@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Networth.Backend.Domain.Enums;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
 
@@ -29,19 +30,19 @@ internal record CreateAgreementResponseDto
     ///     Gets the maximum number of days of historical data available.
     /// </summary>
     [JsonPropertyName("max_historical_days")]
-    public int MaxHistoricalDays { get; init; } = 90;
+    public int? MaxHistoricalDays { get; init; }
 
     /// <summary>
     ///     Gets the number of days the access token is valid for.
     /// </summary>
     [JsonPropertyName("access_valid_for_days")]
-    public int AccessValidForDays { get; init; } = 90;
+    public int? AccessValidForDays { get; init; }
 
     /// <summary>
     ///     Gets the access scopes granted for this agreement.
     /// </summary>
     [JsonPropertyName("access_scope")]
-    public string[] AccessScope { get; init; } = ["balances", "details", "transactions"];
+    public AccessScope[] AccessScope { get; init; } = [];
 
     /// <summary>
     ///     Gets the acceptance timestamp of the agreement.

@@ -1,3 +1,5 @@
+using Networth.Backend.Domain.Enums;
+
 namespace Networth.Backend.Domain.Entities;
 
 /// <summary>
@@ -18,7 +20,7 @@ public class Requisition
     /// <summary>
     ///     Gets or sets the status of the requisition.
     /// </summary>
-    public required string Status { get; set; }
+    public required AccountLinkStatus Status { get; set; }
 
     /// <summary>
     ///     Gets or sets the institution ID.

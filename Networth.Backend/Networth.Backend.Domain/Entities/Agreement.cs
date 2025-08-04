@@ -1,3 +1,5 @@
+using Networth.Backend.Domain.Enums;
+
 namespace Networth.Backend.Domain.Entities;
 
 /// <summary>
@@ -23,17 +25,17 @@ public class Agreement
     /// <summary>
     ///     Gets or sets the maximum number of days of historical data available.
     /// </summary>
-    public int MaxHistoricalDays { get; set; }
+    public int? MaxHistoricalDays { get; set; }
 
     /// <summary>
     ///     Gets or sets the number of days the access token is valid for.
     /// </summary>
-    public int AccessValidForDays { get; set; }
+    public int? AccessValidForDays { get; set; }
 
     /// <summary>
     ///     Gets or sets the access scopes granted for this agreement.
     /// </summary>
-    public string[] AccessScope { get; set; } = Array.Empty<string>();
+    public AccessScope[] AccessScope { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the acceptance timestamp of the agreement.

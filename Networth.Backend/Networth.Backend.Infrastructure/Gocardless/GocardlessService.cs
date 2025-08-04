@@ -2,8 +2,8 @@ using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Domain.Entities;
+using Networth.Backend.Domain.Enums;
 using Networth.Backend.Infrastructure.Gocardless.DTOs;
-using Networth.Backend.Infrastructure.Gocardless.Enums;
 using Refit;
 
 namespace Networth.Backend.Infrastructure.Gocardless;
@@ -15,9 +15,32 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     : IFinancialProvider
 {
     /// <inheritdoc />
-    public async Task<IEnumerable<Institution>> GetInstitutionsAsync(CancellationToken cancellationToken = default)
+    public async Task<Institution> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default)
     {
-        IEnumerable<GetInstitutionDto> response = await gocardlessClient.GetInstitutions("GB", cancellationToken);
+        GetInstitutionDto institution = await gocardlessClient.GetInstitution(institutionId, cancellationToken);
+        bool transactionParse = int.TryParse(institution.TransactionTotalDays, out int transactionTotalDays);
+        bool maxAccessParse = int.TryParse(institution.MaxAccessValidForDays, out int maxAccessValidForDays);
+        if (!transactionParse || !maxAccessParse)
+        {
+            logger.LogWarning(
+                "Failed to parse transaction days or access valid days for institution {InstitutionId}. Using default values.",
+                institution.Id);
+        }
+
+        return new Institution
+        {
+            Id = institution.Id,
+            Name = institution.Name,
+            TransactionTotalDays = transactionTotalDays,
+            MaxAccessValidForDays = maxAccessValidForDays,
+            LogoUrl = institution.Logo,
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<Institution>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default)
+    {
+        IEnumerable<GetInstitutionDto> response = await gocardlessClient.GetInstitutions(country, cancellationToken);
 
         IEnumerable<Institution> institutions = response.Select(dto =>
         {
@@ -43,8 +66,8 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     /// <inheritdoc />
     public async Task<Agreement> CreateAgreementAsync(
         string institutionId,
-        int maxHistoricalDays = 90,
-        int accessValidForDays = 90,
+        int? maxHistoricalDays,
+        int? accessValidForDays,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
@@ -95,11 +118,11 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
     /// <inheritdoc />
     public async Task<Requisition> CreateRequisitionAsync(
-        string redirectUrl,
         string institutionId,
         string agreementId,
+        string redirectUrl,
         string reference,
-        string userLanguage = "EN",
+        string userLanguage,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
@@ -127,7 +150,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         {
             Id = response.Id,
             Redirect = response.Redirect,
-            Status = response.Status,
+            Status = AccountLinkStatusMapper(response.Status),
             InstitutionId = response.InstitutionId,
             Agreement = response.Agreement,
             Reference = response.Reference,
@@ -155,7 +178,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         {
             Id = response.Id,
             Redirect = response.Redirect,
-            Status = response.Status,
+            Status = AccountLinkStatusMapper(response.Status),
             InstitutionId = response.InstitutionId,
             Agreement = response.Agreement,
             Reference = response.Reference,
@@ -346,4 +369,19 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         return null;
     }
+
+
+    private static AccountLinkStatus AccountLinkStatusMapper(string status) =>
+        status switch
+        {
+            "CR" => AccountLinkStatus.Pending,
+            "GC" => AccountLinkStatus.Pending,
+            "UA" => AccountLinkStatus.Pending,
+            "RJ" => AccountLinkStatus.Failed,
+            "SA" => AccountLinkStatus.Pending,
+            "GA" => AccountLinkStatus.Pending,
+            "LN" => AccountLinkStatus.Linked,
+            "EX" => AccountLinkStatus.Expired,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), $"Unknown account link status: {status}"),
+        };
 }

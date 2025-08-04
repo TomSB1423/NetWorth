@@ -32,7 +32,7 @@ public record GetInstitutionDto
     ///     Gets number of days of transaction history available.
     /// </summary>
     [JsonPropertyName("transaction_total_days")]
-    public string TransactionTotalDays { get; init; } = "90";
+    public string? TransactionTotalDays { get; init; }
 
     /// <summary>
     ///     Gets maximum number of days the access token is valid.

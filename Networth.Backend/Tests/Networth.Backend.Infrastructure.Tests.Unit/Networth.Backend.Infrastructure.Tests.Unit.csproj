@@ -29,4 +29,9 @@
     <ProjectReference Include="../../Networth.Backend.Functions/Networth.Backend.Functions.csproj"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Handlers\"/>
+    <Folder Include="Validators\"/>
+  </ItemGroup>
+
 </Project>

@@ -11,9 +11,13 @@ internal interface IGocardlessClient
     [Post("/token/new/")]
     Task<GetTokenResponseDto> GetAccessTokenAsync([Body] TokenRequestDto requestDto);
 
+    [Get("/institutions/{id}/")]
+    [Headers("Authorization: Bearer")]
+    Task<GetInstitutionDto> GetInstitution(string id, CancellationToken cancellationToken = default);
+
     [Get("/institutions/")]
     [Headers("Authorization: Bearer")]
-    Task<IEnumerable<GetInstitutionDto>> GetInstitutions([Query("country")] string country = "GB", CancellationToken cancellationToken = default);
+    Task<IEnumerable<GetInstitutionDto>> GetInstitutions([Query("country")] string country, CancellationToken cancellationToken = default);
 
     [Post("/agreements/enduser/")]
     [Headers("Authorization: Bearer")]
