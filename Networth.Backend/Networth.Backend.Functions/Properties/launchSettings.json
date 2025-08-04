@@ -1,9 +1,9 @@
 {
-  "profiles": {
-    "FunctionHttp": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7129",
-      "launchBrowser": false
+    "profiles": {
+        "FunctionHttp": {
+            "commandName": "Project",
+            "commandLineArgs": "--port 7129",
+            "launchBrowser": false
+        }
     }
-  }
 }

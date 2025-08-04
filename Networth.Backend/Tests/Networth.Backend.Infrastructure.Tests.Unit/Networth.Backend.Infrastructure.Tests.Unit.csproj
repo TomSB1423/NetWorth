@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <Using Include="Xunit"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+    <PackageReference Include="xunit"/>
+    <PackageReference Include="xunit.runner.visualstudio"/>
+    <PackageReference Include="FluentValidation"/>
+    <PackageReference Include="Moq"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Networth.Backend.Domain/Networth.Backend.Domain.csproj"/>
+    <ProjectReference Include="../../Networth.Backend.Infrastructure/Networth.Backend.Infrastructure.csproj"/>
+    <ProjectReference Include="../../Networth.Backend.Functions/Networth.Backend.Functions.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Handlers\"/>
+    <Folder Include="Validators\"/>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,42 @@
+.institution-list-container {
+  text-align: left;
+  max-width: 800px;
+  margin: 20px auto;
+  width: 100%;
+}
+
+.institution-list-title {
+  color: #fff;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.institution-list-grid {
+  display: grid;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.institution-list-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #bbb;
+  font-size: 1.1em;
+}
+
+/* Responsive grid */
+@media (min-width: 768px) {
+  .institution-list-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .institution-list-container {
+    padding: 0 10px;
+  }
+
+  .institution-list-title {
+    font-size: 1.3em;
+  }
+}

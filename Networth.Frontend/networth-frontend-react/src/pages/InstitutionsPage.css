@@ -1,0 +1,40 @@
+.institutions-page {
+  min-height: 100vh;
+  background-color: #282c34;
+  color: white;
+  padding: 40px 20px;
+}
+
+.institutions-page-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.institutions-page-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.5em;
+  color: #61dafb;
+}
+
+.institutions-page-subtitle {
+  margin: 0;
+  font-size: 1.2em;
+  color: #bbb;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .institutions-page {
+    padding: 20px 10px;
+  }
+
+  .institutions-page-header h1 {
+    font-size: 2em;
+  }
+
+  .institutions-page-subtitle {
+    font-size: 1.1em;
+  }
+}

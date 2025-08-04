@@ -1,11 +1,17 @@
-using System.Globalization;
-using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Networth.Backend.Application.Commands;
+using Networth.Backend.Application.Handlers;
 using Networth.Backend.Application.Interfaces;
+using Networth.Backend.Application.Validators;
 using Networth.Backend.Infrastructure.Gocardless;
-using Newtonsoft.Json;
+using Networth.Backend.Infrastructure.Gocardless.Auth;
+using Networth.Backend.Infrastructure.Gocardless.Options;
 using Refit;
 
 namespace Networth.Backend.Infrastructure.Extensions;
@@ -22,26 +28,38 @@ public static class ServiceCollectionExtensions
         services.AddTransient<GoCardlessAuthHandler>();
         services.AddSingleton<GoCardlessTokenManager>(serviceProvider =>
         {
-            var options = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>();
+            IOptions<GocardlessOptions> options = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>();
             return new GoCardlessTokenManager(options);
         });
 
+        services.AddSingleton<RefitLoggingHandler>();
+
+        JsonSerializerOptions options = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
         services.AddRefitClient<IGocardlessClient>(_ =>
-                new RefitSettings(
-                    new NewtonsoftJsonContentSerializer(
-                        new JsonSerializerSettings()
-                        {
-                            Culture = CultureInfo.InvariantCulture,
-                            MissingMemberHandling = MissingMemberHandling.Ignore,
-                        })))
+                new RefitSettings { ContentSerializer = new SystemTextJsonContentSerializer(options) })
             .ConfigureHttpClient((serviceProvider, httpClient) =>
             {
-                var gocardlessOptions = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>().Value;
+                GocardlessOptions gocardlessOptions = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>().Value;
                 httpClient.BaseAddress = new Uri(gocardlessOptions.BankAccountDataBaseUrl);
             })
-            .AddHttpMessageHandler<GoCardlessAuthHandler>();
+            .AddHttpMessageHandler<GoCardlessAuthHandler>()
+            .AddHttpMessageHandler(serviceProvider => new RefitLoggingHandler(serviceProvider.GetRequiredService<ILogger<RefitLoggingHandler>>()));
 
         services.AddTransient<IFinancialProvider, GocardlessService>();
+
+        // Add application services
+        services.AddTransient<ILinkAccountCommandHandler, LinkAccountCommandHandler>();
+
+        // Add FluentValidation validators from Application layer
+        services.AddTransient<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
+
         return services;
     }
 }
