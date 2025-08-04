@@ -8,8 +8,8 @@ public class RefitLoggingHandler(ILogger<RefitLoggingHandler> logger) : Delegati
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        HttpResponseMessage response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         logger.LogDebug("Request: {Request}", request);
+        HttpResponseMessage response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         logger.LogDebug("Response: {Response}", response);
         return response;
     }

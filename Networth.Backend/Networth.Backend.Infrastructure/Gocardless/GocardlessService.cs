@@ -4,6 +4,7 @@ using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Domain.Entities;
 using Networth.Backend.Infrastructure.Gocardless.DTOs;
 using Networth.Backend.Infrastructure.Gocardless.Enums;
+using Refit;
 
 namespace Networth.Backend.Infrastructure.Gocardless;
 
@@ -57,26 +58,39 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             InstitutionId = institutionId,
             MaxHistoricalDays = maxHistoricalDays,
             AccessValidForDays = accessValidForDays,
-            AccessScope = [AccessScope.AccountDetails, AccessScope.Balances, AccessScope.Transactions],
+            AccessScope = [AccessScope.Details, AccessScope.Balances, AccessScope.Transactions],
         };
 
-        CreateAgreementResponseDto response = await gocardlessClient.CreateAgreement(request, cancellationToken);
-
-        logger.LogInformation(
-            "Successfully created agreement {AgreementId} for institution {InstitutionId}",
-            response.Id,
-            response.InstitutionId);
-
-        return new Agreement
+        try
         {
-            Id = response.Id,
-            Created = response.Created,
-            InstitutionId = response.InstitutionId,
-            MaxHistoricalDays = response.MaxHistoricalDays,
-            AccessValidForDays = response.AccessValidForDays,
-            AccessScope = response.AccessScope,
-            Accepted = response.Accepted,
-        };
+            CreateAgreementResponseDto response = await gocardlessClient.CreateAgreement(request, cancellationToken);
+
+            logger.LogInformation(
+                "Successfully created agreement {AgreementId} for institution {InstitutionId}",
+                response.Id,
+                response.InstitutionId);
+
+            return new Agreement
+            {
+                Id = response.Id,
+                Created = response.Created,
+                InstitutionId = response.InstitutionId,
+                MaxHistoricalDays = response.MaxHistoricalDays,
+                AccessValidForDays = response.AccessValidForDays,
+                AccessScope = response.AccessScope,
+                Accepted = response.Accepted,
+            };
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError(
+                ex,
+                "Failed to create agreement for institution {InstitutionId}. Status: {StatusCode}, Response: {Content}",
+                institutionId,
+                ex.StatusCode,
+                ex.Content);
+            throw;
+        }
     }
 
     /// <inheritdoc />

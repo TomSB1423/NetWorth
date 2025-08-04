@@ -39,6 +39,7 @@ public static class ServiceCollectionExtensions
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             WriteIndented = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
 
         services.AddRefitClient<IGocardlessClient>(_ =>
