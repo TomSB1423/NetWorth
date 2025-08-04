@@ -74,7 +74,7 @@ public class LinkAccount(
                 return new BadRequestObjectResult(new
                 {
                     Message = "Validation failed",
-                    Errors = validationResult.Errors.Select(e => new { e.PropertyName, e.ErrorMessage })
+                    Errors = validationResult.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }),
                 });
             }
 
@@ -85,7 +85,7 @@ public class LinkAccount(
                 Reference = request.Reference,
                 MaxHistoricalDays = request.MaxHistoricalDays,
                 AccessValidForDays = request.AccessValidForDays,
-                UserLanguage = request.UserLanguage
+                UserLanguage = request.UserLanguage,
             };
 
             LinkAccountCommandResult result = await linkAccountHandler.HandleAsync(command);

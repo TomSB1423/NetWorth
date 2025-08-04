@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Networth.Backend.Infrastructure.Gocardless.Enums;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
 
@@ -15,24 +16,21 @@ internal record CreateAgreementRequestDto
     /// <summary>
     ///     Gets max number of days of historical data available to retrieve.
     /// </summary>
+    [Required]
     [JsonPropertyName("max_historical_days")]
-    public int MaxHistoricalDays { get; init; } = 90;
+    public required int MaxHistoricalDays { get; init; }
 
     /// <summary>
     ///     Gets maximum number of days the access token is valid.
     /// </summary>
+    [Required]
     [JsonPropertyName("access_valid_for_days")]
-    public int AccessValidForDays { get; init; } = 90;
+    public required int AccessValidForDays { get; init; }
 
     /// <summary>
     ///     Gets list of access scopes requested for the agreement.
     /// </summary>
+    [Required]
     [JsonPropertyName("access_scope")]
-    public string[] AccessScope { get; init; } = ["balances", "details", "transactions"];
-
-    /// <summary>
-    ///     Gets a value indicating whether gets whether this agreement can be extended. Supported by GB banks only.
-    /// </summary>
-    [JsonPropertyName("reconfirmation")]
-    public bool Reconfirmation { get; init; } = false;
+    public required AccessScope[] AccessScope { get; init; }
 }

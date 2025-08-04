@@ -1,7 +1,9 @@
-using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Networth.Backend.Application.Commands;
 using Networth.Backend.Application.Handlers;
@@ -10,7 +12,6 @@ using Networth.Backend.Application.Validators;
 using Networth.Backend.Infrastructure.Gocardless;
 using Networth.Backend.Infrastructure.Gocardless.Auth;
 using Networth.Backend.Infrastructure.Gocardless.Options;
-using Newtonsoft.Json;
 using Refit;
 
 namespace Networth.Backend.Infrastructure.Extensions;
@@ -31,16 +32,24 @@ public static class ServiceCollectionExtensions
             return new GoCardlessTokenManager(options);
         });
 
+        services.AddSingleton<RefitLoggingHandler>();
+
+        JsonSerializerOptions options = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
+
         services.AddRefitClient<IGocardlessClient>(_ =>
-                new RefitSettings(
-                    new NewtonsoftJsonContentSerializer(
-                        new JsonSerializerSettings { Culture = CultureInfo.InvariantCulture, MissingMemberHandling = MissingMemberHandling.Ignore })))
+                new RefitSettings { ContentSerializer = new SystemTextJsonContentSerializer(options) })
             .ConfigureHttpClient((serviceProvider, httpClient) =>
             {
                 GocardlessOptions gocardlessOptions = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>().Value;
                 httpClient.BaseAddress = new Uri(gocardlessOptions.BankAccountDataBaseUrl);
             })
-            .AddHttpMessageHandler<GoCardlessAuthHandler>();
+            .AddHttpMessageHandler<GoCardlessAuthHandler>()
+            .AddHttpMessageHandler(serviceProvider => new RefitLoggingHandler(serviceProvider.GetRequiredService<ILogger<RefitLoggingHandler>>()));
 
         services.AddTransient<IFinancialProvider, GocardlessService>();
 

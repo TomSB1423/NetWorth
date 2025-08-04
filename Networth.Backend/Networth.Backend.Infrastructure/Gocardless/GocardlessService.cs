@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Domain.Entities;
 using Networth.Backend.Infrastructure.Gocardless.DTOs;
+using Networth.Backend.Infrastructure.Gocardless.Enums;
 
 namespace Networth.Backend.Infrastructure.Gocardless;
 
@@ -32,7 +33,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                 Name = dto.Name,
                 TransactionTotalDays = transactionTotalDays,
                 MaxAccessValidForDays = maxAccessValidForDays,
-                LogoUrl = dto.Logo
+                LogoUrl = dto.Logo,
             };
         });
         return institutions;
@@ -56,7 +57,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             InstitutionId = institutionId,
             MaxHistoricalDays = maxHistoricalDays,
             AccessValidForDays = accessValidForDays,
-            AccessScope = ["balances", "details", "transactions"]
+            AccessScope = [AccessScope.AccountDetails, AccessScope.Balances, AccessScope.Transactions],
         };
 
         CreateAgreementResponseDto response = await gocardlessClient.CreateAgreement(request, cancellationToken);
@@ -74,7 +75,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             MaxHistoricalDays = response.MaxHistoricalDays,
             AccessValidForDays = response.AccessValidForDays,
             AccessScope = response.AccessScope,
-            Accepted = response.Accepted
+            Accepted = response.Accepted,
         };
     }
 
@@ -98,7 +99,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             InstitutionId = institutionId,
             Agreement = agreementId,
             Reference = reference,
-            UserLanguage = userLanguage
+            UserLanguage = userLanguage,
         };
 
         CreateRequisitionResponseDto response = await gocardlessClient.CreateRequisition(request, cancellationToken);
@@ -120,7 +121,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             UserLanguage = response.UserLanguage,
             AuthorizationLink = response.Link,
             AccountSelection = response.AccountSelection,
-            RedirectImmediate = response.RedirectImmediate
+            RedirectImmediate = response.RedirectImmediate,
         };
     }
 
@@ -148,7 +149,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             UserLanguage = response.UserLanguage,
             AuthorizationLink = response.Link ?? string.Empty,
             AccountSelection = response.AccountSelection,
-            RedirectImmediate = response.RedirectImmediate
+            RedirectImmediate = response.RedirectImmediate,
         };
     }
 
@@ -173,7 +174,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             OwnerName = response.OwnerName,
             Name = response.Name,
             Currency = null, // Not provided in account metadata
-            AccountType = BankAccountType.Checking // Default, could be enhanced
+            AccountType = BankAccountType.Checking, // Default, could be enhanced
         };
     }
 
@@ -196,7 +197,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             CreditLimitIncluded = balance.CreditLimitIncluded,
             LastChangeDateTime = ParseDateTime(balance.LastChangeDateTime),
             ReferenceDate = ParseDateTime(balance.ReferenceDate),
-            LastCommittedTransaction = balance.LastCommittedTransaction
+            LastCommittedTransaction = balance.LastCommittedTransaction,
         });
     }
 
@@ -238,10 +239,10 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                     BuildingNumber = response.Account.OwnerAddressStructured.BuildingNumber,
                     TownName = response.Account.OwnerAddressStructured.TownName,
                     PostCode = response.Account.OwnerAddressStructured.PostCode,
-                    Country = response.Account.OwnerAddressStructured.Country
+                    Country = response.Account.OwnerAddressStructured.Country,
                 }
                 : null,
-            AdditionalAccountData = response.Account.AdditionalAccountData?.SecondaryIdentification
+            AdditionalAccountData = response.Account.AdditionalAccountData?.SecondaryIdentification,
         };
     }
 
@@ -308,7 +309,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                 dto.BalanceAfterTransaction != null
                     ? decimal.Parse(dto.BalanceAfterTransaction.BalanceAmount.Amount, CultureInfo.InvariantCulture)
                     : null,
-            IsPending = isPending
+            IsPending = isPending,
         };
 
     private static DateTime? ParseDateTime(string? dateTimeString)

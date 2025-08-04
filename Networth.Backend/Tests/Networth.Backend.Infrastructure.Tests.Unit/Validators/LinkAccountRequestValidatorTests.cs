@@ -1,4 +1,3 @@
-using FluentValidation;
 using FluentValidation.Results;
 using Networth.Backend.Functions.Models.Requests;
 using Networth.Backend.Functions.Validators;
@@ -25,7 +24,7 @@ public class LinkAccountRequestValidatorTests
         {
             InstitutionId = string.Empty,
             RedirectUrl = "https://example.com",
-            Reference = "test-ref"
+            Reference = "test-ref",
         };
 
         // Act
@@ -45,7 +44,7 @@ public class LinkAccountRequestValidatorTests
         {
             InstitutionId = "test-institution",
             RedirectUrl = "not-a-valid-url",
-            Reference = "test-ref"
+            Reference = "test-ref",
         };
 
         // Act
@@ -66,7 +65,7 @@ public class LinkAccountRequestValidatorTests
         {
             InstitutionId = "test-institution",
             RedirectUrl = "https://example.com",
-            Reference = longReference
+            Reference = longReference,
         };
 
         // Act
@@ -87,7 +86,7 @@ public class LinkAccountRequestValidatorTests
             InstitutionId = "test-institution",
             RedirectUrl = "https://example.com",
             Reference = "test-ref",
-            MaxHistoricalDays = 0
+            MaxHistoricalDays = 0,
         };
 
         // Act
@@ -108,7 +107,7 @@ public class LinkAccountRequestValidatorTests
             InstitutionId = "test-institution",
             RedirectUrl = "https://example.com",
             Reference = "test-ref",
-            UserLanguage = "en" // Should be uppercase
+            UserLanguage = "en", // Should be uppercase
         };
 
         // Act
@@ -131,7 +130,7 @@ public class LinkAccountRequestValidatorTests
             Reference = "test-ref",
             MaxHistoricalDays = 90,
             AccessValidForDays = 90,
-            UserLanguage = "EN"
+            UserLanguage = "EN",
         };
 
         // Act

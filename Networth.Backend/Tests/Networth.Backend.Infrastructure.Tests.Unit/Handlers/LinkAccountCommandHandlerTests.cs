@@ -40,7 +40,7 @@ public class LinkAccountCommandHandlerTests
             Reference = reference,
             MaxHistoricalDays = 90,
             AccessValidForDays = 90,
-            UserLanguage = "EN"
+            UserLanguage = "EN",
         };
 
         var expectedAgreement = new Agreement
@@ -51,7 +51,7 @@ public class LinkAccountCommandHandlerTests
             AccessValidForDays = 90,
             AccessScope = ["balances", "details", "transactions"],
             Created = DateTime.UtcNow,
-            Accepted = null
+            Accepted = null,
         };
 
         var expectedRequisition = new Requisition
@@ -66,7 +66,7 @@ public class LinkAccountCommandHandlerTests
             AuthorizationLink = "https://link.to.bank.com",
             Accounts = [],
             AccountSelection = false,
-            RedirectImmediate = false
+            RedirectImmediate = false,
         };
 
         _mockFinancialProvider

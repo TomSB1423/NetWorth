@@ -38,5 +38,5 @@ public enum BankAccountType
     /// <summary>
     ///     A mortgage account for home loans.
     /// </summary>
-    Mortgage
+    Mortgage,
 }

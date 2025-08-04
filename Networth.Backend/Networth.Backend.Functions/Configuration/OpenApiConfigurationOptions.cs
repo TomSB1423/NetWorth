@@ -14,7 +14,7 @@ public class OpenApiConfigurationOptions : DefaultOpenApiConfigurationOptions
         Version = "1.0.0",
         Title = "Networth Backend API",
         Description = "API for managing financial data and networth calculations",
-        Contact = new OpenApiContact { Name = "Networth Team", Email = "support@networth.com" }
+        Contact = new OpenApiContact { Name = "Networth Team", Email = "support@networth.com" },
     };
 
     public override OpenApiVersionType OpenApiVersion { get; set; } = OpenApiVersionType.V3;

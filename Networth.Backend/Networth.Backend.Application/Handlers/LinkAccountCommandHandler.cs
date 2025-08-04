@@ -59,7 +59,7 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
         return new LinkAccountCommandResult
         {
             Agreement = agreement,
-            Requisition = requisition
+            Requisition = requisition,
         };
     }
 }
