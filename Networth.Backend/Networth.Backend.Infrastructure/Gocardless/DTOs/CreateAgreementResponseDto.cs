@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Networth.Backend.Domain.Enums;
 
@@ -12,18 +13,21 @@ internal record CreateAgreementResponseDto
     ///     Gets the unique identifier for the agreement.
     /// </summary>
     [JsonPropertyName("id")]
+    [Required]
     public required string Id { get; init; }
 
     /// <summary>
     ///     Gets the creation timestamp of the agreement.
     /// </summary>
     [JsonPropertyName("created")]
+    [Required]
     public required DateTime Created { get; init; }
 
     /// <summary>
     ///     Gets the institution ID this agreement is for.
     /// </summary>
     [JsonPropertyName("institution_id")]
+    [Required]
     public required string InstitutionId { get; init; }
 
     /// <summary>

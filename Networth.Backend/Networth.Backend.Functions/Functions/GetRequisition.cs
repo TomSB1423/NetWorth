@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Domain.Entities;
 
@@ -28,7 +29,7 @@ public class GetRequisition(IFinancialProvider financialProvider, ILogger<GetReq
         Description = "Retrieves the details of a specific requisition by ID.")]
     [OpenApiParameter(
         "requisitionId",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Path,
+        In = ParameterLocation.Path,
         Required = true,
         Type = typeof(string),
         Description = "The requisition ID")]

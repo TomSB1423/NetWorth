@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Domain.Entities;
 
@@ -29,19 +30,19 @@ public class GetAccountTransactions(IFinancialProvider financialProvider, ILogge
         Description = "Retrieves transactions for a specific bank account with optional date range filtering.")]
     [OpenApiParameter(
         "accountId",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Path,
+        In = ParameterLocation.Path,
         Required = true,
         Type = typeof(string),
         Description = "The account ID")]
     [OpenApiParameter(
         "dateFrom",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Query,
+        In = ParameterLocation.Query,
         Required = false,
         Type = typeof(string),
         Description = "Start date for transaction filtering (YYYY-MM-DD format)")]
     [OpenApiParameter(
         "dateTo",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Query,
+        In = ParameterLocation.Query,
         Required = false,
         Type = typeof(string),
         Description = "End date for transaction filtering (YYYY-MM-DD format)")]
@@ -81,7 +82,12 @@ public class GetAccountTransactions(IFinancialProvider financialProvider, ILogge
                 string dateFromStr = req.Query["dateFrom"].ToString();
                 if (!string.IsNullOrEmpty(dateFromStr))
                 {
-                    if (DateTime.TryParseExact(dateFromStr, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateFrom))
+                    if (DateTime.TryParseExact(
+                            dateFromStr,
+                            "yyyy-MM-dd",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out DateTime parsedDateFrom))
                     {
                         dateFrom = parsedDateFrom;
                     }
@@ -110,7 +116,7 @@ public class GetAccountTransactions(IFinancialProvider financialProvider, ILogge
                 }
             }
 
-            IEnumerable<Transaction> transactions = await financialProvider.GetAccountTransactionsAsync(
+            var transactions = await financialProvider.GetAccountTransactionsAsync(
                 accountId,
                 dateFrom,
                 dateTo);

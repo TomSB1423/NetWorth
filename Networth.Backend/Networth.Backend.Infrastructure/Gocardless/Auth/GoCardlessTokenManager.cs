@@ -72,7 +72,7 @@ internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options) : IDi
         response.EnsureSuccessStatusCode();
 
         string responseContent = await response.Content.ReadAsStringAsync();
-        GetTokenResponseDto? tokenResponse = JsonSerializer.Deserialize<GetTokenResponseDto>(
+        var tokenResponse = JsonSerializer.Deserialize<GetTokenResponseDto>(
             responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
 
         // Handle potential null response from deserialization

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
@@ -11,12 +12,14 @@ public record BalanceAfterTransactionDto
     ///     Gets the balance amount and currency.
     /// </summary>
     [JsonPropertyName("balanceAmount")]
+    [Required]
     public required BalanceAmountDto BalanceAmount { get; init; }
 
     /// <summary>
     ///     Gets the type of balance.
     /// </summary>
     [JsonPropertyName("balanceType")]
+    [Required]
     public required string BalanceType { get; init; }
 
     /// <summary>

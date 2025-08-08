@@ -40,12 +40,7 @@ public class Requisition
     /// <summary>
     ///     Gets or sets the accounts associated with this requisition.
     /// </summary>
-    public string[] Accounts { get; set; } = Array.Empty<string>();
-
-    /// <summary>
-    ///     Gets or sets the user language.
-    /// </summary>
-    public required string UserLanguage { get; set; }
+    public string[] Accounts { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the authorization link for the user to complete bank authentication.

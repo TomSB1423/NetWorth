@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
@@ -11,6 +12,7 @@ public record BankTransactionsDto
     ///     Gets the booked transactions.
     /// </summary>
     [JsonPropertyName("booked")]
+    [Required]
     public required TransactionDto[] Booked { get; init; }
 
     /// <summary>

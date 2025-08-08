@@ -42,7 +42,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     {
         IEnumerable<GetInstitutionDto> response = await gocardlessClient.GetInstitutions(country, cancellationToken);
 
-        IEnumerable<Institution> institutions = response.Select(dto =>
+        var institutions = response.Select(dto =>
         {
             bool transactionParse = int.TryParse(dto.TransactionTotalDays, out int transactionTotalDays);
             bool maxAccessParse = int.TryParse(dto.MaxAccessValidForDays, out int maxAccessValidForDays);
@@ -121,8 +121,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         string institutionId,
         string agreementId,
         string redirectUrl,
-        string reference,
-        string userLanguage,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
@@ -135,8 +133,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             Redirect = redirectUrl,
             InstitutionId = institutionId,
             Agreement = agreementId,
-            Reference = reference,
-            UserLanguage = userLanguage,
         };
 
         CreateRequisitionResponseDto response = await gocardlessClient.CreateRequisition(request, cancellationToken);
@@ -155,7 +151,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             Agreement = response.Agreement,
             Reference = response.Reference,
             Accounts = response.Accounts,
-            UserLanguage = response.UserLanguage,
             AuthorizationLink = response.Link,
             AccountSelection = response.AccountSelection,
             RedirectImmediate = response.RedirectImmediate,
@@ -183,7 +178,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             Agreement = response.Agreement,
             Reference = response.Reference,
             Accounts = response.Accounts,
-            UserLanguage = response.UserLanguage,
             AuthorizationLink = response.Link ?? string.Empty,
             AccountSelection = response.AccountSelection,
             RedirectImmediate = response.RedirectImmediate,
@@ -295,7 +289,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         string? dateFromStr = dateFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         string? dateToStr = dateTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-        GetAccountTransactionsResponseDto response =
+        var response =
             await gocardlessClient.GetAccountTransactions(accountId, dateFromStr, dateToStr, cancellationToken);
 
         List<Transaction> transactions = [];

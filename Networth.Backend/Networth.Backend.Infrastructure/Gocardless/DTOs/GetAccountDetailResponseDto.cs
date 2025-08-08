@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
@@ -11,5 +12,6 @@ public record GetAccountDetailResponseDto
     ///     Gets the account details.
     /// </summary>
     [JsonPropertyName("account")]
+    [Required]
     public required AccountDetailSchemaDto Account { get; init; }
 }

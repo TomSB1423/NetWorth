@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Domain.Entities;
 
@@ -28,7 +29,7 @@ public class GetAccount(IFinancialProvider financialProvider, ILogger<GetAccount
         Description = "Retrieves the metadata for a specific bank account.")]
     [OpenApiParameter(
         "accountId",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Path,
+        In = ParameterLocation.Path,
         Required = true,
         Type = typeof(string),
         Description = "The account ID")]

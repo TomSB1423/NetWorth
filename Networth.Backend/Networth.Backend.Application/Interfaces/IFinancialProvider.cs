@@ -43,16 +43,12 @@ public interface IFinancialProvider
     /// <param name="institutionId">The ID of the financial institution.</param>
     /// <param name="agreementId">The agreement ID for the connection.</param>
     /// <param name="redirectUrl">The URL to redirect to after authentication.</param>
-    /// <param name="reference">A reference identifier for the requisition.</param>
-    /// <param name="userLanguage">The user's preferred language (default: EN).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The created requisition with authorization link.</returns>
     Task<Requisition> CreateRequisitionAsync(
         string institutionId,
         string agreementId,
         string redirectUrl,
-        string reference,
-        string userLanguage,
         CancellationToken cancellationToken = default);
 
     /// <summary>

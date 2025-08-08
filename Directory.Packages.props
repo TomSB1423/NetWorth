@@ -32,6 +32,10 @@
     <PackageVersion Include="FluentValidation" Version="12.0.0"/>
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0"/>
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.7"/>
+    <PackageVersion Include="Serilog" Version="4.3.0"/>
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="9.0.0"/>
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0"/>
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0"/>
   </ItemGroup>
   <ItemGroup Label="Testing">
     <PackageVersion Include="Moq" Version="4.20.72"/>

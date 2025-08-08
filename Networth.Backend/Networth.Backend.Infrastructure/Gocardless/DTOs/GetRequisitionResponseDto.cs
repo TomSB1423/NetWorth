@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
@@ -8,6 +9,7 @@ internal record GetRequisitionResponseDto
     ///     Gets the unique identifier for the requisition.
     /// </summary>
     [JsonPropertyName("id")]
+    [Required]
     public required string Id { get; init; }
 
     /// <summary>
@@ -26,24 +28,28 @@ internal record GetRequisitionResponseDto
     ///     Gets the status of the requisition.
     /// </summary>
     [JsonPropertyName("status")]
+    [Required]
     public required string Status { get; init; }
 
     /// <summary>
     ///     Gets the institution ID.
     /// </summary>
     [JsonPropertyName("institution_id")]
+    [Required]
     public required string InstitutionId { get; init; }
 
     /// <summary>
     ///     Gets the agreement ID.
     /// </summary>
     [JsonPropertyName("agreement")]
+    [Required]
     public required string Agreement { get; init; }
 
     /// <summary>
     ///     Gets the reference identifier.
     /// </summary>
     [JsonPropertyName("reference")]
+    [Required]
     public required string Reference { get; init; }
 
     /// <summary>
@@ -56,6 +62,7 @@ internal record GetRequisitionResponseDto
     ///     Gets the user language.
     /// </summary>
     [JsonPropertyName("user_language")]
+    [Required]
     public required string UserLanguage { get; init; }
 
     /// <summary>

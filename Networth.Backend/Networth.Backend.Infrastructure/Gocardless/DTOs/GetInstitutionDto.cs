@@ -11,15 +11,15 @@ public record GetInstitutionDto
     /// <summary>
     ///     Gets unique identifier for the institution.
     /// </summary>
-    [Required]
     [JsonPropertyName("id")]
+    [Required]
     public required string Id { get; init; }
 
     /// <summary>
     ///     Gets display name of the institution.
     /// </summary>
-    [Required]
     [JsonPropertyName("name")]
+    [Required]
     public required string Name { get; init; }
 
     /// <summary>
@@ -41,17 +41,23 @@ public record GetInstitutionDto
     public string? MaxAccessValidForDays { get; init; }
 
     /// <summary>
+    ///     Gets the maximum number of days the access token is valid before reconfirmation is required.
+    /// </summary>
+    [JsonPropertyName("max_access_valid_for_days_reconfirmation")]
+    public string? MaxAccessValidForDaysReconfirmation { get; init; }
+
+    /// <summary>
     ///     Gets list of countries where this institution operates.
     /// </summary>
-    [Required]
     [JsonPropertyName("countries")]
+    [Required]
     public required string[] Countries { get; init; }
 
     /// <summary>
     ///     Gets URL to the institution's logo.
     /// </summary>
-    [Required]
     [JsonPropertyName("logo")]
+    [Required]
     public required string Logo { get; init; }
 
     /// <summary>
@@ -66,3 +72,5 @@ public record GetInstitutionDto
     [JsonPropertyName("identification_codes")]
     public string[] IdentificationCodes { get; init; } = [];
 }
+
+

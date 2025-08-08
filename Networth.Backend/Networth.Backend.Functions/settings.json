@@ -12,5 +12,16 @@
     },
     "Host": {
         "CORS": "*"
+    },
+    "Serilog": {
+        "Using": [
+            "Serilog.Sinks.Console"
+        ],
+        "MinimumLevel": "Debug",
+        "WriteTo": [
+            {
+                "Name": "Console"
+            }
+        ]
     }
 }

@@ -16,7 +16,7 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
 
         Institution institutions = await financialProvider.GetInstitutionAsync(command.InstitutionId, cancellationToken);
 
-        Agreement agreement = await financialProvider.CreateAgreementAsync(
+        var agreement = await financialProvider.CreateAgreementAsync(
             command.InstitutionId,
             institutions.TransactionTotalDays,
             institutions.MaxAccessValidForDays,
@@ -27,12 +27,10 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
             agreement.Id,
             command.InstitutionId);
 
-        Requisition requisition = await financialProvider.CreateRequisitionAsync(
+        var requisition = await financialProvider.CreateRequisitionAsync(
             command.InstitutionId,
             agreement.Id,
             "https://example.com/callback", // Replace with actual redirect URL
-            "Networth",
-            "EN",
             cancellationToken);
 
         logger.LogInformation(
