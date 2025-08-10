@@ -6,7 +6,17 @@ namespace Networth.Backend.Domain.Entities;
 public class Transaction
 {
     /// <summary>
-    ///     Gets or sets the transaction ID.
+    ///     Gets or sets the unique identifier for the transaction (primary key).
+    /// </summary>
+    public required string Id { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the account ID this transaction belongs to.
+    /// </summary>
+    public required string AccountId { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the transaction ID from the bank.
     /// </summary>
     public string? TransactionId { get; set; }
 
@@ -22,11 +32,13 @@ public class Transaction
 
     /// <summary>
     ///     Gets or sets the booking date.
+    ///     The date when the payment is settled (when funds are available to the account owner).
     /// </summary>
     public DateTime? BookingDate { get; set; }
 
     /// <summary>
     ///     Gets or sets the value date.
+    ///     The date when the payment is initiated (when funds cease to be available to the account owner).
     /// </summary>
     public DateTime? ValueDate { get; set; }
 
@@ -41,14 +53,14 @@ public class Transaction
     public string? DebtorName { get; set; }
 
     /// <summary>
-    ///     Gets or sets the creditor account IBAN.
-    /// </summary>
-    public string? CreditorAccountIban { get; set; }
-
-    /// <summary>
     ///     Gets or sets the debtor account IBAN.
     /// </summary>
-    public string? DebtorAccountIban { get; set; }
+    public string? DebtorAccount { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the creditor account IBAN.
+    /// </summary>
+    public string? CreditorAccount { get; set; }
 
     /// <summary>
     ///     Gets or sets the remittance information unstructured (description).

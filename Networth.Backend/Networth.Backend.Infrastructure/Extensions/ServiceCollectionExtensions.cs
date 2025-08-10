@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,8 @@ using Networth.Backend.Application.Commands;
 using Networth.Backend.Application.Handlers;
 using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Application.Validators;
+using Networth.Backend.Infrastructure.Data.Context;
+using Networth.Backend.Infrastructure.Data.Options;
 using Networth.Backend.Infrastructure.Gocardless;
 using Networth.Backend.Infrastructure.Gocardless.Auth;
 using Networth.Backend.Infrastructure.Gocardless.Options;
@@ -39,14 +42,18 @@ public static class ServiceCollectionExtensions
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             WriteIndented = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+            Converters =
+            {
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase),
+            },
         };
 
         services.AddRefitClient<IGocardlessClient>(_ =>
                 new RefitSettings { ContentSerializer = new SystemTextJsonContentSerializer(options) })
             .ConfigureHttpClient((serviceProvider, httpClient) =>
             {
-                GocardlessOptions gocardlessOptions = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>().Value;
+                GocardlessOptions gocardlessOptions = serviceProvider
+                    .GetRequiredService<IOptions<GocardlessOptions>>().Value;
                 httpClient.BaseAddress = new Uri(gocardlessOptions.BankAccountDataBaseUrl);
             })
             .AddHttpMessageHandler<GoCardlessAuthHandler>()
@@ -60,6 +67,29 @@ public static class ServiceCollectionExtensions
         // Add FluentValidation validators from Application layer
         services.AddTransient<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
 
+        // Use DB
+
+        services.AddDbContext<NetworthDbContext>((_, dbContextOptionsBuilder) =>
+        {
+            DatabaseOptions databaseOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>() ??
+                                              throw new InvalidOperationException();
+
+            ConfigureDbContext(dbContextOptionsBuilder, databaseOptions);
+        });
         return services;
+    }
+
+
+    /// <summary>
+    ///     Configures the DbContext based on the database provider.
+    /// </summary>
+    /// <param name="options">The DbContext options builder.</param>
+    /// <param name="databaseOptions">The database configuration options.</param>
+    private static void ConfigureDbContext(DbContextOptionsBuilder options, DatabaseOptions databaseOptions)
+    {
+        // TODO: Will need to remove this when we switch to a real database
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+        options.UseSqlite(databaseOptions.ConnectionString, sqliteOptions => { sqliteOptions.CommandTimeout(30); });
     }
 }

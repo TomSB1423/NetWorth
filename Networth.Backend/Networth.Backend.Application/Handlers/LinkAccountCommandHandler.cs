@@ -40,7 +40,7 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
 
         return new LinkAccountCommandResult
         {
-            AuthorizationLink = requisition.AuthorizationLink, Status = requisition.Status,
+            AuthorizationLink = requisition.AuthenticationLink, Status = requisition.Status,
         };
     }
 }

@@ -26,17 +26,7 @@ public class AccountBalance
     public bool? CreditLimitIncluded { get; set; }
 
     /// <summary>
-    ///     Gets or sets the last change date time.
-    /// </summary>
-    public DateTime? LastChangeDateTime { get; set; }
-
-    /// <summary>
     ///     Gets or sets the reference date.
     /// </summary>
     public DateTime? ReferenceDate { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the last committed transaction.
-    /// </summary>
-    public string? LastCommittedTransaction { get; set; }
 }

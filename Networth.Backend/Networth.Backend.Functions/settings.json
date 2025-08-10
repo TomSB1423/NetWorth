@@ -10,6 +10,14 @@
     "Host": {
         "CORS": "*"
     },
+    "Database": {
+        "Provider": "SQLite",
+        "ConnectionStrings": {
+            "SQLite": "Data Source=networth.db"
+        },
+        "AutoMigrate": true,
+        "CommandTimeout": 30
+    },
     "Serilog": {
         "Using": [
             "Serilog.Sinks.Console"

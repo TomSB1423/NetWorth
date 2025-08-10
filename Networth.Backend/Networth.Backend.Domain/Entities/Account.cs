@@ -11,44 +11,19 @@ public class Account
     public required string Id { get; set; }
 
     /// <summary>
-    ///     Gets or sets the date and time at which the account object was created.
+    ///     Gets or sets the name of account.
     /// </summary>
-    public required DateTime Created { get; set; }
+    public string? Name { get; set; }
 
     /// <summary>
-    ///     Gets or sets the date and time at which the account object was last accessed.
+    ///     Gets or sets the institution id associated with this account.
     /// </summary>
-    public required DateTime LastAccessed { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the Account IBAN.
-    /// </summary>
-    public string? Iban { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the Account BBAN.
-    /// </summary>
-    public string? Bban { get; set; }
+    public required string InstitutionId { get; set; }
 
     /// <summary>
     ///     Gets or sets the processing status of this account.
     /// </summary>
     public required string Status { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the ASPSP associated with this account.
-    /// </summary>
-    public required string InstitutionId { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the name of the account owner.
-    /// </summary>
-    public string? OwnerName { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the name of account.
-    /// </summary>
-    public string? Name { get; set; }
 
     /// <summary>
     ///     Gets or sets the currency of the bank account.
@@ -58,5 +33,5 @@ public class Account
     /// <summary>
     ///     Gets or sets the account type.
     /// </summary>
-    public BankAccountType AccountType { get; set; }
+    public BankAccountType? AccountType { get; set; }
 }
