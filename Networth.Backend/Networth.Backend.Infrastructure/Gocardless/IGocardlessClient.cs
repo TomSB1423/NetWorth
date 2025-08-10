@@ -29,7 +29,7 @@ internal interface IGocardlessClient
         [Body] CreateRequisitionRequestDto requisition,
         CancellationToken cancellationToken = default);
 
-    [Post("/requisitions/{id}/")]
+    [Get("/requisitions/{id}/")]
     [Headers("Authorization: Bearer")]
     Task<GetRequisitionResponseDto> GetRequisition(string id, CancellationToken cancellationToken = default);
 

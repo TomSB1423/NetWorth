@@ -59,13 +59,6 @@ internal record GetRequisitionResponseDto
     public string[] Accounts { get; init; } = [];
 
     /// <summary>
-    ///     Gets the user language.
-    /// </summary>
-    [JsonPropertyName("user_language")]
-    [Required]
-    public required string UserLanguage { get; init; }
-
-    /// <summary>
     ///     Gets the authorization link for the user to complete bank authentication.
     /// </summary>
     [JsonPropertyName("link")]
