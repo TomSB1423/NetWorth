@@ -1,9 +1,11 @@
+using Networth.Backend.Application.Interfaces;
+
 namespace Networth.Backend.Application.Queries;
 
 /// <summary>
 ///     The get transactions query.
 /// </summary>
-public class GetTransactionsQuery
+public class GetTransactionsQuery : IRequest<GetTransactionsQueryResult>
 {
     /// <summary>
     ///     Gets the account to retrieve transactions from.

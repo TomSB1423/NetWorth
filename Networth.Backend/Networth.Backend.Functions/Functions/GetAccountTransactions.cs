@@ -6,9 +6,8 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Networth.Backend.Application.Handlers;
+using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Application.Queries;
-using Networth.Backend.Application.Validators;
 using Networth.Backend.Domain.Entities;
 
 namespace Networth.Backend.Functions.Functions;
@@ -17,8 +16,7 @@ namespace Networth.Backend.Functions.Functions;
 ///     Azure Function for retrieving account transactions.
 /// </summary>
 public class GetAccountTransactions(
-    GetTransactionsQueryHandler getTransactionsQueryHandler,
-    GetTransactionsQueryValidator validator,
+    IMediator mediator,
     ILogger<GetAccountTransactions> logger)
 {
     /// <summary>
@@ -93,7 +91,7 @@ public class GetAccountTransactions(
             return new BadRequestObjectResult(new { errors = new[] { $"Invalid dateTo format: {dateToStr}. Expected ISO 8601 format." } });
         }
 
-        // Create query object for validation
+        // Create query object
         GetTransactionsQuery query = new()
         {
             AccountId = accountId,
@@ -101,25 +99,26 @@ public class GetAccountTransactions(
             DateTo = dateTo,
         };
 
-        // Validate using FluentValidation
-        var validationResult = await validator.ValidateAsync(query);
-        if (!validationResult.IsValid)
+        try
         {
-            var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToArray();
+            // Send through mediator (includes validation)
+            GetTransactionsQueryResult result = await mediator.Send<GetTransactionsQuery, GetTransactionsQueryResult>(query);
+
+            logger.LogInformation(
+                "Successfully retrieved {TransactionCount} transactions for account {AccountId}",
+                result.Transactions.Count(),
+                accountId);
+
+            return new OkObjectResult(result.Transactions);
+        }
+        catch (ValidationException ex)
+        {
+            var errors = ex.Errors.Select(e => e.ErrorMessage).ToArray();
             logger.LogWarning(
                 "Validation failed for account {AccountId}: {ValidationErrors}",
                 accountId,
                 string.Join(", ", errors));
             return new BadRequestObjectResult(new { errors });
         }
-
-        GetTransactionsQueryResult result = await getTransactionsQueryHandler.HandleAsync(query);
-
-        logger.LogInformation(
-            "Successfully retrieved {TransactionCount} transactions for account {AccountId}",
-            result.Transactions.Count(),
-            accountId);
-
-        return new OkObjectResult(result.Transactions);
     }
 }

@@ -5,7 +5,8 @@ using Networth.Backend.Domain.Entities;
 
 namespace Networth.Backend.Application.Handlers;
 
-public class GetTransactionsQueryHandler(IFinancialProvider financialProvider, ILogger<LinkAccountCommandHandler> logger)
+public class GetTransactionsQueryHandler(IFinancialProvider financialProvider, ILogger<GetTransactionsQueryHandler> logger)
+    : IRequestHandler<GetTransactionsQuery, GetTransactionsQueryResult>
 {
     public async Task<GetTransactionsQueryResult> HandleAsync(GetTransactionsQuery query, CancellationToken cancellationToken = default)
     {

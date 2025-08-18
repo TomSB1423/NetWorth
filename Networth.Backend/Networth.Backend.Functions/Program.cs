@@ -4,6 +4,7 @@ using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Networth.Backend.Application.Extensions;
 using Networth.Backend.Functions.Middleware;
 using Networth.Backend.Infrastructure.Extensions;
 using Serilog;
@@ -34,6 +35,7 @@ builder.Services.Configure<JsonSerializerOptions>(options =>
 builder.Services
     .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })
     .AddApplicationInsightsTelemetryWorkerService()
+    .AddApplicationServices()
     .AddInfrastructure(builder.Configuration);
 
 IHost host = builder.Build();

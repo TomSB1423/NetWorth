@@ -9,6 +9,7 @@ namespace Networth.Backend.Application.Handlers;
 ///     Handler for link account commands that creates both agreement and requisition.
 /// </summary>
 public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILogger<LinkAccountCommandHandler> logger)
+    : IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>
 {
     public async Task<LinkAccountCommandResult> HandleAsync(LinkAccountCommand command, CancellationToken cancellationToken = default)
     {
