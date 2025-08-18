@@ -1,5 +1,4 @@
 using System.Net;
-using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -99,26 +98,14 @@ public class GetAccountTransactions(
             DateTo = dateTo,
         };
 
-        try
-        {
-            // Send through mediator (includes validation)
-            GetTransactionsQueryResult result = await mediator.Send<GetTransactionsQuery, GetTransactionsQueryResult>(query);
+        // Send through mediator (includes validation)
+        GetTransactionsQueryResult result = await mediator.Send<GetTransactionsQuery, GetTransactionsQueryResult>(query);
 
-            logger.LogInformation(
-                "Successfully retrieved {TransactionCount} transactions for account {AccountId}",
-                result.Transactions.Count(),
-                accountId);
+        logger.LogInformation(
+            "Successfully retrieved {TransactionCount} transactions for account {AccountId}",
+            result.Transactions.Count(),
+            accountId);
 
-            return new OkObjectResult(result.Transactions);
-        }
-        catch (ValidationException ex)
-        {
-            var errors = ex.Errors.Select(e => e.ErrorMessage).ToArray();
-            logger.LogWarning(
-                "Validation failed for account {AccountId}: {ValidationErrors}",
-                accountId,
-                string.Join(", ", errors));
-            return new BadRequestObjectResult(new { errors });
-        }
+        return new OkObjectResult(result.Transactions);
     }
 }

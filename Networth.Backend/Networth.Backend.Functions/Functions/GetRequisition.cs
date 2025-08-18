@@ -52,24 +52,16 @@ public class GetRequisition(IFinancialProvider financialProvider, ILogger<GetReq
         HttpRequest req,
         string requisitionId)
     {
-        try
+        if (string.IsNullOrEmpty(requisitionId))
         {
-            if (string.IsNullOrEmpty(requisitionId))
-            {
-                logger.LogWarning("Missing requisitionId in GetRequisition request");
-                return new BadRequestObjectResult("Requisition ID is required");
-            }
-
-            Requisition requisition = await financialProvider.GetRequisitionAsync(requisitionId);
-
-            logger.LogInformation("Successfully retrieved requisition {RequisitionId}", requisitionId);
-
-            return new OkObjectResult(requisition);
+            logger.LogWarning("Missing requisitionId in GetRequisition request");
+            throw new ArgumentException("Requisition ID is required", nameof(requisitionId));
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error retrieving requisition {RequisitionId}", requisitionId);
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-        }
+
+        Requisition requisition = await financialProvider.GetRequisitionAsync(requisitionId);
+
+        logger.LogInformation("Successfully retrieved requisition {RequisitionId}", requisitionId);
+
+        return new OkObjectResult(requisition);
     }
 }
