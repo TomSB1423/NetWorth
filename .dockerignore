@@ -1,0 +1,15 @@
+bin/
+obj/
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/.vscode/
+**/node_modules/
+**/dist/
+**/build/
+**/coverage/
+**/.DS_Store
+**/local.settings.json
+**/.env
+**/.env.*

@@ -35,7 +35,7 @@ public static class ServiceCollectionExtensions
             return new GoCardlessTokenManager(options);
         });
 
-        services.AddSingleton<RefitLoggingHandler>();
+        services.AddSingleton<RefitRetryHandler>();
 
         JsonSerializerOptions options = new()
         {
@@ -57,18 +57,16 @@ public static class ServiceCollectionExtensions
                 httpClient.BaseAddress = new Uri(gocardlessOptions.BankAccountDataBaseUrl);
             })
             .AddHttpMessageHandler<GoCardlessAuthHandler>()
-            .AddHttpMessageHandler(serviceProvider => new RefitLoggingHandler(serviceProvider.GetRequiredService<ILogger<RefitLoggingHandler>>()));
+            .AddHttpMessageHandler(serviceProvider => new RefitRetryHandler(serviceProvider.GetRequiredService<ILogger<RefitRetryHandler>>()));
 
+        // Register Infrastructure
         services.AddTransient<IFinancialProvider, GocardlessService>();
 
-        // Add application services
+        // Register application services
         services.AddTransient<LinkAccountCommandHandler>();
-
-        // Add FluentValidation validators from Application layer
         services.AddTransient<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
 
         // Use DB
-
         services.AddDbContext<NetworthDbContext>((_, dbContextOptionsBuilder) =>
         {
             DatabaseOptions databaseOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>() ??

@@ -52,24 +52,8 @@ public class GetAccount(IFinancialProvider financialProvider, ILogger<GetAccount
         HttpRequest req,
         string accountId)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(accountId))
-            {
-                logger.LogWarning("Missing accountId in GetAccount request");
-                return new BadRequestObjectResult("Account ID is required");
-            }
-
-            Account account = await financialProvider.GetAccountAsync(accountId);
-
-            logger.LogInformation("Successfully retrieved account metadata for account {AccountId}", accountId);
-
-            return new OkObjectResult(account);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error retrieving account {AccountId}", accountId);
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-        }
+        Account account = await financialProvider.GetAccountAsync(accountId);
+        logger.LogInformation("Successfully retrieved account metadata for account {AccountId}", accountId);
+        return new OkObjectResult(account);
     }
 }

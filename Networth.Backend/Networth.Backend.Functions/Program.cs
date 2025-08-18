@@ -4,10 +4,14 @@ using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Networth.Backend.Functions.Middleware;
 using Networth.Backend.Infrastructure.Extensions;
 using Serilog;
 
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
+
+// Middleware
+builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
 // Configure additional app settings
 builder.Configuration

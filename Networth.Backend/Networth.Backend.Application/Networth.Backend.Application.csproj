@@ -10,8 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Handlers\"/>
-    <Folder Include="Queries\"/>
     <Folder Include="Validators\"/>
   </ItemGroup>
 

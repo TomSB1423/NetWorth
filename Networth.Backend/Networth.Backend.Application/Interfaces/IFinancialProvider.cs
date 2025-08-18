@@ -95,7 +95,7 @@ public interface IFinancialProvider
     /// <returns>The account transactions.</returns>
     Task<IEnumerable<Transaction>> GetAccountTransactionsAsync(
         string accountId,
-        DateTime? dateFrom = null,
-        DateTime? dateTo = null,
+        DateTimeOffset dateFrom,
+        DateTimeOffset dateTo,
         CancellationToken cancellationToken = default);
 }

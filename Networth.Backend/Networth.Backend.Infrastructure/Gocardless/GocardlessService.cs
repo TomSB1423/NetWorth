@@ -249,14 +249,14 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     /// <inheritdoc />
     public async Task<IEnumerable<Transaction>> GetAccountTransactionsAsync(
         string accountId,
-        DateTime? dateFrom = null,
-        DateTime? dateTo = null,
+        DateTimeOffset dateFrom,
+        DateTimeOffset dateTo,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Retrieving account transactions for account {AccountId}", accountId);
 
-        string? dateFromStr = dateFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        string? dateToStr = dateTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        string? dateFromStr = dateFrom.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        string? dateToStr = dateTo.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
         var response =
             await gocardlessClient.GetAccountTransactions(accountId, dateFromStr, dateToStr, cancellationToken);

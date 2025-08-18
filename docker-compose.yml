@@ -1,0 +1,11 @@
+############################################################
+# Docker Compose moved
+#
+# The active Compose file lives at:
+#   Networth.Backend/docker-compose.yml
+#
+# This file is intentionally left without services to avoid
+# duplicate/accidental usage. Use the backend compose instead.
+############################################################
+
+# No services defined here on purpose.
