@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+
     <PackageReference Include="Microsoft.Azure.Functions.Worker"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore"/>
@@ -44,6 +45,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Networth.Backend.Application\Networth.Backend.Application.csproj"/>
     <ProjectReference Include="..\Networth.Backend.Infrastructure\Networth.Backend.Infrastructure.csproj"/>
+    <ProjectReference Include="..\..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

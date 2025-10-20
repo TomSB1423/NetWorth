@@ -438,3 +438,4 @@ FodyWeavers.xsd
 local.settings.json
 Networth.Frontend/Networth.Frontend.React/.env
 .vscode
+.aspire
