@@ -30,16 +30,6 @@ public class NetworthDbContext : DbContext
     /// </summary>
     public DbSet<Account> Accounts { get; set; } = null!;
 
-    // Note: Institutions and Transactions are fetched from GoCardless API
-    // and don't need local storage for current use case.
-
-    // Uncomment these if you need local storage in the future:
-    // public DbSet<Institution> Institutions { get; set; } = null!;
-    // public DbSet<Transaction> Transactions { get; set; } = null!;
-    // public DbSet<AccountBalance> AccountBalances { get; set; } = null!;
-    // public DbSet<AccountDetail> AccountDetails { get; set; } = null!;
-    // public DbSet<Agreement> Agreements { get; set; } = null!;
-
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

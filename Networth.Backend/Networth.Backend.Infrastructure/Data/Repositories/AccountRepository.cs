@@ -19,12 +19,4 @@ public class AccountRepository : BaseRepository<Account, string>, IAccountReposi
         : base(context)
     {
     }
-
-    /// <inheritdoc />
-    public async Task<IEnumerable<Account>> GetAccountsByInstitutionIdAsync(string institutionId, CancellationToken cancellationToken = default)
-    {
-        return await DbSet
-            .Where(a => a.InstitutionId == institutionId)
-            .ToListAsync(cancellationToken);
-    }
 }

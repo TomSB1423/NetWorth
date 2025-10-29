@@ -8,7 +8,7 @@ public class DatabaseOptions
     /// <summary>
     ///     The configuration section name.
     /// </summary>
-    public const string SectionName = "Database";
+    public const string SectionName = "";
 
     /// <summary>
     ///     Gets the database connection string.

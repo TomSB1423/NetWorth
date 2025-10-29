@@ -19,28 +19,4 @@ public class RequisitionRepository : BaseRepository<Requisition, string>, IRequi
         : base(context)
     {
     }
-
-    /// <inheritdoc />
-    public async Task<IEnumerable<Requisition>> GetRequisitionsByStatusAsync(AccountLinkStatus status, CancellationToken cancellationToken = default)
-    {
-        return await DbSet
-            .Where(r => r.Status == status)
-            .ToListAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<IEnumerable<Requisition>> GetRequisitionsByUserReferenceAsync(string userReference, CancellationToken cancellationToken = default)
-    {
-        return await DbSet
-            .Where(r => r.Reference == userReference)
-            .ToListAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<IEnumerable<Requisition>> GetExpiredRequisitionsAsync(CancellationToken cancellationToken = default)
-    {
-        return await DbSet
-            .Where(r => r.Status == AccountLinkStatus.Expired)
-            .ToListAsync(cancellationToken);
-    }
 }

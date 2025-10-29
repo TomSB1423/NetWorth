@@ -1,7 +1,7 @@
 {
     "IsEncrypted": false,
     "Values": {
-        "AzureWebJobsStorage": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqGbNdRmGFFvZESh2f3rZ+4Z2dZ6hAzBIFF7S4h9P+EjhKiZg==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;",
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
     },
     "Gocardless": {
@@ -9,14 +9,6 @@
     },
     "Host": {
         "CORS": "*"
-    },
-    "Database": {
-        "Provider": "SQLite",
-        "ConnectionStrings": {
-            "SQLite": "Data Source=/data/networth.db"
-        },
-        "AutoMigrate": true,
-        "CommandTimeout": 30
     },
     "Serilog": {
         "Using": ["Serilog.Sinks.Console"],

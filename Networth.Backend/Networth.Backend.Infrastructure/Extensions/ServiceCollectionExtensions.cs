@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -15,6 +16,7 @@ using Networth.Backend.Infrastructure.Data.Options;
 using Networth.Backend.Infrastructure.Gocardless;
 using Networth.Backend.Infrastructure.Gocardless.Auth;
 using Networth.Backend.Infrastructure.Gocardless.Options;
+using Npgsql;
 using Refit;
 
 namespace Networth.Backend.Infrastructure.Extensions;
@@ -62,32 +64,25 @@ public static class ServiceCollectionExtensions
         // Register Infrastructure
         services.AddTransient<IFinancialProvider, GocardlessService>();
 
-        // Register application services
+        // Register Application services
         services.AddTransient<LinkAccountCommandHandler>();
         services.AddTransient<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
 
-        // Use DB
-        services.AddDbContext<NetworthDbContext>((_, dbContextOptionsBuilder) =>
+        // Use DB - with Aspire NpgsqlDataSource
+        services.AddDbContext<NetworthDbContext>((serviceProvider, dbContextOptionsBuilder) =>
         {
-            DatabaseOptions databaseOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>() ??
-                                              throw new InvalidOperationException();
+            NpgsqlDataSource dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
+            dbContextOptionsBuilder.UseNpgsql(dataSource, npgsqlOptions =>
+            {
+                npgsqlOptions.CommandTimeout(30);
+            });
+        });
 
-            ConfigureDbContext(dbContextOptionsBuilder, databaseOptions);
+        services.AddScoped<IDbConnection>(sp =>
+        {
+            NpgsqlDataSource dataSource = sp.GetRequiredService<NpgsqlDataSource>();
+            return dataSource.OpenConnection();
         });
         return services;
-    }
-
-
-    /// <summary>
-    ///     Configures the DbContext based on the database provider.
-    /// </summary>
-    /// <param name="options">The DbContext options builder.</param>
-    /// <param name="databaseOptions">The database configuration options.</param>
-    private static void ConfigureDbContext(DbContextOptionsBuilder options, DatabaseOptions databaseOptions)
-    {
-        // TODO: Will need to remove this when we switch to a real database
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
-        options.UseSqlite(databaseOptions.ConnectionString, sqliteOptions => { sqliteOptions.CommandTimeout(30); });
     }
 }

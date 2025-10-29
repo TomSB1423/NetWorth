@@ -8,7 +8,7 @@
 - **Backend**: Azure Functions (isolated worker), .NET 9.0, Entity Framework Core
 - **Frontend**: React 19 with Create React App, Tailwind CSS
 - **Orchestration**: .NET Aspire (AppHost for local development)
-- **Database**: PostgreSQL (via Aspire hosting), SQLite for development
+- **Database**: PostgreSQL (via Aspire hosting with NpgsqlDataSource)
 - **External APIs**: GoCardless Bank Account Data API
 - **Testing**: xUnit, Moq, FluentValidation
 
@@ -32,19 +32,16 @@ Networth.ServiceDefaults/             # Shared Aspire configuration
 **Preferred: Use .NET Aspire AppHost** (orchestrates all services)
 ```bash
 # From repo root
-dotnet run --project Networth.AppHost
+aspire run
 ```
 This starts:
-- Azure Functions backend at `http://localhost:7071`
+- Azure Functions backend (with Aspire-managed worker host)
 - React frontend at `http://localhost:3000`
 - PostgreSQL database (containerized)
+- Azure Storage Emulator for Functions
+- Aspire Dashboard at `https://localhost:17065`
 
-**Alternative: Backend only with Docker Compose**
-```bash
-cd Networth.Backend
-docker compose up --build
-```
-Services: Backend (port 7071), Azurite storage emulator (ports 10000-10002)
+**Note**: Aspire automatically configures Azure Functions worker settings (`HostEndpoint`, `WorkerId`, storage). Do NOT manually add `Functions:Worker:HostEndpoint` to settings files - this breaks Aspire integration.
 
 **Frontend standalone**
 ```bash
@@ -63,6 +60,25 @@ dotnet user-secrets set "Gocardless:SecretKey" "YOUR_SECRET_KEY"
 - **Build backend**: Use VS Code task "build (functions)" or "build (api)"
 - **Run tests**: `dotnet test` from solution root
 - **Code analysis**: Enabled globally via `Directory.Build.props` (StyleCop, Roslyn analyzers, warnings-as-errors)
+
+### Database Migrations
+Migrations are managed with EF Core for the PostgreSQL database:
+
+```bash
+# Create a new migration
+cd Networth.Backend/Networth.Backend.Infrastructure
+dotnet ef migrations add <MigrationName> --output-dir Data/Migrations
+
+# Apply migrations (while Aspire is running with dynamic ports)
+# Get the port from: docker port <postgres-container-name>
+# Get password from: docker exec <postgres-container-name> printenv POSTGRES_PASSWORD
+env "ConnectionStrings__networth-db=Host=localhost;Port=<port>;Database=networth-db;Username=postgres;Password=<password>" dotnet ef database update
+
+# Remove last migration (if not applied)
+dotnet ef migrations remove
+```
+
+**Note**: `NetworthDbContextFactory` checks for `ConnectionStrings__networth-db` environment variable first, then falls back to localhost:5432. With Aspire's dynamic ports, always run migrations while Aspire is running and use the environment variable approach.
 
 ## Backend Architecture Patterns
 
@@ -119,7 +135,7 @@ public class GetAccount(IMediator mediator)
 - **DbContext**: `NetworthDbContext` only stores `Requisitions` and `Accounts` (minimal local storage)
 - **Most data**: Fetched from GoCardless API via `IFinancialProvider` (no local caching of transactions/balances)
 - **Migrations**: Located in `Infrastructure/Data/Migrations/`
-- **Current DB**: SQLite for dev, PostgreSQL configured for production (see `DatabaseOptions`)
+- **Connection**: Uses Aspire's `NpgsqlDataSource` for PostgreSQL connections (automatic via `builder.AddNpgsqlDataSource("networth-db")`)
 
 ### External API Integration (GoCardless)
 - **Client**: `IGocardlessClient` using Refit with snake_case JSON serialization
@@ -174,7 +190,37 @@ src/
 3. **Database context**: Only for Requisitions/Accounts; don't add unnecessary DbSets
 4. **GoCardless DTOs**: Use snake_case serialization (configured in `RefitSettings`)
 5. **Aspire environment**: Reference services using `builder.AddReference()` for service discovery
-6. **Frontend API base URL**: Set via environment variable or Aspire service reference
+6. **Azure Functions with Aspire**: NEVER manually configure `Functions:Worker:HostEndpoint` or `WorkerId` - Aspire manages these automatically via `.WithHostStorage(storage)`
+7. **Frontend API base URL**: Set via environment variable or Aspire service reference
+8. **PostgreSQL package**: Use `Aspire.Hosting.PostgreSQL` for containerized Postgres, NOT `Aspire.Hosting.Azure.PostgreSQL` (which is for Azure managed service)
+9. **Node simdjson error on macOS**: If React fails with `libsimdjson.27.dylib` error, create symlink: `ln -sf /opt/homebrew/Cellar/simdjson/4.1.0/lib/libsimdjson.28.dylib /opt/homebrew/opt/simdjson/lib/libsimdjson.27.dylib`
+
+## Troubleshooting
+
+### Aspire PostgreSQL Not Starting
+**Symptom**: Aspire dashboard shows postgres "Starting" but never "Running", no Docker containers created
+**Root Cause**: Wrong package (`Aspire.Hosting.Azure.PostgreSQL`) or missing namespace
+**Solution**:
+1. Use `Aspire.Hosting.PostgreSQL` package in `Directory.Packages.props` and `Networth.AppHost.csproj`
+2. Add `using Aspire.Hosting;` to `AppHost.cs`
+3. Run `sudo dotnet workload update` to ensure Aspire workload is current
+
+### React App Fails to Start
+**Symptom**: Error about missing `libsimdjson.27.dylib` when starting React via Aspire
+**Root Cause**: Node.js/Homebrew dependency version mismatch
+**Solution**: Create symlink to newer version:
+```bash
+ln -sf /opt/homebrew/Cellar/simdjson/4.1.0/lib/libsimdjson.28.dylib /opt/homebrew/opt/simdjson/lib/libsimdjson.27.dylib
+```
+
+### Database Migration Fails
+**Symptom**: Connection refused to localhost:5432 when running `dotnet ef database update`
+**Root Cause**: Aspire uses dynamic ports, not 5432
+**Solution**: Run migrations with environment variable pointing to actual port:
+```bash
+docker port <postgres-container> # Get actual port
+env "ConnectionStrings__networth-db=Host=localhost;Port=<actual-port>;..." dotnet ef database update
+```
 
 ## Key Files Reference
 - `AppHost.cs`: Aspire orchestration (adds Postgres, Functions, React)

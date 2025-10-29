@@ -37,8 +37,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .HasConversion<string>()
             .HasMaxLength(50);
 
-        // Create index on Status for filtering active accounts
-        builder.HasIndex(a => a.Status)
-            .HasDatabaseName("IX_Accounts_Status");
+        // builder.HasIndex(a => a.Status)
+        //     .HasDatabaseName("IX_Accounts_Status");
     }
 }

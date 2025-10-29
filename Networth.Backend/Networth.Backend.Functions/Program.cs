@@ -11,6 +11,8 @@ using Serilog;
 
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Middleware
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
@@ -30,6 +32,8 @@ builder.Services.Configure<JsonSerializerOptions>(options =>
     options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 });
 
+// Add Aspire observability to postgres
+builder.AddNpgsqlDataSource("networth-db");
 
 // Configure services
 builder.Services
