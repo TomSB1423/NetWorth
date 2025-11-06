@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Networth.Backend.Functions.Authentication;
 
@@ -21,7 +22,6 @@ public class MockAuthenticationMiddleware : IFunctionsWorkerMiddleware
         ClaimsIdentity identity = new(
             [
                 new Claim(ClaimTypes.NameIdentifier, "mock-user-123"),
-                new Claim(ClaimTypes.Email, "mockuser@networth.dev"),
                 new Claim(ClaimTypes.Name, "Mock Development User"),
                 new Claim("IsActive", "true")
             ],
@@ -31,6 +31,13 @@ public class MockAuthenticationMiddleware : IFunctionsWorkerMiddleware
 
         // Store the principal in the function context
         context.Items["User"] = principal;
+
+        // Set the context on the current user service
+        ICurrentUserService? currentUserService = context.InstanceServices.GetService<ICurrentUserService>();
+        if (currentUserService is CurrentUserService service)
+        {
+            service.SetContext(context);
+        }
 
         await next(context);
     }
