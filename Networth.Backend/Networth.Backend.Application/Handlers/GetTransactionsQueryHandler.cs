@@ -11,7 +11,7 @@ public class GetTransactionsQueryHandler(IFinancialProvider financialProvider, I
     public async Task<GetTransactionsQueryResult> HandleAsync(GetTransactionsQuery query, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Getting transactions for account: {QueryAccountId}", query.AccountId);
-        IEnumerable<Transaction> response = await financialProvider.GetAccountTransactionsAsync(
+        IEnumerable<TransactionMetadata> response = await financialProvider.GetAccountTransactionsAsync(
             query.AccountId,
             query.DateFrom,
             query.DateTo,

@@ -15,7 +15,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     : IFinancialProvider
 {
     /// <inheritdoc />
-    public async Task<Institution> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default)
+    public async Task<InstitutionMetadata> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default)
     {
         GetInstitutionDto institution = await gocardlessClient.GetInstitution(institutionId, cancellationToken);
         bool transactionParse = int.TryParse(institution.TransactionTotalDays, out int transactionTotalDays);
@@ -27,18 +27,20 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                 institution.Id);
         }
 
-        return new Institution
+        return new InstitutionMetadata
         {
             Id = institution.Id,
             Name = institution.Name,
             TransactionTotalDays = transactionTotalDays,
             MaxAccessValidForDays = maxAccessValidForDays,
             LogoUrl = institution.Logo,
+            Bic = institution.Bic,
+            Countries = institution.Countries ?? [],
         };
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Institution>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<InstitutionMetadata>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default)
     {
         IEnumerable<GetInstitutionDto> response = await gocardlessClient.GetInstitutions(country, cancellationToken);
 
@@ -51,13 +53,15 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                 logger.LogWarning("Failed to parse transaction days or access valid days for institution {InstitutionId}. Using default values.", dto.Id);
             }
 
-            return new Institution
+            return new InstitutionMetadata
             {
                 Id = dto.Id,
                 Name = dto.Name,
                 TransactionTotalDays = transactionTotalDays,
                 MaxAccessValidForDays = maxAccessValidForDays,
                 LogoUrl = dto.Logo,
+                Bic = dto.Bic,
+                Countries = dto.Countries ?? [],
             };
         });
         return institutions;
@@ -185,7 +189,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     }
 
     /// <inheritdoc />
-    public async Task<Account> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
+    public async Task<AccountMetadata> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Retrieving account metadata for account {AccountId}", accountId);
 
@@ -193,7 +197,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         logger.LogInformation("Successfully retrieved account metadata for account {AccountId}", accountId);
 
-        return new Account
+        return new AccountMetadata
         {
             Id = response.Id,
             Status = response.Status,
@@ -247,7 +251,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Transaction>> GetAccountTransactionsAsync(
+    public async Task<IEnumerable<TransactionMetadata>> GetAccountTransactionsAsync(
         string accountId,
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,
@@ -261,7 +265,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         var response =
             await gocardlessClient.GetAccountTransactions(accountId, dateFromStr, dateToStr, cancellationToken);
 
-        List<Transaction> transactions = [];
+        List<TransactionMetadata> transactions = [];
 
         // Add booked transactions
         foreach (TransactionDto transaction in response.Transactions.Booked)
@@ -283,7 +287,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         return transactions;
     }
 
-    private static Transaction MapTransactionDto(TransactionDto dto, string accountId, bool isPending) =>
+    private static TransactionMetadata MapTransactionDto(TransactionDto dto, string accountId, bool isPending) =>
         new()
         {
             Id = $"{accountId}_{dto.TransactionId ?? Guid.NewGuid().ToString()}", // Composite ID

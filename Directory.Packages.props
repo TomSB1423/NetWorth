@@ -15,6 +15,7 @@
     <PackageVersion Include="Aspire.Hosting.Azure.Functions" Version="9.5.2-preview.1.25522.3" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="9.5.2" />
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="9.5.2" />
   </ItemGroup>
   <ItemGroup Label="Azure Functions">
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.10" />
@@ -36,6 +37,7 @@
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi" Version="1.6.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0" />
     <PackageVersion Include="FluentValidation" Version="12.0.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />

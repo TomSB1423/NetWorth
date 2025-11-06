@@ -1,230 +1,115 @@
-# NetWorth Application - AI Coding Instructions
+---
+description: NetWorth - Streamlined AI agent guide
+---
 
-## Architecture Overview
+# NetWorth Development Guide
 
-**NetWorth** is a full-stack personal finance application with a .NET backend and React frontend, orchestrated using .NET Aspire.
-
-### Tech Stack
-- **Backend**: Azure Functions (isolated worker), .NET 9.0, Entity Framework Core
-- **Frontend**: React 19 with Create React App, Tailwind CSS
-- **Orchestration**: .NET Aspire (AppHost for local development)
-- **Database**: PostgreSQL (via Aspire hosting with NpgsqlDataSource)
-- **External APIs**: GoCardless Bank Account Data API
-- **Testing**: xUnit, Moq, FluentValidation
-
-### Solution Structure
-```
-Networth.Backend/
-  ├── Networth.Backend.Functions/     # Azure Functions HTTP triggers
-  ├── Networth.Backend.Application/   # CQRS handlers, mediator, validation
-  ├── Networth.Backend.Domain/        # Domain entities, enums, interfaces
-  ├── Networth.Backend.Infrastructure/# EF Core, GoCardless API, Refit clients
-  └── Tests/                          # Unit tests
-Networth.Frontend/networth-frontend-react/ # React SPA
-Networth.AppHost/                     # .NET Aspire orchestration
-Networth.ServiceDefaults/             # Shared Aspire configuration
-```
-
-## Critical Development Workflows
-
-### Running the Application
-
-**Preferred: Use .NET Aspire AppHost** (orchestrates all services)
+## Quick Start
 ```bash
-# From repo root
-aspire run
-```
-This starts:
-- Azure Functions backend (with Aspire-managed worker host)
-- React frontend at `http://localhost:3000`
-- PostgreSQL database (containerized)
-- Azure Storage Emulator for Functions
-- Aspire Dashboard at `https://localhost:17065`
-
-**Note**: Aspire automatically configures Azure Functions worker settings (`HostEndpoint`, `WorkerId`, storage). Do NOT manually add `Functions:Worker:HostEndpoint` to settings files - this breaks Aspire integration.
-
-**Frontend standalone**
-```bash
-cd Networth.Frontend/networth-frontend-react
-npm start
+dotnet run --project Networth.AppHost  # Starts everything (Functions, React, Postgres, Storage)
+dotnet user-secrets set "Gocardless:SecretId" "YOUR_ID" --project Networth.Backend/Networth.Backend.Functions
+dotnet user-secrets set "Gocardless:SecretKey" "YOUR_KEY" --project Networth.Backend/Networth.Backend.Functions
 ```
 
-### User Secrets for GoCardless
-Required before running backend:
-```bash
-dotnet user-secrets set "Gocardless:SecretId" "YOUR_SECRET_ID"
-dotnet user-secrets set "Gocardless:SecretKey" "YOUR_SECRET_KEY"
-```
+## Architecture Essentials
 
-### Build & Test Tasks
-- **Build backend**: Use VS Code task "build (functions)" or "build (api)"
-- **Run tests**: `dotnet test` from solution root
-- **Code analysis**: Enabled globally via `Directory.Build.props` (StyleCop, Roslyn analyzers, warnings-as-errors)
+### Custom CQRS (No MediatR)
+- Pattern: `IRequest<T>` → `IRequestHandler<T,R>` with `HandleAsync()`
+- FluentValidation auto-runs before handler execution
+- Register handlers + validators in `Application/Extensions/ServiceCollectionExtensions.cs`
+
+### Database Strategy
+- DbContext has: `User`, `Institution`, `Account`, `Transaction`, `Requisition`
+- Transactions/balances fetched from GoCardless API via `IFinancialProvider` (not stored locally)
+- PostgreSQL is **ephemeral** - no volume, wipes on Aspire restart (by design)
+
+### Aspire Integration
+- **NEVER** manually set `Functions:Worker:HostEndpoint` or `WorkerId` (Aspire injects automatically)
+- Auto-provisions Azure Storage for Functions runtime
+- Uses ONLY `NpgsqlDataSource` at runtime (no `appsettings.json` connection string fallback)
+
+### Azure Functions Patterns
+- **Middleware order critical**: `MockAuthenticationMiddleware` BEFORE `ExceptionHandlerMiddleware` in `Program.cs`
+- Mock auth injects user ID `"mock-user-123"` into `FunctionContext.Items["User"]`
+- **NO try-catch in Functions** - `ExceptionHandlerMiddleware` handles all exceptions globally
+- Functions only handle expected business logic (validation, authorization checks)
+- Primary constructors for DI, OpenAPI attributes required
+
+### GoCardless Integration
+- Refit client with snake_case JSON serialization
+- `GoCardlessAuthHandler` auto-injects bearer tokens
+- `RefitRetryHandler` for resilience
+
+## Critical Workflows
 
 ### Database Migrations
-Migrations are managed with EF Core for the PostgreSQL database:
-
 ```bash
-# Create a new migration
+# Recommended: Use automated script (handles dynamic credentials)
+./scripts/run-migrations.sh              # Apply pending
+./scripts/run-migrations.sh add <Name>   # Create + apply new
+
+# Manual (if script unavailable)
+docker ps --format "{{.Names}} {{.Ports}}" | grep postgres
+docker exec <container> printenv POSTGRES_PASSWORD
 cd Networth.Backend/Networth.Backend.Infrastructure
-dotnet ef migrations add <MigrationName> --output-dir Data/Migrations
-
-# Apply migrations (while Aspire is running with dynamic ports)
-# Get the port from: docker port <postgres-container-name>
-# Get password from: docker exec <postgres-container-name> printenv POSTGRES_PASSWORD
-env "ConnectionStrings__networth-db=Host=localhost;Port=<port>;Database=networth-db;Username=postgres;Password=<password>" dotnet ef database update
-
-# Remove last migration (if not applied)
-dotnet ef migrations remove
+env "ConnectionStrings__networth-db=Host=localhost;Port=<port>;Database=networth-db;Username=postgres;Password=<pwd>" \
+  dotnet ef migrations add <Name> --output-dir Data/Migrations
 ```
 
-**Note**: `NetworthDbContextFactory` checks for `ConnectionStrings__networth-db` environment variable first, then falls back to localhost:5432. With Aspire's dynamic ports, always run migrations while Aspire is running and use the environment variable approach.
-
-## Backend Architecture Patterns
-
-### CQRS with Custom Mediator
-The backend uses a **lightweight mediator pattern** without MediatR:
-
-1. **Commands/Queries**: Implement `IRequest<TResponse>` marker interface
-2. **Handlers**: Implement `IRequestHandler<TRequest, TResponse>` with `HandleAsync` method
-3. **Validators**: FluentValidation validators auto-executed by mediator
-4. **Mediator flow**: Validates → Executes handler
-
-**Example: Adding a new query**
+### Adding CQRS Query/Command
 ```csharp
-// 1. Define query in Application/Queries/
-public class GetAccountQuery : IRequest<Account>
-{
-    public string AccountId { get; set; }
-}
+// 1. Create in Application/Queries/ or Application/Commands/
+public class GetAccountQuery : IRequest<Account> { public string AccountId { get; set; } }
 
 // 2. Create handler in Application/Handlers/
-public class GetAccountQueryHandler : IRequestHandler<GetAccountQuery, Account>
+public class GetAccountQueryHandler(IFinancialProvider provider)
+    : IRequestHandler<GetAccountQuery, Account>
 {
-    public async Task<Account> HandleAsync(GetAccountQuery request, CancellationToken ct)
-    {
-        // Implementation
-    }
+    public async Task<Account> HandleAsync(GetAccountQuery request, CancellationToken ct) { /* ... */ }
 }
 
-// 3. Register in Application/Extensions/ServiceCollectionExtensions.cs
+// 3. Register BOTH handler and validator in Application/Extensions/ServiceCollectionExtensions.cs
 services.AddScoped<IRequestHandler<GetAccountQuery, Account>, GetAccountQueryHandler>();
+services.AddScoped<IValidator<GetAccountQuery>, GetAccountQueryValidator>(); // if validator exists
 
-// 4. Use in Azure Function
-public class GetAccount(IMediator mediator)
-{
+// 4. Use in Function with OpenAPI attributes
+public class GetAccount(IMediator mediator) {
     [Function("GetAccount")]
+    [OpenApiOperation("GetAccount", "Accounts")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Account))]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts/{accountId}")] HttpRequest req,
         string accountId)
     {
-        var result = await mediator.Send<GetAccountQuery, Account>(
-            new GetAccountQuery { AccountId = accountId });
+        var result = await mediator.Send<GetAccountQuery, Account>(new GetAccountQuery { AccountId = accountId });
         return new OkObjectResult(result);
     }
 }
 ```
 
-### Azure Functions Structure
-- **Functions folder**: HTTP-triggered endpoints with OpenAPI attributes
-- **DI via Program.cs**: Register services using extension methods (`AddApplicationServices()`, `AddInfrastructure()`)
-- **Middleware**: `ExceptionHandlerMiddleware` for global error handling
-- **Configuration**: `settings.json`, `local.settings.json`, user secrets, environment variables
+## Critical Gotchas
 
-### Database & Entity Framework
-- **DbContext**: `NetworthDbContext` only stores `Requisitions` and `Accounts` (minimal local storage)
-- **Most data**: Fetched from GoCardless API via `IFinancialProvider` (no local caching of transactions/balances)
-- **Migrations**: Located in `Infrastructure/Data/Migrations/`
-- **Connection**: Uses Aspire's `NpgsqlDataSource` for PostgreSQL connections (automatic via `builder.AddNpgsqlDataSource("networth-db")`)
+1. **Wrong Postgres package**: Use `Aspire.Hosting.PostgreSQL` NOT `Aspire.Hosting.Azure.PostgreSQL`
+2. **Manual Aspire config**: Don't set `Functions:Worker:HostEndpoint` - Aspire manages it
+3. **Database persistence**: Data lost on Aspire restart (ephemeral by design)
+4. **Handler registration**: Must register in `ServiceCollectionExtensions.cs` (both Application and Infrastructure layers have separate files)
+5. **GoCardless JSON**: Uses snake_case (Refit configured for this)
+6. **React colors**: Use `COLORS` from `constants/colors.js` (not inline styles)
+7. **Middleware order**: Mock auth MUST be before exception handler
+8. **No try-catch**: Let `ExceptionHandlerMiddleware` handle exceptions in Functions
 
-### External API Integration (GoCardless)
-- **Client**: `IGocardlessClient` using Refit with snake_case JSON serialization
-- **Auth**: `GoCardlessAuthHandler` auto-injects bearer tokens via `GoCardlessTokenManager`
-- **Retry Logic**: `RefitRetryHandler` for resilience
-- **Service**: `GocardlessService` implements `IFinancialProvider` domain interface
+## Code Conventions
 
-## Frontend Architecture Patterns
+- Primary constructors for DI
+- Central Package Management (`Directory.Packages.props`)
+- Warnings-as-errors enabled (`Directory.Build.props`)
+- XML docs required for public APIs
+- React: Functional components only, PropTypes validation
 
-### Component Organization
-```
-src/
-  ├── components/          # Reusable UI components
-  │   ├── common/          # Shared components (buttons, inputs, etc.)
-  │   └── institutions/    # Feature-specific components
-  ├── pages/               # Top-level page components
-  ├── services/            # API service layer
-  ├── hooks/               # Custom React hooks
-  └── constants/           # Shared constants (COLORS palette)
-```
-
-### Styling Conventions
-- **Use `COLORS` from `constants/colors.js`** for consistent theming (dark mode palette)
-- **Avoid inline styles**: Use CSS modules or Tailwind classes
-- **Responsive design**: Mobile-first approach
-
-### React Patterns
-- **Functional components** with hooks (no class components)
-- **PropTypes** for prop validation (TypeScript migration pending)
-- **Component naming**: PascalCase for files and components
-
-## Code Quality & Standards
-
-### .NET Conventions
-- **.NET 9.0** target (via `Directory.Build.props`)
-- **Central Package Management**: All versions in `Directory.Packages.props`
-- **Nullable reference types**: Enabled (`<Nullable>enable</Nullable>`)
-- **XML documentation**: Required for public APIs (`GenerateDocumentationFile`)
-- **Code analyzers**: StyleCop, SerilogAnalyzer, Roslyn analyzers (warnings-as-errors)
-- **Primary constructors**: Preferred for DI (see existing handlers/functions)
-
-### Testing Strategy
-- **Location**: `Networth.Backend/Tests/`
-- **Framework**: xUnit + Moq + FluentAssertions (if added)
-- **Coverage**: Focus on handlers, validators, service logic
-- **Write tests** when adding new handlers or complex business logic
-
-## Common Pitfalls & Tips
-
-1. **Don't manually manage handler registration**: Add to `ServiceCollectionExtensions.cs`
-2. **Validation is automatic**: Just register validators with `IValidator<TRequest>`
-3. **Database context**: Only for Requisitions/Accounts; don't add unnecessary DbSets
-4. **GoCardless DTOs**: Use snake_case serialization (configured in `RefitSettings`)
-5. **Aspire environment**: Reference services using `builder.AddReference()` for service discovery
-6. **Azure Functions with Aspire**: NEVER manually configure `Functions:Worker:HostEndpoint` or `WorkerId` - Aspire manages these automatically via `.WithHostStorage(storage)`
-7. **Frontend API base URL**: Set via environment variable or Aspire service reference
-8. **PostgreSQL package**: Use `Aspire.Hosting.PostgreSQL` for containerized Postgres, NOT `Aspire.Hosting.Azure.PostgreSQL` (which is for Azure managed service)
-9. **Node simdjson error on macOS**: If React fails with `libsimdjson.27.dylib` error, create symlink: `ln -sf /opt/homebrew/Cellar/simdjson/4.1.0/lib/libsimdjson.28.dylib /opt/homebrew/opt/simdjson/lib/libsimdjson.27.dylib`
-
-## Troubleshooting
-
-### Aspire PostgreSQL Not Starting
-**Symptom**: Aspire dashboard shows postgres "Starting" but never "Running", no Docker containers created
-**Root Cause**: Wrong package (`Aspire.Hosting.Azure.PostgreSQL`) or missing namespace
-**Solution**:
-1. Use `Aspire.Hosting.PostgreSQL` package in `Directory.Packages.props` and `Networth.AppHost.csproj`
-2. Add `using Aspire.Hosting;` to `AppHost.cs`
-3. Run `sudo dotnet workload update` to ensure Aspire workload is current
-
-### React App Fails to Start
-**Symptom**: Error about missing `libsimdjson.27.dylib` when starting React via Aspire
-**Root Cause**: Node.js/Homebrew dependency version mismatch
-**Solution**: Create symlink to newer version:
-```bash
-ln -sf /opt/homebrew/Cellar/simdjson/4.1.0/lib/libsimdjson.28.dylib /opt/homebrew/opt/simdjson/lib/libsimdjson.27.dylib
-```
-
-### Database Migration Fails
-**Symptom**: Connection refused to localhost:5432 when running `dotnet ef database update`
-**Root Cause**: Aspire uses dynamic ports, not 5432
-**Solution**: Run migrations with environment variable pointing to actual port:
-```bash
-docker port <postgres-container> # Get actual port
-env "ConnectionStrings__networth-db=Host=localhost;Port=<actual-port>;..." dotnet ef database update
-```
-
-## Key Files Reference
-- `AppHost.cs`: Aspire orchestration (adds Postgres, Functions, React)
-- `Program.cs` (Functions): DI setup, middleware, Serilog
-- `ServiceCollectionExtensions.cs`: Where to register new services/handlers
-- `NetworthDbContext.cs`: EF Core context (minimal entities)
-- `COLORS.js`: Frontend color palette - use for consistency
+## Key Files
+- `AppHost.cs` - Aspire orchestration
+- `Program.cs` (Functions) - Middleware registration order
+- `ServiceCollectionExtensions.cs` (Application & Infrastructure) - Handler/service registration
+- `NetworthDbContext.cs` - EF Core entities
+- `GocardlessService.cs` - Implements `IFinancialProvider`
+- `Mediator.cs` - Custom CQRS mediator

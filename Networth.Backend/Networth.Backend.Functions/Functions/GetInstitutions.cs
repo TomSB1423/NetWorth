@@ -33,7 +33,7 @@ public class GetInstitutions(IFinancialProvider financialProvider)
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "institutions")]
         HttpRequest req)
     {
-        IEnumerable<Institution> institutions = await financialProvider.GetInstitutionsAsync("GB");
+        IEnumerable<InstitutionMetadata> institutions = await financialProvider.GetInstitutionsAsync("GB");
         return new OkObjectResult(institutions);
     }
 }

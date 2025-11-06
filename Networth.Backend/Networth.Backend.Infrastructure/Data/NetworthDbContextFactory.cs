@@ -14,11 +14,11 @@ public class NetworthDbContextFactory : IDesignTimeDbContextFactory<NetworthDbCo
     {
         DbContextOptionsBuilder<NetworthDbContext> optionsBuilder = new();
 
-        // Default connection string for design-time migrations
-        // Note: With Aspire's dynamic ports, run migrations while Aspire is running
-        // and use the ConnectionStrings__networth-db environment variable, or use this fallback
-        string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__networth-db")
-                                  ?? "Host=localhost;Port=5432;Database=networth-db;Username=postgres;Password=postgres";
+        string? connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__networth-db");
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException("Connection string 'networth-db' not found.");
+        }
 
         optionsBuilder.UseNpgsql(connectionString);
 

@@ -36,7 +36,7 @@ public class GetAccount(IFinancialProvider financialProvider, ILogger<GetAccount
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(Account),
+        typeof(AccountMetadata),
         Description = "Successfully retrieved account metadata")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
@@ -52,7 +52,7 @@ public class GetAccount(IFinancialProvider financialProvider, ILogger<GetAccount
         HttpRequest req,
         string accountId)
     {
-        Account account = await financialProvider.GetAccountAsync(accountId);
+        AccountMetadata account = await financialProvider.GetAccountAsync(accountId);
         logger.LogInformation("Successfully retrieved account metadata for account {AccountId}", accountId);
         return new OkObjectResult(account);
     }

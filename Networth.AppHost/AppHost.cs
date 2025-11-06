@@ -4,12 +4,15 @@ using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
-// Use a consistent password from configuration or default
-string postgresPassword = builder.Configuration["Parameters:postgres-password"] ?? "postgres_dev_password";
-IResourceBuilder<ParameterResource> postgresPasswordParam = builder.AddParameter("postgres-password", secret: true);
+// Add Azure Storage for Functions runtime (required for isolated worker)
+IResourceBuilder<AzureStorageResource> storage = builder
+    .AddAzureStorage("storage")
+    .RunAsEmulator();
+
+IResourceBuilder<AzureBlobStorageResource> blobs = storage.AddBlobs("blobs");
 
 IResourceBuilder<PostgresServerResource> postgres = builder
-    .AddPostgres("postgres", password: postgresPasswordParam)
+    .AddPostgres("postgres")
     .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
@@ -18,6 +21,7 @@ IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
 IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .AddAzureFunctionsProject<Networth_Backend_Functions>("functions")
     .WithExternalHttpEndpoints()
+    .WithReference(blobs)
     .WithReference(postgresdb);
 
 builder.AddNpmApp("react", "../Networth.Frontend/networth-frontend-react")

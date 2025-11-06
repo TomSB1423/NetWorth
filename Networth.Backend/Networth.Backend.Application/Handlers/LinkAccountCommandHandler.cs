@@ -15,12 +15,12 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
     {
         logger.LogInformation("Starting account link process for institution {InstitutionId}.", command.InstitutionId);
 
-        Institution institutions = await financialProvider.GetInstitutionAsync(command.InstitutionId, cancellationToken);
+        InstitutionMetadata institutionMetadata = await financialProvider.GetInstitutionAsync(command.InstitutionId, cancellationToken);
 
         var agreement = await financialProvider.CreateAgreementAsync(
             command.InstitutionId,
-            institutions.TransactionTotalDays,
-            institutions.MaxAccessValidForDays,
+            institutionMetadata.TransactionTotalDays,
+            institutionMetadata.MaxAccessValidForDays,
             cancellationToken);
 
         logger.LogInformation(

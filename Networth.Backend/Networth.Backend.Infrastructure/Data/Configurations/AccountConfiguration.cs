@@ -15,12 +15,13 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.ToTable("Accounts");
 
         builder.HasKey(a => a.Id);
+
         builder.Property(a => a.Id)
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(a => a.Status)
-            .HasMaxLength(50)
+        builder.Property(a => a.OwnerId)
+            .HasMaxLength(100)
             .IsRequired();
 
         builder.Property(a => a.InstitutionId)
@@ -28,16 +29,30 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .IsRequired();
 
         builder.Property(a => a.Name)
-            .HasMaxLength(200);
+            .HasMaxLength(200)
+            .IsRequired();
 
-        builder.Property(a => a.Currency)
-            .HasMaxLength(3);
+        // Relationships
+        builder.HasOne(a => a.Owner)
+            .WithMany(u => u.Accounts)
+            .HasForeignKey(a => a.OwnerId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(a => a.AccountType)
-            .HasConversion<string>()
-            .HasMaxLength(50);
+        builder.HasOne(a => a.Institution)
+            .WithMany(i => i.Accounts)
+            .HasForeignKey(a => a.InstitutionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // builder.HasIndex(a => a.Status)
-        //     .HasDatabaseName("IX_Accounts_Status");
+        builder.HasMany(a => a.Transactions)
+            .WithOne(t => t.Account)
+            .HasForeignKey(t => t.AccountId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Indexes
+        builder.HasIndex(a => a.OwnerId)
+            .HasDatabaseName("IX_Accounts_OwnerId");
+
+        builder.HasIndex(a => a.InstitutionId)
+            .HasDatabaseName("IX_Accounts_InstitutionId");
     }
 }

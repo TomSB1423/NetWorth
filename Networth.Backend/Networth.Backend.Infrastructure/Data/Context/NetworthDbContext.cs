@@ -5,7 +5,6 @@ namespace Networth.Backend.Infrastructure.Data.Context;
 
 /// <summary>
 ///     Entity Framework DbContext for the Networth application.
-///     Simplified to only include entities that need local storage.
 /// </summary>
 public class NetworthDbContext : DbContext
 {
@@ -19,16 +18,30 @@ public class NetworthDbContext : DbContext
     }
 
     /// <summary>
-    ///     Gets or sets the Requisitions DbSet.
-    ///     Essential for tracking account linking workflow.
+    ///     Gets or sets the Users DbSet.
     /// </summary>
-    public DbSet<Requisition> Requisitions { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the Institutions DbSet.
+    /// </summary>
+    public DbSet<Institution> Institutions { get; set; } = null!;
 
     /// <summary>
     ///     Gets or sets the Accounts DbSet.
-    ///     For caching account data locally if needed.
     /// </summary>
     public DbSet<Account> Accounts { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the Transactions DbSet.
+    /// </summary>
+    public DbSet<Transaction> Transactions { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the Requisitions DbSet.
+    ///     For tracking GoCardless requisition state.
+    /// </summary>
+    public DbSet<Requisition> Requisitions { get; set; } = null!;
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
