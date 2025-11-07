@@ -1,4 +1,4 @@
-name: Backend Tests
+name: CI
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Run Backend Tests
+    name: CI
     runs-on: ubuntu-latest
 
     permissions:
