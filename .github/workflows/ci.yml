@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - feature/mockoon
     paths:
       - "Networth.Application/**"
       - "Networth.Domain/**"
