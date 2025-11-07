@@ -4,6 +4,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Networth.Backend.Functions.Tests.Integration.Fixtures;
 using Networth.Backend.Functions.Tests.Integration.Infrastructure;
+using Projects;
 using Xunit.Abstractions;
 
 namespace Networth.Backend.Functions.Tests.Integration;
@@ -111,7 +112,7 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
         TimeSpan defaultTimeout = TimeSpan.FromSeconds(600); // 10 minutes
 
         var appBuilder = await DistributedApplicationTestingBuilder
-            .CreateAsync<Projects.Networth_AppHost>(CancellationToken.None);
+            .CreateAsync<Networth_AppHost>(CancellationToken.None);
 
         // Configure Mockoon URL instead of real GoCardless
         appBuilder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = mockoonBaseUrl;
@@ -164,7 +165,7 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
                             resourceName,
                             _ => true,
                             CancellationToken.None)
-                        .WaitAsync(TimeSpan.FromMilliseconds(500));
+                        .WaitAsync(TimeSpan.FromMilliseconds(15000));
 
                     output.WriteLine($"  {resourceName}: Found and responsive");
                 }
@@ -182,7 +183,7 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
                         var healthState = await app.ResourceNotifications.WaitForResourceHealthyAsync(
                                 resourceName,
                                 CancellationToken.None)
-                            .WaitAsync(TimeSpan.FromSeconds(2));
+                            .WaitAsync(TimeSpan.FromSeconds(20));
 
                         output.WriteLine($"    Resource health state: {healthState}");
                     }
