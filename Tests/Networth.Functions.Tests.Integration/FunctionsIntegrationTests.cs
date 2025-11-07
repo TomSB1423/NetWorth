@@ -35,6 +35,10 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
         // Act
         using var cts = new CancellationTokenSource(TestTimeouts.Default);
 
+        // Wait for database to be ready first
+        await app.ResourceNotifications.WaitForResourceHealthyAsync("networth-db", cts.Token);
+
+        // Then wait for Functions to be ready
         await app.ResourceNotifications.WaitForResourceHealthyAsync(AspireResourceNames.Functions, cts.Token);
 
         var httpClient = app.CreateHttpClient(AspireResourceNames.Functions);

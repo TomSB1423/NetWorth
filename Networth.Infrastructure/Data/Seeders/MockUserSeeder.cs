@@ -26,8 +26,8 @@ public static class MockUserSeeder
 
         try
         {
-            // Ensure database is created
-            await context.Database.EnsureCreatedAsync();
+            // Apply pending migrations
+            await context.Database.MigrateAsync();
 
             // Check if mock user already exists
             const string mockUserId = "mock-user-123";
