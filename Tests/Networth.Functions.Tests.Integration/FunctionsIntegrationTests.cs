@@ -1,13 +1,27 @@
 using System.Text.Json;
+using Aspire.Hosting;
+using Microsoft.Extensions.Logging;
+using Networth.Backend.Functions.Tests.Integration.Fixtures;
 using Networth.Backend.Functions.Tests.Integration.Infrastructure;
 
 namespace Networth.Backend.Functions.Tests.Integration;
 
 /// <summary>
-///     Integration tests for the Azure Functions backend.
+///     Integration tests for the Azure Functions backend using shared Mockoon fixture.
 /// </summary>
-public class FunctionsIntegrationTests : IntegrationTestBase
+public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
 {
+    private readonly MockoonTestFixture _mockoonFixture;
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="FunctionsIntegrationTests"/> class.
+    /// </summary>
+    /// <param name="mockoonFixture">The shared Mockoon test fixture.</param>
+    public FunctionsIntegrationTests(MockoonTestFixture mockoonFixture)
+    {
+        _mockoonFixture = mockoonFixture;
+    }
+
     /// <summary>
     ///     Tests that the GetInstitutions endpoint returns OK status code and valid JSON response.
     /// </summary>
@@ -15,7 +29,7 @@ public class FunctionsIntegrationTests : IntegrationTestBase
     public async Task GetInstitutionsEndpointReturnsOkStatusCodeAndValidJson()
     {
         // Arrange
-        await using var app = await CreateTestBuilderAsync();
+        await using var app = await CreateTestBuilderAsync(_mockoonFixture.MockoonBaseUrl);
         await app.StartAsync();
 
         // Act
@@ -47,5 +61,36 @@ public class FunctionsIntegrationTests : IntegrationTestBase
         // Verify we got mock data from Mockoon
         var firstInstitutionId = firstInstitution.GetProperty("id").GetString();
         Assert.Contains("ABNAMRO_ABNAGB2LXXX", firstInstitutionId ?? string.Empty);
+    }
+
+    /// <summary>
+    ///     Creates a configured Aspire application builder for testing.
+    /// </summary>
+    /// <param name="mockoonBaseUrl">The base URL for the Mockoon API.</param>
+    /// <returns>A configured distributed application.</returns>
+    private static async Task<DistributedApplication> CreateTestBuilderAsync(string mockoonBaseUrl)
+    {
+        var appBuilder = await DistributedApplicationTestingBuilder
+            .CreateAsync(typeof(Projects.Networth_AppHost));
+
+        // Configure Mockoon URL instead of real GoCardless
+        appBuilder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = mockoonBaseUrl;
+        appBuilder.Configuration[GoCardlessConfiguration.SecretId] = GoCardlessConfiguration.TestSecretId;
+        appBuilder.Configuration[GoCardlessConfiguration.SecretKey] = GoCardlessConfiguration.TestSecretKey;
+
+        // Configure HTTP client resilience
+        appBuilder.Services.ConfigureHttpClientDefaults(clientBuilder =>
+        {
+            clientBuilder.AddStandardResilienceHandler();
+        });
+
+        // Configure logging
+        appBuilder.Services.AddLogging(logging => logging
+            .AddConsole()
+            .AddFilter("Default", LogLevel.Information)
+            .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
+            .AddFilter("Aspire.Hosting.Dcp", LogLevel.Warning));
+
+        return await appBuilder.BuildAsync();
     }
 }
