@@ -46,6 +46,8 @@ jobs:
           docker --version
           docker ps
           docker info
+          # Wait for Docker to be fully ready
+          timeout 30 bash -c 'until docker info &>/dev/null; do sleep 1; done' || true
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -58,8 +60,17 @@ jobs:
       - name: Install Aspire workload
         run: dotnet workload install aspire
 
-      - name: Install & trust dev-certs
-        run: dotnet dev-certs https --trust
+      - name: Setup dev certificates for Ubuntu
+        run: |
+          # Clean any existing certificates
+          dotnet dev-certs https --clean
+          # Generate new certificate
+          dotnet dev-certs https
+          # Export certificate in PEM format for system trust
+          sudo mkdir -p /usr/local/share/ca-certificates/aspnet
+          dotnet dev-certs https -ep /usr/local/share/ca-certificates/aspnet/https.crt --format PEM
+          # Trust the certificate system-wide
+          sudo update-ca-certificates
 
       - name: Setup Azure Functions Core Tools
         run: |
