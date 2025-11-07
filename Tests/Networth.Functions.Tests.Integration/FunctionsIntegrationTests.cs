@@ -35,49 +35,75 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
         // Act
         using var cts = new CancellationTokenSource(TestTimeouts.Default);
 
-        // Wait for database to be ready first
-        await app.ResourceNotifications.WaitForResourceHealthyAsync("networth-db", cts.Token);
-
         // Create HTTP client and wait for Functions to be ready by polling the endpoint
+        // Note: We don't wait for database explicitly as the Functions endpoint won't work until DB is ready anyway
         var httpClient = app.CreateHttpClient(AspireResourceNames.Functions);
+        httpClient.Timeout = TimeSpan.FromSeconds(10); // Set per-request timeout
 
         // Poll the endpoint until it responds (Functions app might still be migrating database)
-        var maxAttempts = 30; // 30 attempts with 2 second delays = 60 seconds max
-        var delayBetweenAttempts = TimeSpan.FromSeconds(2);
+        // Use 3 minutes of polling to leave buffer before the 5-minute test timeout
+        var maxAttempts = 36; // 36 attempts with 5 second delays = 180 seconds (3 minutes) max
+        var delayBetweenAttempts = TimeSpan.FromSeconds(5);
         HttpResponseMessage? response = null;
+        var lastException = default(Exception);
 
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
+            cts.Token.ThrowIfCancellationRequested();
+
             try
             {
-                response = await httpClient.GetAsync("/api/institutions", cts.Token);
+                using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+                requestCts.CancelAfter(TimeSpan.FromSeconds(10));
+
+                response = await httpClient.GetAsync("/api/institutions", requestCts.Token);
                 if (response.IsSuccessStatusCode)
                 {
+                    // Success!
                     break;
                 }
+
+                lastException = new InvalidOperationException($"Attempt {attempt}: Got status code {response.StatusCode}");
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
-                // Functions app not ready yet
-                if (attempt == maxAttempts)
-                {
-                    throw;
-                }
+                // Functions app not ready yet, continue polling
+                lastException = ex;
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException ex) when (!cts.Token.IsCancellationRequested)
             {
-                // Timeout on individual request
-                if (attempt == maxAttempts)
-                {
-                    throw;
-                }
+                // Request timeout (not overall timeout), continue polling
+                lastException = ex;
+            }
+            catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
+            {
+                // Overall test timeout reached
+                throw new TimeoutException($"Test timeout reached after {attempt} attempts. Functions endpoint never became ready.", lastException);
             }
 
-            await Task.Delay(delayBetweenAttempts, cts.Token);
+            if (attempt < maxAttempts)
+            {
+                try
+                {
+                    await Task.Delay(delayBetweenAttempts, cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Overall test timeout reached during delay
+                    throw new TimeoutException($"Test timeout reached after {attempt} attempts while waiting between retries. Functions endpoint never became ready.", lastException);
+                }
+            }
+        }
+
+        if (response == null || !response.IsSuccessStatusCode)
+        {
+            var statusInfo = response != null ? $"Status: {response.StatusCode}" : "No response received";
+            throw new InvalidOperationException(
+                $"Functions endpoint did not become ready after {maxAttempts} attempts. {statusInfo}",
+                lastException);
         }
 
         // Assert
-        Assert.NotNull(response);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync(cts.Token);
