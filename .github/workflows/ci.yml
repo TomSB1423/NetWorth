@@ -30,6 +30,7 @@ jobs:
       ASPIRE_ALLOW_UNSECURED_TRANSPORT: true
       SuppressNETCoreSdkPreviewMessage: true
       DCP_DIAGNOSTICS_LOG_LEVEL: "debug"
+      DCP_IP_VERSION_PREFERENCE: "ipv4"
       TESTCONTAINERS_RYUK_DISABLED: false
       TESTCONTAINERS_HOST_OVERRIDE: localhost
       DOCKER_HOST: unix:///var/run/docker.sock
@@ -48,6 +49,11 @@ jobs:
           docker info
           # Wait for Docker to be fully ready
           timeout 30 bash -c 'until docker info &>/dev/null; do sleep 1; done' || true
+      
+      - name: Configure IPv4 preference for localhost
+        run: |
+          # Prefer IPv4 over IPv6 for localhost connections to avoid DCP connection issues
+          echo "precedence ::ffff:0:0/96 100" | sudo tee -a /etc/gai.conf
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -66,9 +72,9 @@ jobs:
           dotnet dev-certs https --clean
           # Generate new certificate
           dotnet dev-certs https
-          # Export certificate in PEM format for system trust
+          # Export certificate in PEM format for system trust (requires sudo for system directory)
           sudo mkdir -p /usr/local/share/ca-certificates/aspnet
-          dotnet dev-certs https -ep /usr/local/share/ca-certificates/aspnet/https.crt --format PEM
+          sudo dotnet dev-certs https -ep /usr/local/share/ca-certificates/aspnet/https.crt --format PEM --no-password
           # Trust the certificate system-wide
           sudo update-ca-certificates
 
