@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Aspire.Hosting;
+using Microsoft.Extensions.Http.Resilience;
 using MyApp.AppHost;
 using Networth.Functions.Tests.Integration.Fixtures;
 using Networth.Functions.Tests.Integration.Infrastructure;
@@ -78,6 +79,22 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
     {
         var appBuilder = await DistributedApplicationTestingBuilder
             .CreateAsync<Networth_AppHost>(CancellationToken.None);
+
+        TimeSpan defaultTimeout = TimeSpan.FromSeconds(3600);
+        appBuilder.Services.ConfigureHttpClientDefaults(clientBuilder =>
+        {
+            clientBuilder.AddStandardResilienceHandler(b =>
+            {
+                b.AttemptTimeout = b.TotalRequestTimeout = new HttpTimeoutStrategyOptions
+                {
+                    Timeout = defaultTimeout,
+                };
+                b.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
+                {
+                    SamplingDuration = defaultTimeout * 2,
+                };
+            });
+        });
 
         // Configure Mockoon URL instead of real GoCardless
         appBuilder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = mockoonBaseUrl;
