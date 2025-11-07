@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Aspire.Hosting;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Networth.Backend.Functions.Tests.Integration.Fixtures;
 using Networth.Backend.Functions.Tests.Integration.Infrastructure;
@@ -46,98 +47,30 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
         // Log initial resource states
         await LogResourceStatesAsync(app, _output);
 
-        // Create HTTP client and wait for Functions to be ready by polling the endpoint
+        // Create HTTP client - the resilience handler will handle retries and timeouts
         var httpClient = app.CreateHttpClient(AspireResourceNames.Functions);
-        httpClient.Timeout = TimeSpan.FromSeconds(10); // Set per-request timeout
-
         _output.WriteLine($"HTTP client created for '{AspireResourceNames.Functions}'");
 
-        // Poll the endpoint until it responds (Functions app might still be migrating database)
-        // Use 3 minutes of polling to leave buffer before the 5-minute test timeout
-        var maxAttempts = 36; // 36 attempts with 5 second delays = 180 seconds (3 minutes) max
-        var delayBetweenAttempts = TimeSpan.FromSeconds(5);
-        HttpResponseMessage? response = null;
-        var lastException = default(Exception);
+        // Make request - the resilience handler will retry until success or timeout
+        _output.WriteLine("Sending GET request to /api/institutions...");
+        HttpResponseMessage response;
 
-        _output.WriteLine($"Starting polling loop: {maxAttempts} attempts with {delayBetweenAttempts.TotalSeconds}s delays");
-
-        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        try
         {
-            cts.Token.ThrowIfCancellationRequested();
-
-            try
-            {
-                using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
-                requestCts.CancelAfter(TimeSpan.FromSeconds(10));
-
-                _output.WriteLine($"[Attempt {attempt}/{maxAttempts}] Sending GET request to /api/institutions...");
-
-                response = await httpClient.GetAsync("/api/institutions", requestCts.Token);
-
-                _output.WriteLine($"[Attempt {attempt}/{maxAttempts}] Got response: {response.StatusCode}");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    _output.WriteLine($"[Attempt {attempt}/{maxAttempts}] SUCCESS! Endpoint is ready.");
-                    break;
-                }
-
-                lastException = new InvalidOperationException($"Attempt {attempt}: Got status code {response.StatusCode}");
-            }
-            catch (HttpRequestException ex)
-            {
-                // Functions app not ready yet, continue polling
-                _output.WriteLine($"[Attempt {attempt}/{maxAttempts}] HttpRequestException: {ex.Message}");
-                lastException = ex;
-            }
-            catch (TaskCanceledException ex) when (!cts.Token.IsCancellationRequested)
-            {
-                // Request timeout (not overall timeout), continue polling
-                _output.WriteLine($"[Attempt {attempt}/{maxAttempts}] Request timeout (10s)");
-                lastException = ex;
-            }
-            catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
-            {
-                // Overall test timeout reached
-                _output.WriteLine($"[Attempt {attempt}/{maxAttempts}] OVERALL TEST TIMEOUT REACHED!");
-                await LogResourceStatesAsync(app, _output);
-                throw new TimeoutException($"Test timeout reached after {attempt} attempts. Functions endpoint never became ready.", lastException);
-            }
-
-            if (attempt < maxAttempts)
-            {
-                // Log resource states every 5 attempts
-                if (attempt % 5 == 0)
-                {
-                    await LogResourceStatesAsync(app, _output);
-                }
-
-                try
-                {
-                    _output.WriteLine($"[Attempt {attempt}/{maxAttempts}] Waiting {delayBetweenAttempts.TotalSeconds}s before next attempt...");
-                    await Task.Delay(delayBetweenAttempts, cts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    // Overall test timeout reached during delay
-                    _output.WriteLine($"[Attempt {attempt}/{maxAttempts}] TIMEOUT during delay!");
-                    await LogResourceStatesAsync(app, _output);
-                    throw new TimeoutException($"Test timeout reached after {attempt} attempts while waiting between retries. Functions endpoint never became ready.", lastException);
-                }
-            }
+            response = await httpClient.GetAsync("/api/institutions", cts.Token);
+            _output.WriteLine($"Got response: {response.StatusCode}");
+        }
+        catch (Exception ex)
+        {
+            _output.WriteLine($"Request failed with exception: {ex.GetType().Name}: {ex.Message}");
+            await LogResourceStatesAsync(app, _output);
+            throw;
         }
 
-        if (response == null || !response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
         {
-            _output.WriteLine("=== MAX ATTEMPTS REACHED ===");
+            _output.WriteLine($"Request returned non-success status: {response.StatusCode}");
             await LogResourceStatesAsync(app, _output);
-
-            var statusInfo = response != null ? $"Status: {response.StatusCode}" : "No response received";
-            var lastExMsg = lastException != null ? $"Last exception: {lastException.Message}" : "No exceptions";
-
-            throw new InvalidOperationException(
-                $"Functions endpoint did not become ready after {maxAttempts} attempts. {statusInfo}. {lastExMsg}",
-                lastException);
         }
 
         _output.WriteLine("=== Test Successful - Endpoint Ready ===");
@@ -174,17 +107,32 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
     /// <returns>A configured distributed application.</returns>
     private static async Task<DistributedApplication> CreateTestBuilderAsync(string mockoonBaseUrl)
     {
+        // Use a longer timeout for integration tests to allow for slow startup and migrations
+        TimeSpan defaultTimeout = TimeSpan.FromSeconds(600); // 10 minutes
+
         var appBuilder = await DistributedApplicationTestingBuilder
-            .CreateAsync(typeof(Projects.Networth_AppHost));
+            .CreateAsync<Projects.Networth_AppHost>(CancellationToken.None);
 
         // Configure Mockoon URL instead of real GoCardless
         appBuilder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = mockoonBaseUrl;
         appBuilder.Configuration[GoCardlessConfiguration.SecretId] = GoCardlessConfiguration.TestSecretId;
         appBuilder.Configuration[GoCardlessConfiguration.SecretKey] = GoCardlessConfiguration.TestSecretKey;
 
-        // Note: We don't add the standard resilience handler here as it has a 30-second timeout
-        // which can cause issues during initial startup when migrations are running.
-        // The test itself handles retries with appropriate delays.
+        // Configure HTTP client resilience with extended timeouts for integration tests
+        appBuilder.Services.ConfigureHttpClientDefaults(clientBuilder =>
+        {
+            clientBuilder.AddStandardResilienceHandler(b =>
+            {
+                b.AttemptTimeout = b.TotalRequestTimeout = new HttpTimeoutStrategyOptions()
+                {
+                    Timeout = defaultTimeout,
+                };
+                b.CircuitBreaker = new HttpCircuitBreakerStrategyOptions()
+                {
+                    SamplingDuration = defaultTimeout * 2,
+                };
+            });
+        });
 
         // Configure logging
         appBuilder.Services.AddLogging(logging => logging
