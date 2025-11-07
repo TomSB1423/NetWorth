@@ -1,7 +1,7 @@
-using Networth.Backend.Domain.Entities;
-using Networth.Backend.Domain.Enums;
+using Networth.Domain.Entities;
+using Networth.Domain.Enums;
 
-namespace Networth.Backend.Domain.Repositories;
+namespace Networth.Domain.Repositories;
 
 /// <summary>
 ///     Repository interface for Requisition entities.

@@ -1,7 +1,7 @@
 using FluentValidation;
-using Networth.Backend.Application.Commands;
+using Networth.Application.Commands;
 
-namespace Networth.Backend.Application.Validators;
+namespace Networth.Application.Validators;
 
 /// <summary>
 ///     Validator for LinkAccountCommand.

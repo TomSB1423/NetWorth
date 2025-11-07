@@ -1,22 +1,22 @@
-using Aspire.Hosting;
 using Aspire.Hosting.Azure;
+using MyApp.AppHost;
 using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
 IResourceBuilder<PostgresServerResource> postgres = builder
-    .AddPostgres("postgres")
+    .AddPostgres(ResourceNames.Postgres)
     .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
-    .AddDatabase("networth-db");
+    .AddDatabase(ResourceNames.NetworthDb);
 
 IResourceBuilder<AzureFunctionsProjectResource> functions = builder
-    .AddAzureFunctionsProject<Networth_Backend_Functions>("functions")
+    .AddAzureFunctionsProject<Networth_Functions>(ResourceNames.Functions)
     .WithExternalHttpEndpoints()
     .WithReference(postgresdb);
 
-builder.AddNpmApp("react", "../Networth.Frontend")
+builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend")
     .WithReference(functions)
     .WaitFor(functions)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start

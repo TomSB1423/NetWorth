@@ -1,8 +1,8 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using Networth.Backend.Functions.Tests.Integration.Infrastructure;
+using Networth.Functions.Tests.Integration.Infrastructure;
 
-namespace Networth.Backend.Functions.Tests.Integration.Fixtures;
+namespace Networth.Functions.Tests.Integration.Fixtures;
 
 /// <summary>
 /// Test fixture providing Mockoon container for GoCardless API mocking.

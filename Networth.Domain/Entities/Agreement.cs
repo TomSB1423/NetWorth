@@ -1,6 +1,6 @@
-using Networth.Backend.Domain.Enums;
+using Networth.Domain.Enums;
 
-namespace Networth.Backend.Domain.Entities;
+namespace Networth.Domain.Entities;
 
 /// <summary>
 ///     Represents an agreement for accessing bank account data through GoCardless.

@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.Azure.Functions.Worker;
 
-namespace Networth.Backend.Functions.Authentication;
+namespace Networth.Functions.Authentication;
 
 /// <summary>
 ///     Implementation of <see cref="ICurrentUserService"/> for Azure Functions.

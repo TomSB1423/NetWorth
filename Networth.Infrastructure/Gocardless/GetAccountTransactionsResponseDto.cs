@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Networth.Backend.Infrastructure.Gocardless.DTOs;
+using Networth.Infrastructure.Gocardless.DTOs;
 
-namespace Networth.Backend.Infrastructure.Gocardless;
+namespace Networth.Infrastructure.Gocardless;
 
 /// <summary>
 ///     Account transactions response DTO according to GoCardless API specification.

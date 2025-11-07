@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Networth.Backend.Domain.Enums;
+using Networth.Domain.Enums;
 
-namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
+namespace Networth.Infrastructure.Gocardless.DTOs;
 
 internal record CreateAgreementRequestDto
 {

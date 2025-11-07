@@ -5,11 +5,11 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Networth.Backend.Domain.Entities;
-using Networth.Backend.Functions.Authentication;
-using Networth.Backend.Infrastructure.Data.Context;
+using Networth.Domain.Entities;
+using Networth.Functions.Authentication;
+using Networth.Infrastructure.Data.Context;
 
-namespace Networth.Backend.Functions.Functions;
+namespace Networth.Functions.Functions;
 
 /// <summary>
 ///     Azure Function for retrieving all accounts for the current user.

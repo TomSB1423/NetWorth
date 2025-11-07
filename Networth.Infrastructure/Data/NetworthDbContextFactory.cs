@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Networth.Backend.Infrastructure.Data.Context;
+using Networth.Infrastructure.Data.Context;
 
-namespace Networth.Backend.Infrastructure.Data;
+namespace Networth.Infrastructure.Data;
 
 /// <summary>
 ///     Factory for creating NetworthDbContext instances at design time (for migrations).

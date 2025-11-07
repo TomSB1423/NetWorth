@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>Networth.Backend.Infrastructure</RootNamespace>
+    <RootNamespace>Networth.Infrastructure</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Networth.Domain\Networth.Backend.Domain.csproj" />
-    <ProjectReference Include="..\Networth.Application\Networth.Backend.Application.csproj" />
+    <ProjectReference Include="..\Networth.Domain\Networth.Domain.csproj" />
+    <ProjectReference Include="..\Networth.Application\Networth.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,3 +29,4 @@
   </ItemGroup>
 
 </Project>
+

@@ -1,7 +1,7 @@
 using FluentValidation;
-using Networth.Backend.Application.Queries;
+using Networth.Application.Queries;
 
-namespace Networth.Backend.Application.Validators;
+namespace Networth.Application.Validators;
 
 /// <summary>
 ///     Validator for GetTransactionsQuery.

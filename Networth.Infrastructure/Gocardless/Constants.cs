@@ -1,4 +1,4 @@
-namespace Networth.Backend.Infrastructure.Gocardless;
+namespace Networth.Infrastructure.Gocardless;
 
 public class Constants
 {

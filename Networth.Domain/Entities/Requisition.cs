@@ -1,6 +1,6 @@
-using Networth.Backend.Domain.Enums;
+using Networth.Domain.Enums;
 
-namespace Networth.Backend.Domain.Entities;
+namespace Networth.Domain.Entities;
 
 /// <summary>
 ///     Represents a bank account requisition for connecting to financial institutions.

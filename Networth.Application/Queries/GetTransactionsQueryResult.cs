@@ -1,6 +1,6 @@
-using Networth.Backend.Domain.Entities;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Application.Queries;
+namespace Networth.Application.Queries;
 
 /// <summary>
 ///     The result of the get transactions query.

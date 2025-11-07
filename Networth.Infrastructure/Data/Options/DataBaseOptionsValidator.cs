@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Networth.Backend.Infrastructure.Data.Options;
+namespace Networth.Infrastructure.Data.Options;
 
 /// <summary>
 ///     Validator for <see cref="DatabaseOptions" /> to ensure valid configuration.

@@ -1,6 +1,6 @@
-using Networth.Backend.Domain.Enums;
+using Networth.Domain.Enums;
 
-namespace Networth.Backend.Application.Commands;
+namespace Networth.Application.Commands;
 
 /// <summary>
 ///     Result of the link account command containing both agreement and requisition details.

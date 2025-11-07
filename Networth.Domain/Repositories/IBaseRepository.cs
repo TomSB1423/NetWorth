@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Networth.Backend.Domain.Repositories;
+namespace Networth.Domain.Repositories;
 
 /// <summary>
 ///     Base repository interface providing common CRUD operations for all entities.

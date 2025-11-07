@@ -1,14 +1,14 @@
 using System.Reflection;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Networth.Backend.Application.Commands;
-using Networth.Backend.Application.Handlers;
-using Networth.Backend.Application.Interfaces;
-using Networth.Backend.Application.Queries;
-using Networth.Backend.Application.Services;
-using Networth.Backend.Application.Validators;
+using Networth.Application.Commands;
+using Networth.Application.Handlers;
+using Networth.Application.Interfaces;
+using Networth.Application.Queries;
+using Networth.Application.Services;
+using Networth.Application.Validators;
 
-namespace Networth.Backend.Application.Extensions;
+namespace Networth.Application.Extensions;
 
 /// <summary>
 ///     Extension methods for registering application services.

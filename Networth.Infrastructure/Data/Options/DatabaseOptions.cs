@@ -1,4 +1,4 @@
-namespace Networth.Backend.Infrastructure.Data.Options;
+namespace Networth.Infrastructure.Data.Options;
 
 /// <summary>
 ///     Configuration options for database connection and settings.

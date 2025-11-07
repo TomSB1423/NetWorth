@@ -1,12 +1,12 @@
 using System.Globalization;
 using Microsoft.Extensions.Logging;
-using Networth.Backend.Application.Interfaces;
-using Networth.Backend.Domain.Entities;
-using Networth.Backend.Domain.Enums;
-using Networth.Backend.Infrastructure.Gocardless.DTOs;
+using Networth.Application.Interfaces;
+using Networth.Domain.Entities;
+using Networth.Domain.Enums;
+using Networth.Infrastructure.Gocardless.DTOs;
 using Refit;
 
-namespace Networth.Backend.Infrastructure.Gocardless;
+namespace Networth.Infrastructure.Gocardless;
 
 /// <summary>
 ///     GoCardless implementation of financial provider services.

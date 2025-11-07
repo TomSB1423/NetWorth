@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
-using Networth.Backend.Application.Interfaces;
-using Networth.Backend.Application.Queries;
-using Networth.Backend.Domain.Entities;
+using Networth.Application.Interfaces;
+using Networth.Application.Queries;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Application.Handlers;
+namespace Networth.Application.Handlers;
 
 public class GetTransactionsQueryHandler(IFinancialProvider financialProvider, ILogger<GetTransactionsQueryHandler> logger)
     : IRequestHandler<GetTransactionsQuery, GetTransactionsQueryResult>

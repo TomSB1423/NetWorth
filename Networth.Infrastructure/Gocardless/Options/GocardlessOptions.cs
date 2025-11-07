@@ -1,4 +1,4 @@
-namespace Networth.Backend.Infrastructure.Gocardless.Options;
+namespace Networth.Infrastructure.Gocardless.Options;
 
 public class GocardlessOptions
 {

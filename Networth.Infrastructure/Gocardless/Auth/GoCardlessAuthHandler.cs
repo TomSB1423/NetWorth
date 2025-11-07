@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 
-namespace Networth.Backend.Infrastructure.Gocardless.Auth;
+namespace Networth.Infrastructure.Gocardless.Auth;
 
 internal class GoCardlessAuthHandler(GoCardlessTokenManager tokenManager)
     : DelegatingHandler

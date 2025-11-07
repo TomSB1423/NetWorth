@@ -1,4 +1,4 @@
-namespace Networth.Backend.Application.Interfaces;
+namespace Networth.Application.Interfaces;
 
 /// <summary>
 ///     Marker interface for requests.

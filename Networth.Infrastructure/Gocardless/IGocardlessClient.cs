@@ -1,7 +1,7 @@
-using Networth.Backend.Infrastructure.Gocardless.DTOs;
+using Networth.Infrastructure.Gocardless.DTOs;
 using Refit;
 
-namespace Networth.Backend.Infrastructure.Gocardless;
+namespace Networth.Infrastructure.Gocardless;
 
 /// <summary>
 ///     Defines the interface for interacting with the GoCardless Bank Account Data API.

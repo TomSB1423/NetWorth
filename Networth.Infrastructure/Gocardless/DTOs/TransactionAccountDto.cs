@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
+namespace Networth.Infrastructure.Gocardless.DTOs;
 
 /// <summary>
 ///     Account schema for transactions according to GoCardless API specification.

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Networth.Backend.Infrastructure.Data.Migrations
+namespace Networth.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
     public partial class RestructureSchema : Migration

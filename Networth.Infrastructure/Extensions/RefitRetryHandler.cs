@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Networth.Backend.Infrastructure.Extensions;
+namespace Networth.Infrastructure.Extensions;
 
 /// <inheritdoc />
 public class RefitRetryHandler(ILogger<RefitRetryHandler> logger) : DelegatingHandler

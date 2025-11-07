@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Networth.Backend.Application.Interfaces;
-using Networth.Backend.Domain.Entities;
+using Networth.Application.Interfaces;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Functions.Functions;
+namespace Networth.Functions.Functions;
 
 public class GetInstitutions(IFinancialProvider financialProvider)
 {

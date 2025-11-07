@@ -1,6 +1,6 @@
-using Networth.Backend.Domain.Entities;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Application.Interfaces;
+namespace Networth.Application.Interfaces;
 
 /// <summary>
 ///     Interface for financial provider services that handles all GoCardless operations.

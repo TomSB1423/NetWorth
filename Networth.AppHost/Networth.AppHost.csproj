@@ -20,7 +20,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Networth.Functions\Networth.Backend.Functions.csproj" />
+    <ProjectReference Include="..\Networth.Functions\Networth.Functions.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Networth.AppHost">
+      <HintPath>..\Tests\Networth.Functions.Tests.Integration\bin\Debug\net9.0\Networth.AppHost.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">

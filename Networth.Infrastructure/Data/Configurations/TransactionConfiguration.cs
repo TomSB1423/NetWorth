@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Networth.Backend.Domain.Entities;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Infrastructure.Data.Configurations;
+namespace Networth.Infrastructure.Data.Configurations;
 
 /// <summary>
 ///     Entity Framework configuration for the Transaction entity.

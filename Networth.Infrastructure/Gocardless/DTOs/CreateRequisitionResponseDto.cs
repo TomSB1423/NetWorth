@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
+namespace Networth.Infrastructure.Gocardless.DTOs;
 
 /// <summary>
 ///     Response DTO for a created requisition from GoCardless according to Requisition schema.

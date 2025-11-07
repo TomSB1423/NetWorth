@@ -1,6 +1,6 @@
-using Networth.Backend.Application.Interfaces;
+using Networth.Application.Interfaces;
 
-namespace Networth.Backend.Application.Commands;
+namespace Networth.Application.Commands;
 
 /// <summary>
 ///     Command for linking a bank account by creating an agreement and requisition.

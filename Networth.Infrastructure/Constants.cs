@@ -1,4 +1,4 @@
-namespace Networth.Backend.Infrastructure;
+namespace Networth.Infrastructure;
 
 internal static class Constants
 {

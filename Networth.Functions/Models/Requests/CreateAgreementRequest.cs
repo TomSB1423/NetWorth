@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Networth.Backend.Functions.Models.Requests;
+namespace Networth.Functions.Models.Requests;
 
 /// <summary>
 ///     Request model for creating an agreement.

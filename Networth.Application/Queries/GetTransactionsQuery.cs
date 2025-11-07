@@ -1,6 +1,6 @@
-using Networth.Backend.Application.Interfaces;
+using Networth.Application.Interfaces;
 
-namespace Networth.Backend.Application.Queries;
+namespace Networth.Application.Queries;
 
 /// <summary>
 ///     The get transactions query.

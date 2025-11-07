@@ -5,10 +5,10 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Networth.Backend.Application.Interfaces;
-using Networth.Backend.Domain.Entities;
+using Networth.Application.Interfaces;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Functions.Functions;
+namespace Networth.Functions.Functions;
 
 /// <summary>
 ///     Azure Function for retrieving account balances.

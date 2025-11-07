@@ -6,7 +6,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Logging;
 
-namespace Networth.Backend.Functions.Middleware;
+namespace Networth.Functions.Middleware;
 
 /// <summary>
 ///     Responsible for handling exceptions that occur during the execution of Azure Functions.

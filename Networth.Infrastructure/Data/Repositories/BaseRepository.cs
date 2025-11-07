@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Networth.Backend.Domain.Repositories;
-using Networth.Backend.Infrastructure.Data.Context;
+using Networth.Domain.Repositories;
+using Networth.Infrastructure.Data.Context;
 
-namespace Networth.Backend.Infrastructure.Data.Repositories;
+namespace Networth.Infrastructure.Data.Repositories;
 
 /// <summary>
 ///     Base repository implementation providing common CRUD operations for all entities.

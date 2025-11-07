@@ -1,4 +1,4 @@
-namespace Networth.Backend.Domain.Entities;
+namespace Networth.Domain.Entities;
 
 /// <summary>
 ///     Represents metadata about a financial institution from GoCardless.

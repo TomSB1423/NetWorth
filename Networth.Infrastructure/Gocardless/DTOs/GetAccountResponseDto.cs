@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
+namespace Networth.Infrastructure.Gocardless.DTOs;
 
 /// <summary>
 ///     Account metadata DTO according to GoCardless API specification.

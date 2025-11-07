@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace Networth.Backend.Functions.Authentication;
+namespace Networth.Functions.Authentication;
 
 /// <summary>
 ///     Service for accessing the current authenticated user.

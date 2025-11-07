@@ -1,4 +1,4 @@
-namespace Networth.Backend.Functions.Models.Requests;
+namespace Networth.Functions.Models.Requests;
 
 /// <summary>
 ///     Request model for getting account transactions with optional date filtering.

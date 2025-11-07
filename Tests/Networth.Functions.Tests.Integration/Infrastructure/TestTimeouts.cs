@@ -1,4 +1,4 @@
-namespace Networth.Backend.Functions.Tests.Integration.Infrastructure;
+namespace Networth.Functions.Tests.Integration.Infrastructure;
 
 /// <summary>
 ///     Configuration for test timeouts.

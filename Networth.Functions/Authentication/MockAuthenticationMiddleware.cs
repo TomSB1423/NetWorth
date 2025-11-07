@@ -3,7 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Networth.Backend.Functions.Authentication;
+namespace Networth.Functions.Authentication;
 
 /// <summary>
 ///     Middleware for mock authentication in development.

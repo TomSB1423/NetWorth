@@ -1,6 +1,6 @@
-using Networth.Backend.Domain.Entities;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Domain.Repositories;
+namespace Networth.Domain.Repositories;
 
 /// <summary>
 ///     Repository interface for Account entities.

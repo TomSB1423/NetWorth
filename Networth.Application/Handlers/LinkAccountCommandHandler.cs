@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
-using Networth.Backend.Application.Commands;
-using Networth.Backend.Application.Interfaces;
-using Networth.Backend.Domain.Entities;
+using Networth.Application.Commands;
+using Networth.Application.Interfaces;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Application.Handlers;
+namespace Networth.Application.Handlers;
 
 /// <summary>
 ///     Handler for link account commands that creates both agreement and requisition.

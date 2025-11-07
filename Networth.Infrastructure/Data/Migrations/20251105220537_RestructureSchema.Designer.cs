@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Networth.Backend.Infrastructure.Data.Context;
+using Networth.Infrastructure.Data.Context;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Networth.Backend.Infrastructure.Data.Migrations
+namespace Networth.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NetworthDbContext))]
     [Migration("20251105220537_RestructureSchema")]

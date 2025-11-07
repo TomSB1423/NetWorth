@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Networth.Backend.Domain.Enums;
+namespace Networth.Domain.Enums;
 
 /// <summary>
 ///     Represents the status of an account link.

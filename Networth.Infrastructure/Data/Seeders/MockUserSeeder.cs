@@ -2,10 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Networth.Backend.Domain.Entities;
-using Networth.Backend.Infrastructure.Data.Context;
+using Networth.Domain.Entities;
+using Networth.Infrastructure.Data.Context;
 
-namespace Networth.Backend.Infrastructure.Data.Seeders;
+namespace Networth.Infrastructure.Data.Seeders;
 
 /// <summary>
 ///     Seeds the database with mock user data for development.

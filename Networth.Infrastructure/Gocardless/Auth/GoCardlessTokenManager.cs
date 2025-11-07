@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using Networth.Backend.Infrastructure.Gocardless.DTOs;
-using Networth.Backend.Infrastructure.Gocardless.Options;
+using Networth.Infrastructure.Gocardless.DTOs;
+using Networth.Infrastructure.Gocardless.Options;
 
-namespace Networth.Backend.Infrastructure.Gocardless.Auth;
+namespace Networth.Infrastructure.Gocardless.Auth;
 
 internal class GoCardlessTokenManager(IOptions<GocardlessOptions> options) : IDisposable
 {

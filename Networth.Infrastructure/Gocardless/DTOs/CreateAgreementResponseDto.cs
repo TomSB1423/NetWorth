@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Networth.Backend.Domain.Enums;
+using Networth.Domain.Enums;
 
-namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
+namespace Networth.Infrastructure.Gocardless.DTOs;
 
 /// <summary>
 ///     Response DTO for a created agreement from GoCardless according to EndUserAgreement schema.

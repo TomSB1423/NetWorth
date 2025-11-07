@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Networth.Backend.Domain.Entities;
+using Networth.Domain.Entities;
 
-namespace Networth.Backend.Infrastructure.Data.Context;
+namespace Networth.Infrastructure.Data.Context;
 
 /// <summary>
 ///     Entity Framework DbContext for the Networth application.

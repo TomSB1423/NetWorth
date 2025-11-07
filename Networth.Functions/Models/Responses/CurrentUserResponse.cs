@@ -1,4 +1,4 @@
-namespace Networth.Backend.Functions.Models.Responses;
+namespace Networth.Functions.Models.Responses;
 
 /// <summary>
 ///     Response model for current user information.

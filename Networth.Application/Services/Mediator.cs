@@ -1,9 +1,9 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Networth.Backend.Application.Interfaces;
+using Networth.Application.Interfaces;
 
-namespace Networth.Backend.Application.Services;
+namespace Networth.Application.Services;
 
 /// <summary>
 ///     Simple mediator implementation that validates and executes handlers.

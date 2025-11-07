@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Networth.Backend.Infrastructure.Gocardless.Options;
+namespace Networth.Infrastructure.Gocardless.Options;
 
 /// <summary>
 ///     Validator for GoCardless options configuration.

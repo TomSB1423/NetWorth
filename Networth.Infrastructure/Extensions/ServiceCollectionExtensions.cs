@@ -7,19 +7,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Networth.Backend.Application.Commands;
-using Networth.Backend.Application.Handlers;
-using Networth.Backend.Application.Interfaces;
-using Networth.Backend.Application.Validators;
-using Networth.Backend.Infrastructure.Data.Context;
-using Networth.Backend.Infrastructure.Data.Options;
-using Networth.Backend.Infrastructure.Gocardless;
-using Networth.Backend.Infrastructure.Gocardless.Auth;
-using Networth.Backend.Infrastructure.Gocardless.Options;
+using Networth.Application.Commands;
+using Networth.Application.Handlers;
+using Networth.Application.Interfaces;
+using Networth.Application.Validators;
+using Networth.Infrastructure.Data.Context;
+using Networth.Infrastructure.Data.Options;
+using Networth.Infrastructure.Gocardless;
+using Networth.Infrastructure.Gocardless.Auth;
+using Networth.Infrastructure.Gocardless.Options;
 using Npgsql;
 using Refit;
 
-namespace Networth.Backend.Infrastructure.Extensions;
+namespace Networth.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {

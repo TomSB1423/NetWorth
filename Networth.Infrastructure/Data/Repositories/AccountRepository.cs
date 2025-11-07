@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Networth.Backend.Domain.Entities;
-using Networth.Backend.Domain.Repositories;
-using Networth.Backend.Infrastructure.Data.Context;
+using Networth.Domain.Entities;
+using Networth.Domain.Repositories;
+using Networth.Infrastructure.Data.Context;
 
-namespace Networth.Backend.Infrastructure.Data.Repositories;
+namespace Networth.Infrastructure.Data.Repositories;
 
 /// <summary>
 ///     Repository implementation for Account entities.

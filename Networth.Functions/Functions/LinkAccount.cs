@@ -2,12 +2,12 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Networth.Backend.Application.Commands;
-using Networth.Backend.Application.Handlers;
-using Networth.Backend.Functions.Models.Requests;
+using Networth.Application.Commands;
+using Networth.Application.Handlers;
+using Networth.Functions.Models.Requests;
 using FromBodyAttributes = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-namespace Networth.Backend.Functions.Functions;
+namespace Networth.Functions.Functions;
 
 /// <summary>
 ///     Azure Function for linking bank accounts by creating agreements and requisitions.

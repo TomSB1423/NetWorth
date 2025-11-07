@@ -1,4 +1,4 @@
-namespace Networth.Backend.Domain.Enums;
+namespace Networth.Domain.Enums;
 
 public enum AccessScope
 {
