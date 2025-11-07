@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Networth.Backend.Domain</RootNamespace>
+  </PropertyGroup>
+</Project>

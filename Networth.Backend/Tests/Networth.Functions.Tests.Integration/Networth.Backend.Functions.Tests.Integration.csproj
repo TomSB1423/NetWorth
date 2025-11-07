@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <RootNamespace>Networth.Backend.Functions.Tests.Integration</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Networth.AppHost\Networth.AppHost.csproj" />
-    <ProjectReference Include="..\..\Networth.Backend.Infrastructure\Networth.Backend.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Networth.Infrastructure\Networth.Backend.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

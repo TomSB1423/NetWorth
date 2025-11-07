@@ -27,15 +27,18 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Install Aspire workload
+        run: dotnet workload install aspire
+
       - name: Restore dependencies
         run: dotnet restore Networth.sln
 
       - name: Build solution
         run: dotnet build Networth.sln --no-restore --configuration Release
 
-      - name: Run Aspire integration tests
+      - name: Run Tests
         run: |
-          dotnet test Networth.Backend/Tests/Networth.Backend.Functions.Tests.Integration/Networth.Backend.Functions.Tests.Integration.csproj \
+          dotnet test Networth.sln \
             --no-build \
             --configuration Release \
             --verbosity normal \

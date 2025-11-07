@@ -4,6 +4,7 @@
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
     <UserSecretsId>09bd123b-3401-4507-b92c-0b283b95b537</UserSecretsId>
+    <RootNamespace>Networth.Backend.Functions</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -44,8 +45,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Networth.Backend.Application\Networth.Backend.Application.csproj"/>
-    <ProjectReference Include="..\Networth.Backend.Infrastructure\Networth.Backend.Infrastructure.csproj"/>
+    <ProjectReference Include="..\Networth.Application\Networth.Backend.Application.csproj" />
+    <ProjectReference Include="..\Networth.Infrastructure\Networth.Backend.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj"/>
   </ItemGroup>
 

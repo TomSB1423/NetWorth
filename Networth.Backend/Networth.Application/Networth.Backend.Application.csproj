@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <RootNamespace>Networth.Backend.Application</RootNamespace>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Networth.Backend.Domain\Networth.Backend.Domain.csproj"/>
+    <ProjectReference Include="..\Networth.Domain\Networth.Backend.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

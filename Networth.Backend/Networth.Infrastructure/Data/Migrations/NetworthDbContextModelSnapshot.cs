@@ -22,7 +22,7 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Account", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Account", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(100)
@@ -54,7 +54,7 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
                     b.ToTable("Accounts", (string)null);
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Institution", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Institution", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(100)
@@ -88,7 +88,7 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
                     b.ToTable("Institutions", (string)null);
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Requisition", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Requisition", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(100)
@@ -141,7 +141,7 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
                     b.ToTable("Requisitions", (string)null);
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Transaction", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(100)
@@ -183,7 +183,7 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
                     b.ToTable("Transactions", (string)null);
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.User", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(100)
@@ -199,15 +199,15 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Account", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Account", b =>
                 {
-                    b.HasOne("Networth.Backend.Domain.Entities.Institution", "Institution")
+                    b.HasOne("Networth.Domain.Entities.Institution", "Institution")
                         .WithMany("Accounts")
                         .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Networth.Backend.Domain.Entities.User", "Owner")
+                    b.HasOne("Networth.Domain.Entities.User", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -218,15 +218,15 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Institution", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Institution", b =>
                 {
-                    b.HasOne("Networth.Backend.Domain.Entities.User", "Owner")
+                    b.HasOne("Networth.Domain.Entities.User", "Owner")
                         .WithMany("Institutions")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Networth.Backend.Domain.Entities.Requisition", "Requisition")
+                    b.HasOne("Networth.Domain.Entities.Requisition", "Requisition")
                         .WithMany()
                         .HasForeignKey("RequisitionId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -237,15 +237,15 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
                     b.Navigation("Requisition");
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Transaction", b =>
                 {
-                    b.HasOne("Networth.Backend.Domain.Entities.Account", "Account")
+                    b.HasOne("Networth.Domain.Entities.Account", "Account")
                         .WithMany("Transactions")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Networth.Backend.Domain.Entities.User", "Owner")
+                    b.HasOne("Networth.Domain.Entities.User", "Owner")
                         .WithMany("Transactions")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -256,17 +256,17 @@ namespace Networth.Backend.Infrastructure.Data.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Account", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Account", b =>
                 {
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.Institution", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.Institution", b =>
                 {
                     b.Navigation("Accounts");
                 });
 
-            modelBuilder.Entity("Networth.Backend.Domain.Entities.User", b =>
+            modelBuilder.Entity("Networth.Domain.Entities.User", b =>
                 {
                     b.Navigation("Accounts");
 

@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <RootNamespace>Networth.Backend.Infrastructure.Tests.Unit</RootNamespace>
   </PropertyGroup>
 
 
@@ -24,9 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Networth.Backend.Domain/Networth.Backend.Domain.csproj"/>
-    <ProjectReference Include="../../Networth.Backend.Infrastructure/Networth.Backend.Infrastructure.csproj"/>
-    <ProjectReference Include="../../Networth.Backend.Functions/Networth.Backend.Functions.csproj"/>
+    <ProjectReference Include="..\..\Networth.Domain\Networth.Backend.Domain.csproj" />
+    <ProjectReference Include="..\..\Networth.Infrastructure\Networth.Backend.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Networth.Functions\Networth.Backend.Functions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
