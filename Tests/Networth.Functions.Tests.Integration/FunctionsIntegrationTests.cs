@@ -40,8 +40,6 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
             .WaitAsync(TestTimeouts.Default, cts.Token);
         await app.ResourceNotifications.WaitForResourceHealthyAsync(ResourceNames.NetworthDb, cts.Token)
             .WaitAsync(TestTimeouts.Default, cts.Token);
-        await app.ResourceNotifications.WaitForResourceHealthyAsync(ResourceNames.FunctionsStorage, cts.Token)
-            .WaitAsync(TestTimeouts.Default, cts.Token);
         await app.ResourceNotifications.WaitForResourceHealthyAsync(ResourceNames.Functions, cts.Token)
             .WaitAsync(TestTimeouts.Default, cts.Token);
 

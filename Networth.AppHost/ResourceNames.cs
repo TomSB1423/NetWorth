@@ -21,11 +21,6 @@ public static class ResourceNames
     public const string Functions = "functions";
 
     /// <summary>
-    ///     Gets the resource name for the Azure Functions storage account.
-    /// </summary>
-    public const string FunctionsStorage = "funcstoragecf0b0";
-
-    /// <summary>
     ///     Gets the resource name for the React frontend.
     /// </summary>
     public const string React = "react";
