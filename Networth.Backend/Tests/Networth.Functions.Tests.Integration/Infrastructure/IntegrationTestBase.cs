@@ -91,7 +91,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     private async Task WaitForMockoonReadyAsync()
     {
         using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
-        var maxAttempts = 30; // 30 attempts * 1 second = 30 seconds max wait
+        var maxAttempts = 60; // 60 attempts * 6 seconds = 360 seconds max wait
         var attempt = 0;
 
         while (attempt < maxAttempts)
@@ -114,7 +114,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
             }
 
             attempt++;
-            await Task.Delay(1000);
+            await Task.Delay(6000);
         }
 
         throw new TimeoutException($"Mockoon failed to become ready after {maxAttempts} attempts");
