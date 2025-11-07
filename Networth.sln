@@ -18,25 +18,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Networth.Frontend.React", "
 		Networth.Frontend\Networth.Frontend.React\README.md = Networth.Frontend\Networth.Frontend.React\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Networth.Backend", "Networth.Backend", "{B1E2F3A4-5C6D-7E8F-9A0B-1C2D3E4F5A6B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Functions", "Networth.Functions\Networth.Backend.Functions.csproj", "{6275CD94-7FA2-413D-A71F-4784A870201B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Functions", "Networth.Backend\Networth.Functions\Networth.Backend.Functions.csproj", "{6275CD94-7FA2-413D-A71F-4784A870201B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Application", "Networth.Application\Networth.Backend.Application.csproj", "{48AE5889-93B9-45F3-A443-AA03243E479F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Application", "Networth.Backend\Networth.Application\Networth.Backend.Application.csproj", "{48AE5889-93B9-45F3-A443-AA03243E479F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Domain", "Networth.Domain\Networth.Backend.Domain.csproj", "{192BE8FD-DDD8-4BCC-997A-7B5E3F95B093}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Domain", "Networth.Backend\Networth.Domain\Networth.Backend.Domain.csproj", "{192BE8FD-DDD8-4BCC-997A-7B5E3F95B093}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Infrastructure", "Networth.Backend\Networth.Infrastructure\Networth.Backend.Infrastructure.csproj", "{C04666F0-78ED-48B7-985E-FF3401D09174}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Infrastructure", "Networth.Infrastructure\Networth.Backend.Infrastructure.csproj", "{C04666F0-78ED-48B7-985E-FF3401D09174}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E6F5B30F-71A7-48FE-A289-41D465218CBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Infrastructure.Tests.Unit", "Networth.Backend\Tests\Networth.Infrastructure.Tests.Unit\Networth.Backend.Infrastructure.Tests.Unit.csproj", "{6E84FDA1-746C-45F4-8D68-FDD2D60B6B87}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Infrastructure.Tests.Unit", "Tests\Networth.Infrastructure.Tests.Unit\Networth.Backend.Infrastructure.Tests.Unit.csproj", "{6E84FDA1-746C-45F4-8D68-FDD2D60B6B87}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.AppHost", "Networth.AppHost\Networth.AppHost.csproj", "{D83F4670-9322-4D77-AF2D-C47002F91A36}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.ServiceDefaults", "Networth.ServiceDefaults\Networth.ServiceDefaults.csproj", "{D25AA5D9-5260-41C4-8BC8-502DE11B9896}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Functions.Tests.Integration", "Networth.Backend\Tests\Networth.Functions.Tests.Integration\Networth.Backend.Functions.Tests.Integration.csproj", "{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Functions.Tests.Integration", "Tests\Networth.Functions.Tests.Integration\Networth.Backend.Functions.Tests.Integration.csproj", "{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -150,11 +148,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D3F4A5B6-7E8F-9A0B-1C2D-3E4F5A6B7C8D} = {C2F3A4B5-6D7E-8F9A-0B1C-2D3E4F5A6B7C}
-		{6275CD94-7FA2-413D-A71F-4784A870201B} = {B1E2F3A4-5C6D-7E8F-9A0B-1C2D3E4F5A6B}
-		{48AE5889-93B9-45F3-A443-AA03243E479F} = {B1E2F3A4-5C6D-7E8F-9A0B-1C2D3E4F5A6B}
-		{192BE8FD-DDD8-4BCC-997A-7B5E3F95B093} = {B1E2F3A4-5C6D-7E8F-9A0B-1C2D3E4F5A6B}
-		{C04666F0-78ED-48B7-985E-FF3401D09174} = {B1E2F3A4-5C6D-7E8F-9A0B-1C2D3E4F5A6B}
-		{E6F5B30F-71A7-48FE-A289-41D465218CBD} = {B1E2F3A4-5C6D-7E8F-9A0B-1C2D3E4F5A6B}
 		{6E84FDA1-746C-45F4-8D68-FDD2D60B6B87} = {E6F5B30F-71A7-48FE-A289-41D465218CBD}
 		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B} = {E6F5B30F-71A7-48FE-A289-41D465218CBD}
 	EndGlobalSection

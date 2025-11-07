@@ -5,7 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "Networth.Backend/**"
+      - "Networth.Application/**"
+      - "Networth.Domain/**"
+      - "Networth.Functions/**"
+      - "Networth.Infrastructure/**"
+      - "Tests/**"
+      - ".github/workflows/ci.yml"
 
   workflow_dispatch:
 

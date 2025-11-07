@@ -20,12 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Networth.Backend\Networth.Functions\Networth.Backend.Functions.csproj" />
+    <ProjectReference Include="..\Networth.Functions\Networth.Backend.Functions.csproj" />
   </ItemGroup>
 
   <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
     <ItemGroup>
-      <PackageJsons Include="..\Networth.Frontend\*\package.json" />
+      <PackageJsons Include="..\Networth.Frontend\package.json" />
     </ItemGroup>
 
     <!-- Install npm packages if node_modules is missing -->

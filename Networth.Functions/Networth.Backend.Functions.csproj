@@ -47,7 +47,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Networth.Application\Networth.Backend.Application.csproj" />
     <ProjectReference Include="..\Networth.Infrastructure\Networth.Backend.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj"/>
+    <ProjectReference Include="..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

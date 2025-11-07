@@ -59,7 +59,7 @@ CONNECTION_STRING="Host=localhost;Port=${POSTGRES_PORT};Database=networth-db;Use
 
 # Navigate to Infrastructure project
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="${SCRIPT_DIR}/../Networth.Backend/Networth.Backend.Infrastructure"
+PROJECT_DIR="${SCRIPT_DIR}/../Networth.Infrastructure"
 
 if [ ! -d "$PROJECT_DIR" ]; then
     echo -e "${RED}❌ Error: Infrastructure project directory not found at ${PROJECT_DIR}${NC}"

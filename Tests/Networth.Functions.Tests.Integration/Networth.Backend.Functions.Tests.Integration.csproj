@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Networth.AppHost\Networth.AppHost.csproj" />
+    <ProjectReference Include="..\..\Networth.AppHost\Networth.AppHost.csproj" />
     <ProjectReference Include="..\..\Networth.Infrastructure\Networth.Backend.Infrastructure.csproj" />
   </ItemGroup>
 
