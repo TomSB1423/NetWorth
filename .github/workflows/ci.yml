@@ -23,24 +23,41 @@ jobs:
       contents: read
       pull-requests: write
 
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_NOLOGO: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+      ASPIRE_ALLOW_UNSECURED_TRANSPORT: true
+      SuppressNETCoreSdkPreviewMessage: true
+      DCP_DIAGNOSTICS_LOG_LEVEL: "debug"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install Docker
+        uses: docker/setup-docker-action@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
 
+      - name: Print .NET info
+        run: dotnet --info
+
       - name: Install Aspire workload
         run: dotnet workload install aspire
 
+      - name: Install & trust dev-certs
+        run: dotnet dev-certs https --trust
+
       - name: Setup Azure Functions Core Tools
         run: |
-          wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
+          wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
           sudo dpkg -i packages-microsoft-prod.deb
           sudo apt-get update
-          sudo apt-get install -y azure-functions-core-tools-4
+          sudo apt-get install azure-functions-core-tools-4
 
       - name: Restore dependencies
         run: dotnet restore Networth.sln
@@ -49,22 +66,35 @@ jobs:
         run: dotnet build Networth.sln --no-restore --configuration Release
 
       - name: Run Tests
+        id: test
+        run: >
+          dotnet test Networth.sln
+          --no-build
+          --configuration Release
+          --logger console
+          --logger trx
+          --logger html
+          --logger GitHubActions
+          --results-directory ./TestResults
+          --blame
+          --collect:"XPlat Code Coverage"
+          --
+          RunConfiguration.CollectSourceInformation=true
+
+      - name: Copy DCP logs
+        if: (success() || steps.test.conclusion == 'failure')
         run: |
-          dotnet test Networth.sln \
-            --no-build \
-            --configuration Release \
-            --verbosity normal \
-            --logger "trx;LogFileName=test-results.trx" \
-            --collect:"XPlat Code Coverage"
+          mkdir -p ./TestResults/DCPLogs
+          if [ -d "/tmp/dcp/logs" ]; then
+            cp -r /tmp/dcp/logs/* ./TestResults/DCPLogs 2>/dev/null || true
+          fi
 
       - name: Upload test results
-        if: always()
+        if: (success() || steps.test.conclusion == 'failure')
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: |
-            **/TestResults/**/*.trx
-            **/TestResults/**/*.coverage
+          path: ./TestResults
 
       - name: Publish test summary
         if: always()
