@@ -171,6 +171,29 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
                 catch (TimeoutException)
                 {
                     output.WriteLine($"  {resourceName}: Timeout - may not be ready");
+
+                    // Try to get more detailed information about the timed-out resource
+                    try
+                    {
+                        // Use ResourceLoggerService to get logs
+                        output.WriteLine($"    Attempting to retrieve logs for '{resourceName}'...");
+
+                        // Try to wait a bit longer to see if resource state changes
+                        var healthState = await app.ResourceNotifications.WaitForResourceHealthyAsync(
+                                resourceName,
+                                CancellationToken.None)
+                            .WaitAsync(TimeSpan.FromSeconds(2));
+
+                        output.WriteLine($"    Resource health state: {healthState}");
+                    }
+                    catch (TimeoutException)
+                    {
+                        output.WriteLine($"    Resource did not become healthy within 2 seconds");
+                    }
+                    catch (Exception logEx)
+                    {
+                        output.WriteLine($"    Failed to retrieve resource info: {logEx.GetType().Name}: {logEx.Message}");
+                    }
                 }
                 catch (Exception ex)
                 {
