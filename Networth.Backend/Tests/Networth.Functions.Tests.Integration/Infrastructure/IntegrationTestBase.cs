@@ -30,15 +30,16 @@ public abstract class IntegrationTestBase : IAsyncLifetime
                 Path.Combine(Directory.GetCurrentDirectory(), MockoonConfiguration.GoCardlessDataFile),
                 MockoonConfiguration.ContainerDataPath)
             .WithCommand("--data", MockoonConfiguration.ContainerDataPath, "--port", MockoonConfiguration.Port.ToString())
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(MockoonConfiguration.Port))
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilHttpRequestIsSucceeded(request => request
+                    .ForPort(MockoonConfiguration.Port)
+                    .ForPath("/ready")
+                    .ForStatusCode(System.Net.HttpStatusCode.OK)))
             .Build();
 
         await mockoonContainer.StartAsync();
 
         MockoonBaseUrl = $"http://{mockoonContainer.Hostname}:{mockoonContainer.GetMappedPublicPort(MockoonConfiguration.Port)}";
-
-        // Poll Mockoon until it's ready
-        await WaitForMockoonReadyAsync();
     }
 
     /// <summary>
@@ -82,41 +83,5 @@ public abstract class IntegrationTestBase : IAsyncLifetime
             .AddFilter("Aspire.Hosting.Dcp", LogLevel.Warning));
 
         return await appBuilder.BuildAsync();
-    }
-
-    /// <summary>
-    ///     Polls Mockoon until it responds successfully.
-    /// </summary>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task WaitForMockoonReadyAsync()
-    {
-        using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
-        var maxAttempts = 60; // 60 attempts * 6 seconds = 360 seconds max wait
-        var attempt = 0;
-
-        while (attempt < maxAttempts)
-        {
-            try
-            {
-                var response = await httpClient.GetAsync($"{MockoonBaseUrl}/api/v2/institutions/");
-                if (response.IsSuccessStatusCode)
-                {
-                    return;
-                }
-            }
-            catch (HttpRequestException)
-            {
-                // Expected during startup
-            }
-            catch (TaskCanceledException)
-            {
-                // Timeout - try again
-            }
-
-            attempt++;
-            await Task.Delay(6000);
-        }
-
-        throw new TimeoutException($"Mockoon failed to become ready after {maxAttempts} attempts");
     }
 }
