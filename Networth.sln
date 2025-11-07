@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.AppHost", "Networt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.ServiceDefaults", "Networth.ServiceDefaults\Networth.ServiceDefaults.csproj", "{D25AA5D9-5260-41C4-8BC8-502DE11B9896}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Backend.Functions.Tests.Integration", "Networth.Backend\Tests\Networth.Backend.Functions.Tests.Integration\Networth.Backend.Functions.Tests.Integration.csproj", "{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -130,6 +132,18 @@ Global
 		{D25AA5D9-5260-41C4-8BC8-502DE11B9896}.Release|x64.Build.0 = Release|Any CPU
 		{D25AA5D9-5260-41C4-8BC8-502DE11B9896}.Release|x86.ActiveCfg = Release|Any CPU
 		{D25AA5D9-5260-41C4-8BC8-502DE11B9896}.Release|x86.Build.0 = Release|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Debug|x64.Build.0 = Debug|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Debug|x86.Build.0 = Debug|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Release|x64.ActiveCfg = Release|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Release|x64.Build.0 = Release|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Release|x86.ActiveCfg = Release|Any CPU
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,5 +156,6 @@ Global
 		{C04666F0-78ED-48B7-985E-FF3401D09174} = {B1E2F3A4-5C6D-7E8F-9A0B-1C2D3E4F5A6B}
 		{E6F5B30F-71A7-48FE-A289-41D465218CBD} = {B1E2F3A4-5C6D-7E8F-9A0B-1C2D3E4F5A6B}
 		{6E84FDA1-746C-45F4-8D68-FDD2D60B6B87} = {E6F5B30F-71A7-48FE-A289-41D465218CBD}
+		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B} = {E6F5B30F-71A7-48FE-A289-41D465218CBD}
 	EndGlobalSection
 EndGlobal
