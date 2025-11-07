@@ -81,8 +81,8 @@ jobs:
           sudo mkdir -p /usr/local/share/ca-certificates/aspnet
           sudo cp ~/https.crt /usr/local/share/ca-certificates/aspnet/https.crt
           sudo chmod 644 /usr/local/share/ca-certificates/aspnet/https.crt
-          # Clean up temporary file
-          rm ~/https.crt ~/https.key
+          # Clean up temporary files (PEM export creates both .crt and .key)
+          rm -f ~/https.crt ~/https.key
           # Trust the certificate system-wide
           sudo update-ca-certificates
 
