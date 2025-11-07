@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
@@ -11,5 +12,6 @@ public record GetAccountBalanceResponseDto
     ///     Gets the array of balance information.
     /// </summary>
     [JsonPropertyName("balances")]
+    [Required]
     public required BalanceDto[] Balances { get; init; }
 }

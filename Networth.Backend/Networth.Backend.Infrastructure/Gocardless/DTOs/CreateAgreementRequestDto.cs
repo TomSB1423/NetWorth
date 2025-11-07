@@ -9,8 +9,8 @@ internal record CreateAgreementRequestDto
     /// <summary>
     ///     Gets unique identifier for the institution.
     /// </summary>
-    [Required]
     [JsonPropertyName("institution_id")]
+    [Required]
     public required string InstitutionId { get; init; }
 
     /// <summary>
@@ -28,7 +28,7 @@ internal record CreateAgreementRequestDto
     /// <summary>
     ///     Gets list of access scopes requested for the agreement.
     /// </summary>
-    [Required]
     [JsonPropertyName("access_scope")]
+    [Required]
     public required AccessScope[] AccessScope { get; init; }
 }

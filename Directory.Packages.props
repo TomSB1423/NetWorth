@@ -3,47 +3,68 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
+  <ItemGroup Label="Aspire Packages">
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Npgsql" Version="9.5.2" />
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.2" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.13.1" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.13.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Functions" Version="9.5.2-preview.1.25522.3" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="9.5.2" />
+  </ItemGroup>
   <ItemGroup Label="Azure Functions">
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7"/>
-    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.7"/>
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7"/>
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7"/>
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.7"/>
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0"/>
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7"/>
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.7"/>
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7"/>
-    <PackageVersion Include="Refit" Version="8.0.0"/>
-    <PackageVersion Include="Refit.HttpClientFactory" Version="8.0.0"/>
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0"/>
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0"/>
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0"/>
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0"/>
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0"/>
-    <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="2.0.0"/>
-    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0"/>
-    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.2"/>
-    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.5"/>
-    <PackageVersion Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0"/>
-    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi" Version="1.5.1"/>
-    <PackageVersion Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0"/>
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.7"/>
-    <PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0"/>
-    <PackageVersion Include="FluentValidation" Version="12.0.0"/>
-    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0"/>
-    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.7"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
+    <PackageVersion Include="Refit" Version="8.0.0" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.2" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.5" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi" Version="1.6.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0" />
+    <PackageVersion Include="FluentValidation" Version="12.0.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.10" />
+    <PackageVersion Include="Serilog" Version="4.3.0" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0" />
+  </ItemGroup>
+  <ItemGroup Label="Entity Framework">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
   <ItemGroup Label="Testing">
-    <PackageVersion Include="Moq" Version="4.20.72"/>
-    <PackageVersion Include="coverlet.collector" Version="6.0.2"/>
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.0"/>
-    <PackageVersion Include="xunit" Version="2.9.2"/>
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2"/>
+    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
+    <PackageVersion Include="xunit" Version="2.9.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup Label="Code Analysis">
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556"/>
-    <PackageVersion Include="SerilogAnalyzer" Version="0.15.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0"/>
-    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15"/>
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
+    <PackageVersion Include="SerilogAnalyzer" Version="0.15.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
   </ItemGroup>
 </Project>

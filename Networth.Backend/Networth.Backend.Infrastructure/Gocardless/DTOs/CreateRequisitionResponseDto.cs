@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
@@ -11,6 +12,7 @@ internal record CreateRequisitionResponseDto
     ///     Gets the unique identifier for the requisition.
     /// </summary>
     [JsonPropertyName("id")]
+    [Required]
     public required string Id { get; init; }
 
     /// <summary>
@@ -29,24 +31,28 @@ internal record CreateRequisitionResponseDto
     ///     Gets the status of the requisition.
     /// </summary>
     [JsonPropertyName("status")]
+    [Required]
     public required string Status { get; init; }
 
     /// <summary>
     ///     Gets the institution ID.
     /// </summary>
     [JsonPropertyName("institution_id")]
+    [Required]
     public required string InstitutionId { get; init; }
 
     /// <summary>
     ///     Gets the agreement ID.
     /// </summary>
     [JsonPropertyName("agreement")]
+    [Required]
     public required string Agreement { get; init; }
 
     /// <summary>
     ///     Gets the reference identifier.
     /// </summary>
     [JsonPropertyName("reference")]
+    [Required]
     public required string Reference { get; init; }
 
     /// <summary>
@@ -56,15 +62,10 @@ internal record CreateRequisitionResponseDto
     public string[] Accounts { get; init; } = [];
 
     /// <summary>
-    ///     Gets the user language.
-    /// </summary>
-    [JsonPropertyName("user_language")]
-    public required string UserLanguage { get; init; }
-
-    /// <summary>
     ///     Gets the authorization link for the user to complete bank authentication.
     /// </summary>
     [JsonPropertyName("link")]
+    [Required]
     public required string Link { get; init; }
 
     /// <summary>

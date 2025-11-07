@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Networth.Backend.Infrastructure.Gocardless.DTOs;
@@ -71,6 +72,7 @@ public record TransactionDto
     ///     Gets the transaction amount.
     /// </summary>
     [JsonPropertyName("transactionAmount")]
+    [Required]
     public required TransactionAmountDto TransactionAmount { get; init; }
 
     /// <summary>

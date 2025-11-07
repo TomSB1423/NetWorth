@@ -9,19 +9,18 @@ namespace Networth.Backend.Application.Handlers;
 ///     Handler for link account commands that creates both agreement and requisition.
 /// </summary>
 public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILogger<LinkAccountCommandHandler> logger)
-    : ILinkAccountCommandHandler
+    : IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>
 {
-    /// <inheritdoc />
     public async Task<LinkAccountCommandResult> HandleAsync(LinkAccountCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Starting account link process for institution {InstitutionId}.", command.InstitutionId);
 
-        Institution institutions = await financialProvider.GetInstitutionAsync(command.InstitutionId, cancellationToken);
+        InstitutionMetadata institutionMetadata = await financialProvider.GetInstitutionAsync(command.InstitutionId, cancellationToken);
 
-        Agreement agreement = await financialProvider.CreateAgreementAsync(
+        var agreement = await financialProvider.CreateAgreementAsync(
             command.InstitutionId,
-            institutions.TransactionTotalDays,
-            institutions.MaxAccessValidForDays,
+            institutionMetadata.TransactionTotalDays,
+            institutionMetadata.MaxAccessValidForDays,
             cancellationToken);
 
         logger.LogInformation(
@@ -29,12 +28,10 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
             agreement.Id,
             command.InstitutionId);
 
-        Requisition requisition = await financialProvider.CreateRequisitionAsync(
+        var requisition = await financialProvider.CreateRequisitionAsync(
             command.InstitutionId,
             agreement.Id,
             "https://example.com/callback", // Replace with actual redirect URL
-            "Networth",
-            "EN",
             cancellationToken);
 
         logger.LogInformation(
@@ -44,7 +41,7 @@ public class LinkAccountCommandHandler(IFinancialProvider financialProvider, ILo
 
         return new LinkAccountCommandResult
         {
-            AuthorizationLink = requisition.AuthorizationLink, Status = requisition.Status,
+            AuthorizationLink = requisition.AuthenticationLink, Status = requisition.Status,
         };
     }
 }

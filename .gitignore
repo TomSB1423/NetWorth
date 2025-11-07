@@ -438,3 +438,10 @@ FodyWeavers.xsd
 local.settings.json
 Networth.Frontend/Networth.Frontend.React/.env
 .vscode
+.aspire
+
+# Azurite (Azure Storage Emulator) local database files
+__azurite_db_*.json
+__blobstorage__/
+__queuestorage__/
+__tablestorage__/

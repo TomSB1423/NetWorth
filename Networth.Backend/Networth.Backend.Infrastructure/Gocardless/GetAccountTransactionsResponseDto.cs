@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Networth.Backend.Infrastructure.Gocardless.DTOs;
 
@@ -12,6 +13,7 @@ internal record GetAccountTransactionsResponseDto
     ///     Gets the transactions container with booked and pending transactions.
     /// </summary>
     [JsonPropertyName("transactions")]
+    [Required]
     public required BankTransactionsDto Transactions { get; init; }
 
     /// <summary>

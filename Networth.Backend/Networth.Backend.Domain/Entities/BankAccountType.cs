@@ -8,7 +8,7 @@ public enum BankAccountType
     /// <summary>
     ///     A checking account for everyday transactions.
     /// </summary>
-    Checking,
+    Checking = 0,
 
     /// <summary>
     ///     A spending account for everyday transactions.

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Networth.Backend.Application.Interfaces;
 using Networth.Backend.Domain.Entities;
 
@@ -28,7 +29,7 @@ public class GetAccountBalances(IFinancialProvider financialProvider, ILogger<Ge
         Description = "Retrieves the current balances for a specific bank account.")]
     [OpenApiParameter(
         "accountId",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Path,
+        In = ParameterLocation.Path,
         Required = true,
         Type = typeof(string),
         Description = "The account ID")]
@@ -51,24 +52,8 @@ public class GetAccountBalances(IFinancialProvider financialProvider, ILogger<Ge
         HttpRequest req,
         string accountId)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(accountId))
-            {
-                logger.LogWarning("Missing accountId in GetAccountBalances request");
-                return new BadRequestObjectResult("Account ID is required");
-            }
-
-            IEnumerable<AccountBalance> balances = await financialProvider.GetAccountBalancesAsync(accountId);
-
-            logger.LogInformation("Successfully retrieved account balances for account {AccountId}", accountId);
-
-            return new OkObjectResult(balances);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error retrieving account balances for account {AccountId}", accountId);
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-        }
+        IEnumerable<AccountBalance> balances = await financialProvider.GetAccountBalancesAsync(accountId);
+        logger.LogInformation("Successfully retrieved account balances for account {AccountId}", accountId);
+        return new OkObjectResult(balances);
     }
 }

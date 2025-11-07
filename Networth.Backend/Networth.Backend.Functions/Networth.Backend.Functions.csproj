@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    <PackageReference Include="Aspire.Npgsql"/>
+
     <PackageReference Include="Microsoft.Azure.Functions.Worker"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore"/>
@@ -20,6 +22,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
     <PackageReference Include="FluentValidation"/>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
+    <PackageReference Include="Serilog"/>
+    <PackageReference Include="Serilog.Extensions.Hosting"/>
+    <PackageReference Include="Serilog.Sinks.Console"/>
+    <PackageReference Include="Serilog.Settings.Configuration"/>
+
   </ItemGroup>
 
   <ItemGroup>
@@ -27,10 +34,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
-    <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
@@ -43,11 +46,13 @@
   <ItemGroup>
     <ProjectReference Include="..\Networth.Backend.Application\Networth.Backend.Application.csproj"/>
     <ProjectReference Include="..\Networth.Backend.Infrastructure\Networth.Backend.Infrastructure.csproj"/>
+    <ProjectReference Include="..\..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\Requests\"/>
     <Folder Include="Models\Responses\"/>
+    <Folder Include="Validators\"/>
   </ItemGroup>
 
 </Project>

@@ -13,6 +13,11 @@ public class Requisition
     public required string Id { get; set; }
 
     /// <summary>
+    ///     Gets or sets the creation date.
+    /// </summary>
+    public DateTime Created { get; set; }
+
+    /// <summary>
     ///     Gets or sets the redirect URL after completion.
     /// </summary>
     public required string? Redirect { get; set; }
@@ -30,7 +35,7 @@ public class Requisition
     /// <summary>
     ///     Gets or sets the agreement ID.
     /// </summary>
-    public required string Agreement { get; set; }
+    public required string AgreementId { get; set; }
 
     /// <summary>
     ///     Gets or sets the reference identifier.
@@ -40,25 +45,15 @@ public class Requisition
     /// <summary>
     ///     Gets or sets the accounts associated with this requisition.
     /// </summary>
-    public string[] Accounts { get; set; } = Array.Empty<string>();
-
-    /// <summary>
-    ///     Gets or sets the user language.
-    /// </summary>
-    public required string UserLanguage { get; set; }
+    public string[] Accounts { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the authorization link for the user to complete bank authentication.
     /// </summary>
-    public required string AuthorizationLink { get; set; }
+    public required string AuthenticationLink { get; set; }
 
     /// <summary>
-    ///     Gets or sets a value indicating whether the account selection is enabled.
+    ///     Gets or sets the account selection option.
     /// </summary>
-    public bool AccountSelection { get; set; }
-
-    /// <summary>
-    ///     Gets or sets a value indicating whether redirect immediate is enabled.
-    /// </summary>
-    public bool RedirectImmediate { get; set; }
+    public string? AccountSelection { get; set; }
 }

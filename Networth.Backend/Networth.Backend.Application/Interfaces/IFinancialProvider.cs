@@ -8,20 +8,20 @@ namespace Networth.Backend.Application.Interfaces;
 public interface IFinancialProvider
 {
     /// <summary>
-    ///     Gets a single institutions.
+    ///     Gets a single institution's metadata.
     /// </summary>
     /// <param name="institutionId">The institution id.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A collection of available institutions.</returns>
-    Task<Institution> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default);
+    /// <returns>Institution metadata from GoCardless.</returns>
+    Task<InstitutionMetadata> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets a list of available institutions for a given country.
     /// </summary>
     /// <param name="country">The institution country.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A collection of available institutions.</returns>
-    Task<IEnumerable<Institution>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default);
+    /// <returns>A collection of available institution metadata.</returns>
+    Task<IEnumerable<InstitutionMetadata>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates an agreement for accessing bank account data.
@@ -43,16 +43,12 @@ public interface IFinancialProvider
     /// <param name="institutionId">The ID of the financial institution.</param>
     /// <param name="agreementId">The agreement ID for the connection.</param>
     /// <param name="redirectUrl">The URL to redirect to after authentication.</param>
-    /// <param name="reference">A reference identifier for the requisition.</param>
-    /// <param name="userLanguage">The user's preferred language (default: EN).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The created requisition with authorization link.</returns>
     Task<Requisition> CreateRequisitionAsync(
         string institutionId,
         string agreementId,
         string redirectUrl,
-        string reference,
-        string userLanguage,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -68,8 +64,8 @@ public interface IFinancialProvider
     /// </summary>
     /// <param name="accountId">The account ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The account metadata.</returns>
-    Task<Account> GetAccountAsync(string accountId, CancellationToken cancellationToken = default);
+    /// <returns>The account metadata from GoCardless.</returns>
+    Task<AccountMetadata> GetAccountAsync(string accountId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets account balances by account ID.
@@ -96,10 +92,10 @@ public interface IFinancialProvider
     /// <param name="dateFrom">Start date for transaction filtering (optional).</param>
     /// <param name="dateTo">End date for transaction filtering (optional).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The account transactions.</returns>
-    Task<IEnumerable<Transaction>> GetAccountTransactionsAsync(
+    /// <returns>The account transactions from GoCardless.</returns>
+    Task<IEnumerable<TransactionMetadata>> GetAccountTransactionsAsync(
         string accountId,
-        DateTime? dateFrom = null,
-        DateTime? dateTo = null,
+        DateTimeOffset dateFrom,
+        DateTimeOffset dateTo,
         CancellationToken cancellationToken = default);
 }

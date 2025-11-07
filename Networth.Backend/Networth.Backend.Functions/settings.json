@@ -1,7 +1,6 @@
 {
     "IsEncrypted": false,
     "Values": {
-        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
     },
     "Gocardless": {
@@ -9,5 +8,14 @@
     },
     "Host": {
         "CORS": "*"
+    },
+    "Serilog": {
+        "Using": ["Serilog.Sinks.Console"],
+        "MinimumLevel": "Debug",
+        "WriteTo": [
+            {
+                "Name": "Console"
+            }
+        ]
     }
 }

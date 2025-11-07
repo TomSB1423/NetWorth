@@ -15,7 +15,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     : IFinancialProvider
 {
     /// <inheritdoc />
-    public async Task<Institution> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default)
+    public async Task<InstitutionMetadata> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default)
     {
         GetInstitutionDto institution = await gocardlessClient.GetInstitution(institutionId, cancellationToken);
         bool transactionParse = int.TryParse(institution.TransactionTotalDays, out int transactionTotalDays);
@@ -27,22 +27,24 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                 institution.Id);
         }
 
-        return new Institution
+        return new InstitutionMetadata
         {
             Id = institution.Id,
             Name = institution.Name,
             TransactionTotalDays = transactionTotalDays,
             MaxAccessValidForDays = maxAccessValidForDays,
             LogoUrl = institution.Logo,
+            Bic = institution.Bic,
+            Countries = institution.Countries ?? [],
         };
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Institution>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<InstitutionMetadata>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default)
     {
         IEnumerable<GetInstitutionDto> response = await gocardlessClient.GetInstitutions(country, cancellationToken);
 
-        IEnumerable<Institution> institutions = response.Select(dto =>
+        var institutions = response.Select(dto =>
         {
             bool transactionParse = int.TryParse(dto.TransactionTotalDays, out int transactionTotalDays);
             bool maxAccessParse = int.TryParse(dto.MaxAccessValidForDays, out int maxAccessValidForDays);
@@ -51,13 +53,15 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                 logger.LogWarning("Failed to parse transaction days or access valid days for institution {InstitutionId}. Using default values.", dto.Id);
             }
 
-            return new Institution
+            return new InstitutionMetadata
             {
                 Id = dto.Id,
                 Name = dto.Name,
                 TransactionTotalDays = transactionTotalDays,
                 MaxAccessValidForDays = maxAccessValidForDays,
                 LogoUrl = dto.Logo,
+                Bic = dto.Bic,
+                Countries = dto.Countries ?? [],
             };
         });
         return institutions;
@@ -121,8 +125,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         string institutionId,
         string agreementId,
         string redirectUrl,
-        string reference,
-        string userLanguage,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
@@ -135,8 +137,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             Redirect = redirectUrl,
             InstitutionId = institutionId,
             Agreement = agreementId,
-            Reference = reference,
-            UserLanguage = userLanguage,
         };
 
         CreateRequisitionResponseDto response = await gocardlessClient.CreateRequisition(request, cancellationToken);
@@ -149,16 +149,15 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         return new Requisition
         {
             Id = response.Id,
+            Created = DateTime.UtcNow, // Set current time since GoCardless might not provide this
             Redirect = response.Redirect,
             Status = AccountLinkStatusMapper(response.Status),
             InstitutionId = response.InstitutionId,
-            Agreement = response.Agreement,
+            AgreementId = response.Agreement,
             Reference = response.Reference,
             Accounts = response.Accounts,
-            UserLanguage = response.UserLanguage,
-            AuthorizationLink = response.Link,
-            AccountSelection = response.AccountSelection,
-            RedirectImmediate = response.RedirectImmediate,
+            AuthenticationLink = response.Link,
+            AccountSelection = response.AccountSelection.ToString(),
         };
     }
 
@@ -177,21 +176,20 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         return new Requisition
         {
             Id = response.Id,
+            Created = DateTime.UtcNow, // Set current time since GoCardless might not provide this
             Redirect = response.Redirect,
             Status = AccountLinkStatusMapper(response.Status),
             InstitutionId = response.InstitutionId,
-            Agreement = response.Agreement,
+            AgreementId = response.Agreement,
             Reference = response.Reference,
             Accounts = response.Accounts,
-            UserLanguage = response.UserLanguage,
-            AuthorizationLink = response.Link ?? string.Empty,
-            AccountSelection = response.AccountSelection,
-            RedirectImmediate = response.RedirectImmediate,
+            AuthenticationLink = response.Link ?? string.Empty,
+            AccountSelection = response.AccountSelection.ToString(),
         };
     }
 
     /// <inheritdoc />
-    public async Task<Account> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
+    public async Task<AccountMetadata> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Retrieving account metadata for account {AccountId}", accountId);
 
@@ -199,19 +197,12 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         logger.LogInformation("Successfully retrieved account metadata for account {AccountId}", accountId);
 
-        return new Account
+        return new AccountMetadata
         {
             Id = response.Id,
-            Created = response.Created,
-            LastAccessed = response.LastAccessed,
-            Iban = response.Iban,
-            Bban = response.Bban,
             Status = response.Status,
             InstitutionId = response.InstitutionId,
-            OwnerName = response.OwnerName,
             Name = response.Name,
-            Currency = null, // Not provided in account metadata
-            AccountType = BankAccountType.Checking, // Default, could be enhanced
         };
     }
 
@@ -232,9 +223,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             Currency = balance.BalanceAmount.Currency,
             BalanceType = balance.BalanceType,
             CreditLimitIncluded = balance.CreditLimitIncluded,
-            LastChangeDateTime = ParseDateTime(balance.LastChangeDateTime),
             ReferenceDate = ParseDateTime(balance.ReferenceDate),
-            LastCommittedTransaction = balance.LastCommittedTransaction,
         });
     }
 
@@ -251,59 +240,37 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         return new AccountDetail
         {
-            ResourceId = response.Account.ResourceId,
-            Iban = response.Account.Iban,
-            Bban = response.Account.Bban,
-            Scan = response.Account.Scan,
-            Msisdn = response.Account.Msisdn,
+            Id = response.Account.ResourceId,
             Currency = response.Account.Currency,
-            OwnerName = response.Account.OwnerName,
             Name = response.Account.Name,
             DisplayName = response.Account.DisplayName,
             Product = response.Account.Product,
             CashAccountType = response.Account.CashAccountType,
             Status = response.Account.Status,
-            Bic = response.Account.Bic,
-            LinkedAccounts = response.Account.LinkedAccounts,
-            MaskedPan = response.Account.MaskedPan,
-            Usage = response.Account.Usage,
-            Details = response.Account.Details,
-            OwnerAddressUnstructured = response.Account.OwnerAddressUnstructured,
-            OwnerAddressStructured = response.Account.OwnerAddressStructured != null
-                ? new OwnerAddressStructured
-                {
-                    StreetName = response.Account.OwnerAddressStructured.StreetName,
-                    BuildingNumber = response.Account.OwnerAddressStructured.BuildingNumber,
-                    TownName = response.Account.OwnerAddressStructured.TownName,
-                    PostCode = response.Account.OwnerAddressStructured.PostCode,
-                    Country = response.Account.OwnerAddressStructured.Country,
-                }
-                : null,
-            AdditionalAccountData = response.Account.AdditionalAccountData?.SecondaryIdentification,
         };
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Transaction>> GetAccountTransactionsAsync(
+    public async Task<IEnumerable<TransactionMetadata>> GetAccountTransactionsAsync(
         string accountId,
-        DateTime? dateFrom = null,
-        DateTime? dateTo = null,
+        DateTimeOffset dateFrom,
+        DateTimeOffset dateTo,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Retrieving account transactions for account {AccountId}", accountId);
 
-        string? dateFromStr = dateFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        string? dateToStr = dateTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        string? dateFromStr = dateFrom.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        string? dateToStr = dateTo.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-        GetAccountTransactionsResponseDto response =
+        var response =
             await gocardlessClient.GetAccountTransactions(accountId, dateFromStr, dateToStr, cancellationToken);
 
-        List<Transaction> transactions = [];
+        List<TransactionMetadata> transactions = [];
 
         // Add booked transactions
         foreach (TransactionDto transaction in response.Transactions.Booked)
         {
-            transactions.Add(MapTransactionDto(transaction, false));
+            transactions.Add(MapTransactionDto(transaction, accountId, false));
         }
 
         // Add pending transactions if available
@@ -311,7 +278,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         {
             foreach (TransactionDto transaction in response.Transactions.Pending)
             {
-                transactions.Add(MapTransactionDto(transaction, true));
+                transactions.Add(MapTransactionDto(transaction, accountId, true));
             }
         }
 
@@ -320,9 +287,11 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         return transactions;
     }
 
-    private static Transaction MapTransactionDto(TransactionDto dto, bool isPending) =>
+    private static TransactionMetadata MapTransactionDto(TransactionDto dto, string accountId, bool isPending) =>
         new()
         {
+            Id = $"{accountId}_{dto.TransactionId ?? Guid.NewGuid().ToString()}", // Composite ID
+            AccountId = accountId,
             TransactionId = dto.TransactionId,
             Amount = decimal.Parse(dto.TransactionAmount.Amount, CultureInfo.InvariantCulture),
             Currency = dto.TransactionAmount.Currency,
@@ -330,8 +299,8 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             ValueDate = ParseDateTime(dto.ValueDate),
             CreditorName = dto.CreditorName,
             DebtorName = dto.DebtorName,
-            CreditorAccountIban = dto.CreditorAccount?.Iban,
-            DebtorAccountIban = dto.DebtorAccount?.Iban,
+            CreditorAccount = dto.CreditorAccount?.Iban,
+            DebtorAccount = dto.DebtorAccount?.Iban,
             RemittanceInformationUnstructured = dto.RemittanceInformationUnstructured,
             BankTransactionCode = dto.BankTransactionCode,
             ProprietaryBankTransactionCode = dto.ProprietaryBankTransactionCode,

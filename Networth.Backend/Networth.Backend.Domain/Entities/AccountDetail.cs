@@ -8,37 +8,12 @@ public class AccountDetail
     /// <summary>
     ///     Gets or sets the resource ID.
     /// </summary>
-    public string? ResourceId { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the IBAN.
-    /// </summary>
-    public string? Iban { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the BBAN.
-    /// </summary>
-    public string? Bban { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the SortCodeAccountNumber returned by some UK banks.
-    /// </summary>
-    public string? Scan { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the MSISDN.
-    /// </summary>
-    public string? Msisdn { get; set; }
+    public string? Id { get; set; }
 
     /// <summary>
     ///     Gets or sets the currency.
     /// </summary>
     public string? Currency { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the owner name.
-    /// </summary>
-    public string? OwnerName { get; set; }
 
     /// <summary>
     ///     Gets or sets the account name.
@@ -64,44 +39,4 @@ public class AccountDetail
     ///     Gets or sets the status.
     /// </summary>
     public string? Status { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the BIC.
-    /// </summary>
-    public string? Bic { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the linked accounts.
-    /// </summary>
-    public string? LinkedAccounts { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the masked PAN.
-    /// </summary>
-    public string? MaskedPan { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the usage.
-    /// </summary>
-    public string? Usage { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the details.
-    /// </summary>
-    public string? Details { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the owner address unstructured.
-    /// </summary>
-    public string[]? OwnerAddressUnstructured { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the owner address structured.
-    /// </summary>
-    public OwnerAddressStructured? OwnerAddressStructured { get; set; }
-
-    /// <summary>
-    ///     Gets or sets additional account data.
-    /// </summary>
-    public string? AdditionalAccountData { get; set; }
 }

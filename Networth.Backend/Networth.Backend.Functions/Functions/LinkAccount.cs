@@ -1,12 +1,7 @@
 using System.Net;
-using System.Text.Json;
-using FluentValidation;
-using FluentValidation.Results;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Extensions.Logging;
 using Networth.Backend.Application.Commands;
 using Networth.Backend.Application.Handlers;
 using Networth.Backend.Functions.Models.Requests;
@@ -17,10 +12,7 @@ namespace Networth.Backend.Functions.Functions;
 /// <summary>
 ///     Azure Function for linking bank accounts by creating agreements and requisitions.
 /// </summary>
-public class LinkAccount(
-    ILinkAccountCommandHandler linkAccountHandler,
-    IValidator<LinkAccountRequest> validator,
-    ILogger<LinkAccount> logger)
+public class LinkAccount(LinkAccountCommandHandler linkAccountHandler)
 {
     /// <summary>
     ///     Links a bank account by creating an agreement and requisition in sequence.
@@ -52,41 +44,8 @@ public class LinkAccount(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = "account/link")] [FromBodyAttributes]
         LinkAccountRequest request)
     {
-        try
-        {
-            // Validate the request using FluentValidation
-            ValidationResult validationResult = await validator.ValidateAsync(request);
-            if (!validationResult.IsValid)
-            {
-                logger.LogWarning(
-                    "Validation failed for LinkAccount request: {Errors}",
-                    string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
-
-                return new BadRequestObjectResult(new
-                {
-                    Message = "Validation failed",
-                    Errors = validationResult.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }),
-                });
-            }
-
-            LinkAccountCommand command = new()
-            {
-                InstitutionId = request.InstitutionId,
-            };
-
-            LinkAccountCommandResult result = await linkAccountHandler.HandleAsync(command);
-            logger.LogInformation("Successfully linked account for institution {InstitutionId}.", request.InstitutionId);
-            return new OkObjectResult(result);
-        }
-        catch (JsonException ex)
-        {
-            logger.LogError(ex, "Failed to deserialize LinkAccount request");
-            return new BadRequestObjectResult("Invalid JSON format");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error linking account");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-        }
+        LinkAccountCommand command = new() { InstitutionId = request.InstitutionId };
+        LinkAccountCommandResult result = await linkAccountHandler.HandleAsync(command);
+        return new OkObjectResult(result);
     }
 }

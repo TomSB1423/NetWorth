@@ -6,12 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
     <PackageReference Include="FluentValidation"/>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Handlers\"/>
-    <Folder Include="Queries\"/>
     <Folder Include="Validators\"/>
   </ItemGroup>
 
