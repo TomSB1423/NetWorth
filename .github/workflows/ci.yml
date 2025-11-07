@@ -1,4 +1,4 @@
-name: .NET Aspire Samples CI
+name: CI
 
 on:
   push:
@@ -18,28 +18,25 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    name: Build & Test Samples
+    runs-on: ubuntu-latest
+    name: Build & Test
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_NOLOGO: true
       DOTNET_MULTILEVEL_LOOKUP: false
-      DOTNET_INSTALL_DIR: ${{ matrix.os == 'ubuntu-latest' && '' || 'dotnet' }}
       ASPIRE_ALLOW_UNSECURED_TRANSPORT: true
       SuppressNETCoreSdkPreviewMessage: true
       DCP_DIAGNOSTICS_LOG_LEVEL: "debug"
+      TESTCONTAINERS_RYUK_DISABLED: false
+      TESTCONTAINERS_HOST_OVERRIDE: localhost
+      DOCKER_HOST: unix:///var/run/docker.sock
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Install Docker (latest version)
-        if: matrix.os == 'ubuntu-latest'
         uses: docker/setup-docker-action@b60f85385d03ac8acfca6d9996982511d8620a19 #v4.3.0
 
       - name: Install Azure Functions Core Tools
-        if: matrix.os == 'ubuntu-latest'
         run: |
           wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
           sudo dpkg -i packages-microsoft-prod.deb
@@ -49,45 +46,53 @@ jobs:
       - name: Install .NET SDK (global.json)
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
         with:
-          global-json-file: ${{ matrix.os == 'ubuntu-latest' && './global.json' || '.\global.json' }}
+          global-json-file: ./global.json
 
       - name: Print .NET info
         run: dotnet --info
+
+      - name: Install Aspire workload
+        run: dotnet workload install aspire
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "20.x"
 
       - name: Install & trust dev-certs
-        id: install-dev-certs
-        # Trusting certs on Windows throws a prompt so will halt the build
-        if: matrix.os == 'ubuntu-latest'
         run: dotnet dev-certs https --trust
 
-      - name: Build
-        run: ${{ matrix.os == 'ubuntu-latest' && './build.sh' || '.\build.cmd' }}
+      - name: Restore dependencies
+        run: dotnet restore Networth.sln
+
+      - name: Build solution
+        run: dotnet build Networth.sln --no-restore --configuration Release
 
       - name: Test
         id: test
-        # We only test on Ubuntu because Windows agents don't support Docker with WSL
-        if: matrix.os == 'ubuntu-latest'
-        # Note that the space after the last double dash (--) is intentional
         run: >
           dotnet test Networth.sln
-          --logger console --logger trx --logger html
-          --results-directory ./TestResults --blame
+          --no-build
+          --configuration Release
+          --logger console
+          --logger trx
+          --logger html
+          --results-directory ./TestResults
+          --blame
+          --collect:"XPlat Code Coverage"
           --
           RunConfiguration.CollectSourceInformation=true
 
       - name: Copy DCP logs
-        if: (success() || steps.test.conclusion == 'failure') && matrix.os == 'ubuntu-latest'
+        if: (success() || steps.test.conclusion == 'failure')
         run: |
           mkdir -p ./TestResults/DCPLogs
-          cp -r /tmp/dcp/logs/* ./TestResults/DCPLogs
+          if [ -d "/tmp/dcp/logs" ]; then
+            cp -r /tmp/dcp/logs/* ./TestResults/DCPLogs 2>/dev/null || true
+          fi
 
       - name: Publish Test Results
-        if: (success() || steps.test.conclusion == 'failure') && matrix.os == 'ubuntu-latest'
+        if: (success() || steps.test.conclusion == 'failure')
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
-          name: TestResults_${{ matrix.os }}
+          name: test-results
           path: ./TestResults
