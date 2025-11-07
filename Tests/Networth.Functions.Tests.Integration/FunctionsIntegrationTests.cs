@@ -35,20 +35,15 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
         // Arrange
         await using var app = await CreateTestBuilderAsync(_mockoonFixture.MockoonBaseUrl);
         await app.StartAsync();
-        await app.StartAsync();
 
         // Act
         using var cts = new CancellationTokenSource(TestTimeouts.Default);
 
-
-        // Act
+        _output.WriteLine("=== Starting Aspire Integration Test ===");
+        _output.WriteLine($"Test timeout: {TestTimeouts.Default.TotalMinutes} minutes");
         _output.WriteLine($"Mockoon base URL: {_mockoonFixture.MockoonBaseUrl}");
 
         // Log initial resource states
-        _output.WriteLine("=== Starting Aspire Integration Test ===");
-
-        _output.WriteLine($"Test timeout: {TestTimeouts.Default.TotalMinutes} minutes");
-        var httpClient = app.CreateHttpClient(AspireResourceNames.Functions);
         await LogResourceStatesAsync(app, _output);
 
         // Create HTTP client and wait for Functions to be ready by polling the endpoint
@@ -130,71 +125,75 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
                     throw new TimeoutException($"Test timeout reached after {attempt} attempts while waiting between retries. Functions endpoint never became ready.", lastException);
                 }
             }
+        }
+
+        if (response == null || !response.IsSuccessStatusCode)
+        {
             _output.WriteLine("=== MAX ATTEMPTS REACHED ===");
             await LogResourceStatesAsync(app, _output);
 
-        }
+            var statusInfo = response != null ? $"Status: {response.StatusCode}" : "No response received";
             var lastExMsg = lastException != null ? $"Last exception: {lastException.Message}" : "No exceptions";
 
-
+            throw new InvalidOperationException(
                 $"Functions endpoint did not become ready after {maxAttempts} attempts. {statusInfo}. {lastExMsg}",
-        {
-            _output.WriteLine("=== MAX ATTEMPTS REACHED ===");
+                lastException);
         }
+
         _output.WriteLine("=== Test Successful - Endpoint Ready ===");
 
-        return await appBuilder.BuildAsync();
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync(cts.Token);
+        Assert.False(string.IsNullOrWhiteSpace(content), "Response content should not be empty");
+
+        using var jsonDoc = JsonDocument.Parse(content);
+        var institutionsElement = jsonDoc.RootElement.ValueKind == JsonValueKind.Array
+            ? jsonDoc.RootElement
+            : jsonDoc.RootElement.GetProperty("value");
+
+        var institutions = institutionsElement.EnumerateArray().ToList();
+        Assert.True(institutions.Count > 0, "Should return at least one institution");
+
+        var firstInstitution = institutions.First();
+        Assert.True(firstInstitution.TryGetProperty("id", out JsonElement _), "Institution should have 'id' property");
+        Assert.True(firstInstitution.TryGetProperty("name", out JsonElement _), "Institution should have 'name' property");
+
+        // Verify we got mock data from Mockoon
+        var firstInstitutionId = firstInstitution.GetProperty("id").GetString();
+        Assert.Contains("ABNAMRO_ABNAGB2LXXX", firstInstitutionId ?? string.Empty);
+
+        _output.WriteLine("=== All Assertions Passed ===");
     }
 
     /// <summary>
-    ///     Logs the current state of all resources in the Aspire app.
+    ///     Creates a configured Aspire application builder for testing.
     /// </summary>
-    private static async Task LogResourceStatesAsync(DistributedApplication app, ITestOutputHelper output)
+    /// <param name="mockoonBaseUrl">The base URL for the Mockoon API.</param>
+    /// <returns>A configured distributed application.</returns>
+    private static async Task<DistributedApplication> CreateTestBuilderAsync(string mockoonBaseUrl)
     {
-        output.WriteLine("--- Resource States ---");
+        var appBuilder = await DistributedApplicationTestingBuilder
+            .CreateAsync(typeof(Projects.Networth_AppHost));
 
-        try
-        {
-            var resourceNames = new[] { "postgres", "networth-db", "functions", "funcstoragecf0b0", "react" };
+        // Configure Mockoon URL instead of real GoCardless
+        appBuilder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = mockoonBaseUrl;
+        appBuilder.Configuration[GoCardlessConfiguration.SecretId] = GoCardlessConfiguration.TestSecretId;
+        appBuilder.Configuration[GoCardlessConfiguration.SecretKey] = GoCardlessConfiguration.TestSecretKey;
 
-            foreach (var resourceName in resourceNames)
-            {
-                try
-                {
-                    var resource = app.Resources.FirstOrDefault(r => r.Name == resourceName);
-                    if (resource != null)
-                    {
+        // Note: We don't add the standard resilience handler here as it has a 30-second timeout
+        // which can cause issues during initial startup when migrations are running.
+        // The test itself handles retries with appropriate delays.
 
-        _output.WriteLine("=== All Assertions Passed ===");
-                        // Try to get the latest snapshot
-                        var snapshot = await app.ResourceNotifications.WaitForResourceAsync(resourceName,
-                            r => r.State != null,
-                            CancellationToken.None)
-                            .WaitAsync(TimeSpan.FromSeconds(1));
+        // Configure logging
+        appBuilder.Services.AddLogging(logging => logging
+            .AddConsole()
+            .AddFilter("Default", LogLevel.Information)
+            .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
+            .AddFilter("Aspire.Hosting.Dcp", LogLevel.Warning));
 
-                        output.WriteLine($"  {resourceName}: State={snapshot?.State?.Text ?? "unknown"}, Health={snapshot?.HealthStatus ?? "unknown"}");
-                    }
-                    else
-                    {
-                        output.WriteLine($"  {resourceName}: NOT FOUND");
-                    }
-                }
-                catch (TimeoutException)
-                {
-                    output.WriteLine($"  {resourceName}: TIMEOUT getting state");
-                }
-                catch (Exception ex)
-                {
-                    output.WriteLine($"  {resourceName}: ERROR - {ex.Message}");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            output.WriteLine($"ERROR logging resource states: {ex.Message}");
-        }
-
-        output.WriteLine("--- End Resource States ---");
+        return await appBuilder.BuildAsync();
     }
 
     /// <summary>
@@ -214,8 +213,9 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
                 {
                     // Try to wait for the resource with a short timeout to see if it responds
                     await app.ResourceNotifications.WaitForResourceAsync(
-                        resourceName,
-                        CancellationToken.None)
+                            resourceName,
+                            _ => true,
+                            CancellationToken.None)
                         .WaitAsync(TimeSpan.FromMilliseconds(500));
 
                     output.WriteLine($"  {resourceName}: Found and responsive");
