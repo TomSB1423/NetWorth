@@ -48,7 +48,10 @@ jobs:
           docker ps
           docker info
           # Wait for Docker to be fully ready
-          timeout 30 bash -c 'until docker info &>/dev/null; do sleep 1; done' || true
+          if ! timeout 30 bash -c 'until docker info &>/dev/null; do sleep 1; done'; then
+            echo "Docker failed to initialize within 30 seconds"
+            exit 1
+          fi
       
       - name: Configure IPv4 preference for localhost
         run: |
@@ -72,9 +75,14 @@ jobs:
           dotnet dev-certs https --clean
           # Generate new certificate
           dotnet dev-certs https
-          # Export certificate in PEM format for system trust (requires sudo for system directory)
+          # Export certificate to a temporary location first
+          dotnet dev-certs https -ep ~/https.crt --format PEM --no-password
+          # Copy to system directory with sudo
           sudo mkdir -p /usr/local/share/ca-certificates/aspnet
-          sudo dotnet dev-certs https -ep /usr/local/share/ca-certificates/aspnet/https.crt --format PEM --no-password
+          sudo cp ~/https.crt /usr/local/share/ca-certificates/aspnet/https.crt
+          sudo chmod 644 /usr/local/share/ca-certificates/aspnet/https.crt
+          # Clean up temporary file
+          rm ~/https.crt ~/https.key
           # Trust the certificate system-wide
           sudo update-ca-certificates
 
