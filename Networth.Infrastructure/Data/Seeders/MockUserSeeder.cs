@@ -26,12 +26,17 @@ public static class MockUserSeeder
 
         try
         {
-            // Apply pending migrations
-            await context.Database.MigrateAsync();
+            logger.LogInformation("Starting database migration and seeding...");
+
+            // Apply pending migrations with timeout
+            using CancellationTokenSource migrationCts = new(TimeSpan.FromMinutes(2));
+            await context.Database.MigrateAsync(migrationCts.Token);
+
+            logger.LogInformation("Database migration completed successfully");
 
             // Check if mock user already exists
             const string mockUserId = "mock-user-123";
-            bool userExists = await context.Users.AnyAsync(u => u.Id == mockUserId);
+            bool userExists = await context.Users.AnyAsync(u => u.Id == mockUserId, migrationCts.Token);
 
             if (!userExists)
             {
@@ -41,8 +46,8 @@ public static class MockUserSeeder
                     Name = "Mock Development User",
                 };
 
-                await context.Users.AddAsync(mockUser);
-                await context.SaveChangesAsync();
+                await context.Users.AddAsync(mockUser, migrationCts.Token);
+                await context.SaveChangesAsync(migrationCts.Token);
 
                 logger.LogInformation("Mock user seeded successfully");
             }
@@ -51,9 +56,15 @@ public static class MockUserSeeder
                 logger.LogInformation("Mock user already exists");
             }
         }
+        catch (OperationCanceledException ex)
+        {
+            logger.LogError(ex, "Database migration or seeding timed out");
+            throw; // Re-throw to prevent app from starting with incomplete database
+        }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while seeding the mock user");
+            logger.LogError(ex, "An error occurred while migrating database or seeding the mock user");
+            throw; // Re-throw to prevent app from starting with incomplete database
         }
     }
 }

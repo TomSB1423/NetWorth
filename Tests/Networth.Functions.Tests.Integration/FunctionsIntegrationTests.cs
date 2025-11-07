@@ -38,13 +38,46 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
         // Wait for database to be ready first
         await app.ResourceNotifications.WaitForResourceHealthyAsync("networth-db", cts.Token);
 
-        // Then wait for Functions to be ready
-        await app.ResourceNotifications.WaitForResourceHealthyAsync(AspireResourceNames.Functions, cts.Token);
-
+        // Create HTTP client and wait for Functions to be ready by polling the endpoint
         var httpClient = app.CreateHttpClient(AspireResourceNames.Functions);
-        var response = await httpClient.GetAsync("/api/institutions", cts.Token);
+
+        // Poll the endpoint until it responds (Functions app might still be migrating database)
+        var maxAttempts = 30; // 30 attempts with 2 second delays = 60 seconds max
+        var delayBetweenAttempts = TimeSpan.FromSeconds(2);
+        HttpResponseMessage? response = null;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                response = await httpClient.GetAsync("/api/institutions", cts.Token);
+                if (response.IsSuccessStatusCode)
+                {
+                    break;
+                }
+            }
+            catch (HttpRequestException)
+            {
+                // Functions app not ready yet
+                if (attempt == maxAttempts)
+                {
+                    throw;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Timeout on individual request
+                if (attempt == maxAttempts)
+                {
+                    throw;
+                }
+            }
+
+            await Task.Delay(delayBetweenAttempts, cts.Token);
+        }
 
         // Assert
+        Assert.NotNull(response);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync(cts.Token);
@@ -82,11 +115,9 @@ public class FunctionsIntegrationTests : IClassFixture<MockoonTestFixture>
         appBuilder.Configuration[GoCardlessConfiguration.SecretId] = GoCardlessConfiguration.TestSecretId;
         appBuilder.Configuration[GoCardlessConfiguration.SecretKey] = GoCardlessConfiguration.TestSecretKey;
 
-        // Configure HTTP client resilience
-        appBuilder.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        {
-            clientBuilder.AddStandardResilienceHandler();
-        });
+        // Note: We don't add the standard resilience handler here as it has a 30-second timeout
+        // which can cause issues during initial startup when migrations are running.
+        // The test itself handles retries with appropriate delays.
 
         // Configure logging
         appBuilder.Services.AddLogging(logging => logging
