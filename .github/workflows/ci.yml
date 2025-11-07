@@ -74,7 +74,6 @@ jobs:
           --logger console
           --logger trx
           --logger html
-          --logger GitHubActions
           --results-directory ./TestResults
           --blame
           --collect:"XPlat Code Coverage"
