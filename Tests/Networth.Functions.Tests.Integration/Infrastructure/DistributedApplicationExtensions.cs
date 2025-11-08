@@ -24,7 +24,8 @@ public static class DistributedApplicationExtensions
         string baseUrl)
         where TBuilder : IDistributedApplicationTestingBuilder
     {
-        builder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = baseUrl;
+        // Mockoon expects /api/v2 prefix, so append it to the base URL
+        builder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = $"{baseUrl}/api/v2";
         builder.Configuration[GoCardlessConfiguration.SecretId] = GoCardlessConfiguration.TestSecretId;
         builder.Configuration[GoCardlessConfiguration.SecretKey] = GoCardlessConfiguration.TestSecretKey;
         return builder;
