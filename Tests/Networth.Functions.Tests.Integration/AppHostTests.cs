@@ -17,7 +17,7 @@ public class AppHostTests(ITestOutputHelper testOutput)
         await app.StartAsync().WaitAsync(StartStopTimeout);
         await app.WaitForResourcesAsync().WaitAsync(StartStopTimeout);
 
-        // app.EnsureNoErrorsLogged();
+        app.EnsureNoErrorsLogged();
 
         await app.StopAsync().WaitAsync(BuildStopTimeout);
     }

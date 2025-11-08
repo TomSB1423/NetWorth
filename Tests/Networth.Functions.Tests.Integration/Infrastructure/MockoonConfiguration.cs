@@ -24,9 +24,4 @@ public static class MockoonConfiguration
     ///     Gets the container mount path for mock data.
     /// </summary>
     public const string ContainerDataPath = "/data/mockoon-gocardless-spec.json";
-
-    /// <summary>
-    ///     Gets the initialization delay in milliseconds.
-    /// </summary>
-    public const int InitializationDelayMs = 2000;
 }
