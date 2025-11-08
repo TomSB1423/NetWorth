@@ -34,7 +34,7 @@ internal static class DistributedApplicationTestFactory
                 logging.AddXUnit(testOutput);
             }
 
-            logging.SetMinimumLevel(LogLevel.Information);
+            logging.SetMinimumLevel(LogLevel.Error);
             logging.AddFilter("Aspire", LogLevel.Information);
             logging.AddFilter(builder.Environment.ApplicationName, LogLevel.Information);
         });

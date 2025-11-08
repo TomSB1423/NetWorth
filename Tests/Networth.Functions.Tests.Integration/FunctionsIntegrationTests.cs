@@ -29,16 +29,13 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
         await app.WaitForResourcesAsync().WaitAsync(StartStopTimeout);
 
         // Act
-        var httpClient = app.CreateHttpClient(ResourceNames.Functions, false);
+        HttpClient httpClient = app.CreateHttpClient(ResourceNames.Functions, true);
         var response = await httpClient.GetAsync("/api/institutions", CancellationToken.None);
 
         // Assert
-        string content = await response.Content.ReadAsStringAsync(CancellationToken.None);
-        // log content
-        testOutput.WriteLine("Response Content: " + content);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        content = await response.Content.ReadAsStringAsync(CancellationToken.None);
+        string content = await response.Content.ReadAsStringAsync(CancellationToken.None);
         Assert.False(string.IsNullOrWhiteSpace(content), "Response content should not be empty");
 
         using var jsonDoc = JsonDocument.Parse(content);
