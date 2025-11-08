@@ -1,14 +1,15 @@
-namespace Networth.Functions.Tests.Integration;
-
 using System.Text.Json;
-using Fixtures;
-using Infrastructure;
 using MyApp.AppHost;
+using Networth.Functions.Tests.Integration.Fixtures;
+using Networth.Functions.Tests.Integration.Infrastructure;
+using Xunit.Abstractions;
+
+namespace Networth.Functions.Tests.Integration;
 
 /// <summary>
 ///     Integration tests for the Azure Functions backend using shared Mockoon fixture.
 /// </summary>
-public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture) : IClassFixture<MockoonTestFixture>
+public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput) : IClassFixture<MockoonTestFixture>
 {
     private static readonly TimeSpan BuildStopTimeout = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan StartStopTimeout = TimeSpan.FromSeconds(120);
@@ -16,18 +17,16 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture) : 
     /// <summary>
     ///     Tests that the GetInstitutions endpoint returns OK status code and valid JSON response.
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
     [Fact]
     public async Task GetInstitutionsEndpointReturnsOkStatusCodeAndValidJson()
     {
         // Arrange
-        await using var appHost = await DistributedApplicationTestFactory.CreateAsync(appHostPath, testOutput);
+        await using IDistributedApplicationTestingBuilder appHost = await DistributedApplicationTestFactory.CreateAsync(testOutput);
         appHost.ConfigureMockoonForResource(mockoonTestFixture.MockoonBaseUrl);
         await using var app = await appHost.BuildAsync().WaitAsync(BuildStopTimeout);
 
         await app.StartAsync().WaitAsync(StartStopTimeout);
         await app.WaitForResourcesAsync().WaitAsync(StartStopTimeout);
-        await app.WaitForResourcesAsync([ResourceNames.Postgres, ResourceNames.NetworthDb, ResourceNames.Functions]).WaitAsync(StartStopTimeout);
 
         // Act
         var httpClient = app.CreateHttpClient(ResourceNames.Functions, false);

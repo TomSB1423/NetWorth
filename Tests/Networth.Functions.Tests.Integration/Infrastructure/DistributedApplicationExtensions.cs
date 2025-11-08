@@ -34,7 +34,6 @@ public static class DistributedApplicationExtensions
     ///     Sets the container lifetime for all container resources in the application.
     /// </summary>
     /// <typeparam name="TBuilder">The type of the distributed application testing builder.</typeparam>
-    /// <returns></returns>
     public static TBuilder WithContainersLifetime<TBuilder>(this TBuilder builder, ContainerLifetime containerLifetime)
         where TBuilder : IDistributedApplicationTestingBuilder
     {
@@ -60,7 +59,6 @@ public static class DistributedApplicationExtensions
     ///     shared across those resources in the test run.
     /// </remarks>
     /// <typeparam name="TBuilder">The type of the distributed application testing builder.</typeparam>
-    /// <returns></returns>
     public static TBuilder WithRandomVolumeNames<TBuilder>(this TBuilder builder)
         where TBuilder : IDistributedApplicationTestingBuilder
     {
@@ -103,9 +101,6 @@ public static class DistributedApplicationExtensions
     /// <summary>
     ///     Waits for the specified resource to reach the specified state.
     /// </summary>
-    /// <returns>
-    ///     <placeholder>A <see cref="Task" /> representing the asynchronous operation.</placeholder>
-    /// </returns>
     public static Task WaitForResource(
         this DistributedApplication app,
         string resourceName,
@@ -125,9 +120,6 @@ public static class DistributedApplicationExtensions
     ///     If <paramref name="targetStates" /> is null, the default states are <see cref="KnownResourceStates.Running" /> and
     ///     <see cref="KnownResourceStates.Hidden" />.
     /// </remarks>
-    /// <returns>
-    ///     <placeholder>A <see cref="Task" /> representing the asynchronous operation.</placeholder>
-    /// </returns>
     public static async Task WaitForResourcesAsync(
         this DistributedApplication app,
         IEnumerable<string>? targetStates = null,
@@ -262,14 +254,12 @@ public static class DistributedApplicationExtensions
     /// <summary>
     ///     Creates an <see cref="HttpClient" /> configured to communicate with the specified resource.
     /// </summary>
-    /// <returns></returns>
     public static HttpClient CreateHttpClient(this DistributedApplication app, string resourceName, bool useHttpClientFactory)
         => app.CreateHttpClient(resourceName, null, useHttpClientFactory);
 
     /// <summary>
     ///     Creates an <see cref="HttpClient" /> configured to communicate with the specified resource.
     /// </summary>
-    /// <returns></returns>
     public static HttpClient CreateHttpClient(
         this DistributedApplication app,
         string resourceName,
@@ -294,7 +284,6 @@ public static class DistributedApplicationExtensions
     ///     Creates an <see cref="HttpClient" /> configured to communicate with the specified resource with custom
     ///     configuration.
     /// </summary>
-    /// <returns></returns>
     public static HttpClient CreateHttpClient(
         this DistributedApplication app,
         string resourceName,
@@ -317,9 +306,6 @@ public static class DistributedApplicationExtensions
     ///     Attempts to apply EF migrations for the specified project by sending a request to the migrations endpoint
     ///     <c>/ApplyDatabaseMigrations</c>.
     /// </summary>
-    /// <returns>
-    ///     <placeholder>A <see cref="Task" /> representing the asynchronous operation.</placeholder>
-    /// </returns>
     public static async Task<bool> TryApplyEfMigrationsAsync(this DistributedApplication app, ProjectResource project)
     {
         var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(TryApplyEfMigrationsAsync));

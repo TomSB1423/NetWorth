@@ -1,8 +1,8 @@
-namespace Networth.Functions.Tests.Integration.Fixtures;
-
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using Infrastructure;
+using Networth.Functions.Tests.Integration.Infrastructure;
+
+namespace Networth.Functions.Tests.Integration.Fixtures;
 
 /// <summary>
 ///     Test fixture providing Mockoon container for GoCardless API mocking.
@@ -23,7 +23,6 @@ public class MockoonTestFixture : IAsyncLifetime
     /// <summary>
     ///     Initializes the fixture by starting the Mockoon container.
     /// </summary>
-    /// <returns></returns>
     public async Task InitializeAsync()
     {
         Container = new ContainerBuilder()
@@ -48,7 +47,6 @@ public class MockoonTestFixture : IAsyncLifetime
     /// <summary>
     ///     Disposes the fixture by stopping the Mockoon container.
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public async Task DisposeAsync()
     {
         if (Container != null)

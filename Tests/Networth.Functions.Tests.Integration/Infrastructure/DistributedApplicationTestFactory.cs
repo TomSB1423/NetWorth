@@ -1,28 +1,25 @@
-namespace Networth.Functions.Tests.Integration.Infrastructure;
-
-using System.Reflection;
 using Microsoft.Extensions.Logging;
+using Projects;
 using Xunit.Abstractions;
+
+namespace Networth.Functions.Tests.Integration.Infrastructure;
 
 internal static class DistributedApplicationTestFactory
 {
     /// <summary>
     ///     Creates an <see cref="IDistributedApplicationTestingBuilder" /> for the specified app host assembly.
     /// </summary>
-    /// <returns>
-    ///     <placeholder>A <see cref="Task" /> representing the asynchronous operation.</placeholder>
-    /// </returns>
-    public static async Task<IDistributedApplicationTestingBuilder> CreateAsync(string appHostAssemblyPath, ITestOutputHelper? testOutput)
+    public static async Task<IDistributedApplicationTestingBuilder>
+        CreateAsync(ITestOutputHelper? testOutput, bool enableDashboard = false)
     {
-        var appHostProjectName = Path.GetFileNameWithoutExtension(appHostAssemblyPath) ??
-                                 throw new InvalidOperationException("AppHost assembly was not found.");
-
-        var appHostAssembly = Assembly.LoadFrom(Path.Combine(AppContext.BaseDirectory, appHostAssemblyPath));
-
-        var appHostType = appHostAssembly.GetTypes().FirstOrDefault(t => t.Name.EndsWith("_AppHost"))
-                          ?? throw new InvalidOperationException("Generated AppHost type not found.");
-
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync(appHostType);
+        IDistributedApplicationTestingBuilder? builder =
+            await DistributedApplicationTestingBuilder.CreateAsync<Networth_AppHost>(
+                [],
+                (appOptions, hostSettings) =>
+                {
+                    appOptions.DisableDashboard = !enableDashboard;
+                    appOptions.AllowUnsecuredTransport = enableDashboard;
+                });
 
         builder.WithRandomVolumeNames();
         builder.WithContainersLifetime(ContainerLifetime.Session);

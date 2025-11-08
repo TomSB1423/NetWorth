@@ -49,8 +49,6 @@ builder.Services
 IHost host = builder.Build();
 
 // Seed mock user for development
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-host.SeedMockUserAsync().GetAwaiter().GetResult();
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+await host.SeedMockUserAsync();
 
 host.Run();
