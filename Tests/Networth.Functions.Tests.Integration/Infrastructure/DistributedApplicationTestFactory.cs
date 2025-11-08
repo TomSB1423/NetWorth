@@ -19,6 +19,7 @@ internal static class DistributedApplicationTestFactory
                 {
                     appOptions.DisableDashboard = !enableDashboard;
                     appOptions.AllowUnsecuredTransport = enableDashboard;
+                    hostSettings.EnvironmentName = "Test";
                 });
 
         builder.WithRandomVolumeNames();
@@ -34,9 +35,9 @@ internal static class DistributedApplicationTestFactory
                 logging.AddXUnit(testOutput);
             }
 
-            logging.SetMinimumLevel(LogLevel.Trace);
-            logging.AddFilter("Aspire", LogLevel.Trace);
-            logging.AddFilter(builder.Environment.ApplicationName, LogLevel.Trace);
+            logging.SetMinimumLevel(LogLevel.Information);
+            logging.AddFilter("Aspire", LogLevel.Information);
+            logging.AddFilter(builder.Environment.ApplicationName, LogLevel.Information);
         });
 
         return builder;

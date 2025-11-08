@@ -4,10 +4,11 @@ using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MyApp.AppHost;
 using Networth.Application.Extensions;
 using Networth.Functions.Authentication;
 using Networth.Functions.Middleware;
-using Networth.Infrastructure.Data.Seeders;
+using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Extensions;
 using Serilog;
 
@@ -36,7 +37,7 @@ builder.Services.Configure<JsonSerializerOptions>(options =>
 });
 
 // Add Aspire observability to postgres
-builder.AddNpgsqlDataSource("networth-db");
+builder.AddNpgsqlDataSource(ResourceNames.NetworthDb);
 
 // Configure services
 builder.Services
@@ -48,7 +49,12 @@ builder.Services
 
 IHost host = builder.Build();
 
-// Seed mock user for development
-await host.SeedMockUserAsync();
+IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
+if (environment.IsDevelopment())
+{
+    await using AsyncServiceScope serviceScope = host.Services.CreateAsyncScope();
+    await using NetworthDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<NetworthDbContext>();
+    await dbContext.Database.EnsureCreatedAsync();
+}
 
 host.Run();

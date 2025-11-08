@@ -1,11 +1,11 @@
-namespace Networth.Functions.Tests.Integration.Infrastructure;
-
 using System.Diagnostics;
 using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
+
+namespace Networth.Functions.Tests.Integration.Infrastructure;
 
 /// <summary>
 ///     Extensions for working with distributed applications in tests.
@@ -24,7 +24,6 @@ public static class DistributedApplicationExtensions
         string baseUrl)
         where TBuilder : IDistributedApplicationTestingBuilder
     {
-        // Mockoon expects /api/v2 prefix, so append it to the base URL
         builder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = $"{baseUrl}/api/v2";
         builder.Configuration[GoCardlessConfiguration.SecretId] = GoCardlessConfiguration.TestSecretId;
         builder.Configuration[GoCardlessConfiguration.SecretKey] = GoCardlessConfiguration.TestSecretKey;

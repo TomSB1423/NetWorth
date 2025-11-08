@@ -26,17 +26,10 @@ public static class MockUserSeeder
 
         try
         {
-            logger.LogInformation("Starting database migration and seeding...");
+            logger.LogInformation("Seeding mock user...");
 
-            // Apply pending migrations with timeout
-            using CancellationTokenSource migrationCts = new(TimeSpan.FromMinutes(2));
-            await context.Database.MigrateAsync(migrationCts.Token);
-
-            logger.LogInformation("Database migration completed successfully");
-
-            // Check if mock user already exists
             const string mockUserId = "mock-user-123";
-            bool userExists = await context.Users.AnyAsync(u => u.Id == mockUserId, migrationCts.Token);
+            bool userExists = await context.Users.AnyAsync(u => u.Id == mockUserId);
 
             if (!userExists)
             {
@@ -46,25 +39,19 @@ public static class MockUserSeeder
                     Name = "Mock Development User",
                 };
 
-                await context.Users.AddAsync(mockUser, migrationCts.Token);
-                await context.SaveChangesAsync(migrationCts.Token);
+                await context.Users.AddAsync(mockUser);
+                await context.SaveChangesAsync();
 
                 logger.LogInformation("Mock user seeded successfully");
             }
             else
             {
-                logger.LogInformation("Mock user already exists");
+                logger.LogInformation("Mock user already exists, skipping seed");
             }
-        }
-        catch (OperationCanceledException ex)
-        {
-            logger.LogError(ex, "Database migration or seeding timed out");
-            throw; // Re-throw to prevent app from starting with incomplete database
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while migrating database or seeding the mock user");
-            throw; // Re-throw to prevent app from starting with incomplete database
+            logger.LogError(ex, "An error occurred while seeding the mock user");
         }
     }
 }

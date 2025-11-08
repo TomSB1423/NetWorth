@@ -50,5 +50,11 @@ public class NetworthDbContext : DbContext
 
         // Apply all configurations from the current assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(NetworthDbContext).Assembly);
+
+        // Seed mock user for development/testing
+        modelBuilder.Entity<User>().HasData(new User
+        {
+            Id = "mock-user-123", Name = "Mock Development User",
+        });
     }
 }

@@ -1,4 +1,5 @@
 using Aspire.Hosting.Azure;
+using Microsoft.Extensions.Hosting;
 using MyApp.AppHost;
 using Projects;
 
@@ -7,6 +8,11 @@ IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(ar
 IResourceBuilder<PostgresServerResource> postgres = builder
     .AddPostgres(ResourceNames.Postgres)
     .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
+
+if (!builder.Environment.IsEnvironment("Test"))
+{
+    postgres.WithDataVolume();
+}
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
     .AddDatabase(ResourceNames.NetworthDb);
