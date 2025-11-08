@@ -1,6 +1,6 @@
-using Networth.Infrastructure.Gocardless.Options;
-
 namespace Networth.Functions.Tests.Integration.Infrastructure;
+
+using Networth.Infrastructure.Gocardless.Options;
 
 /// <summary>
 ///     Configuration keys for GoCardless settings.

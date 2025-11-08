@@ -1,33 +1,32 @@
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
-using Networth.Functions.Tests.Integration.Infrastructure;
-
 namespace Networth.Functions.Tests.Integration.Fixtures;
 
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
+using Infrastructure;
+
 /// <summary>
-/// Test fixture providing Mockoon container for GoCardless API mocking.
-/// Shared across all tests in a test class via IClassFixture.
+///     Test fixture providing Mockoon container for GoCardless API mocking.
+///     Shared across all tests in a test class via IClassFixture.
 /// </summary>
 public class MockoonTestFixture : IAsyncLifetime
 {
-    private IContainer? _mockoonContainer;
-
     /// <summary>
-    /// Gets the Mockoon base URL for API calls.
+    ///     Gets the Mockoon base URL for API calls.
     /// </summary>
     public string MockoonBaseUrl { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Gets the Mockoon container instance.
+    ///     Gets the Mockoon container instance.
     /// </summary>
-    public IContainer? Container => _mockoonContainer;
+    public IContainer? Container { get; private set; }
 
     /// <summary>
-    /// Initializes the fixture by starting the Mockoon container.
+    ///     Initializes the fixture by starting the Mockoon container.
     /// </summary>
+    /// <returns></returns>
     public async Task InitializeAsync()
     {
-        _mockoonContainer = new ContainerBuilder()
+        Container = new ContainerBuilder()
             .WithImage(MockoonConfiguration.Image)
             .WithPortBinding(MockoonConfiguration.Port, true)
             .WithBindMount(
@@ -38,23 +37,24 @@ public class MockoonTestFixture : IAsyncLifetime
                 .UntilHttpRequestIsSucceeded(request => request
                     .ForPort(MockoonConfiguration.Port)
                     .ForPath("/ready")
-                    .ForStatusCode(System.Net.HttpStatusCode.OK)))
+                    .ForStatusCode(HttpStatusCode.OK)))
             .Build();
 
-        await _mockoonContainer.StartAsync();
+        await Container.StartAsync();
 
-        MockoonBaseUrl = $"http://{_mockoonContainer.Hostname}:{_mockoonContainer.GetMappedPublicPort(MockoonConfiguration.Port)}";
+        MockoonBaseUrl = $"http://{Container.Hostname}:{Container.GetMappedPublicPort(MockoonConfiguration.Port)}";
     }
 
     /// <summary>
-    /// Disposes the fixture by stopping the Mockoon container.
+    ///     Disposes the fixture by stopping the Mockoon container.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public async Task DisposeAsync()
     {
-        if (_mockoonContainer != null)
+        if (Container != null)
         {
-            await _mockoonContainer.StopAsync();
-            await _mockoonContainer.DisposeAsync();
+            await Container.StopAsync();
+            await Container.DisposeAsync();
         }
     }
 }
