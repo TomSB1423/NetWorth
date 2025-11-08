@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Networth.Functions\Networth.Functions.csproj"/>
-    <ProjectReference Include="..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj"/>
+    <ProjectReference Include="..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj" IsAspireProjectResource="false"/>
   </ItemGroup>
 
 
