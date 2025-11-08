@@ -12,14 +12,13 @@ internal static class DistributedApplicationTestFactory
     public static async Task<IDistributedApplicationTestingBuilder>
         CreateAsync(ITestOutputHelper? testOutput, bool enableDashboard = false)
     {
-        IDistributedApplicationTestingBuilder? builder =
-            await DistributedApplicationTestingBuilder.CreateAsync<Networth_AppHost>(
+        IDistributedApplicationTestingBuilder builder = await DistributedApplicationTestingBuilder.CreateAsync<Networth_AppHost>(
                 [],
                 (appOptions, hostSettings) =>
                 {
+                    hostSettings.EnvironmentName = "Test";
                     appOptions.DisableDashboard = !enableDashboard;
                     appOptions.AllowUnsecuredTransport = enableDashboard;
-                    hostSettings.EnvironmentName = "Test";
                 });
 
         builder.WithRandomVolumeNames();
