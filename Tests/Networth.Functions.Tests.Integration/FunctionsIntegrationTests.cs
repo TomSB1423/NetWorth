@@ -54,6 +54,6 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
         Assert.True(firstInstitution.TryGetProperty("name", out _), "Institution should have 'name' property");
 
         var firstInstitutionId = firstInstitution.GetProperty("id").GetString();
-        Assert.Contains("ABNAMRO_ABNAGB2LXXX", firstInstitutionId ?? string.Empty);
+        Assert.Contains("SANDBOXFINANCE_SFIN0000", firstInstitutionId ?? string.Empty);
     }
 }

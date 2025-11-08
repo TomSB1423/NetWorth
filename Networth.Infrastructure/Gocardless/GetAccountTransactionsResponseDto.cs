@@ -15,10 +15,4 @@ internal record GetAccountTransactionsResponseDto
     [JsonPropertyName("transactions")]
     [Required]
     public required BankTransactionsDto Transactions { get; init; }
-
-    /// <summary>
-    ///     Gets the last time the account transactions were updated.
-    /// </summary>
-    [JsonPropertyName("last_updated")]
-    public DateTime? LastUpdated { get; init; }
 }
