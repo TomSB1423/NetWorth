@@ -21,6 +21,7 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
             HttpRequestData? request = await context.GetHttpRequestDataAsync();
             HttpResponseData response = request!.CreateResponse();
 
