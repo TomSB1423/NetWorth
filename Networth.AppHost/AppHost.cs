@@ -1,6 +1,6 @@
 using Aspire.Hosting.Azure;
 using Microsoft.Extensions.Hosting;
-using MyApp.AppHost;
+using Networth.ServiceDefaults;
 using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);

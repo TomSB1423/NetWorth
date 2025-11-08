@@ -1,4 +1,4 @@
-namespace MyApp.AppHost;
+namespace Networth.ServiceDefaults;
 
 /// <summary>
 ///     Constants for Aspire resource names used throughout the application.
@@ -25,3 +25,4 @@ public static class ResourceNames
     /// </summary>
     public const string React = "react";
 }
+

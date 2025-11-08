@@ -1,7 +1,7 @@
 using System.Text.Json;
-using MyApp.AppHost;
 using Networth.Functions.Tests.Integration.Fixtures;
 using Networth.Functions.Tests.Integration.Infrastructure;
+using Networth.ServiceDefaults;
 using Xunit.Abstractions;
 
 namespace Networth.Functions.Tests.Integration;

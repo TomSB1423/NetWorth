@@ -4,12 +4,12 @@ using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MyApp.AppHost;
 using Networth.Application.Extensions;
 using Networth.Functions.Authentication;
 using Networth.Functions.Middleware;
 using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Extensions;
+using Networth.ServiceDefaults;
 using Serilog;
 
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
