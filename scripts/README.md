@@ -42,7 +42,7 @@ Example:
 
 This will:
 
-1. Create a new migration file in `Networth.Backend.Infrastructure/Data/Migrations/`
+1. Create a new migration file in `Networth.Infrastructure/Data/Migrations/`
 2. Automatically apply it to the running database
 
 ### What the Script Does
@@ -80,7 +80,7 @@ docker ps | grep postgres
 docker exec <container-name> env | grep POSTGRES
 
 # 3. Run migration
-cd Networth.Backend/Networth.Backend.Infrastructure
+cd Networth.Infrastructure
 env "ConnectionStrings__networth-db=Host=localhost;Port=<PORT>;Database=networth-db;Username=postgres;Password=<PASSWORD>" \
   dotnet ef database update
 ```

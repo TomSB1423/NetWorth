@@ -1,0 +1,8 @@
+{
+    "profiles": {
+        "FunctionHttp": {
+            "commandName": "Project",
+            "launchBrowser": false
+        }
+    }
+}

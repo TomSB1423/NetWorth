@@ -7,8 +7,8 @@ description: NetWorth - Streamlined AI agent guide
 ## Quick Start
 ```bash
 dotnet run --project Networth.AppHost  # Starts everything (Functions, React, Postgres, Storage)
-dotnet user-secrets set "Gocardless:SecretId" "YOUR_ID" --project Networth.Backend/Networth.Backend.Functions
-dotnet user-secrets set "Gocardless:SecretKey" "YOUR_KEY" --project Networth.Backend/Networth.Backend.Functions
+dotnet user-secrets set "Gocardless:SecretId" "YOUR_ID" --project Networth.Functions
+dotnet user-secrets set "Gocardless:SecretKey" "YOUR_KEY" --project Networth.Functions
 ```
 
 ## Architecture Essentials
@@ -51,7 +51,7 @@ dotnet user-secrets set "Gocardless:SecretKey" "YOUR_KEY" --project Networth.Bac
 # Manual (if script unavailable)
 docker ps --format "{{.Names}} {{.Ports}}" | grep postgres
 docker exec <container> printenv POSTGRES_PASSWORD
-cd Networth.Backend/Networth.Backend.Infrastructure
+cd Networth.Infrastructure
 env "ConnectionStrings__networth-db=Host=localhost;Port=<port>;Database=networth-db;Username=postgres;Password=<pwd>" \
   dotnet ef migrations add <Name> --output-dir Data/Migrations
 ```

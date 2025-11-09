@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "**/*.gitignore"
+      - "**/*.gitattributes"
+
+  pull_request:
+    paths-ignore:
+      - "**/*.md"
+      - "**/*.gitignore"
+      - "**/*.gitattributes"
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build & Test
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_NOLOGO: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+      ASPIRE_ALLOW_UNSECURED_TRANSPORT: true
+      SuppressNETCoreSdkPreviewMessage: true
+      DCP_DIAGNOSTICS_LOG_LEVEL: "debug"
+      TESTCONTAINERS_RYUK_DISABLED: false
+      TESTCONTAINERS_HOST_OVERRIDE: localhost
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup Docker
+        uses: docker/setup-docker-action@efe9e3891a4f7307e689f2100b33a155b900a608 # v4.5.0
+
+      - name: Install Azure Functions Core Tools
+        run: |
+          wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+          sudo dpkg -i packages-microsoft-prod.deb
+          sudo apt-get update
+          sudo apt-get install azure-functions-core-tools-4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Print .NET info
+        run: dotnet --info
+
+      - name: Install Aspire workload
+        run: dotnet workload install aspire
+
+      - name: Setup Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: "20.x"
+
+      - name: Install & trust dev-certs
+        run: dotnet dev-certs https --trust
+
+      - name: Restore dependencies
+        run: dotnet restore Networth.sln
+
+      - name: Build solution
+        run: dotnet build Networth.sln --no-restore --configuration Release
+
+      - name: Test
+        id: test
+        run: >
+          dotnet test Networth.sln
+          --no-build
+          --configuration Release
+          --logger console
+          --logger trx
+          --results-directory ./TestResults
+          --blame
+          --collect:"XPlat Code Coverage"
+          --
+          RunConfiguration.CollectSourceInformation=true
+
+      - name: Copy DCP logs
+        if: (success() || steps.test.conclusion == 'failure')
+        run: |
+          mkdir -p ./TestResults/DCPLogs
+          if [ -d "/tmp/dcp/logs" ]; then
+            cp -r /tmp/dcp/logs/* ./TestResults/DCPLogs 2>/dev/null || true
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: test-results
+          path: ./TestResults/
+          if-no-files-found: error
