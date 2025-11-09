@@ -12,11 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Networth.Frontend", "Networth.Frontend", "{C2F3A4B5-6D7E-8F9A-0B1C-2D3E4F5A6B7C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Networth.Frontend.React", "Networth.Frontend.React", "{D3F4A5B6-7E8F-9A0B-1C2D-3E4F5A6B7C8D}"
-	ProjectSection(SolutionItems) = preProject
-		Networth.Frontend\Networth.Frontend.React\README.md = Networth.Frontend\Networth.Frontend.React\README.md
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Functions", "Networth.Functions\Networth.Functions.csproj", "{6275CD94-7FA2-413D-A71F-4784A870201B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networth.Application", "Networth.Application\Networth.Application.csproj", "{48AE5889-93B9-45F3-A443-AA03243E479F}"
@@ -132,7 +127,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{D3F4A5B6-7E8F-9A0B-1C2D-3E4F5A6B7C8D} = {C2F3A4B5-6D7E-8F9A-0B1C-2D3E4F5A6B7C}
 		{A1301DD0-DF4C-46D3-A7C5-F903BC2B0F5B} = {E6F5B30F-71A7-48FE-A289-41D465218CBD}
 	EndGlobalSection
 EndGlobal

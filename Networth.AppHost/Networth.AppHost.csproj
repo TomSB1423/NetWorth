@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>d5cb0dc6-fab7-41dc-9872-692579832423</UserSecretsId>
-    <RootNamespace>MyApp.AppHost</RootNamespace>
+    <RootNamespace>Networth.AppHost</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,8 +31,9 @@
     </ItemGroup>
 
     <!-- Install npm packages if node_modules is missing -->
-    <Message Importance="Normal" Text="Installing npm packages for %(PackageJsons.RelativeDir)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
-    <Exec Command="npm install" WorkingDirectory="%(PackageJsons.RootDir)%(PackageJsons.Directory)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+    <Message Importance="High" Text="Installing npm packages for %(PackageJsons.RelativeDir)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)node_modules')" />
+    <Exec Command="npm install" WorkingDirectory="%(PackageJsons.RootDir)%(PackageJsons.Directory)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)node_modules')" />
+    <Message Importance="High" Text="npm packages already installed for %(PackageJsons.RelativeDir)" Condition="Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)node_modules')" />
   </Target>
 
 </Project>

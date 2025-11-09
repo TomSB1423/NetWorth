@@ -22,10 +22,10 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
     {
         // Arrange
         await using IDistributedApplicationTestingBuilder appHost = await DistributedApplicationTestFactory.CreateAsync(testOutput);
+        appHost.ConfigureMockoonForResource(mockoonTestFixture.MockoonBaseUrl);
         await using var app = await appHost.BuildAsync().WaitAsync(BuildStopTimeout);
         await app.StartAsync().WaitAsync(StartStopTimeout);
         await app.WaitForResourcesAsync().WaitAsync(StartStopTimeout);
-        appHost.ConfigureMockoonForResource(mockoonTestFixture.MockoonBaseUrl);
 
         // Act
         HttpClient httpClient = app.CreateHttpClient(ResourceNames.Functions, true);
