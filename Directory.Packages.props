@@ -18,6 +18,7 @@
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="9.5.2" />
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
     <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="9.5.2" />
+    <PackageVersion Include="Scalar.Aspire" Version="0.7.3" />
   </ItemGroup>
   <ItemGroup Label="Azure Functions">
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.10" />
