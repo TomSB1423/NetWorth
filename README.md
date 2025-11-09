@@ -12,10 +12,11 @@ Access the Aspire Dashboard at: `https://localhost:17065`
 
 Services:
 
--   **Azure Functions backend**: Managed by Aspire
--   **React frontend**: `http://localhost:3000`
--   **PostgreSQL database**: Containerized with PgAdmin
--   **Aspire Dashboard**: `https://localhost:17065`
+- **Azure Functions backend**: Managed by Aspire
+- **API Documentation** (Scalar UI): Available at the Functions `/api/docs` endpoint
+- **React frontend**: `http://localhost:3000`
+- **PostgreSQL database**: Containerized with PgAdmin
+- **Aspire Dashboard**: `https://localhost:17065`
 
 ## Configuration
 

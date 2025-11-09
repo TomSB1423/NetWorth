@@ -79,8 +79,13 @@ jobs:
           --results-directory ./TestResults
           --blame
           --collect:"XPlat Code Coverage"
-          --
-          RunConfiguration.CollectSourceInformation=true
+          -- RunConfiguration.CollectSourceInformation=true
+
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Validate OpenAPI spec
+        run: ./scripts/validate-openapi.sh
 
       - name: Copy DCP logs
         if: (success() || steps.test.conclusion == 'failure')
