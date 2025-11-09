@@ -9,11 +9,9 @@ namespace Networth.Functions.Tests.Integration;
 /// <summary>
 ///     Integration tests for the Azure Functions backend using shared Mockoon fixture.
 /// </summary>
-public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput) : IClassFixture<MockoonTestFixture>
+public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
+    : IClassFixture<MockoonTestFixture>
 {
-    private static readonly TimeSpan BuildStopTimeout = TimeSpan.FromSeconds(60);
-    private static readonly TimeSpan StartStopTimeout = TimeSpan.FromSeconds(120);
-
     /// <summary>
     ///     Tests that the GetInstitutions endpoint returns OK status code and valid JSON response.
     /// </summary>
@@ -21,15 +19,13 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
     public async Task GetInstitutionsEndpointReturnsOkStatusCodeAndValidJson()
     {
         // Arrange
-        await using IDistributedApplicationTestingBuilder appHost = await DistributedApplicationTestFactory.CreateAsync(testOutput);
-        appHost.ConfigureMockoonForResource(mockoonTestFixture.MockoonBaseUrl);
-        await using var app = await appHost.BuildAsync().WaitAsync(BuildStopTimeout);
-        await app.StartAsync().WaitAsync(StartStopTimeout);
-        await app.WaitForResourcesAsync().WaitAsync(StartStopTimeout);
+        await using var app = await IntegrationTestFactory.CreateAsync(
+            testOutput,
+            mockoonTestFixture.MockoonBaseUrl);
 
         // Act
-        HttpClient httpClient = app.CreateHttpClient(ResourceNames.Functions, true);
-        var response = await httpClient.GetAsync("/api/institutions", CancellationToken.None);
+        var client = app.CreateHttpClient(ResourceNames.Functions);
+        var response = await client.GetAsync("/api/institutions", CancellationToken.None);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

@@ -1,24 +1,28 @@
+using Aspire.Hosting.Testing;
 using Networth.Functions.Tests.Integration.Infrastructure;
 using Xunit.Abstractions;
 
 namespace Networth.Functions.Tests.Integration;
 
+/// <summary>
+///     Tests for the AppHost configuration and infrastructure.
+/// </summary>
 public class AppHostTests(ITestOutputHelper testOutput)
 {
-    private static readonly TimeSpan BuildStopTimeout = TimeSpan.FromSeconds(60);
-    private static readonly TimeSpan StartStopTimeout = TimeSpan.FromSeconds(120);
-
     [Fact]
     public async Task AppHostRunsCleanly()
     {
-        IDistributedApplicationTestingBuilder appHost = await DistributedApplicationTestFactory.CreateAsync(testOutput);
-        await using var app = await appHost.BuildAsync().WaitAsync(BuildStopTimeout);
+        // Arrange
+        var builder = await DistributedApplicationTestFactory.CreateAsync(testOutput);
+        builder.WithContainersLifetime(ContainerLifetime.Session);
+        builder.WithRandomVolumeNames();
 
-        await app.StartAsync().WaitAsync(StartStopTimeout);
-        await app.WaitForResourcesAsync().WaitAsync(StartStopTimeout);
+        // Act
+        await using var app = await builder.BuildAsync();
+        await app.StartAsync();
+        await app.WaitForResourcesAsync();
 
+        // Assert
         app.EnsureNoErrorsLogged();
-
-        await app.StopAsync().WaitAsync(BuildStopTimeout);
     }
 }

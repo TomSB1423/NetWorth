@@ -13,24 +13,6 @@ namespace Networth.Functions.Tests.Integration.Infrastructure;
 public static class DistributedApplicationExtensions
 {
     /// <summary>
-    ///     Configure Mockoon http services..
-    /// </summary>
-    /// <param name="builder">The distributed application testing builder.</param>
-    /// <param name="baseUrl">The base URL for the Mockoon service.</param>
-    /// <typeparam name="TBuilder">The type of the distributed application testing builder.</typeparam>
-    /// <returns>The updated distributed application testing builder.</returns>
-    public static TBuilder ConfigureMockoonForResource<TBuilder>(
-        this TBuilder builder,
-        string baseUrl)
-        where TBuilder : IDistributedApplicationTestingBuilder
-    {
-        builder.Configuration[GoCardlessConfiguration.BankAccountDataBaseUrl] = $"{baseUrl}/api/v2";
-        builder.Configuration[GoCardlessConfiguration.SecretId] = GoCardlessConfiguration.TestSecretId;
-        builder.Configuration[GoCardlessConfiguration.SecretKey] = GoCardlessConfiguration.TestSecretKey;
-        return builder;
-    }
-
-    /// <summary>
     ///     Sets the container lifetime for all container resources in the application.
     /// </summary>
     /// <typeparam name="TBuilder">The type of the distributed application testing builder.</typeparam>
