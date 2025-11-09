@@ -83,6 +83,7 @@ public static class ServiceCollectionExtensions
             NpgsqlDataSource dataSource = sp.GetRequiredService<NpgsqlDataSource>();
             return dataSource.OpenConnection();
         });
+
         return services;
     }
 }
