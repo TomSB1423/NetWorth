@@ -19,7 +19,7 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
     public async Task GetInstitutionsEndpointReturnsOkStatusCodeAndValidJson()
     {
         // Arrange
-        await using var app = await IntegrationTestFactory.CreateAsync(
+        await using var app = await DistributedApplicationTestFactory.CreateAsync(
             testOutput,
             mockoonTestFixture.MockoonBaseUrl);
 

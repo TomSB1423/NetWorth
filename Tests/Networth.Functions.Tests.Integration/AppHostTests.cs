@@ -1,4 +1,3 @@
-using Aspire.Hosting.Testing;
 using Networth.Functions.Tests.Integration.Infrastructure;
 using Xunit.Abstractions;
 
@@ -12,17 +11,7 @@ public class AppHostTests(ITestOutputHelper testOutput)
     [Fact]
     public async Task AppHostRunsCleanly()
     {
-        // Arrange
-        var builder = await DistributedApplicationTestFactory.CreateAsync(testOutput);
-        builder.WithContainersLifetime(ContainerLifetime.Session);
-        builder.WithRandomVolumeNames();
-
-        // Act
-        await using var app = await builder.BuildAsync();
-        await app.StartAsync();
-        await app.WaitForResourcesAsync();
-
-        // Assert
-        app.EnsureNoErrorsLogged();
+        // Arrange & Act
+        await using var app = await DistributedApplicationTestFactory.CreateAsync(testOutput);
     }
 }

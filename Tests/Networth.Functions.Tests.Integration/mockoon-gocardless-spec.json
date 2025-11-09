@@ -6773,7 +6773,7 @@
       "responses": [
         {
           "uuid": "fc4f7211-9cd7-4d01-b6b2-1c4833b72d70",
-          "body": "{\n  \"access\": \"\",\n  \"access_expires\": 86400,\n  \"refresh\": \"\",\n  \"refresh_expires\": 2592000\n}",
+          "body": "{\n  \"access\": \"{{faker 'internet.jwt'}}\",\n  \"access_expires\": 86400,\n  \"refresh\": \"{{faker 'internet.jwt'}}\",\n  \"refresh_expires\": 2592000\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "Obtain JWT response.",
@@ -6953,7 +6953,7 @@
       "responses": [
         {
           "uuid": "fea0594d-0c0a-49db-8cbf-e308386448f0",
-          "body": "{\n  \"access\": \"\",\n  \"access_expires\": 86400\n}",
+          "body": "{\n  \"access\": \"{{faker 'internet.jwt'}}\",\n  \"access_expires\": 86400\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "Refresh access token.",
@@ -7123,37 +7123,6 @@
       "responseMode": null,
       "streamingMode": null,
       "streamingInterval": 0
-    },
-    {
-      "uuid": "63baaefc-2ad9-42e6-a452-d7cb616889d1",
-      "type": "http",
-      "documentation": "Networth endpoint for test readyness",
-      "method": "get",
-      "endpoint": "ready",
-      "responses": [
-        {
-          "uuid": "bac113af-8b7f-46a1-aeab-22554c7e6aa5",
-          "body": "{}",
-          "latency": 0,
-          "statusCode": 200,
-          "label": "",
-          "headers": [],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [],
-          "rulesOperator": "OR",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true,
-          "crudKey": "id",
-          "callbacks": []
-        }
-      ],
-      "responseMode": null,
-      "streamingMode": null,
-      "streamingInterval": 0
     }
   ],
   "rootChildren": [
@@ -7232,10 +7201,6 @@
     {
       "type": "route",
       "uuid": "eb40662e-8085-4f00-8b9a-8de7679857dd"
-    },
-    {
-      "type": "route",
-      "uuid": "63baaefc-2ad9-42e6-a452-d7cb616889d1"
     }
   ],
   "proxyMode": false,

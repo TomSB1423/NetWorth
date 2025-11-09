@@ -50,11 +50,16 @@ builder.Services
 IHost host = builder.Build();
 
 IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
-if (environment.IsDevelopment())
+if (environment.IsDevelopment() || environment.IsEnvironment("Test"))
 {
     await using AsyncServiceScope serviceScope = host.Services.CreateAsyncScope();
     await using NetworthDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<NetworthDbContext>();
-    await dbContext.Database.EnsureCreatedAsync();
+
+    // Only create if database doesn't exist (idempotent)
+    if (!await dbContext.Database.CanConnectAsync())
+    {
+        await dbContext.Database.EnsureCreatedAsync();
+    }
 }
 
 host.Run();

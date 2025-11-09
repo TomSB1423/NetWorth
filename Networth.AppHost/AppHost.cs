@@ -6,12 +6,16 @@ using Projects;
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
 IResourceBuilder<PostgresServerResource> postgres = builder
-    .AddPostgres(ResourceNames.Postgres)
-    .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
+    .AddPostgres(ResourceNames.Postgres);
 
 if (!builder.Environment.IsEnvironment("Test"))
 {
     postgres.WithDataVolume();
+}
+
+if (builder.Environment.IsDevelopment())
+{
+    postgres.WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
 }
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres

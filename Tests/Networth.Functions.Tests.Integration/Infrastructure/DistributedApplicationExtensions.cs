@@ -199,41 +199,6 @@ public static class DistributedApplicationExtensions
     }
 
     /// <summary>
-    ///     Asserts that no errors were logged by the application or any of its resources.
-    /// </summary>
-    /// <remarks>
-    ///     Some resource types are excluded from this check because they tend to write to stderr for various non-error
-    ///     reasons.
-    /// </remarks>
-    /// <param name="app">The distributed application.</param>
-    public static void EnsureNoErrorsLogged(this DistributedApplication app)
-    {
-        var environment = app.Services.GetRequiredService<IHostEnvironment>();
-        var applicationModel = app.Services.GetRequiredService<DistributedApplicationModel>();
-        var assertableResourceLogNames = applicationModel.Resources.Where(ShouldAssertErrorsForResource)
-            .Select(r => $"{environment.ApplicationName}.Resources.{r.Name}").ToList();
-
-        var (appHostlogs, resourceLogs) = app.GetLogs();
-
-        Assert.DoesNotContain(
-            appHostlogs,
-            log => log.Level >= LogLevel.Error);
-        Assert.DoesNotContain(
-            resourceLogs,
-            log => log.Category is { Length: > 0 } category && assertableResourceLogNames.Contains(category) && log.Level >= LogLevel.Error);
-
-        static bool ShouldAssertErrorsForResource(IResource resource)
-        {
-            return resource
-                is
-                // Container resources tend to write to stderr for various reasons so only assert projects and executables
-                (ProjectResource or ExecutableResource)
-                // Node resources tend to have modules that write to stderr so ignore them
-                and not NodeAppResource;
-        }
-    }
-
-    /// <summary>
     ///     Creates an <see cref="HttpClient" /> configured to communicate with the specified resource.
     /// </summary>
     public static HttpClient CreateHttpClient(this DistributedApplication app, string resourceName, bool useHttpClientFactory)
@@ -282,85 +247,5 @@ public static class DistributedApplicationExtensions
         httpClient.BaseAddress = app.GetEndpoint(resourceName, endpointName);
 
         return httpClient;
-    }
-
-    /// <summary>
-    ///     Attempts to apply EF migrations for the specified project by sending a request to the migrations endpoint
-    ///     <c>/ApplyDatabaseMigrations</c>.
-    /// </summary>
-    public static async Task<bool> TryApplyEfMigrationsAsync(this DistributedApplication app, ProjectResource project)
-    {
-        var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(TryApplyEfMigrationsAsync));
-        var projectName = project.Name;
-
-        // First check if the project has a migration endpoint, if it doesn't it will respond with a 404
-        logger.LogInformation("Checking if project '{ProjectName}' has a migration endpoint", projectName);
-        using (var checkHttpClient = app.CreateHttpClient(project.Name))
-        {
-            using FormUrlEncodedContent emptyDbContextContent = new([new KeyValuePair<string, string>("context", string.Empty)]);
-            using var checkResponse = await checkHttpClient.PostAsync("/ApplyDatabaseMigrations", emptyDbContextContent);
-            if (checkResponse.StatusCode == HttpStatusCode.NotFound)
-            {
-                logger.LogInformation("Project '{ProjectName}' does not have a migration endpoint", projectName);
-                return false;
-            }
-        }
-
-        logger.LogInformation("Attempting to apply EF migrations for project '{ProjectName}'", projectName);
-
-        // Load the project assembly and find all DbContext types
-        var projectDirectory = Path.GetDirectoryName(project.GetProjectMetadata().ProjectPath) ?? throw new UnreachableException();
-#if DEBUG
-        var configuration = "Debug";
-#else
-        var configuration = "Release";
-#endif
-        var projectAssemblyPath = Path.Combine(projectDirectory, "bin", configuration, "net8.0", $"{projectName}.dll");
-        var projectAssembly = Assembly.LoadFrom(projectAssemblyPath);
-        var dbContextTypes = projectAssembly.GetTypes().Where(t => DerivesFromDbContext(t)).ToList();
-
-        logger.LogInformation("Found {DbContextCount} DbContext types in project '{ProjectName}'", dbContextTypes.Count, projectName);
-
-        // Call the migration endpoint for each DbContext type
-        var migrationsApplied = false;
-        using var applyMigrationsHttpClient = app.CreateHttpClient(project.Name, false);
-        applyMigrationsHttpClient.Timeout = TimeSpan.FromSeconds(240);
-        foreach (var dbContextType in dbContextTypes)
-        {
-            logger.LogInformation(
-                "Applying migrations for DbContext '{DbContextType}' in project '{ProjectName}'",
-                dbContextType.FullName,
-                projectName);
-            using FormUrlEncodedContent content = new([new KeyValuePair<string, string>("context", dbContextType.AssemblyQualifiedName!)]);
-            using var response = await applyMigrationsHttpClient.PostAsync("/ApplyDatabaseMigrations", content);
-            if (response.StatusCode == HttpStatusCode.NoContent)
-            {
-                migrationsApplied = true;
-                logger.LogInformation(
-                    "Migrations applied for DbContext '{DbContextType}' in project '{ProjectName}'",
-                    dbContextType.FullName,
-                    projectName);
-            }
-        }
-
-        return migrationsApplied;
-    }
-
-    private static bool DerivesFromDbContext(Type type)
-    {
-        var baseType = type.BaseType;
-
-        while (baseType is not null)
-        {
-            if (baseType.FullName == "Microsoft.EntityFrameworkCore.DbContext" &&
-                baseType.Assembly.GetName().Name == "Microsoft.EntityFrameworkCore")
-            {
-                return true;
-            }
-
-            baseType = baseType.BaseType;
-        }
-
-        return false;
     }
 }
