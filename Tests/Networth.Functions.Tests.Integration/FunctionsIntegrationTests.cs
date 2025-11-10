@@ -48,4 +48,40 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
         var firstInstitutionId = firstInstitution.GetProperty("id").GetString();
         Assert.Contains("SANDBOXFINANCE_SFIN0000", firstInstitutionId ?? string.Empty);
     }
+
+    /// <summary>
+    ///     Downloads the OpenAPI spec from the Functions app and saves it to the workspace root.
+    ///     This is used by CI to validate the spec with Spectral.
+    /// </summary>
+    [Fact]
+    public async Task DownloadOpenApiSpecification()
+    {
+        // Arrange
+        await using var app = await DistributedApplicationTestFactory.CreateAsync(
+            testOutput,
+            mockoonTestFixture.MockoonBaseUrl);
+
+        var client = app.CreateHttpClient(ResourceNames.Functions);
+
+        // Act
+        var response = await client.GetAsync("/api/swagger.json", CancellationToken.None);
+
+        // Assert
+        Assert.True(response.IsSuccessStatusCode, "Failed to download OpenAPI spec");
+
+        var specContent = await response.Content.ReadAsStringAsync(CancellationToken.None);
+        Assert.NotNull(specContent);
+
+        // Validate it's valid JSON
+        using var jsonDoc = JsonDocument.Parse(specContent);
+        Assert.True(
+            jsonDoc.RootElement.TryGetProperty("openapi", out _) ||
+            jsonDoc.RootElement.TryGetProperty("swagger", out _),
+            "Spec should contain 'openapi' or 'swagger' property");
+
+        // Save to workspace root for CI validation
+        var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "openapi.json");
+        await File.WriteAllTextAsync(outputPath, specContent, CancellationToken.None);
+        testOutput.WriteLine($"OpenAPI spec downloaded from /api/swagger.json and saved to {outputPath}");
+    }
 }
