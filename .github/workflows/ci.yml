@@ -79,8 +79,7 @@ jobs:
           --results-directory ./TestResults
           --blame
           --collect:"XPlat Code Coverage"
-          --
-          RunConfiguration.CollectSourceInformation=true
+          -- RunConfiguration.CollectSourceInformation=true
 
       - name: Copy DCP logs
         if: (success() || steps.test.conclusion == 'failure')

@@ -445,3 +445,7 @@ __azurite_db_*.json
 __blobstorage__/
 __queuestorage__/
 __tablestorage__/
+
+# Generated OpenAPI specifications
+openapi.json
+swagger.json

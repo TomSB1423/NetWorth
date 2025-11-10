@@ -1,1 +1,25 @@
-extends: [ "spectral:oas" ]
+extends: ["spectral:oas"]
+
+rules:
+  # Enforce operation IDs are present (already handled by OpenApiOperation)
+  operation-operationId: error
+
+  # Enforce operation descriptions
+  operation-description: warn
+
+  # Enforce tags on all operations
+  operation-tags: warn
+
+  # Ensure all operations have proper response definitions
+  operation-tag-defined: error
+
+  # Info section requirements
+  info-contact: warn
+  info-description: error
+
+  # Schema validation
+  oas3-valid-schema-example: warn
+
+  # Best practices
+  no-$ref-siblings: error
+  oas3-unused-component: warn
