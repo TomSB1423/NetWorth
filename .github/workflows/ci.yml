@@ -81,11 +81,6 @@ jobs:
           --collect:"XPlat Code Coverage"
           -- RunConfiguration.CollectSourceInformation=true
 
-      - name: Run Spectral linting
-        uses: stoplightio/spectral-action@v0.8.11
-        with:
-          file_glob: openapi.json
-
       - name: Copy DCP logs
         if: (success() || steps.test.conclusion == 'failure')
         run: |

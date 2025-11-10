@@ -16,7 +16,8 @@ if (!builder.Environment.IsEnvironment("Test"))
 
 if (builder.Environment.IsDevelopment())
 {
-    postgres.WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
+    postgres.WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050))
+        .WithExplicitStart();
 }
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
