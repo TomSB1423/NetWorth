@@ -32,7 +32,7 @@ public class MockoonTestFixture : IAsyncLifetime
                 Path.Combine(Directory.GetCurrentDirectory(), MockoonConfiguration.GoCardlessDataFile),
                 MockoonConfiguration.ContainerDataPath)
             .WithCommand("--data", MockoonConfiguration.ContainerDataPath, "--port", MockoonConfiguration.Port.ToString())
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(MockoonConfiguration.Port))
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(MockoonConfiguration.Port))
             .Build();
 
         await Container.StartAsync();
