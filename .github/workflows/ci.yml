@@ -68,6 +68,12 @@ jobs:
       - name: Build solution
         run: dotnet build Networth.sln --no-restore --configuration Release
 
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Validate OpenAPI spec
+        run: spectral lint openapi.json
+
       - name: Test
         id: test
         run: >
@@ -80,12 +86,6 @@ jobs:
           --blame
           --collect:"XPlat Code Coverage"
           -- RunConfiguration.CollectSourceInformation=true
-
-      - name: Install Spectral
-        run: npm install -g @stoplight/spectral-cli
-
-      - name: Validate OpenAPI spec
-        run: ./scripts/validate-openapi.sh
 
       - name: Copy DCP logs
         if: (success() || steps.test.conclusion == 'failure')
