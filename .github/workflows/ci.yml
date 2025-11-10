@@ -68,12 +68,6 @@ jobs:
       - name: Build solution
         run: dotnet build Networth.sln --no-restore --configuration Release
 
-      - name: Install Spectral
-        run: npm install -g @stoplight/spectral-cli
-
-      - name: Validate OpenAPI spec
-        run: spectral lint openapi.json
-
       - name: Test
         id: test
         run: >
@@ -102,3 +96,34 @@ jobs:
           name: test-results
           path: ./TestResults/
           if-no-files-found: error
+
+  openapi-lint:
+    runs-on: ubuntu-latest
+    name: OpenAPI Validation
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_NOLOGO: true
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Restore dependencies
+        run: dotnet restore Networth.Functions/Networth.Functions.csproj
+
+      - name: Build Functions project
+        run: dotnet build Networth.Functions/Networth.Functions.csproj --no-restore --configuration Release
+
+      - name: Install Swashbuckle CLI
+        run: dotnet tool install --global Swashbuckle.AspNetCore.Cli
+
+      - name: Generate OpenAPI spec
+        run: dotnet swagger tofile --output openapi.json Networth.Functions/bin/Release/net9.0/Networth.Functions.dll v1
+
+      - name: Run Spectral linting
+        uses: stoplightio/spectral-action@v0.8.11
+        with:
+          file_glob: openapi.json
