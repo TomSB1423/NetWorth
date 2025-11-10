@@ -117,11 +117,16 @@ jobs:
       - name: Build Functions project
         run: dotnet build Networth.Functions/Networth.Functions.csproj --no-restore --configuration Release
 
-      - name: Install Swashbuckle CLI
-        run: dotnet tool install --global Swashbuckle.AspNetCore.Cli
+      - name: Install OpenAPI CLI
+        run: dotnet tool install --global Microsoft.Azure.Functions.Worker.Extensions.OpenApi.CLI
 
       - name: Generate OpenAPI spec
-        run: dotnet swagger tofile --output openapi.json Networth.Functions/bin/Release/net9.0/Networth.Functions.dll v1
+        run: |
+          func openapi create \
+            --project Networth.Functions/Networth.Functions.csproj \
+            --configuration Release \
+            --output openapi.json \
+            --version v3
 
       - name: Run Spectral linting
         uses: stoplightio/spectral-action@v0.8.11
