@@ -61,7 +61,7 @@
   <ItemGroup Label="Testing">
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1"/>
-    <PackageVersion Include="MartinCostello.Logging.XUnit" Version="0.5.0"/>
+    <PackageVersion Include="MartinCostello.Logging.XUnit" Version="0.6.0"/>
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.10.0"/>
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
     <PackageVersion Include="Moq" Version="4.20.72"/>
