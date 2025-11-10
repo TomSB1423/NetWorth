@@ -1,0 +1,74 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "schedule": [
+    "every weekend"
+  ],
+  "timezone": "UTC",
+  "labels": [
+    "dependencies"
+  ],
+  "assignees": [
+    "@me"
+  ],
+  "reviewers": [
+    "copilot"
+  ],
+  "packageRules": [
+    {
+      "description": "Group .NET packages together",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackagePatterns": [
+        "^Microsoft\\.",
+        "^Aspire\\.",
+        "^System\\."
+      ],
+      "groupName": "Microsoft & Aspire packages"
+    },
+    {
+      "description": "Group testing packages",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackagePatterns": [
+        "xunit",
+        "coverlet",
+        "Moq",
+        "Testcontainers"
+      ],
+      "groupName": "Testing packages"
+    },
+    {
+      "description": "Group GitHub Actions updates",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "description": "Group React and related npm packages",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchPackagePatterns": [
+        "^react",
+        "^@testing-library"
+      ],
+      "groupName": "React ecosystem"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": [
+      "security"
+    ]
+  },
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 0,
+  "automerge": false,
+  "platformAutomerge": false
+}
