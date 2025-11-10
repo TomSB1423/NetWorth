@@ -54,6 +54,7 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
     ///     This is used by CI to validate the spec with Spectral.
     /// </summary>
     [Fact]
+    [Trait("Category", "OpenAPI")]
     public async Task DownloadOpenApiSpecification()
     {
         // Arrange
@@ -80,7 +81,8 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
             "Spec should contain 'openapi' or 'swagger' property");
 
         // Save to workspace root for CI validation
-        var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "openapi.json");
+        var workspaceRoot = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") ?? Directory.GetCurrentDirectory();
+        var outputPath = Path.Combine(workspaceRoot, "openapi.json");
         await File.WriteAllTextAsync(outputPath, specContent, CancellationToken.None);
         testOutput.WriteLine($"OpenAPI spec downloaded from /api/swagger.json and saved to {outputPath}");
     }
