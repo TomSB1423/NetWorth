@@ -8,10 +8,12 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Aspire.Npgsql"/>
+    <PackageReference Include="Aspire.Azure.Storage.Queues"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi"/>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk"/>
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights"/>

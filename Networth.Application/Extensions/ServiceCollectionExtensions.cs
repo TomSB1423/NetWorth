@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
 
         // Register command handlers
         services.AddScoped<IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>, LinkAccountCommandHandler>();
+        services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
 
         // Register query handlers
         services.AddScoped<IRequestHandler<GetAccountsQuery, GetAccountsQueryResult>, GetAccountsQueryHandler>();
@@ -39,6 +40,7 @@ public static class ServiceCollectionExtensions
 
         // Register validators
         services.AddScoped<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
+        services.AddScoped<IValidator<SyncAccountCommand>, SyncAccountCommandValidator>();
         services.AddScoped<IValidator<GetTransactionsQuery>, GetTransactionsQueryValidator>();
 
         return services;

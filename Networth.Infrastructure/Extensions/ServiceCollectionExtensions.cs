@@ -1,6 +1,7 @@
 using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Azure.Storage.Queues;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,7 @@ using Networth.Infrastructure.Data.Repositories;
 using Networth.Infrastructure.Gocardless;
 using Networth.Infrastructure.Gocardless.Auth;
 using Networth.Infrastructure.Gocardless.Options;
+using Networth.Infrastructure.Services;
 using Npgsql;
 using Refit;
 
@@ -65,10 +67,12 @@ public static class ServiceCollectionExtensions
 
         // Register Infrastructure services
         services.AddTransient<IFinancialProvider, GocardlessService>();
+        services.AddScoped<IQueueService, QueueService>();
 
         // Register repositories
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IRequisitionRepository, RequisitionRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
 
         // Use DB - with Aspire NpgsqlDataSource
         services.AddDbContext<NetworthDbContext>((serviceProvider, dbContextOptionsBuilder) =>

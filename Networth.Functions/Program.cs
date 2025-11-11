@@ -39,6 +39,9 @@ builder.Services.Configure<JsonSerializerOptions>(options =>
 // Add Aspire observability to postgres
 builder.AddNpgsqlDataSource(ResourceNames.NetworthDb);
 
+// Add Aspire Azure Queue client
+builder.AddAzureQueueServiceClient(ResourceNames.Queues);
+
 // Configure services
 builder.Services
     .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })

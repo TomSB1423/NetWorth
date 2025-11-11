@@ -7,26 +7,33 @@ using Scalar.Aspire;
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
 IResourceBuilder<PostgresServerResource> postgres = builder
-    .AddPostgres(ResourceNames.Postgres);
-
-if (!builder.Environment.IsEnvironment("Test"))
-{
-    postgres.WithDataVolume();
-}
+    .AddPostgres(ResourceNames.Postgres)
+    .WithDataVolume();
 
 if (builder.Environment.IsDevelopment())
 {
-    postgres.WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050))
-        .WithExplicitStart();
+    postgres.WithPgAdmin(pgAdmin =>
+    {
+        pgAdmin.WithHostPort(5050);
+        pgAdmin.WithExplicitStart();
+    });
 }
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
     .AddDatabase(ResourceNames.NetworthDb);
 
+// Add Azure Storage for queues
+IResourceBuilder<AzureStorageResource> storage = builder
+    .AddAzureStorage(ResourceNames.Storage)
+    .RunAsEmulator();
+
+IResourceBuilder<AzureQueueStorageResource> queues = storage.AddQueues(ResourceNames.Queues);
+
 IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .AddAzureFunctionsProject<Networth_Functions>(ResourceNames.Functions)
     .WithExternalHttpEndpoints()
-    .WithReference(postgresdb);
+    .WithReference(postgresdb)
+    .WithReference(queues);
 
 builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend")
     .WithReference(functions)
@@ -41,6 +48,9 @@ IResourceBuilder<ScalarResource> scalar = builder.AddScalarApiReference("api-ref
 {
     options
     .WithTheme(ScalarTheme.Purple)
+    .ExpandAllTags()
+    .ExpandAllResponses()
+    .HideClientButton()
     .HideDarkModeToggle()
         .AddMetadata("title", "Networth API Reference")
         .AddMetadata("description", "Unified API documentation for Networth backend services");
