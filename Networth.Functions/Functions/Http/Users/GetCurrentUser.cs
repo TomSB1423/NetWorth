@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.OpenApi.Models;
 using Networth.Functions.Authentication;
 using Networth.Functions.Models.Responses;
 
-namespace Networth.Functions.Functions;
+namespace Networth.Functions.Functions.Http.Users;
 
 /// <summary>
 ///     Azure Function for retrieving the current authenticated user information.

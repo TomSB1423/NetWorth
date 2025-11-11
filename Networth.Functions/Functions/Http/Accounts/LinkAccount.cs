@@ -8,7 +8,7 @@ using Networth.Functions.Models.Requests;
 using Networth.Functions.Models.Responses;
 using FromBodyAttributes = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-namespace Networth.Functions.Functions;
+namespace Networth.Functions.Functions.Http.Accounts;
 
 /// <summary>
 ///     Azure Function for linking bank accounts by creating agreements and requisitions.

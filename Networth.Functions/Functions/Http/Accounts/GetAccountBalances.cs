@@ -9,7 +9,7 @@ using Networth.Application.Interfaces;
 using Networth.Application.Queries;
 using Networth.Functions.Models.Responses;
 
-namespace Networth.Functions.Functions;
+namespace Networth.Functions.Functions.Http.Accounts;
 
 /// <summary>
 ///     Azure Function for retrieving account balances.
