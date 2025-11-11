@@ -25,7 +25,7 @@ public class GetInstitutionsQueryHandler(
 
         return new GetInstitutionsQueryResult
         {
-            Institutions = institutions
+            Institutions = institutions,
         };
     }
 }

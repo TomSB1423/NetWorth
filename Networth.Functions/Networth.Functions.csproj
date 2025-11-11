@@ -43,7 +43,7 @@
     <ProjectReference Include="..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj"/>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Functions\Http\" />
     <Folder Include="Models\Requests\"/>
-    <Folder Include="Validators\"/>
   </ItemGroup>
 </Project>

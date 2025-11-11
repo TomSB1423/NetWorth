@@ -31,7 +31,7 @@ public class GetRequisitionQueryHandler(
 
         return new GetRequisitionQueryResult
         {
-            Requisition = requisition
+            Requisition = requisition,
         };
     }
 }

@@ -12,22 +12,22 @@ using Networth.Functions.Models.Responses;
 namespace Networth.Functions.Functions;
 
 /// <summary>
-///     Azure Function for retrieving account balances.
+///     Azure Function for retrieving account metadata.
 /// </summary>
-public class GetAccountBalances(IMediator mediator, ILogger<GetAccountBalances> logger)
+public class GetAccount(IMediator mediator, ILogger<GetAccount> logger)
 {
     /// <summary>
-    ///     Gets the balances for a specific account.
+    ///     Gets the metadata for a specific account.
     /// </summary>
     /// <param name="req">The HTTP request.</param>
     /// <param name="accountId">The account ID from the route.</param>
-    /// <returns>The account balances.</returns>
-    [Function("GetAccountBalances")]
+    /// <returns>The account metadata.</returns>
+    [Function("GetAccount")]
     [OpenApiOperation(
-        "GetAccountBalances",
+        "GetAccount",
         "Accounts",
-        Summary = "Get account balances",
-        Description = "Retrieves the current balances for a specific bank account.")]
+        Summary = "Get account metadata",
+        Description = "Retrieves the metadata for a specific bank account.")]
     [OpenApiParameter(
         "accountId",
         In = ParameterLocation.Path,
@@ -37,8 +37,8 @@ public class GetAccountBalances(IMediator mediator, ILogger<GetAccountBalances> 
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(IEnumerable<AccountBalanceResponse>),
-        Description = "Successfully retrieved account balances")]
+        typeof(AccountResponse),
+        Description = "Successfully retrieved account metadata")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
         Description = "Invalid account ID")]
@@ -49,25 +49,24 @@ public class GetAccountBalances(IMediator mediator, ILogger<GetAccountBalances> 
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts/{accountId}/balances")]
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts/{accountId}")]
         HttpRequest req,
         string accountId)
     {
-        logger.LogInformation("Received request to get balances for account {AccountId}", accountId);
+        logger.LogInformation("Received request to get account metadata for {AccountId}", accountId);
 
-        var query = new GetAccountBalancesQuery { AccountId = accountId };
-        var result = await mediator.Send<GetAccountBalancesQuery, GetAccountBalancesQueryResult>(query);
+        var query = new GetAccountQuery { AccountId = accountId };
+        var result = await mediator.Send<GetAccountQuery, GetAccountQueryResult>(query);
 
-        var response = result.Balances.Select(b => new AccountBalanceResponse
+        var response = new AccountResponse
         {
-            Amount = b.Amount,
-            Currency = b.Currency,
-            BalanceType = b.BalanceType,
-            CreditLimitIncluded = b.CreditLimitIncluded,
-            ReferenceDate = b.ReferenceDate
-        });
+            Id = result.Account.Id,
+            InstitutionId = result.Account.InstitutionId,
+            Status = result.Account.Status,
+            Name = result.Account.Name,
+        };
 
-        logger.LogInformation("Successfully retrieved account balances for account {AccountId}", accountId);
+        logger.LogInformation("Successfully retrieved account metadata for account {AccountId}", accountId);
         return new OkObjectResult(response);
     }
 }

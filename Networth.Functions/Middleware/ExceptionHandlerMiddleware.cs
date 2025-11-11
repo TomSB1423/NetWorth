@@ -28,13 +28,13 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
             var (statusCode, errorResponse) = ex switch
             {
                 ValidationException validationEx => HandleValidationException(validationEx),
-                _ => HandleInternalServerError(ex)
+                _ => HandleInternalServerError(ex),
             };
 
             response.StatusCode = statusCode;
             string responseBody = JsonSerializer.Serialize(errorResponse, new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             });
 
             await response.WriteStringAsync(responseBody);
@@ -54,7 +54,7 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
         logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
         return (HttpStatusCode.InternalServerError, new
         {
-            errors = new[] { "An internal server error occurred. Please try again later." }
+            errors = new[] { "An internal server error occurred. Please try again later." },
         });
     }
 }

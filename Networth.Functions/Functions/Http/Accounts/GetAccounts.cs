@@ -6,8 +6,8 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
-using Networth.Domain.Entities;
 using Networth.Functions.Authentication;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions;
 
@@ -33,7 +33,7 @@ public class GetAccounts(
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(IEnumerable<UserAccount>),
+        typeof(IEnumerable<UserAccountResponse>),
         Description = "Successfully retrieved user accounts")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.Unauthorized,
@@ -53,11 +53,19 @@ public class GetAccounts(
 
         var query = new GetAccountsQuery
         {
-            UserId = currentUserService.UserId
+            UserId = currentUserService.UserId,
         };
 
         var result = await mediator.Send<GetAccountsQuery, GetAccountsQueryResult>(query);
 
-        return new OkObjectResult(result.Accounts);
+        var response = result.Accounts.Select(a => new UserAccountResponse
+        {
+            Id = a.Id,
+            InstitutionId = a.InstitutionId,
+            Name = a.Name,
+            InstitutionGoCardlessId = a.InstitutionGoCardlessId,
+        });
+
+        return new OkObjectResult(response);
     }
 }

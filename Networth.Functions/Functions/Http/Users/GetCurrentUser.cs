@@ -45,7 +45,7 @@ public class GetCurrentUser
         {
             UserId = _currentUserService.UserId,
             Name = _currentUserService.Name,
-            IsAuthenticated = _currentUserService.IsAuthenticated
+            IsAuthenticated = _currentUserService.IsAuthenticated,
         };
 
         return new OkObjectResult(response);

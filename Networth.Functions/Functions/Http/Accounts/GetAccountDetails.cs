@@ -66,7 +66,7 @@ public class GetAccountDetails(IMediator mediator, ILogger<GetAccountDetails> lo
             DisplayName = result.AccountDetail.DisplayName,
             Product = result.AccountDetail.Product,
             CashAccountType = result.AccountDetail.CashAccountType,
-            Status = result.AccountDetail.Status
+            Status = result.AccountDetail.Status,
         };
 
         logger.LogInformation("Successfully retrieved account details for account {AccountId}", accountId);

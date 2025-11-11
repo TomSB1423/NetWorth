@@ -23,7 +23,7 @@ public class MockAuthenticationMiddleware : IFunctionsWorkerMiddleware
             [
                 new Claim(ClaimTypes.NameIdentifier, "mock-user-123"),
                 new Claim(ClaimTypes.Name, "Mock Development User"),
-                new Claim("IsActive", "true")
+                new Claim("IsActive", "true"),
             ],
             "MockAuthentication");
 

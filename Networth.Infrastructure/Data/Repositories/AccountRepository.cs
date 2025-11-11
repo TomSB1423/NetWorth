@@ -28,7 +28,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
                 OwnerId = a.OwnerId,
                 InstitutionId = a.InstitutionId,
                 Name = a.Name,
-                InstitutionGoCardlessId = a.Institution.GoCardlessId
+                InstitutionGoCardlessId = a.Institution.GoCardlessId,
             })
             .ToListAsync(cancellationToken);
 

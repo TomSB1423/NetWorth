@@ -5,6 +5,7 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
 using Networth.Functions.Models.Requests;
+using Networth.Functions.Models.Responses;
 using FromBodyAttributes = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 namespace Networth.Functions.Functions;
@@ -32,7 +33,7 @@ public class LinkAccount(IMediator mediator)
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(LinkAccountCommandResult),
+        typeof(LinkAccountResponse),
         Description = "Successfully linked account")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
@@ -46,6 +47,13 @@ public class LinkAccount(IMediator mediator)
     {
         var command = new LinkAccountCommand { InstitutionId = request.InstitutionId };
         var result = await mediator.Send<LinkAccountCommand, LinkAccountCommandResult>(command);
-        return new OkObjectResult(result);
+
+        var response = new LinkAccountResponse
+        {
+            AuthorizationLink = result.AuthorizationLink,
+            Status = result.Status,
+        };
+
+        return new OkObjectResult(response);
     }
 }

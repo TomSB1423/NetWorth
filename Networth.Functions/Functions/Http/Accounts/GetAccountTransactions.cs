@@ -110,7 +110,7 @@ public class GetAccountTransactions(
             Currency = t.Currency,
             BookingDate = t.BookingDate,
             ValueDate = t.ValueDate,
-            RemittanceInformationUnstructured = t.RemittanceInformationUnstructured
+            RemittanceInformationUnstructured = t.RemittanceInformationUnstructured,
         });
 
         logger.LogInformation(

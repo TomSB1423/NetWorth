@@ -66,7 +66,7 @@ public class GetRequisition(IMediator mediator, ILogger<GetRequisition> logger)
             AgreementId = result.Requisition.AgreementId,
             Accounts = result.Requisition.Accounts,
             AuthenticationLink = result.Requisition.AuthenticationLink,
-            Reference = result.Requisition.Reference
+            Reference = result.Requisition.Reference,
         };
 
         logger.LogInformation("Successfully retrieved requisition {RequisitionId}", requisitionId);

@@ -25,7 +25,7 @@ public class GetAccountQueryHandler(
 
         return new GetAccountQueryResult
         {
-            Account = account
+            Account = account,
         };
     }
 }

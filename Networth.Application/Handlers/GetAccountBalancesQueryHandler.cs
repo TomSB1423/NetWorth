@@ -25,7 +25,7 @@ public class GetAccountBalancesQueryHandler(
 
         return new GetAccountBalancesQueryResult
         {
-            Balances = balances
+            Balances = balances,
         };
     }
 }
