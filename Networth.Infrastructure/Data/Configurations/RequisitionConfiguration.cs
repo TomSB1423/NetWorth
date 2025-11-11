@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Networth.Domain.Entities;
+using Networth.Infrastructure.Data.Entities;
 
 namespace Networth.Infrastructure.Data.Configurations;
 

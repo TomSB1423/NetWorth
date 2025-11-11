@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Networth.Domain.Entities;
+using Networth.Application.Interfaces;
+using Networth.Application.Queries;
 using Networth.Functions.Authentication;
-using Networth.Infrastructure.Data.Context;
 
 namespace Networth.Functions.Functions;
 
@@ -15,7 +14,7 @@ namespace Networth.Functions.Functions;
 ///     Azure Function for retrieving all accounts for the current user.
 /// </summary>
 public class GetAccounts(
-    NetworthDbContext dbContext,
+    IMediator mediator,
     ICurrentUserService currentUserService,
     ILogger<GetAccounts> logger)
 {
@@ -33,7 +32,7 @@ public class GetAccounts(
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(IEnumerable<Account>),
+        typeof(IEnumerable<AccountDto>),
         Description = "Successfully retrieved user accounts")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.Unauthorized,
@@ -51,20 +50,13 @@ public class GetAccounts(
             return new UnauthorizedResult();
         }
 
-        string userId = currentUserService.UserId;
-        logger.LogInformation("Retrieving accounts for user {UserId}", userId);
+        var query = new GetAccountsQuery
+        {
+            UserId = currentUserService.UserId
+        };
 
-        List<Account> accounts = await dbContext.Accounts
-            .Where(a => a.OwnerId == userId)
-            .Include(a => a.Institution)
-            .OrderBy(a => a.Name)
-            .ToListAsync();
+        var result = await mediator.Send<GetAccountsQuery, GetAccountsQueryResult>(query);
 
-        logger.LogInformation(
-            "Successfully retrieved {Count} accounts for user {UserId}",
-            accounts.Count,
-            userId);
-
-        return new OkObjectResult(accounts);
+        return new OkObjectResult(result.Accounts);
     }
 }

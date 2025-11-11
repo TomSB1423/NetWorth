@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Networth.Domain.Entities;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;

@@ -6,14 +6,15 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Networth.Application.Interfaces;
-using Networth.Domain.Entities;
+using Networth.Application.Queries;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions;
 
 /// <summary>
 ///     Azure Function for retrieving requisition details.
 /// </summary>
-public class GetRequisition(IFinancialProvider financialProvider, ILogger<GetRequisition> logger)
+public class GetRequisition(IMediator mediator, ILogger<GetRequisition> logger)
 {
     /// <summary>
     ///     Gets the details of a specific requisition.
@@ -36,7 +37,7 @@ public class GetRequisition(IFinancialProvider financialProvider, ILogger<GetReq
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(Requisition),
+        typeof(RequisitionResponse),
         Description = "Successfully retrieved requisition")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
@@ -52,16 +53,23 @@ public class GetRequisition(IFinancialProvider financialProvider, ILogger<GetReq
         HttpRequest req,
         string requisitionId)
     {
-        if (string.IsNullOrEmpty(requisitionId))
-        {
-            logger.LogWarning("Missing requisitionId in GetRequisition request");
-            throw new ArgumentException("Requisition ID is required", nameof(requisitionId));
-        }
+        logger.LogInformation("Received request to get requisition {RequisitionId}", requisitionId);
 
-        Requisition requisition = await financialProvider.GetRequisitionAsync(requisitionId);
+        var query = new GetRequisitionQuery { RequisitionId = requisitionId };
+        var result = await mediator.Send<GetRequisitionQuery, GetRequisitionQueryResult>(query);
+
+        var response = new RequisitionResponse
+        {
+            Id = result.Requisition.Id,
+            Status = result.Requisition.Status.ToString(),
+            InstitutionId = result.Requisition.InstitutionId,
+            AgreementId = result.Requisition.AgreementId,
+            Accounts = result.Requisition.Accounts,
+            AuthenticationLink = result.Requisition.AuthenticationLink,
+            Reference = result.Requisition.Reference
+        };
 
         logger.LogInformation("Successfully retrieved requisition {RequisitionId}", requisitionId);
-
-        return new OkObjectResult(requisition);
+        return new OkObjectResult(response);
     }
 }

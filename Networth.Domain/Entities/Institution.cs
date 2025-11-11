@@ -1,42 +1,44 @@
 namespace Networth.Domain.Entities;
 
 /// <summary>
-///     Represents a financial institution connected through GoCardless.
+///     Represents metadata about a financial institution from GoCardless.
+///     This is a read-only DTO and not stored in the database.
 /// </summary>
-public class Institution
+public record Institution
 {
     /// <summary>
-    ///     Gets or sets the unique identifier for the institution.
+    ///     Gets the unique identifier for the institution.
     /// </summary>
-    public required string Id { get; set; }
+    public required string Id { get; init; }
 
     /// <summary>
-    ///     Gets or sets the owner user ID.
+    ///     Gets the name of the bank.
     /// </summary>
-    public required string OwnerId { get; set; }
+    public required string Name { get; init; }
 
     /// <summary>
-    ///     Gets or sets the owner user.
+    ///     Gets the transaction history available in days.
     /// </summary>
-    public User Owner { get; set; } = null!;
+    public int? TransactionTotalDays { get; init; }
 
     /// <summary>
-    ///     Gets or sets the GoCardless institution ID.
+    ///     Gets the maximum number of days the authorization is valid for.
     /// </summary>
-    public required string GoCardlessId { get; set; }
+    public int? MaxAccessValidForDays { get; init; }
 
     /// <summary>
-    ///     Gets or sets the requisition ID.
+    ///     Gets the logo URL of the bank institution.
     /// </summary>
-    public required string RequisitionId { get; set; }
+    public string? LogoUrl { get; init; }
 
     /// <summary>
-    ///     Gets or sets the requisition.
+    ///     Gets the BIC code of the institution.
     /// </summary>
-    public Requisition Requisition { get; set; } = null!;
+    public string? Bic { get; init; }
 
     /// <summary>
-    ///     Gets or sets the accounts associated with this institution.
+    ///     Gets the countries where this institution operates.
     /// </summary>
-    public ICollection<Account> Accounts { get; set; } = [];
+    public string[] Countries { get; init; } = [];
 }
+

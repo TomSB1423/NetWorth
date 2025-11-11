@@ -6,14 +6,15 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Networth.Application.Interfaces;
-using Networth.Domain.Entities;
+using Networth.Application.Queries;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions;
 
 /// <summary>
 ///     Azure Function for retrieving account metadata.
 /// </summary>
-public class GetAccount(IFinancialProvider financialProvider, ILogger<GetAccount> logger)
+public class GetAccount(IMediator mediator, ILogger<GetAccount> logger)
 {
     /// <summary>
     ///     Gets the metadata for a specific account.
@@ -36,7 +37,7 @@ public class GetAccount(IFinancialProvider financialProvider, ILogger<GetAccount
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(AccountMetadata),
+        typeof(AccountResponse),
         Description = "Successfully retrieved account metadata")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
@@ -52,8 +53,20 @@ public class GetAccount(IFinancialProvider financialProvider, ILogger<GetAccount
         HttpRequest req,
         string accountId)
     {
-        AccountMetadata account = await financialProvider.GetAccountAsync(accountId);
+        logger.LogInformation("Received request to get account metadata for {AccountId}", accountId);
+
+        var query = new GetAccountQuery { AccountId = accountId };
+        var result = await mediator.Send<GetAccountQuery, GetAccountQueryResult>(query);
+
+        var response = new AccountResponse
+        {
+            Id = result.Account.Id,
+            InstitutionId = result.Account.InstitutionId,
+            Status = result.Account.Status,
+            Name = result.Account.Name
+        };
+
         logger.LogInformation("Successfully retrieved account metadata for account {AccountId}", accountId);
-        return new OkObjectResult(account);
+        return new OkObjectResult(response);
     }
 }

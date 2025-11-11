@@ -6,14 +6,15 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Networth.Application.Interfaces;
-using Networth.Domain.Entities;
+using Networth.Application.Queries;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions;
 
 /// <summary>
 ///     Azure Function for retrieving detailed account information.
 /// </summary>
-public class GetAccountDetails(IFinancialProvider financialProvider, ILogger<GetAccountDetails> logger)
+public class GetAccountDetails(IMediator mediator, ILogger<GetAccountDetails> logger)
 {
     /// <summary>
     ///     Gets the detailed information for a specific account.
@@ -36,7 +37,7 @@ public class GetAccountDetails(IFinancialProvider financialProvider, ILogger<Get
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(AccountDetail),
+        typeof(AccountDetailResponse),
         Description = "Successfully retrieved account details")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
@@ -52,8 +53,23 @@ public class GetAccountDetails(IFinancialProvider financialProvider, ILogger<Get
         HttpRequest req,
         string accountId)
     {
-        AccountDetail accountDetails = await financialProvider.GetAccountDetailsAsync(accountId);
+        logger.LogInformation("Received request to get details for account {AccountId}", accountId);
+
+        var query = new GetAccountDetailsQuery { AccountId = accountId };
+        var result = await mediator.Send<GetAccountDetailsQuery, GetAccountDetailsQueryResult>(query);
+
+        var response = new AccountDetailResponse
+        {
+            Id = result.AccountDetail.Id,
+            Currency = result.AccountDetail.Currency,
+            Name = result.AccountDetail.Name,
+            DisplayName = result.AccountDetail.DisplayName,
+            Product = result.AccountDetail.Product,
+            CashAccountType = result.AccountDetail.CashAccountType,
+            Status = result.AccountDetail.Status
+        };
+
         logger.LogInformation("Successfully retrieved account details for account {AccountId}", accountId);
-        return new OkObjectResult(accountDetails);
+        return new OkObjectResult(response);
     }
 }

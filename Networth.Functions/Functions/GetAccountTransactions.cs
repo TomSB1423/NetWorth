@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
-using Networth.Domain.Entities;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions;
 
@@ -53,7 +53,7 @@ public class GetAccountTransactions(
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(IEnumerable<Transaction>),
+        typeof(IEnumerable<TransactionResponse>),
         Description = "Successfully retrieved account transactions")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
@@ -101,11 +101,23 @@ public class GetAccountTransactions(
         // Send through mediator (includes validation)
         GetTransactionsQueryResult result = await mediator.Send<GetTransactionsQuery, GetTransactionsQueryResult>(query);
 
+        var response = result.Transactions.Select(t => new TransactionResponse
+        {
+            Id = t.Id,
+            AccountId = t.AccountId,
+            TransactionId = t.TransactionId,
+            Amount = t.Amount,
+            Currency = t.Currency,
+            BookingDate = t.BookingDate,
+            ValueDate = t.ValueDate,
+            RemittanceInformationUnstructured = t.RemittanceInformationUnstructured
+        });
+
         logger.LogInformation(
             "Successfully retrieved {TransactionCount} transactions for account {AccountId}",
-            result.Transactions.Count(),
+            response.Count(),
             accountId);
 
-        return new OkObjectResult(result.Transactions);
+        return new OkObjectResult(response);
     }
 }

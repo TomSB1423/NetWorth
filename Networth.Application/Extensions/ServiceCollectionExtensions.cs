@@ -25,13 +25,21 @@ public static class ServiceCollectionExtensions
         // Register simple mediator
         services.AddScoped<IMediator, Mediator>();
 
-        // Register handlers
-        services.AddScoped<IRequestHandler<GetTransactionsQuery, GetTransactionsQueryResult>, GetTransactionsQueryHandler>();
+        // Register command handlers
         services.AddScoped<IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>, LinkAccountCommandHandler>();
 
+        // Register query handlers
+        services.AddScoped<IRequestHandler<GetAccountsQuery, GetAccountsQueryResult>, GetAccountsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAccountQuery, GetAccountQueryResult>, GetAccountQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAccountBalancesQuery, GetAccountBalancesQueryResult>, GetAccountBalancesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAccountDetailsQuery, GetAccountDetailsQueryResult>, GetAccountDetailsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetTransactionsQuery, GetTransactionsQueryResult>, GetTransactionsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetInstitutionsQuery, GetInstitutionsQueryResult>, GetInstitutionsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetRequisitionQuery, GetRequisitionQueryResult>, GetRequisitionQueryHandler>();
+
         // Register validators
-        services.AddScoped<IValidator<GetTransactionsQuery>, GetTransactionsQueryValidator>();
         services.AddScoped<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
+        services.AddScoped<IValidator<GetTransactionsQuery>, GetTransactionsQueryValidator>();
 
         return services;
     }

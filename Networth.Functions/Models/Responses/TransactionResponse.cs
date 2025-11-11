@@ -1,10 +1,9 @@
-namespace Networth.Domain.Entities;
+namespace Networth.Functions.Models.Responses;
 
 /// <summary>
-///     Represents a financial transaction from GoCardless API.
-///     This is a read-only DTO with all GoCardless fields and not stored directly in the database.
+///     Response model for a financial transaction.
 /// </summary>
-public record TransactionMetadata
+public record TransactionResponse
 {
     /// <summary>
     ///     Gets the composite identifier for the transaction (accountId_transactionId).
@@ -121,4 +120,3 @@ public record TransactionMetadata
     /// </summary>
     public bool IsPending { get; init; }
 }
-

@@ -6,14 +6,15 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Networth.Application.Interfaces;
-using Networth.Domain.Entities;
+using Networth.Application.Queries;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions;
 
 /// <summary>
 ///     Azure Function for retrieving account balances.
 /// </summary>
-public class GetAccountBalances(IFinancialProvider financialProvider, ILogger<GetAccountBalances> logger)
+public class GetAccountBalances(IMediator mediator, ILogger<GetAccountBalances> logger)
 {
     /// <summary>
     ///     Gets the balances for a specific account.
@@ -36,7 +37,7 @@ public class GetAccountBalances(IFinancialProvider financialProvider, ILogger<Ge
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(IEnumerable<AccountBalance>),
+        typeof(IEnumerable<AccountBalanceResponse>),
         Description = "Successfully retrieved account balances")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
@@ -52,8 +53,21 @@ public class GetAccountBalances(IFinancialProvider financialProvider, ILogger<Ge
         HttpRequest req,
         string accountId)
     {
-        IEnumerable<AccountBalance> balances = await financialProvider.GetAccountBalancesAsync(accountId);
+        logger.LogInformation("Received request to get balances for account {AccountId}", accountId);
+
+        var query = new GetAccountBalancesQuery { AccountId = accountId };
+        var result = await mediator.Send<GetAccountBalancesQuery, GetAccountBalancesQueryResult>(query);
+
+        var response = result.Balances.Select(b => new AccountBalanceResponse
+        {
+            Amount = b.Amount,
+            Currency = b.Currency,
+            BalanceType = b.BalanceType,
+            CreditLimitIncluded = b.CreditLimitIncluded,
+            ReferenceDate = b.ReferenceDate
+        });
+
         logger.LogInformation("Successfully retrieved account balances for account {AccountId}", accountId);
-        return new OkObjectResult(balances);
+        return new OkObjectResult(response);
     }
 }

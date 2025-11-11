@@ -15,5 +15,5 @@ public record GetTransactionsQueryResult
     /// <summary>
     ///     Gets the transactions for the account from GoCardless.
     /// </summary>
-    public IEnumerable<TransactionMetadata> Transactions { get; init; } = [];
+    public IEnumerable<Transaction> Transactions { get; init; } = [];
 }

@@ -3,12 +3,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
-using Networth.Domain.Entities;
+using Networth.Application.Queries;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions;
 
-public class GetInstitutions(IFinancialProvider financialProvider)
+/// <summary>
+///     Azure Function for retrieving available financial institutions.
+/// </summary>
+public class GetInstitutions(IMediator mediator, ILogger<GetInstitutions> logger)
 {
     /// <summary>
     ///     Gets a list of available financial institutions.
@@ -24,7 +29,7 @@ public class GetInstitutions(IFinancialProvider financialProvider)
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(object),
+        typeof(IEnumerable<InstitutionResponse>),
         Description = "Successfully retrieved institutions")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.InternalServerError,
@@ -33,7 +38,17 @@ public class GetInstitutions(IFinancialProvider financialProvider)
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "institutions")]
         HttpRequest req)
     {
-        IEnumerable<InstitutionMetadata> institutions = await financialProvider.GetInstitutionsAsync("GB");
-        return new OkObjectResult(institutions);
+        logger.LogInformation("Received request to get institutions");
+
+        var query = new GetInstitutionsQuery { CountryCode = "GB" };
+        var result = await mediator.Send<GetInstitutionsQuery, GetInstitutionsQueryResult>(query);
+
+        var response = result.Institutions.Select(i => new InstitutionResponse(
+            i.Id,
+            i.Name,
+            i.LogoUrl));
+
+        logger.LogInformation("Successfully retrieved {Count} institutions", response.Count());
+        return new OkObjectResult(response);
     }
 }

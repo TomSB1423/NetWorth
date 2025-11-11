@@ -13,7 +13,7 @@ public interface IFinancialProvider
     /// <param name="institutionId">The institution id.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Institution metadata from GoCardless.</returns>
-    Task<InstitutionMetadata> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default);
+    Task<Institution> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets a list of available institutions for a given country.
@@ -21,7 +21,7 @@ public interface IFinancialProvider
     /// <param name="country">The institution country.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A collection of available institution metadata.</returns>
-    Task<IEnumerable<InstitutionMetadata>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Institution>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates an agreement for accessing bank account data.
@@ -65,7 +65,7 @@ public interface IFinancialProvider
     /// <param name="accountId">The account ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The account metadata from GoCardless.</returns>
-    Task<AccountMetadata> GetAccountAsync(string accountId, CancellationToken cancellationToken = default);
+    Task<Account> GetAccountAsync(string accountId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets account balances by account ID.
@@ -93,7 +93,7 @@ public interface IFinancialProvider
     /// <param name="dateTo">End date for transaction filtering (optional).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The account transactions from GoCardless.</returns>
-    Task<IEnumerable<TransactionMetadata>> GetAccountTransactionsAsync(
+    Task<IEnumerable<Transaction>> GetAccountTransactionsAsync(
         string accountId,
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,

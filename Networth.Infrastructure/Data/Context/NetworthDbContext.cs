@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using Networth.Domain.Entities;
+using Networth.Infrastructure.Data.Entities;
+using Account = Networth.Infrastructure.Data.Entities.Account;
+using Institution = Networth.Infrastructure.Data.Entities.Institution;
+using Transaction = Networth.Infrastructure.Data.Entities.Transaction;
 
 namespace Networth.Infrastructure.Data.Context;
 

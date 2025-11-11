@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Requests\"/>
-    <Folder Include="Models\Responses\"/>
     <Folder Include="Validators\"/>
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-namespace Networth.Domain.Entities;
+namespace Networth.Infrastructure.Data.Entities;
 
 /// <summary>
 ///     Represents a user of the Networth application.

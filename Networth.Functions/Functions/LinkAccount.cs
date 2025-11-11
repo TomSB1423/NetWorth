@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Networth.Application.Commands;
-using Networth.Application.Handlers;
+using Networth.Application.Interfaces;
 using Networth.Functions.Models.Requests;
 using FromBodyAttributes = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
@@ -12,7 +12,7 @@ namespace Networth.Functions.Functions;
 /// <summary>
 ///     Azure Function for linking bank accounts by creating agreements and requisitions.
 /// </summary>
-public class LinkAccount(LinkAccountCommandHandler linkAccountHandler)
+public class LinkAccount(IMediator mediator)
 {
     /// <summary>
     ///     Links a bank account by creating an agreement and requisition in sequence.
@@ -44,8 +44,8 @@ public class LinkAccount(LinkAccountCommandHandler linkAccountHandler)
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = "account/link")] [FromBodyAttributes]
         LinkAccountRequest request)
     {
-        LinkAccountCommand command = new() { InstitutionId = request.InstitutionId };
-        LinkAccountCommandResult result = await linkAccountHandler.HandleAsync(command);
+        var command = new LinkAccountCommand { InstitutionId = request.InstitutionId };
+        var result = await mediator.Send<LinkAccountCommand, LinkAccountCommandResult>(command);
         return new OkObjectResult(result);
     }
 }

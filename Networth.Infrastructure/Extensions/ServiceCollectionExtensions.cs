@@ -16,6 +16,7 @@ using Networth.Infrastructure.Data.Options;
 using Networth.Infrastructure.Gocardless;
 using Networth.Infrastructure.Gocardless.Auth;
 using Networth.Infrastructure.Gocardless.Options;
+using Networth.Infrastructure.Services;
 using Npgsql;
 using Refit;
 
@@ -61,12 +62,9 @@ public static class ServiceCollectionExtensions
             .AddHttpMessageHandler<GoCardlessAuthHandler>()
             .AddHttpMessageHandler(serviceProvider => new RefitRetryHandler(serviceProvider.GetRequiredService<ILogger<RefitRetryHandler>>()));
 
-        // Register Infrastructure
+        // Register Infrastructure services
         services.AddTransient<IFinancialProvider, GocardlessService>();
-
-        // Register Application services
-        services.AddTransient<LinkAccountCommandHandler>();
-        services.AddTransient<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
+        services.AddScoped<IAccountService, AccountService>();
 
         // Use DB - with Aspire NpgsqlDataSource
         services.AddDbContext<NetworthDbContext>((serviceProvider, dbContextOptionsBuilder) =>

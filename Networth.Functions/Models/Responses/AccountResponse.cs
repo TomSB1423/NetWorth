@@ -1,10 +1,9 @@
-namespace Networth.Domain.Entities;
+namespace Networth.Functions.Models.Responses;
 
 /// <summary>
-///     Represents account metadata from GoCardless API.
-///     This is a read-only DTO and not stored in the database.
+///     Response model for account metadata.
 /// </summary>
-public record AccountMetadata
+public record AccountResponse
 {
     /// <summary>
     ///     Gets the unique identifier for the account.
@@ -26,4 +25,3 @@ public record AccountMetadata
     /// </summary>
     public string? Name { get; init; }
 }
-
