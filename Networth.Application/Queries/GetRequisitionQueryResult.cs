@@ -8,7 +8,7 @@ namespace Networth.Application.Queries;
 public class GetRequisitionQueryResult
 {
     /// <summary>
-    ///     Gets the requisition.
+    ///     Gets the requisition, or null if not found.
     /// </summary>
-    public required Requisition Requisition { get; init; }
+    public required Requisition? Requisition { get; init; }
 }

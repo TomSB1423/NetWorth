@@ -101,6 +101,13 @@ public class GetAccountTransactions(
         // Send through mediator (includes validation)
         GetTransactionsQueryResult result = await mediator.Send<GetTransactionsQuery, GetTransactionsQueryResult>(query);
 
+        // Return 404 if account not found
+        if (result.Transactions is null)
+        {
+            logger.LogWarning("Account {AccountId} not found", accountId);
+            return new NotFoundResult();
+        }
+
         var response = result.Transactions.Select(t => new TransactionResponse
         {
             Id = t.Id,

@@ -58,6 +58,13 @@ public class GetRequisition(IMediator mediator, ILogger<GetRequisition> logger)
         var query = new GetRequisitionQuery { RequisitionId = requisitionId };
         var result = await mediator.Send<GetRequisitionQuery, GetRequisitionQueryResult>(query);
 
+        // Return 404 if requisition not found
+        if (result.Requisition is null)
+        {
+            logger.LogWarning("Requisition {RequisitionId} not found", requisitionId);
+            return new NotFoundResult();
+        }
+
         var response = new RequisitionResponse
         {
             Id = result.Requisition.Id,

@@ -58,6 +58,13 @@ public class GetAccount(IMediator mediator, ILogger<GetAccount> logger)
         var query = new GetAccountQuery { AccountId = accountId };
         var result = await mediator.Send<GetAccountQuery, GetAccountQueryResult>(query);
 
+        // Return 404 if account not found
+        if (result.Account is null)
+        {
+            logger.LogWarning("Account {AccountId} not found", accountId);
+            return new NotFoundResult();
+        }
+
         var response = new AccountResponse
         {
             Id = result.Account.Id,

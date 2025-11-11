@@ -27,7 +27,7 @@ This starts:
 - Azure Storage Emulator (Azurite) with queues
 - Azure Functions backend on random port (Aspire-managed)
 - React frontend on port 3000
-- Aspire Dashboard
+- Aspire Dashboard at https://localhost:17065
 
 **Required Secrets** (set before first run):
 ```bash

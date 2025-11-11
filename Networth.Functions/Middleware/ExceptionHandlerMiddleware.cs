@@ -23,7 +23,14 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
         {
             logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
             HttpRequestData? request = await context.GetHttpRequestDataAsync();
-            HttpResponseData response = request!.CreateResponse();
+
+            if (request == null)
+            {
+                logger.LogError("Unable to get HttpRequestData from context");
+                throw;
+            }
+
+            HttpResponseData response = request.CreateResponse();
 
             var (statusCode, errorResponse) = ex switch
             {

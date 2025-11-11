@@ -9,45 +9,45 @@ namespace Networth.Infrastructure.Gocardless;
 internal interface IGocardlessClient
 {
     [Post("/token/new/")]
-    Task<GetTokenResponseDto> GetAccessTokenAsync([Body] TokenRequestDto requestDto);
+    Task<ApiResponse<GetTokenResponseDto>> GetAccessTokenAsync([Body] TokenRequestDto requestDto);
 
     [Get("/institutions/{id}/")]
     [Headers("Authorization: Bearer")]
-    Task<GetInstitutionDto> GetInstitution(string id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<GetInstitutionDto>> GetInstitution(string id, CancellationToken cancellationToken = default);
 
     [Get("/institutions/")]
     [Headers("Authorization: Bearer")]
-    Task<IEnumerable<GetInstitutionDto>> GetInstitutions([Query("country")] string country, CancellationToken cancellationToken = default);
+    Task<ApiResponse<IEnumerable<GetInstitutionDto>>> GetInstitutions([Query("country")] string country, CancellationToken cancellationToken = default);
 
     [Post("/agreements/enduser/")]
     [Headers("Authorization: Bearer")]
-    Task<CreateAgreementResponseDto> CreateAgreement([Body] CreateAgreementRequestDto agreement, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CreateAgreementResponseDto>> CreateAgreement([Body] CreateAgreementRequestDto agreement, CancellationToken cancellationToken = default);
 
     [Post("/requisitions/")]
     [Headers("Authorization: Bearer")]
-    Task<CreateRequisitionResponseDto> CreateRequisition(
+    Task<ApiResponse<CreateRequisitionResponseDto>> CreateRequisition(
         [Body] CreateRequisitionRequestDto requisition,
         CancellationToken cancellationToken = default);
 
     [Get("/requisitions/{id}/")]
     [Headers("Authorization: Bearer")]
-    Task<GetRequisitionResponseDto> GetRequisition(string id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<GetRequisitionResponseDto>> GetRequisition(string id, CancellationToken cancellationToken = default);
 
     [Get("/accounts/{id}/")]
     [Headers("Authorization: Bearer")]
-    Task<GetAccountResponseDto> GetAccount(string id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<GetAccountResponseDto>> GetAccount(string id, CancellationToken cancellationToken = default);
 
     [Get("/accounts/{id}/balances/")]
     [Headers("Authorization: Bearer")]
-    Task<GetAccountBalanceResponseDto> GetAccountBalances(string id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<GetAccountBalanceResponseDto>> GetAccountBalances(string id, CancellationToken cancellationToken = default);
 
     [Get("/accounts/{id}/details/")]
     [Headers("Authorization: Bearer")]
-    Task<GetAccountDetailResponseDto> GetAccountDetails(string id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<GetAccountDetailResponseDto>> GetAccountDetails(string id, CancellationToken cancellationToken = default);
 
     [Get("/accounts/{id}/transactions/")]
     [Headers("Authorization: Bearer")]
-    Task<GetAccountTransactionsResponseDto> GetAccountTransactions(
+    Task<ApiResponse<GetAccountTransactionsResponseDto>> GetAccountTransactions(
         string id,
         [Query("date_from")] string? dateFrom = null,
         [Query("date_to")] string? dateTo = null,

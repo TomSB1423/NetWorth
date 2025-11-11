@@ -58,6 +58,13 @@ public class GetAccountBalances(IMediator mediator, ILogger<GetAccountBalances> 
         var query = new GetAccountBalancesQuery { AccountId = accountId };
         var result = await mediator.Send<GetAccountBalancesQuery, GetAccountBalancesQueryResult>(query);
 
+        // Return 404 if account not found
+        if (result.Balances is null)
+        {
+            logger.LogWarning("Account {AccountId} not found", accountId);
+            return new NotFoundResult();
+        }
+
         var response = result.Balances.Select(b => new AccountBalanceResponse
         {
             Amount = b.Amount,

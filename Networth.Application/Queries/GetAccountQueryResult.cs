@@ -8,7 +8,7 @@ namespace Networth.Application.Queries;
 public class GetAccountQueryResult
 {
     /// <summary>
-    ///     Gets the account metadata.
+    ///     Gets the account metadata, or null if not found.
     /// </summary>
-    public required Account Account { get; init; }
+    public required Account? Account { get; init; }
 }

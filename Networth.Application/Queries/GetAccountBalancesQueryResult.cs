@@ -8,7 +8,7 @@ namespace Networth.Application.Queries;
 public class GetAccountBalancesQueryResult
 {
     /// <summary>
-    ///     Gets the account balances.
+    ///     Gets the account balances, or null if the account was not found.
     /// </summary>
-    public required IEnumerable<AccountBalance> Balances { get; init; }
+    public required IEnumerable<AccountBalance>? Balances { get; init; }
 }

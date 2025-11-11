@@ -35,6 +35,19 @@ public class SyncAccountCommandHandler(
             dateTo,
             cancellationToken);
 
+        // If transactions is null, account was not found - return empty result
+        if (transactions is null)
+        {
+            logger.LogError("Account {AccountId} not found during sync", request.AccountId);
+            return new SyncAccountCommandResult
+            {
+                AccountId = request.AccountId,
+                TransactionCount = 0,
+                DateFrom = dateFrom,
+                DateTo = dateTo
+            };
+        }
+
         var transactionList = transactions.ToList();
 
         logger.LogInformation(

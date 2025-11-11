@@ -1,4 +1,3 @@
-using System.Reflection;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Networth.Application.Commands;
@@ -28,6 +27,7 @@ public static class ServiceCollectionExtensions
         // Register command handlers
         services.AddScoped<IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>, LinkAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
+        services.AddScoped<IRequestHandler<SyncInstitutionCommand, SyncInstitutionCommandResult>, SyncInstitutionCommandHandler>();
 
         // Register query handlers
         services.AddScoped<IRequestHandler<GetAccountsQuery, GetAccountsQueryResult>, GetAccountsQueryHandler>();
@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         // Register validators
         services.AddScoped<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
         services.AddScoped<IValidator<SyncAccountCommand>, SyncAccountCommandValidator>();
+        services.AddScoped<IValidator<SyncInstitutionCommand>, SyncInstitutionCommandValidator>();
         services.AddScoped<IValidator<GetTransactionsQuery>, GetTransactionsQueryValidator>();
 
         return services;
