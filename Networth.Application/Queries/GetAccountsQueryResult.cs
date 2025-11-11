@@ -1,14 +1,14 @@
-using Networth.Application.Interfaces;
+using Networth.Domain.Entities;
 
 namespace Networth.Application.Queries;
 
 /// <summary>
-///     Result for GetAccountsQuery.
+///     Result for retrieving user accounts.
 /// </summary>
 public class GetAccountsQueryResult
 {
     /// <summary>
-    ///     Gets the list of accounts.
+    ///     Gets the collection of accounts.
     /// </summary>
-    public required IEnumerable<AccountDto> Accounts { get; init; }
+    public required IEnumerable<UserAccount> Accounts { get; init; }
 }

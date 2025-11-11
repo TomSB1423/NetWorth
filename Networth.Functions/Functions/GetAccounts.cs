@@ -6,6 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
+using Networth.Domain.Entities;
 using Networth.Functions.Authentication;
 
 namespace Networth.Functions.Functions;
@@ -32,7 +33,7 @@ public class GetAccounts(
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(IEnumerable<AccountDto>),
+        typeof(IEnumerable<UserAccount>),
         Description = "Successfully retrieved user accounts")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.Unauthorized,

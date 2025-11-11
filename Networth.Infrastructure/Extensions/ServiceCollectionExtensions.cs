@@ -11,12 +11,13 @@ using Networth.Application.Commands;
 using Networth.Application.Handlers;
 using Networth.Application.Interfaces;
 using Networth.Application.Validators;
+using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Data.Options;
+using Networth.Infrastructure.Data.Repositories;
 using Networth.Infrastructure.Gocardless;
 using Networth.Infrastructure.Gocardless.Auth;
 using Networth.Infrastructure.Gocardless.Options;
-using Networth.Infrastructure.Services;
 using Npgsql;
 using Refit;
 
@@ -64,7 +65,10 @@ public static class ServiceCollectionExtensions
 
         // Register Infrastructure services
         services.AddTransient<IFinancialProvider, GocardlessService>();
-        services.AddScoped<IAccountService, AccountService>();
+
+        // Register repositories
+        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IRequisitionRepository, RequisitionRepository>();
 
         // Use DB - with Aspire NpgsqlDataSource
         services.AddDbContext<NetworthDbContext>((serviceProvider, dbContextOptionsBuilder) =>

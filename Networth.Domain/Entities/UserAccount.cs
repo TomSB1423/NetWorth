@@ -1,9 +1,9 @@
-namespace Networth.Application.Interfaces;
+namespace Networth.Domain.Entities;
 
 /// <summary>
-///     Data transfer object for account information from the database.
+///     Represents a user's bank account stored in the database.
 /// </summary>
-public class AccountDto
+public class UserAccount
 {
     /// <summary>
     ///     Gets the unique identifier for the account.
@@ -11,7 +11,12 @@ public class AccountDto
     public required string Id { get; init; }
 
     /// <summary>
-    ///     Gets the institution identifier.
+    ///     Gets the owner user ID.
+    /// </summary>
+    public required string OwnerId { get; init; }
+
+    /// <summary>
+    ///     Gets the institution ID.
     /// </summary>
     public required string InstitutionId { get; init; }
 
@@ -21,7 +26,7 @@ public class AccountDto
     public required string Name { get; init; }
 
     /// <summary>
-    ///     Gets the institution information.
+    ///     Gets the institution GoCardless ID.
     /// </summary>
-    public InstitutionInfo? Institution { get; init; }
+    public string? InstitutionGoCardlessId { get; init; }
 }

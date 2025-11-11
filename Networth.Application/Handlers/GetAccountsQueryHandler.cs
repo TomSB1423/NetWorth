@@ -1,25 +1,28 @@
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
+using Networth.Domain.Repositories;
 
 namespace Networth.Application.Handlers;
 
 /// <summary>
-///     Handler for GetAccountsQuery.
+///     Handler for retrieving user accounts.
 /// </summary>
 public class GetAccountsQueryHandler(
-    IAccountService accountService,
+    IAccountRepository accountRepository,
     ILogger<GetAccountsQueryHandler> logger)
     : IRequestHandler<GetAccountsQuery, GetAccountsQueryResult>
 {
     /// <inheritdoc />
     public async Task<GetAccountsQueryResult> HandleAsync(
-        GetAccountsQuery query,
-        CancellationToken cancellationToken = default)
+        GetAccountsQuery request,
+        CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling GetAccountsQuery for user {UserId}", query.UserId);
+        logger.LogInformation("Handling GetAccountsQuery for user {UserId}", request.UserId);
 
-        var accounts = await accountService.GetAccountsByUserIdAsync(query.UserId, cancellationToken);
+        var accounts = await accountRepository.GetAccountsByUserIdAsync(request.UserId, cancellationToken);
+
+        logger.LogInformation("Successfully retrieved {Count} accounts for user {UserId}", accounts.Count(), request.UserId);
 
         return new GetAccountsQueryResult
         {
