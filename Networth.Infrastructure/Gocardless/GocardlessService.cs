@@ -96,38 +96,25 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             AccessScope = [AccessScope.Details, AccessScope.Balances, AccessScope.Transactions],
         };
 
-        try
-        {
-            var apiResponse = await gocardlessClient.CreateAgreement(request, cancellationToken);
-            EnsureSuccessStatusCode(apiResponse);
-            CreateAgreementResponseDto response = apiResponse.Content!;
+        var apiResponse = await gocardlessClient.CreateAgreement(request, cancellationToken);
+        EnsureSuccessStatusCode(apiResponse);
+        CreateAgreementResponseDto response = apiResponse.Content!;
 
-            logger.LogInformation(
-                "Successfully created agreement {AgreementId} for institution {InstitutionId}",
-                response.Id,
-                response.InstitutionId);
+        logger.LogInformation(
+            "Successfully created agreement {AgreementId} for institution {InstitutionId}",
+            response.Id,
+            response.InstitutionId);
 
-            return new Agreement
-            {
-                Id = response.Id,
-                Created = response.Created,
-                InstitutionId = response.InstitutionId,
-                MaxHistoricalDays = response.MaxHistoricalDays,
-                AccessValidForDays = response.AccessValidForDays,
-                AccessScope = response.AccessScope,
-                Accepted = response.Accepted,
-            };
-        }
-        catch (ApiException ex)
+        return new Agreement
         {
-            logger.LogError(
-                ex,
-                "Failed to create agreement for institution {InstitutionId}. Status: {StatusCode}, Response: {Content}",
-                institutionId,
-                ex.StatusCode,
-                ex.Content);
-            throw;
-        }
+            Id = response.Id,
+            Created = response.Created,
+            InstitutionId = response.InstitutionId,
+            MaxHistoricalDays = response.MaxHistoricalDays,
+            AccessValidForDays = response.AccessValidForDays,
+            AccessScope = response.AccessScope,
+            Accepted = response.Accepted,
+        };
     }
 
     /// <inheritdoc />

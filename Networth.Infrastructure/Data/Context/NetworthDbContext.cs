@@ -46,6 +46,18 @@ public class NetworthDbContext : DbContext
     /// </summary>
     public DbSet<Requisition> Requisitions { get; set; } = null!;
 
+    /// <summary>
+    ///     Gets or sets the CacheMetadata DbSet.
+    ///     For tracking data cache freshness.
+    /// </summary>
+    public DbSet<CacheMetadata> CacheMetadata { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the InstitutionMetadata DbSet.
+    ///     For caching institution information from GoCardless.
+    /// </summary>
+    public DbSet<InstitutionMetadata> InstitutionMetadata { get; set; } = null!;
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -73,6 +73,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IRequisitionRepository, RequisitionRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<ICacheMetadataRepository, CacheMetadataRepository>();
+        services.AddScoped<IInstitutionMetadataRepository, InstitutionMetadataRepository>();
 
         // Use DB - with Aspire NpgsqlDataSource
         services.AddDbContext<NetworthDbContext>((serviceProvider, dbContextOptionsBuilder) =>

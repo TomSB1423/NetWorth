@@ -58,11 +58,9 @@ if (environment.IsDevelopment() || environment.IsEnvironment("Test"))
     await using AsyncServiceScope serviceScope = host.Services.CreateAsyncScope();
     await using NetworthDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<NetworthDbContext>();
 
-    // Only create if database doesn't exist (idempotent)
-    if (!await dbContext.Database.CanConnectAsync())
-    {
-        await dbContext.Database.EnsureCreatedAsync();
-    }
+    // In development, recreate the database to ensure schema is up to date
+    await dbContext.Database.EnsureDeletedAsync();
+    await dbContext.Database.EnsureCreatedAsync();
 }
 
 host.Run();
