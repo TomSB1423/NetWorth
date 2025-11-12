@@ -16,9 +16,9 @@ public class User
     public required string Name { get; set; }
 
     /// <summary>
-    ///     Gets or sets the institutions owned by this user.
+    ///     Gets or sets the user's institution connections.
     /// </summary>
-    public ICollection<Institution> Institutions { get; set; } = [];
+    public ICollection<Institution> UserInstitutions { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the accounts owned by this user.

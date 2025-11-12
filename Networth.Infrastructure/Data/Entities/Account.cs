@@ -21,14 +21,19 @@ public class Account
     public User Owner { get; set; } = null!;
 
     /// <summary>
-    ///     Gets or sets the institution ID.
+    ///     Gets or sets the user-institution link ID.
     /// </summary>
-    public required string InstitutionId { get; set; }
+    public required string UserInstitutionId { get; set; }
 
     /// <summary>
-    ///     Gets or sets the institution.
+    ///     Gets or sets the user-institution link.
     /// </summary>
     public Institution Institution { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the GoCardless institution ID (denormalized for convenience).
+    /// </summary>
+    public required string InstitutionId { get; set; }
 
     /// <summary>
     ///     Gets or sets the name of the account.

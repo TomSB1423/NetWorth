@@ -11,7 +11,7 @@ public class InstitutionMetadataConfiguration : IEntityTypeConfiguration<Entitie
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Entities.InstitutionMetadata> builder)
     {
-        builder.ToTable("institution_metadata");
+        builder.ToTable("Institutions");
 
         builder.HasKey(i => new { i.Id, i.CountryCode });
 

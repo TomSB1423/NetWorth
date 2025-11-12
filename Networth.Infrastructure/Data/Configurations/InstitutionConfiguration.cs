@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Institution = Networth.Infrastructure.Data.Entities.Institution;
+using Networth.Infrastructure.Data.Entities;
 
 namespace Networth.Infrastructure.Data.Configurations;
 
@@ -12,48 +12,47 @@ public class InstitutionConfiguration : IEntityTypeConfiguration<Institution>
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Institution> builder)
     {
-        builder.ToTable("Institutions");
+        builder.ToTable("UserInstitutions");
 
-        builder.HasKey(i => i.Id);
+        builder.HasKey(ui => ui.Id);
 
-        builder.Property(i => i.Id)
+        builder.Property(ui => ui.Id)
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(i => i.OwnerId)
+        builder.Property(ui => ui.OwnerId)
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(i => i.GoCardlessId)
+        builder.Property(ui => ui.GoCardlessInstitutionId)
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(i => i.RequisitionId)
+        builder.Property(ui => ui.RequisitionId)
             .HasMaxLength(200)
             .IsRequired();
 
         // Relationships
-        builder.HasOne(i => i.Owner)
-            .WithMany(u => u.Institutions)
-            .HasForeignKey(i => i.OwnerId)
+        builder.HasOne(ui => ui.Owner)
+            .WithMany(u => u.UserInstitutions)
+            .HasForeignKey(ui => ui.OwnerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(i => i.Requisition)
+        builder.HasOne(ui => ui.Requisition)
             .WithMany()
-            .HasForeignKey(i => i.RequisitionId)
+            .HasForeignKey(ui => ui.RequisitionId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(i => i.Accounts)
+        builder.HasMany(ui => ui.Accounts)
             .WithOne(a => a.Institution)
-            .HasForeignKey(a => a.InstitutionId)
+            .HasForeignKey(a => a.UserInstitutionId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(i => i.OwnerId)
-            .HasDatabaseName("IX_Institutions_OwnerId");
+        builder.HasIndex(ui => ui.OwnerId)
+            .HasDatabaseName("IX_UserInstitutions_OwnerId");
 
-        builder.HasIndex(i => i.GoCardlessId)
-            .HasDatabaseName("IX_Institutions_GoCardlessId");
+        builder.HasIndex(ui => ui.GoCardlessInstitutionId)
+            .HasDatabaseName("IX_UserInstitutions_GoCardlessInstitutionId");
     }
 }
-

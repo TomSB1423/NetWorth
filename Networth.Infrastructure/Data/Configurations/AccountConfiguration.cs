@@ -24,6 +24,10 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .HasMaxLength(100)
             .IsRequired();
 
+        builder.Property(a => a.UserInstitutionId)
+            .HasMaxLength(100)
+            .IsRequired();
+
         builder.Property(a => a.InstitutionId)
             .HasMaxLength(100)
             .IsRequired();
@@ -39,8 +43,8 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(a => a.Institution)
-            .WithMany(i => i.Accounts)
-            .HasForeignKey(a => a.InstitutionId)
+            .WithMany(ui => ui.Accounts)
+            .HasForeignKey(a => a.UserInstitutionId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(a => a.Transactions)
@@ -52,7 +56,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.HasIndex(a => a.OwnerId)
             .HasDatabaseName("IX_Accounts_OwnerId");
 
-        builder.HasIndex(a => a.InstitutionId)
-            .HasDatabaseName("IX_Accounts_InstitutionId");
+        builder.HasIndex(a => a.UserInstitutionId)
+            .HasDatabaseName("IX_Accounts_UserInstitutionId");
     }
 }

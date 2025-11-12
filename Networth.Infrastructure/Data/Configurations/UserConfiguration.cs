@@ -25,9 +25,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         // Relationships
-        builder.HasMany(u => u.Institutions)
-            .WithOne(i => i.Owner)
-            .HasForeignKey(i => i.OwnerId)
+        builder.HasMany(u => u.UserInstitutions)
+            .WithOne(ui => ui.Owner)
+            .HasForeignKey(ui => ui.OwnerId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(u => u.Accounts)

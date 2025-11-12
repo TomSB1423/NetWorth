@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Networth.Infrastructure.Data.Entities;
 using Account = Networth.Infrastructure.Data.Entities.Account;
-using Institution = Networth.Infrastructure.Data.Entities.Institution;
 using Transaction = Networth.Infrastructure.Data.Entities.Transaction;
 
 namespace Networth.Infrastructure.Data.Context;
@@ -27,8 +26,15 @@ public class NetworthDbContext : DbContext
 
     /// <summary>
     ///     Gets or sets the Institutions DbSet.
+    ///     For caching institution information from GoCardless.
     /// </summary>
-    public DbSet<Institution> Institutions { get; set; } = null!;
+    public DbSet<InstitutionMetadata> Institutions { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the UserInstitutions DbSet.
+    ///     For tracking user connections to institutions.
+    /// </summary>
+    public DbSet<Institution> UserInstitutions { get; set; } = null!;
 
     /// <summary>
     ///     Gets or sets the Accounts DbSet.
@@ -51,12 +57,6 @@ public class NetworthDbContext : DbContext
     ///     For tracking data cache freshness.
     /// </summary>
     public DbSet<CacheMetadata> CacheMetadata { get; set; } = null!;
-
-    /// <summary>
-    ///     Gets or sets the InstitutionMetadata DbSet.
-    ///     For caching institution information from GoCardless.
-    /// </summary>
-    public DbSet<InstitutionMetadata> InstitutionMetadata { get; set; } = null!;
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)

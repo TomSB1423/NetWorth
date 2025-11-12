@@ -1,12 +1,12 @@
 namespace Networth.Infrastructure.Data.Entities;
 
 /// <summary>
-///     Represents a financial institution connected through GoCardless.
+///     Represents a user's connection to a financial institution.
 /// </summary>
 public class Institution
 {
     /// <summary>
-    ///     Gets or sets the unique identifier for the institution.
+    ///     Gets or sets the unique identifier for the user-institution link.
     /// </summary>
     public required string Id { get; set; }
 
@@ -23,7 +23,7 @@ public class Institution
     /// <summary>
     ///     Gets or sets the GoCardless institution ID.
     /// </summary>
-    public required string GoCardlessId { get; set; }
+    public required string GoCardlessInstitutionId { get; set; }
 
     /// <summary>
     ///     Gets or sets the requisition ID.
@@ -36,7 +36,7 @@ public class Institution
     public Requisition Requisition { get; set; } = null!;
 
     /// <summary>
-    ///     Gets or sets the accounts associated with this institution.
+    ///     Gets or sets the accounts associated with this user-institution connection.
     /// </summary>
     public ICollection<Account> Accounts { get; set; } = [];
 }

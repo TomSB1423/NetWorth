@@ -26,7 +26,7 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
     /// <inheritdoc />
     public async Task<IEnumerable<DomainInstitution>> GetByCountryAsync(string countryCode, CancellationToken cancellationToken = default)
     {
-        var entities = await _context.InstitutionMetadata
+        var entities = await _context.Institutions
             .Where(i => i.CountryCode == countryCode)
             .ToListAsync(cancellationToken);
 
@@ -41,18 +41,18 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
 
         // Add new institutions
         var entities = institutions.Select(i => MapToInfrastructure(i, countryCode));
-        await _context.InstitutionMetadata.AddRangeAsync(entities, cancellationToken);
+        await _context.Institutions.AddRangeAsync(entities, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task DeleteByCountryAsync(string countryCode, CancellationToken cancellationToken = default)
     {
-        var existing = await _context.InstitutionMetadata
+        var existing = await _context.Institutions
             .Where(i => i.CountryCode == countryCode)
             .ToListAsync(cancellationToken);
 
-        _context.InstitutionMetadata.RemoveRange(existing);
+        _context.Institutions.RemoveRange(existing);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
