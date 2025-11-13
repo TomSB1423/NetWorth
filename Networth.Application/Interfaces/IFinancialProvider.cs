@@ -13,7 +13,7 @@ public interface IFinancialProvider
     /// <param name="institutionId">The institution id.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Institution metadata from GoCardless.</returns>
-    Task<Institution> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default);
+    Task<InstitutionMetadata> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets a list of available institutions for a given country.
@@ -21,7 +21,7 @@ public interface IFinancialProvider
     /// <param name="country">The institution country.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A collection of available institution metadata.</returns>
-    Task<IEnumerable<Institution>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InstitutionMetadata>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates an agreement for accessing bank account data.

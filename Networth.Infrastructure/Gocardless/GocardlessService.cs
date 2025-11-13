@@ -6,7 +6,7 @@ using Networth.Domain.Enums;
 using Networth.Infrastructure.Gocardless.DTOs;
 using Refit;
 using Account = Networth.Domain.Entities.Account;
-using Institution = Networth.Domain.Entities.Institution;
+using InstitutionMetadata = Networth.Domain.Entities.InstitutionMetadata;
 using Requisition = Networth.Domain.Entities.Requisition;
 using Transaction = Networth.Domain.Entities.Transaction;
 
@@ -19,7 +19,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     : IFinancialProvider
 {
     /// <inheritdoc />
-    public async Task<Institution> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default)
+    public async Task<InstitutionMetadata> GetInstitutionAsync(string institutionId, CancellationToken cancellationToken = default)
     {
         var response = await gocardlessClient.GetInstitution(institutionId, cancellationToken);
         EnsureSuccessStatusCode(response);
@@ -33,7 +33,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                 institution.Id);
         }
 
-        return new Institution
+        return new InstitutionMetadata
         {
             Id = institution.Id,
             Name = institution.Name,
@@ -46,7 +46,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Institution>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<InstitutionMetadata>> GetInstitutionsAsync(string country, CancellationToken cancellationToken = default)
     {
         var response = await gocardlessClient.GetInstitutions(country, cancellationToken);
         EnsureSuccessStatusCode(response);
@@ -61,7 +61,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
                 logger.LogWarning("Failed to parse transaction days or access valid days for institution {InstitutionId}. Using default values.", dto.Id);
             }
 
-            return new Institution
+            return new InstitutionMetadata
             {
                 Id = dto.Id,
                 Name = dto.Name,

@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
-using DomainInstitution = Networth.Domain.Entities.Institution;
+using DomainInstitutionMetadata = Networth.Domain.Entities.InstitutionMetadata;
 using InfrastructureInstitutionMetadata = Networth.Infrastructure.Data.Entities.InstitutionMetadata;
 
 namespace Networth.Infrastructure.Data.Repositories;
@@ -24,7 +24,7 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<DomainInstitution>> GetByCountryAsync(string countryCode, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<DomainInstitutionMetadata>> GetByCountryAsync(string countryCode, CancellationToken cancellationToken = default)
     {
         var entities = await _context.Institutions
             .Where(i => i.CountryCode == countryCode)
@@ -34,7 +34,7 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
     }
 
     /// <inheritdoc />
-    public async Task SaveInstitutionsAsync(string countryCode, IEnumerable<DomainInstitution> institutions, CancellationToken cancellationToken = default)
+    public async Task SaveInstitutionsAsync(string countryCode, IEnumerable<DomainInstitutionMetadata> institutions, CancellationToken cancellationToken = default)
     {
         // Delete existing institutions for this country
         await DeleteByCountryAsync(countryCode, cancellationToken);
@@ -56,11 +56,11 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    private static DomainInstitution MapToDomain(InfrastructureInstitutionMetadata entity)
+    private static DomainInstitutionMetadata MapToDomain(InfrastructureInstitutionMetadata entity)
     {
         var countries = JsonSerializer.Deserialize<string[]>(entity.Countries) ?? [];
 
-        return new DomainInstitution
+        return new DomainInstitutionMetadata
         {
             Id = entity.Id,
             Name = entity.Name,
@@ -72,7 +72,7 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
         };
     }
 
-    private static InfrastructureInstitutionMetadata MapToInfrastructure(DomainInstitution domain, string countryCode)
+    private static InfrastructureInstitutionMetadata MapToInfrastructure(DomainInstitutionMetadata domain, string countryCode)
     {
         var countriesJson = JsonSerializer.Serialize(domain.Countries);
 

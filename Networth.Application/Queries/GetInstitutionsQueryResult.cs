@@ -10,5 +10,5 @@ public class GetInstitutionsQueryResult
     /// <summary>
     ///     Gets the list of institutions.
     /// </summary>
-    public required IEnumerable<Institution> Institutions { get; init; }
+    public required IEnumerable<InstitutionMetadata> Institutions { get; init; }
 }

@@ -38,11 +38,6 @@ public class InstitutionConfiguration : IEntityTypeConfiguration<Institution>
             .HasForeignKey(ui => ui.OwnerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(ui => ui.Requisition)
-            .WithMany()
-            .HasForeignKey(ui => ui.RequisitionId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.HasMany(ui => ui.Accounts)
             .WithOne(a => a.Institution)
             .HasForeignKey(a => a.UserInstitutionId)

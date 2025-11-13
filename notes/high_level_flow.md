@@ -35,7 +35,7 @@ link: <https://ob.gocardless.com/ob-psd2/start/55b865e1-334b-4779-a9bb-a18fffd5f
 sequenceDiagram
     participant Frontend
     participant HTTP as HTTP Functions
-    participant Queue as Queue Functions
+    participant Queue as Queue Functions 
     participant DB as PostgreSQL
     participant GC as GoCardless API
 

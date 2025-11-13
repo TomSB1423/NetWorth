@@ -1,10 +1,11 @@
 namespace Networth.Domain.Entities;
 
 /// <summary>
-///     Represents metadata about a financial institution from GoCardless.
-///     This is a read-only DTO and not stored in the database.
+///     Represents metadata about a financial institution from GoCardless API.
+///     This is a read-only record used as a data transfer object.
+///     Note: This data is cached in the database via Infrastructure.Data.Entities.InstitutionMetadata.
 /// </summary>
-public record Institution
+public record InstitutionMetadata
 {
     /// <summary>
     ///     Gets the unique identifier for the institution.

@@ -26,14 +26,9 @@ public class Institution
     public required string GoCardlessInstitutionId { get; set; }
 
     /// <summary>
-    ///     Gets or sets the requisition ID.
+    ///     Gets or sets the requisition ID (reference to GoCardless requisition).
     /// </summary>
     public required string RequisitionId { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the requisition.
-    /// </summary>
-    public Requisition Requisition { get; set; } = null!;
 
     /// <summary>
     ///     Gets or sets the accounts associated with this user-institution connection.
