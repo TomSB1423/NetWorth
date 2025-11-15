@@ -64,11 +64,8 @@ public static class ServiceCollectionExtensions
             .AddHttpMessageHandler<GoCardlessAuthHandler>()
             .AddStandardResilienceHandler(options =>
             {
-                options.Retry.MaxRetryAttempts = 5;
-                options.Retry.Delay = TimeSpan.FromSeconds(1);
+                options.Retry.BackoffType = DelayBackoffType.Exponential;
                 options.Retry.UseJitter = true;
-                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
-                options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
             });
 
         // Register Infrastructure services
