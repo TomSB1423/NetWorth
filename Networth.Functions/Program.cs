@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +43,7 @@ builder.Services.Configure<JsonSerializerOptions>(options =>
 // Add Aspire observability to postgres
 builder.AddNpgsqlDataSource(ResourceNames.NetworthDb);
 
-// Add Aspire Azure Queue client
+// Add Aspire Azure Queue Service client
 builder.AddAzureQueueServiceClient(ResourceNames.Queues);
 
 // Configure services
@@ -62,6 +64,11 @@ if (environment.IsDevelopment() || environment.IsEnvironment("Test"))
 
     // In development, create the database if it doesn't exist
     await dbContext.Database.EnsureCreatedAsync();
+
+    // Create required queues
+    QueueServiceClient queueServiceClient = serviceScope.ServiceProvider.GetRequiredService<QueueServiceClient>();
+    QueueClient accountSyncQueue = queueServiceClient.GetQueueClient(ResourceNames.AccountSyncQueue);
+    await accountSyncQueue.CreateIfNotExistsAsync();
 }
 
 host.Run();

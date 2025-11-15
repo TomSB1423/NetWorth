@@ -21,6 +21,7 @@ using Networth.Infrastructure.Gocardless.Auth;
 using Networth.Infrastructure.Gocardless.Options;
 using Networth.Infrastructure.Services;
 using Npgsql;
+using Polly;
 using Refit;
 
 namespace Networth.Infrastructure.Extensions;
@@ -40,8 +41,6 @@ public static class ServiceCollectionExtensions
             IOptions<GocardlessOptions> options = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>();
             return new GoCardlessTokenManager(options);
         });
-
-        services.AddSingleton<RefitRetryHandler>();
 
         JsonSerializerOptions options = new()
         {
@@ -63,7 +62,14 @@ public static class ServiceCollectionExtensions
                 httpClient.BaseAddress = new Uri(gocardlessOptions.BankAccountDataBaseUrl);
             })
             .AddHttpMessageHandler<GoCardlessAuthHandler>()
-            .AddHttpMessageHandler(serviceProvider => new RefitRetryHandler(serviceProvider.GetRequiredService<ILogger<RefitRetryHandler>>()));
+            .AddStandardResilienceHandler(options =>
+            {
+                options.Retry.MaxRetryAttempts = 5;
+                options.Retry.Delay = TimeSpan.FromSeconds(1);
+                options.Retry.UseJitter = true;
+                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+                options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
+            });
 
         // Register Infrastructure services
         services.AddTransient<IFinancialProvider, GocardlessService>();

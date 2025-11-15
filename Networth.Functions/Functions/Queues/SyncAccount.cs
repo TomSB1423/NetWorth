@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
 using Networth.Functions.Models.Requests;
+using Networth.ServiceDefaults;
 
 namespace Networth.Functions.Functions.Queues;
 
@@ -22,7 +23,7 @@ public class SyncAccount(
     /// <param name="cancellationToken">Cancellation token.</param>
     [Function("SyncAccount")]
     public async Task RunAsync(
-        [QueueTrigger("account-sync", Connection = "queues")]
+        [QueueTrigger("account-sync", Connection = ResourceNames.Queues)]
         string message,
         CancellationToken cancellationToken)
     {

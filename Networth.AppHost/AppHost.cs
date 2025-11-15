@@ -10,15 +10,6 @@ IResourceBuilder<PostgresServerResource> postgres = builder
     .AddPostgres(ResourceNames.Postgres)
     .WithDataVolume();
 
-if (builder.Environment.IsDevelopment())
-{
-    postgres.WithPgAdmin(pgAdmin =>
-    {
-        pgAdmin.WithHostPort(5050);
-        pgAdmin.WithExplicitStart();
-    });
-}
-
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
     .AddDatabase(ResourceNames.NetworthDb);
 
@@ -65,5 +56,15 @@ scalar.WithApiReference(functions, options =>
         .AddServer("/api", "Azure Functions API")
         .AddMetadata("summary", "Public endpoints exposed by the Networth Azure Functions app");
 });
+
+if (builder.Environment.IsDevelopment())
+{
+    postgres.WithPgAdmin(pgAdmin =>
+    {
+        pgAdmin
+            .WithHostPort(5050)
+            .WithExplicitStart();
+    });
+}
 
 builder.Build().Run();

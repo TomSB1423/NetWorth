@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 
@@ -8,9 +9,17 @@ namespace Networth.Infrastructure.Services;
 /// <summary>
 ///     Service for managing Azure Storage Queue operations.
 /// </summary>
-public class QueueService(QueueServiceClient queueServiceClient, ILogger<QueueService> logger) : IQueueService
+public class QueueService : IQueueService
 {
     private const string AccountSyncQueueName = "account-sync";
+    private readonly QueueServiceClient _queueServiceClient;
+    private readonly ILogger<QueueService> _logger;
+
+    public QueueService(QueueServiceClient queueServiceClient, ILogger<QueueService> logger)
+    {
+        _logger = logger;
+        _queueServiceClient = queueServiceClient;
+    }
 
     /// <inheritdoc />
     public async Task EnqueueAccountSyncAsync(
@@ -20,12 +29,12 @@ public class QueueService(QueueServiceClient queueServiceClient, ILogger<QueueSe
         DateTimeOffset? dateTo = null,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
+        _logger.LogInformation(
             "Enqueueing account sync for account {AccountId}, user {UserId}",
             accountId,
             userId);
 
-        var queueClient = queueServiceClient.GetQueueClient(AccountSyncQueueName);
+        var queueClient = _queueServiceClient.GetQueueClient(AccountSyncQueueName);
 
         // Ensure queue exists
         await queueClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
@@ -40,9 +49,13 @@ public class QueueService(QueueServiceClient queueServiceClient, ILogger<QueueSe
 
         var messageJson = JsonSerializer.Serialize(message);
 
-        await queueClient.SendMessageAsync(messageJson, cancellationToken);
+        // Manually encode as Base64 to match Azure Functions default expectation
+        var messageBytes = System.Text.Encoding.UTF8.GetBytes(messageJson);
+        var base64Message = Convert.ToBase64String(messageBytes);
 
-        logger.LogInformation(
+        await queueClient.SendMessageAsync(base64Message, cancellationToken);
+
+        _logger.LogInformation(
             "Successfully enqueued account sync for account {AccountId}",
             accountId);
     }

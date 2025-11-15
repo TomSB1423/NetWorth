@@ -34,5 +34,10 @@ public static class ResourceNames
     ///     Gets the resource name for the Azure Storage Queues.
     /// </summary>
     public const string Queues = "queues";
+
+    /// <summary>
+    ///     Gets the queue name for account sync operations.
+    /// </summary>
+    public const string AccountSyncQueue = "account-sync";
 }
 
