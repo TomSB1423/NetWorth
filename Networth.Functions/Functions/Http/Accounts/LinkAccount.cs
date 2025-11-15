@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
@@ -6,7 +7,7 @@ using Networth.Application.Commands;
 using Networth.Application.Interfaces;
 using Networth.Functions.Models.Requests;
 using Networth.Functions.Models.Responses;
-using FromBodyAttributes = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 namespace Networth.Functions.Functions.Http.Accounts;
 
@@ -18,7 +19,8 @@ public class LinkAccount(IMediator mediator)
     /// <summary>
     ///     Links a bank account by creating an agreement and requisition in sequence.
     /// </summary>
-    /// <param name="request">The HTTP request containing link account parameters.</param>
+    /// <param name="req">The HTTP request.</param>
+    /// <param name="request">The link account request from the body.</param>
     /// <returns>The created requisition details with authorization link.</returns>
     [Function("LinkAccount")]
     [OpenApiOperation(
@@ -42,8 +44,9 @@ public class LinkAccount(IMediator mediator)
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "account/link")] [FromBodyAttributes]
-        LinkAccountRequest request)
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "account/link")]
+        HttpRequest req,
+        [FromBody] LinkAccountRequest request)
     {
         var command = new LinkAccountCommand
         {

@@ -19,6 +19,42 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
         {
             await next(context);
         }
+        catch (ValidationException validationEx)
+        {
+            logger.LogWarning(
+                "Validation failed: {ValidationErrors}",
+                string.Join(", ", validationEx.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}")));
+
+            HttpRequestData? request = await context.GetHttpRequestDataAsync();
+
+            if (request == null)
+            {
+                logger.LogError("Unable to get HttpRequestData from context");
+                throw;
+            }
+
+            HttpResponseData response = request.CreateResponse();
+            var errors = validationEx.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.ErrorMessage).ToArray());
+
+            response.StatusCode = HttpStatusCode.BadRequest;
+            string responseBody = JsonSerializer.Serialize(
+                new
+                {
+                    message = "Validation failed",
+                    errors,
+                },
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                });
+
+            await response.WriteStringAsync(responseBody);
+            context.GetInvocationResult().Value = response;
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
@@ -31,37 +67,19 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
             }
 
             HttpResponseData response = request.CreateResponse();
-
-            var (statusCode, errorResponse) = ex switch
-            {
-                ValidationException validationEx => HandleValidationException(validationEx),
-                _ => HandleInternalServerError(ex),
-            };
-
-            response.StatusCode = statusCode;
-            string responseBody = JsonSerializer.Serialize(errorResponse, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            });
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            string responseBody = JsonSerializer.Serialize(
+                new
+                {
+                    errors = new[] { "An internal server error occurred. Please try again later." },
+                },
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                });
 
             await response.WriteStringAsync(responseBody);
             context.GetInvocationResult().Value = response;
         }
-    }
-
-    private (HttpStatusCode StatusCode, object ErrorResponse) HandleValidationException(ValidationException ex)
-    {
-        var errors = ex.Errors.Select(e => e.ErrorMessage).ToArray();
-        logger.LogWarning("Validation failed: {ValidationErrors}", string.Join(", ", errors));
-        return (HttpStatusCode.BadRequest, new { errors });
-    }
-
-    private (HttpStatusCode StatusCode, object ErrorResponse) HandleInternalServerError(Exception ex)
-    {
-        logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
-        return (HttpStatusCode.InternalServerError, new
-        {
-            errors = new[] { "An internal server error occurred. Please try again later." },
-        });
     }
 }

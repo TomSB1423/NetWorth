@@ -14,6 +14,8 @@ using Serilog;
 
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
 
+builder.ConfigureFunctionsWebApplication();
+
 builder.AddServiceDefaults();
 
 // Middleware

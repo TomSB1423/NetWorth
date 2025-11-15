@@ -13,6 +13,10 @@ public class LinkAccountCommandValidator : AbstractValidator<LinkAccountCommand>
     /// </summary>
     public LinkAccountCommandValidator()
     {
+        RuleFor(x => x.UserId)
+            .NotEmpty()
+            .WithMessage("User ID is required");
+
         RuleFor(x => x.InstitutionId)
             .NotEmpty()
             .WithMessage("Institution ID is required");
