@@ -17,46 +17,75 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.HasKey(a => a.Id);
 
         builder.Property(a => a.Id)
-            .HasMaxLength(100)
+            .HasMaxLength(255)
             .IsRequired();
 
-        builder.Property(a => a.OwnerId)
-            .HasMaxLength(100)
+        builder.Property(a => a.UserId)
+            .HasMaxLength(255)
             .IsRequired();
 
-        builder.Property(a => a.UserInstitutionId)
-            .HasMaxLength(100)
+        builder.Property(a => a.RequisitionId)
+            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(a => a.InstitutionId)
-            .HasMaxLength(100)
+            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(a => a.Name)
             .HasMaxLength(200)
             .IsRequired();
 
-        // Relationships
-        builder.HasOne(a => a.Owner)
+        builder.Property(a => a.Iban)
+            .HasMaxLength(34);
+
+        builder.Property(a => a.Currency)
+            .HasMaxLength(3)
+            .IsRequired();
+
+        builder.Property(a => a.Product)
+            .HasMaxLength(200);
+
+        builder.Property(a => a.CashAccountType)
+            .HasMaxLength(50);
+
+        builder.Property(a => a.AdditionalAccountData)
+            .HasColumnType("jsonb");
+
+        builder.Property(a => a.Created)
+            .IsRequired();
+
+        // Foreign Keys
+        builder.HasOne<Entities.User>()
             .WithMany(u => u.Accounts)
-            .HasForeignKey(a => a.OwnerId)
+            .HasForeignKey(a => a.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(a => a.Institution)
-            .WithMany(ui => ui.Accounts)
-            .HasForeignKey(a => a.UserInstitutionId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Entities.Requisition>()
+            .WithMany()
+            .HasForeignKey(a => a.RequisitionId)
+            .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne<Entities.InstitutionMetadata>()
+            .WithMany()
+            .HasForeignKey(a => a.InstitutionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Relationships
         builder.HasMany(a => a.Transactions)
-            .WithOne(t => t.Account)
+            .WithOne()
             .HasForeignKey(t => t.AccountId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Indexes
-        builder.HasIndex(a => a.OwnerId)
-            .HasDatabaseName("IX_Accounts_OwnerId");
+        builder.HasMany(a => a.Balances)
+            .WithOne()
+            .HasForeignKey(b => b.AccountId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(a => a.UserInstitutionId)
-            .HasDatabaseName("IX_Accounts_UserInstitutionId");
+        // Indexes
+        builder.HasIndex(a => a.UserId);
+        builder.HasIndex(a => a.RequisitionId);
+        builder.HasIndex(a => a.InstitutionId);
+        builder.HasIndex(a => a.Created);
     }
 }

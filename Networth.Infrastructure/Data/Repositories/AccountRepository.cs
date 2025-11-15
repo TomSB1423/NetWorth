@@ -19,16 +19,18 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
         logger.LogInformation("Retrieving accounts for user {UserId}", userId);
 
         var accounts = await context.Accounts
-            .Where(a => a.OwnerId == userId)
-            .Include(a => a.Institution)
+            .Where(a => a.UserId == userId)
             .OrderBy(a => a.Name)
             .Select(a => new UserAccount
             {
                 Id = a.Id,
-                OwnerId = a.OwnerId,
+                UserId = a.UserId,
+                RequisitionId = a.RequisitionId,
                 InstitutionId = a.InstitutionId,
                 Name = a.Name,
-                InstitutionGoCardlessId = a.Institution.GoCardlessInstitutionId,
+                Iban = a.Iban,
+                Currency = a.Currency,
+                Product = a.Product,
             })
             .ToListAsync(cancellationToken);
 

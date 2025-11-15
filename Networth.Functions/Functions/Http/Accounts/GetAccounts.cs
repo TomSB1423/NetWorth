@@ -61,9 +61,13 @@ public class GetAccounts(
         var response = result.Accounts.Select(a => new UserAccountResponse
         {
             Id = a.Id,
+            UserId = a.UserId,
+            RequisitionId = a.RequisitionId,
             InstitutionId = a.InstitutionId,
             Name = a.Name,
-            InstitutionGoCardlessId = a.InstitutionGoCardlessId,
+            Iban = a.Iban,
+            Currency = a.Currency,
+            Product = a.Product,
         });
 
         return new OkObjectResult(response);

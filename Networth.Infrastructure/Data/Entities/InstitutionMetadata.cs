@@ -16,16 +16,6 @@ public class InstitutionMetadata
     public required string Name { get; set; }
 
     /// <summary>
-    ///     Gets or sets the transaction history available in days.
-    /// </summary>
-    public int? TransactionTotalDays { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the maximum number of days the authorization is valid for.
-    /// </summary>
-    public int? MaxAccessValidForDays { get; set; }
-
-    /// <summary>
     ///     Gets or sets the logo URL of the bank institution.
     /// </summary>
     public string? LogoUrl { get; set; }
@@ -46,7 +36,17 @@ public class InstitutionMetadata
     public required string Countries { get; set; }
 
     /// <summary>
+    ///     Gets or sets the supported features of this institution (JSON array).
+    /// </summary>
+    public string? SupportedFeatures { get; set; }
+
+    /// <summary>
     ///     Gets or sets when this record was last updated.
     /// </summary>
     public required DateTime LastUpdated { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the agreements associated with this institution.
+    /// </summary>
+    public ICollection<Agreement> Agreements { get; set; } = [];
 }

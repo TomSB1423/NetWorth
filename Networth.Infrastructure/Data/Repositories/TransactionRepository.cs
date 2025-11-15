@@ -40,11 +40,18 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
         var infraTransactions = transactionList.Select(dt => new InfraTransaction
         {
             Id = dt.Id,
-            OwnerId = userId,
+            UserId = userId,
             AccountId = dt.AccountId,
-            Value = dt.Amount,
+            TransactionId = dt.TransactionId ?? dt.Id,
+            DebtorName = dt.DebtorName,
+            DebtorAccountIban = dt.DebtorAccount,
+            Amount = dt.Amount,
             Currency = dt.Currency,
-            Time = dt.BookingDate ?? dt.ValueDate ?? DateTime.UtcNow
+            BankTransactionCode = dt.BankTransactionCode,
+            BookingDate = dt.BookingDate,
+            ValueDate = dt.ValueDate,
+            RemittanceInformationUnstructured = dt.RemittanceInformationUnstructured,
+            Status = dt.Status,
         }).ToList();
 
         // Separate new and existing
@@ -88,7 +95,7 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
 
         var transactions = await context.Transactions
             .Where(t => t.AccountId == accountId)
-            .OrderByDescending(t => t.Time)
+            .OrderByDescending(t => t.BookingDate ?? t.ValueDate ?? t.ImportedAt)
             .ToListAsync(cancellationToken);
 
         logger.LogInformation(
@@ -101,10 +108,16 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
         {
             Id = it.Id,
             AccountId = it.AccountId,
-            Amount = it.Value,
+            TransactionId = it.TransactionId,
+            DebtorName = it.DebtorName,
+            DebtorAccount = it.DebtorAccountIban,
+            Amount = it.Amount,
             Currency = it.Currency,
-            BookingDate = it.Time,
-            ValueDate = it.Time
+            BankTransactionCode = it.BankTransactionCode,
+            BookingDate = it.BookingDate,
+            ValueDate = it.ValueDate,
+            RemittanceInformationUnstructured = it.RemittanceInformationUnstructured,
+            Status = it.Status,
         });
     }
 }

@@ -13,14 +13,14 @@ public class Requisition
     public required string Id { get; set; }
 
     /// <summary>
-    ///     Gets or sets the creation date.
+    ///     Gets or sets the user ID who owns this requisition.
     /// </summary>
-    public DateTime Created { get; set; }
+    public required string UserId { get; set; }
 
     /// <summary>
     ///     Gets or sets the redirect URL after completion.
     /// </summary>
-    public required string? Redirect { get; set; }
+    public string? Redirect { get; set; }
 
     /// <summary>
     ///     Gets or sets the status of the requisition.
@@ -28,7 +28,7 @@ public class Requisition
     public required AccountLinkStatus Status { get; set; }
 
     /// <summary>
-    ///     Gets or sets the institution ID.
+    ///     Gets or sets the institution metadata ID.
     /// </summary>
     public required string InstitutionId { get; set; }
 
@@ -43,17 +43,37 @@ public class Requisition
     public required string Reference { get; set; }
 
     /// <summary>
-    ///     Gets or sets the accounts associated with this requisition.
+    ///     Gets or sets the accounts associated with this requisition (JSON array of account IDs).
     /// </summary>
-    public string[] Accounts { get; set; } = [];
+    public string Accounts { get; set; } = "[]";
+
+    /// <summary>
+    ///     Gets or sets the user language.
+    /// </summary>
+    public string? UserLanguage { get; set; }
 
     /// <summary>
     ///     Gets or sets the authorization link for the user to complete bank authentication.
     /// </summary>
-    public required string AuthenticationLink { get; set; }
+    public required string Link { get; set; }
 
     /// <summary>
-    ///     Gets or sets the account selection option.
+    ///     Gets or sets the SSN if required by the institution.
     /// </summary>
-    public string? AccountSelection { get; set; }
+    public string? Ssn { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether account selection is enabled.
+    /// </summary>
+    public bool AccountSelection { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether immediate redirect is enabled.
+    /// </summary>
+    public bool RedirectImmediate { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the creation date.
+    /// </summary>
+    public DateTime Created { get; set; }
 }

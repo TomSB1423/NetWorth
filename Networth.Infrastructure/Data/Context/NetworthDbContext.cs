@@ -25,16 +25,22 @@ public class NetworthDbContext : DbContext
     public DbSet<User> Users { get; set; } = null!;
 
     /// <summary>
-    ///     Gets or sets the Institutions DbSet.
+    ///     Gets or sets the InstitutionMetadata DbSet.
     ///     For caching institution information from GoCardless.
     /// </summary>
     public DbSet<InstitutionMetadata> Institutions { get; set; } = null!;
 
     /// <summary>
-    ///     Gets or sets the UserInstitutions DbSet.
-    ///     For tracking user connections to institutions.
+    ///     Gets or sets the Agreements DbSet.
+    ///     For tracking user agreements with institutions.
     /// </summary>
-    public DbSet<Institution> UserInstitutions { get; set; } = null!;
+    public DbSet<Agreement> Agreements { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the Requisitions DbSet.
+    ///     For tracking GoCardless requisition state.
+    /// </summary>
+    public DbSet<Requisition> Requisitions { get; set; } = null!;
 
     /// <summary>
     ///     Gets or sets the Accounts DbSet.
@@ -42,15 +48,14 @@ public class NetworthDbContext : DbContext
     public DbSet<Account> Accounts { get; set; } = null!;
 
     /// <summary>
+    ///     Gets or sets the AccountBalances DbSet.
+    /// </summary>
+    public DbSet<AccountBalance> AccountBalances { get; set; } = null!;
+
+    /// <summary>
     ///     Gets or sets the Transactions DbSet.
     /// </summary>
     public DbSet<Transaction> Transactions { get; set; } = null!;
-
-    /// <summary>
-    ///     Gets or sets the Requisitions DbSet.
-    ///     For tracking GoCardless requisition state.
-    /// </summary>
-    public DbSet<Requisition> Requisitions { get; set; } = null!;
 
     /// <summary>
     ///     Gets or sets the CacheMetadata DbSet.

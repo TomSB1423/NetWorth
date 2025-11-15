@@ -11,7 +11,17 @@ public record UserAccountResponse
     public required string Id { get; init; }
 
     /// <summary>
-    ///     Gets the institution ID.
+    ///     Gets the user ID.
+    /// </summary>
+    public required string UserId { get; init; }
+
+    /// <summary>
+    ///     Gets the requisition ID.
+    /// </summary>
+    public required string RequisitionId { get; init; }
+
+    /// <summary>
+    ///     Gets the institution metadata ID.
     /// </summary>
     public required string InstitutionId { get; init; }
 
@@ -21,7 +31,17 @@ public record UserAccountResponse
     public required string Name { get; init; }
 
     /// <summary>
-    ///     Gets the institution GoCardless ID.
+    ///     Gets the IBAN of the account.
     /// </summary>
-    public string? InstitutionGoCardlessId { get; init; }
+    public string? Iban { get; init; }
+
+    /// <summary>
+    ///     Gets the currency of the account.
+    /// </summary>
+    public required string Currency { get; init; }
+
+    /// <summary>
+    ///     Gets the product name/type.
+    /// </summary>
+    public string? Product { get; init; }
 }

@@ -64,8 +64,8 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
         {
             Id = entity.Id,
             Name = entity.Name,
-            TransactionTotalDays = entity.TransactionTotalDays,
-            MaxAccessValidForDays = entity.MaxAccessValidForDays,
+            TransactionTotalDays = null,
+            MaxAccessValidForDays = null,
             LogoUrl = entity.LogoUrl,
             Bic = entity.Bic,
             Countries = countries,
@@ -80,8 +80,6 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
         {
             Id = domain.Id,
             Name = domain.Name,
-            TransactionTotalDays = domain.TransactionTotalDays,
-            MaxAccessValidForDays = domain.MaxAccessValidForDays,
             LogoUrl = domain.LogoUrl,
             Bic = domain.Bic,
             CountryCode = countryCode,

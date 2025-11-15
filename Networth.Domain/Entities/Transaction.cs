@@ -112,6 +112,11 @@ public record Transaction
     public string? AdditionalInformation { get; init; }
 
     /// <summary>
+    ///     Gets the transaction status.
+    /// </summary>
+    public string? Status { get; init; }
+
+    /// <summary>
     ///     Gets the account balance after this transaction.
     /// </summary>
     public decimal? BalanceAfterTransaction { get; init; }
@@ -121,4 +126,3 @@ public record Transaction
     /// </summary>
     public bool IsPending { get; init; }
 }
-

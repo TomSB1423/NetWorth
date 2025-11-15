@@ -16,11 +16,6 @@ public class User
     public required string Name { get; set; }
 
     /// <summary>
-    ///     Gets or sets the user's institution connections.
-    /// </summary>
-    public ICollection<Institution> UserInstitutions { get; set; } = [];
-
-    /// <summary>
     ///     Gets or sets the accounts owned by this user.
     /// </summary>
     public ICollection<Account> Accounts { get; set; } = [];
@@ -30,4 +25,3 @@ public class User
     /// </summary>
     public ICollection<Transaction> Transactions { get; set; } = [];
 }
-

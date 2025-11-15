@@ -17,18 +17,28 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.HasKey(t => t.Id);
 
         builder.Property(t => t.Id)
-            .HasMaxLength(100)
+            .HasMaxLength(255)
             .IsRequired();
 
-        builder.Property(t => t.OwnerId)
-            .HasMaxLength(100)
+        builder.Property(t => t.UserId)
+            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(t => t.AccountId)
-            .HasMaxLength(100)
+            .HasMaxLength(255)
             .IsRequired();
 
-        builder.Property(t => t.Value)
+        builder.Property(t => t.TransactionId)
+            .HasMaxLength(255)
+            .IsRequired();
+
+        builder.Property(t => t.DebtorName)
+            .HasMaxLength(500);
+
+        builder.Property(t => t.DebtorAccountIban)
+            .HasMaxLength(34);
+
+        builder.Property(t => t.Amount)
             .HasPrecision(18, 2)
             .IsRequired();
 
@@ -36,29 +46,35 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             .HasMaxLength(3)
             .IsRequired();
 
-        builder.Property(t => t.Time)
+        builder.Property(t => t.BankTransactionCode)
+            .HasMaxLength(100);
+
+        builder.Property(t => t.RemittanceInformationUnstructured)
+            .HasMaxLength(1000);
+
+        builder.Property(t => t.Status)
+            .HasMaxLength(50);
+
+        builder.Property(t => t.ImportedAt)
             .IsRequired();
 
-        // Relationships
-        builder.HasOne(t => t.Owner)
+        // Foreign Keys
+        builder.HasOne<Entities.User>()
             .WithMany(u => u.Transactions)
-            .HasForeignKey(t => t.OwnerId)
+            .HasForeignKey(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(t => t.Account)
+        builder.HasOne<Entities.Account>()
             .WithMany(a => a.Transactions)
             .HasForeignKey(t => t.AccountId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(t => t.OwnerId)
-            .HasDatabaseName("IX_Transactions_OwnerId");
-
-        builder.HasIndex(t => t.AccountId)
-            .HasDatabaseName("IX_Transactions_AccountId");
-
-        builder.HasIndex(t => t.Time)
-            .HasDatabaseName("IX_Transactions_Time");
+        builder.HasIndex(t => t.UserId);
+        builder.HasIndex(t => t.AccountId);
+        builder.HasIndex(t => t.TransactionId);
+        builder.HasIndex(t => t.BookingDate);
+        builder.HasIndex(t => t.ValueDate);
+        builder.HasIndex(t => t.ImportedAt);
     }
 }
-

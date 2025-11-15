@@ -25,12 +25,6 @@ public class InstitutionMetadataConfiguration : IEntityTypeConfiguration<Entitie
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(i => i.TransactionTotalDays)
-            .HasColumnName("transaction_total_days");
-
-        builder.Property(i => i.MaxAccessValidForDays)
-            .HasColumnName("max_access_valid_for_days");
-
         builder.Property(i => i.LogoUrl)
             .HasColumnName("logo_url")
             .HasMaxLength(500);
@@ -46,12 +40,22 @@ public class InstitutionMetadataConfiguration : IEntityTypeConfiguration<Entitie
 
         builder.Property(i => i.Countries)
             .HasColumnName("countries")
-            .HasMaxLength(1000)
+            .HasColumnType("jsonb")
             .IsRequired();
+
+        builder.Property(i => i.SupportedFeatures)
+            .HasColumnName("supported_features")
+            .HasColumnType("jsonb");
 
         builder.Property(i => i.LastUpdated)
             .HasColumnName("last_updated")
             .IsRequired();
+
+        // Relationships
+        builder.HasMany(i => i.Agreements)
+            .WithOne()
+            .HasForeignKey("InstitutionId")
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes for efficient queries
         builder.HasIndex(i => i.CountryCode)
