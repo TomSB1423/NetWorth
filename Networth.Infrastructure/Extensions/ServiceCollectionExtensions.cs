@@ -71,6 +71,7 @@ public static class ServiceCollectionExtensions
 
         // Register repositories
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IAgreementRepository, AgreementRepository>();
         services.AddScoped<IRequisitionRepository, RequisitionRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<ICacheMetadataRepository, CacheMetadataRepository>();

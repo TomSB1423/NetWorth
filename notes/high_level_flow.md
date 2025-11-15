@@ -11,6 +11,74 @@ link: <https://ob.gocardless.com/ob-psd2/start/55b865e1-334b-4779-a9bb-a18fffd5f
 - Single Requisition
 - Single Account with Balances, Details, Transactions
 
+## Data tables
+
+- User
+  - id
+  - name
+- InstitutionMetadata
+  - id
+  - institution_id
+  - name
+  - bic
+  - logo_url
+  - transaction_total_days
+  - max_access_valid_for_days
+  - countries
+  - supported_features
+- Agreement
+  - id
+  - institution_id
+  - max_historical_days
+  - access_valid_for_days
+  - access_scope
+  - reconfirmation
+  - created
+  - accepted
+- Requisition
+  - id
+  - redirect
+  - status
+  - institution_id
+  - agreement_id
+  - reference
+  - accounts (list of account ids)
+  - user_language
+  - link
+  - ssn
+  - account_selection
+  - redirect_immediate
+  - created
+- Account
+  - id
+  - institution_id
+  - user_id
+  - iban
+  - currency
+  - product
+  - cash_account_type
+  - additional_account_data
+- Transaction
+  - id
+  - account_id
+  - transaction_id
+  - debtor_name
+  - debtor_account_iban
+  - amount
+  - currency
+  - bank_transaction_code
+  - booking_date
+  - value_date
+  - remittance_information_unstructured
+  - status (booked/pending)
+- AccountBalance
+  - id
+  - account_id
+  - balance_type
+  - amount
+  - currency
+  - reference_date
+
 ## Architecture Overview
 
 ### HTTP Functions (Azure Functions)
@@ -35,7 +103,7 @@ link: <https://ob.gocardless.com/ob-psd2/start/55b865e1-334b-4779-a9bb-a18fffd5f
 sequenceDiagram
     participant Frontend
     participant HTTP as HTTP Functions
-    participant Queue as Queue Functions 
+    participant Queue as Queue Functions
     participant DB as PostgreSQL
     participant GC as GoCardless API
 
@@ -359,7 +427,7 @@ graph LR
 
 ## Function Details
 
-Get institutions
+### Get institutions
 
 GET /api/v2/institutions
 
@@ -418,7 +486,7 @@ Response 200 OK
 
 ---
 
-Create agreement
+### Create agreement
 
 POST /api/v2/agreements
 
@@ -452,7 +520,7 @@ Response 201 Created
 
 ---
 
-Create requisition
+### Create requisition
 
 POST /api/v2/requisitions
 
@@ -486,11 +554,11 @@ Response 201 Created
 
 ---
 
-User is redirected to GoCardless link to authenticate and authorize.
+### User is redirected to GoCardless link to authenticate and authorize
 
 ---
 
-After successful authorization, user is redirected back to redirect URL.
+### After successful authorization, user is redirected back to redirect URL
 
 GET /api/v2/requisitions/{id}
 
@@ -514,7 +582,7 @@ Response 200 OK
 
 ---
 
-Get account balances
+### Get account balances
 
 GET /api/v2/accounts/{id}/balances
 

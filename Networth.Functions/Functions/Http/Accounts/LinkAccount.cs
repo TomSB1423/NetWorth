@@ -45,7 +45,11 @@ public class LinkAccount(IMediator mediator)
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = "account/link")] [FromBodyAttributes]
         LinkAccountRequest request)
     {
-        var command = new LinkAccountCommand { InstitutionId = request.InstitutionId };
+        var command = new LinkAccountCommand
+        {
+            UserId = request.UserId,
+            InstitutionId = request.InstitutionId,
+        };
         var result = await mediator.Send<LinkAccountCommand, LinkAccountCommandResult>(command);
 
         var response = new LinkAccountResponse
