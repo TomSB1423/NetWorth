@@ -44,9 +44,4 @@ public class InstitutionMetadata
     ///     Gets or sets when this record was last updated.
     /// </summary>
     public required DateTime LastUpdated { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the agreements associated with this institution.
-    /// </summary>
-    public ICollection<Agreement> Agreements { get; set; } = [];
 }

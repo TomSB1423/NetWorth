@@ -51,12 +51,6 @@ public class InstitutionMetadataConfiguration : IEntityTypeConfiguration<Entitie
             .HasColumnName("last_updated")
             .IsRequired();
 
-        // Relationships
-        builder.HasMany(i => i.Agreements)
-            .WithOne()
-            .HasForeignKey("InstitutionId")
-            .OnDelete(DeleteBehavior.Restrict);
-
         // Indexes for efficient queries
         builder.HasIndex(i => i.CountryCode)
             .HasDatabaseName("IX_InstitutionMetadata_CountryCode");

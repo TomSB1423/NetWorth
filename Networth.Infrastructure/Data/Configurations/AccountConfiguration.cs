@@ -66,10 +66,9 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .HasForeignKey(a => a.RequisitionId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne<Entities.InstitutionMetadata>()
-            .WithMany()
-            .HasForeignKey(a => a.InstitutionId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // Note: InstitutionId is stored for reference but has no FK constraint
+        // because InstitutionMetadata has a composite key (Id + CountryCode)
+        // and we only store the Id portion
 
         // Relationships
         builder.HasMany(a => a.Transactions)

@@ -67,10 +67,9 @@ public class RequisitionConfiguration : IEntityTypeConfiguration<Requisition>
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne<Entities.InstitutionMetadata>()
-            .WithMany()
-            .HasForeignKey(r => r.InstitutionId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // Note: InstitutionId is stored for reference but has no FK constraint
+        // because InstitutionMetadata has a composite key (Id + CountryCode)
+        // and we only store the Id portion
 
         builder.HasOne<Entities.Agreement>()
             .WithMany(a => a.Requisitions)
