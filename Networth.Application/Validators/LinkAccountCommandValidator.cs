@@ -21,8 +21,4 @@ public class LinkAccountCommandValidator : AbstractValidator<LinkAccountCommand>
             .NotEmpty()
             .WithMessage("Institution ID is required");
     }
-
-    private static bool BeAValidUrl(string url) =>
-        Uri.TryCreate(url, UriKind.Absolute, out Uri? result) &&
-        (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
 }

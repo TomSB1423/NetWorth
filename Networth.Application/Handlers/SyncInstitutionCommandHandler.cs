@@ -23,22 +23,27 @@ public class SyncInstitutionCommandHandler(
         CancellationToken cancellationToken)
     {
         logger.LogInformation(
-            "Handling SyncInstitutionCommand for institution {InstitutionId}, user {UserId}",
+            "Syncing institution {InstitutionId} for user {UserId}",
             request.InstitutionId,
             request.UserId);
 
-        // Get requisitions for this institution and user from database
         var requisitions = await requisitionRepository.GetRequisitionsByInstitutionAndUserAsync(
             request.InstitutionId,
             request.UserId,
             cancellationToken);
 
-        var requisition = requisitions.FirstOrDefault();
+        var requisitionsList = requisitions.ToList();
+        logger.LogDebug(
+            "Found {Count} requisition(s) for institution {InstitutionId}",
+            requisitionsList.Count,
+            request.InstitutionId);
+
+        var requisition = requisitionsList.FirstOrDefault();
 
         if (requisition == null)
         {
             logger.LogWarning(
-                "No requisition found for institution {InstitutionId} and user {UserId}",
+                "No requisition found for institution {InstitutionId} and user {UserId}. User needs to link their account first.",
                 request.InstitutionId,
                 request.UserId);
 
@@ -50,13 +55,16 @@ public class SyncInstitutionCommandHandler(
             };
         }
 
-        // Fetch latest requisition status from GoCardless
+        logger.LogDebug(
+            "Using requisition {RequisitionId} with status {Status}",
+            requisition.Id,
+            requisition.Status);
         var latestRequisition = await financialProvider.GetRequisitionAsync(requisition.Id, cancellationToken);
 
         if (latestRequisition == null)
         {
-            logger.LogWarning(
-                "Requisition {RequisitionId} not found in GoCardless",
+            logger.LogError(
+                "Requisition {RequisitionId} not found in GoCardless API. It may have been deleted.",
                 requisition.Id);
 
             return new SyncInstitutionCommandResult
@@ -67,11 +75,15 @@ public class SyncInstitutionCommandHandler(
             };
         }
 
-        // Check if requisition is still pending
+        logger.LogDebug(
+            "Requisition {RequisitionId} status: {Status}, accounts: {AccountCount}",
+            latestRequisition.Id,
+            latestRequisition.Status,
+            latestRequisition.Accounts.Length);
         if (latestRequisition.Status == AccountLinkStatus.Pending)
         {
-            logger.LogInformation(
-                "Requisition {RequisitionId} is still pending with status {Status}",
+            logger.LogWarning(
+                "Requisition {RequisitionId} is still pending with status {Status}. User needs to complete authorization.",
                 requisition.Id,
                 latestRequisition.Status);
 
@@ -83,62 +95,72 @@ public class SyncInstitutionCommandHandler(
             };
         }
 
-        // Update database with latest requisition from GoCardless
         await requisitionRepository.UpdateRequisitionAsync(latestRequisition, cancellationToken);
 
-        logger.LogInformation(
-            "Updated requisition {RequisitionId} with status {Status} and {AccountCount} accounts",
-            latestRequisition.Id,
-            latestRequisition.Status,
-            latestRequisition.Accounts.Length);
-
-        // Process accounts if linked
         if (latestRequisition.Status == AccountLinkStatus.Linked && latestRequisition.Accounts.Length > 0)
         {
+            logger.LogInformation(
+                "Processing {Count} linked account(s)",
+                latestRequisition.Accounts.Length);
+
             var accountIds = new List<string>();
+            int successCount = 0;
+            int failureCount = 0;
 
             foreach (var accountId in latestRequisition.Accounts)
             {
-                // Fetch account details from GoCardless
-                var accountDetails = await financialProvider.GetAccountDetailsAsync(accountId, cancellationToken);
-
-                if (accountDetails != null)
+                try
                 {
-                    // Store/update account in database
-                    await accountRepository.UpsertAccountAsync(
-                        accountId,
-                        request.UserId,
-                        latestRequisition.Id,
-                        request.InstitutionId,
-                        accountDetails,
-                        cancellationToken);
+                    var accountDetails = await financialProvider.GetAccountDetailsAsync(accountId, cancellationToken);
 
-                    // Enqueue sync for transactions and balances
-                    await queueService.EnqueueAccountSyncAsync(
-                        accountId,
-                        request.UserId,
-                        request.DateFrom,
-                        request.DateTo,
-                        cancellationToken);
+                    if (accountDetails != null)
+                    {
+                        logger.LogDebug(
+                            "Account details for {AccountId}: {Name}",
+                            accountId,
+                            accountDetails.DisplayName ?? accountDetails.Name);
+                        await accountRepository.UpsertAccountAsync(
+                            accountId,
+                            request.UserId,
+                            latestRequisition.Id,
+                            request.InstitutionId,
+                            accountDetails,
+                            cancellationToken);
 
-                    accountIds.Add(accountId);
+                        await queueService.EnqueueAccountSyncAsync(
+                            accountId,
+                            request.UserId,
+                            request.DateFrom,
+                            request.DateTo,
+                            cancellationToken);
 
-                    logger.LogInformation(
-                        "Enqueued account {AccountId} for sync",
-                        accountId);
+                        accountIds.Add(accountId);
+                        successCount++;
+                    }
+                    else
+                    {
+                        failureCount++;
+                        logger.LogError(
+                            "Could not fetch details for account {AccountId} - received null response from GoCardless",
+                            accountId);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    logger.LogWarning(
-                        "Could not fetch details for account {AccountId}",
-                        accountId);
+                    failureCount++;
+                    logger.LogError(
+                        ex,
+                        "Error processing account {AccountId}: {ErrorMessage}",
+                        accountId,
+                        ex.Message);
                 }
             }
 
             logger.LogInformation(
-                "Successfully enqueued {Count} accounts for sync from institution {InstitutionId}",
-                accountIds.Count,
-                request.InstitutionId);
+                "Enqueued {SuccessCount} account(s) for sync from institution {InstitutionId}{FailureInfo}",
+                successCount,
+                request.InstitutionId,
+                failureCount > 0 ? $", {failureCount} failed" : "");
 
             return new SyncInstitutionCommandResult
             {
@@ -148,8 +170,8 @@ public class SyncInstitutionCommandHandler(
             };
         }
 
-        logger.LogInformation(
-            "Requisition {RequisitionId} has status {Status} with no linked accounts",
+        logger.LogWarning(
+            "Requisition {RequisitionId} has status {Status} with no linked accounts to process",
             latestRequisition.Id,
             latestRequisition.Status);
 
@@ -161,3 +183,4 @@ public class SyncInstitutionCommandHandler(
         };
     }
 }
+

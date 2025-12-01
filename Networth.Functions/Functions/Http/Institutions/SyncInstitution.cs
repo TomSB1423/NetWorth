@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
 using Networth.Functions.Authentication;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions.Http.Institutions;
 
@@ -89,26 +90,5 @@ public class SyncInstitution(
         };
 
         return new OkObjectResult(response);
-    }
-
-    /// <summary>
-    ///     Response for institution sync operation.
-    /// </summary>
-    private class SyncInstitutionResponse
-    {
-        /// <summary>
-        ///     Gets or sets the institution ID that was synced.
-        /// </summary>
-        public required string InstitutionId { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the number of accounts enqueued for sync.
-        /// </summary>
-        public required int AccountsEnqueued { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the list of account IDs that were enqueued.
-        /// </summary>
-        public required List<string> AccountIds { get; set; }
     }
 }

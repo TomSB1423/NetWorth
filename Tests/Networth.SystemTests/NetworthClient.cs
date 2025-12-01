@@ -84,4 +84,36 @@ public class NetworthClient
 
         return institutions ?? new List<InstitutionResponse>();
     }
+
+    /// <summary>
+    ///     Links a bank account by creating an agreement and requisition.
+    /// </summary>
+    /// <param name="institutionId">The institution ID to link.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The link account response with authorization link.</returns>
+    public async Task<LinkAccountResponse> LinkAccountAsync(
+        string institutionId,
+        CancellationToken cancellationToken = default)
+    {
+        var requestBody = new { institutionId };
+
+        var response = await _httpClient.PostAsJsonAsync(
+            "/api/account/link",
+            requestBody,
+            _jsonOptions,
+            cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<LinkAccountResponse>(
+            _jsonOptions,
+            cancellationToken);
+
+        if (result == null)
+        {
+            throw new InvalidOperationException("Failed to deserialize link account response");
+        }
+
+        return result;
+    }
 }

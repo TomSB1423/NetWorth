@@ -21,16 +21,16 @@ public class SyncAccountCommandHandler(
         CancellationToken cancellationToken)
     {
         logger.LogInformation(
-            "Syncing account and transactions for account {AccountId}, user {UserId}",
+            "Syncing account {AccountId} for user {UserId}",
             request.AccountId,
             request.UserId);
-
-        // First, fetch and cache account metadata
         var account = await financialProvider.GetAccountAsync(request.AccountId, cancellationToken);
 
         if (account is null)
         {
-            logger.LogError("Account {AccountId} not found during sync", request.AccountId);
+            logger.LogError(
+                "Account {AccountId} not found during sync - may have been deleted or access revoked",
+                request.AccountId);
             return new SyncAccountCommandResult
             {
                 AccountId = request.AccountId,
@@ -40,20 +40,25 @@ public class SyncAccountCommandHandler(
             };
         }
 
-        // Fetch account details for additional metadata
+        logger.LogDebug(
+            "Account metadata: Institution={InstitutionId}, Status={Status}, Name={Name}",
+            account.InstitutionId,
+            account.Status,
+            account.Name);
         var accountDetails = await financialProvider.GetAccountDetailsAsync(request.AccountId, cancellationToken);
 
         if (accountDetails != null)
         {
-            // We need requisitionId to save account. Since we don't have it in the command,
-            // we'll need to look it up from existing account or skip this for now.
-            // For now, let's fetch it from the existing account if it exists.
+            logger.LogDebug(
+                "Account details: Currency={Currency}, Type={Type}, Product={Product}",
+                accountDetails.Currency,
+                accountDetails.CashAccountType,
+                accountDetails.Product);
             var existingAccounts = await accountRepository.GetAccountsByUserIdAsync(request.UserId, cancellationToken);
             var existingAccount = existingAccounts.FirstOrDefault(a => a.Id == request.AccountId);
 
             if (existingAccount != null)
             {
-                // Account exists, update with latest details
                 await accountRepository.UpsertAccountAsync(
                     request.AccountId,
                     request.UserId,
@@ -61,32 +66,37 @@ public class SyncAccountCommandHandler(
                     account.InstitutionId,
                     accountDetails,
                     cancellationToken);
-
-                logger.LogInformation("Updated account {AccountId} metadata", request.AccountId);
             }
             else
             {
                 logger.LogWarning(
-                    "Account {AccountId} not found in database, cannot save without requisitionId. Skipping account save.",
+                    "Account {AccountId} not found in database, cannot save without requisitionId. Skipping account metadata save.",
                     request.AccountId);
             }
         }
+        else
+        {
+            logger.LogDebug("Account details not available for {AccountId}", request.AccountId);
+        }
 
-        // Determine date range (default to last 90 days if not specified)
         var dateTo = request.DateTo ?? DateTimeOffset.UtcNow;
         var dateFrom = request.DateFrom ?? dateTo.AddDays(-90);
 
-        // Fetch transactions from GoCardless
+        logger.LogDebug(
+            "Fetching transactions from {DateFrom} to {DateTo}",
+            dateFrom.ToString("yyyy-MM-dd"),
+            dateTo.ToString("yyyy-MM-dd"));
         var transactions = await financialProvider.GetAccountTransactionsAsync(
             request.AccountId,
             dateFrom,
             dateTo,
             cancellationToken);
 
-        // If transactions is null, account was not found - return empty result
         if (transactions is null)
         {
-            logger.LogError("Failed to retrieve transactions for account {AccountId}", request.AccountId);
+            logger.LogError(
+                "Failed to retrieve transactions for account {AccountId} - account may have been deleted",
+                request.AccountId);
             return new SyncAccountCommandResult
             {
                 AccountId = request.AccountId,
@@ -98,12 +108,10 @@ public class SyncAccountCommandHandler(
 
         var transactionList = transactions.ToList();
 
-        logger.LogInformation(
-            "Retrieved {Count} transactions from GoCardless for account {AccountId}",
+        logger.LogDebug(
+            "Retrieved {Count} transactions for account {AccountId}",
             transactionList.Count,
             request.AccountId);
-
-        // Upsert transactions to database
         await transactionRepository.UpsertTransactionsAsync(
             request.AccountId,
             request.UserId,
@@ -111,7 +119,7 @@ public class SyncAccountCommandHandler(
             cancellationToken);
 
         logger.LogInformation(
-            "Successfully synced {Count} transactions for account {AccountId}",
+            "Synced {Count} transactions for account {AccountId}",
             transactionList.Count,
             request.AccountId);
 

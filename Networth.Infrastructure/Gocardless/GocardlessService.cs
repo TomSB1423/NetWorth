@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 using Networth.Domain.Entities;
@@ -82,11 +83,9 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         int? accessValidForDays,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "Creating agreement for institution {InstitutionId} with {MaxHistoricalDays} historical days and {AccessValidForDays} access days",
-            institutionId,
-            maxHistoricalDays,
-            accessValidForDays);
+        logger.LogDebug(
+            "Creating agreement for institution {InstitutionId}",
+            institutionId);
 
         CreateAgreementRequestDto request = new()
         {
@@ -99,11 +98,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         var apiResponse = await gocardlessClient.CreateAgreement(request, cancellationToken);
         EnsureSuccessStatusCode(apiResponse);
         CreateAgreementResponseDto response = apiResponse.Content!;
-
-        logger.LogInformation(
-            "Successfully created agreement {AgreementId} for institution {InstitutionId}",
-            response.Id,
-            response.InstitutionId);
 
         return new Agreement
         {
@@ -124,10 +118,9 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         string redirectUrl,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "Creating requisition for institution {InstitutionId} with agreement {AgreementId}",
-            institutionId,
-            agreementId);
+        logger.LogDebug(
+            "Creating requisition for institution {InstitutionId}",
+            institutionId);
 
         CreateRequisitionRequestDto request = new()
         {
@@ -139,11 +132,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         var apiResponse = await gocardlessClient.CreateRequisition(request, cancellationToken);
         EnsureSuccessStatusCode(apiResponse);
         CreateRequisitionResponseDto response = apiResponse.Content!;
-
-        logger.LogInformation(
-            "Successfully created requisition {RequisitionId} with status {Status}",
-            response.Id,
-            response.Status);
 
         return new Requisition
         {
@@ -163,8 +151,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     /// <inheritdoc />
     public async Task<Requisition?> GetRequisitionAsync(string requisitionId, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Retrieving requisition {RequisitionId}", requisitionId);
-
         var apiResponse = await gocardlessClient.GetRequisition(requisitionId, cancellationToken);
 
         if (IsNotFound(apiResponse))
@@ -175,11 +161,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         EnsureSuccessStatusCode(apiResponse);
         GetRequisitionResponseDto response = apiResponse.Content!;
-
-        logger.LogInformation(
-            "Successfully retrieved requisition {RequisitionId} with status {Status}",
-            response.Id,
-            response.Status);
 
         return new Requisition
         {
@@ -199,8 +180,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
     /// <inheritdoc />
     public async Task<Account?> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Retrieving account metadata for account {AccountId}", accountId);
-
         var apiResponse = await gocardlessClient.GetAccount(accountId, cancellationToken);
 
         if (IsNotFound(apiResponse))
@@ -211,8 +190,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         EnsureSuccessStatusCode(apiResponse);
         GetAccountResponseDto response = apiResponse.Content!;
-
-        logger.LogInformation("Successfully retrieved account metadata for account {AccountId}", accountId);
 
         return new Account
         {
@@ -228,8 +205,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         string accountId,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Retrieving account balances for account {AccountId}", accountId);
-
         var apiResponse = await gocardlessClient.GetAccountBalances(accountId, cancellationToken);
 
         if (IsNotFound(apiResponse))
@@ -240,8 +215,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         EnsureSuccessStatusCode(apiResponse);
         GetAccountBalanceResponseDto response = apiResponse.Content!;
-
-        logger.LogInformation("Successfully retrieved {BalanceCount} balances for account {AccountId}", response.Balances.Length, accountId);
 
         return response.Balances.Select(balance => new AccountBalance
         {
@@ -258,8 +231,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         string accountId,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Retrieving account details for account {AccountId}", accountId);
-
         var apiResponse = await gocardlessClient.GetAccountDetails(accountId, cancellationToken);
 
         if (IsNotFound(apiResponse))
@@ -270,8 +241,6 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         EnsureSuccessStatusCode(apiResponse);
         GetAccountDetailResponseDto response = apiResponse.Content!;
-
-        logger.LogInformation("Successfully retrieved account details for account {AccountId}", accountId);
 
         return new AccountDetail
         {
@@ -292,7 +261,11 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         DateTimeOffset dateTo,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Retrieving account transactions for account {AccountId}", accountId);
+        logger.LogDebug(
+            "Retrieving transactions for account {AccountId} from {DateFrom} to {DateTo}",
+            accountId,
+            dateFrom.ToString("yyyy-MM-dd"),
+            dateTo.ToString("yyyy-MM-dd"));
 
         string? dateFromStr = dateFrom.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         string? dateToStr = dateTo.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -300,9 +273,14 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         var apiResponse =
             await gocardlessClient.GetAccountTransactions(accountId, dateFromStr, dateToStr, cancellationToken);
 
+        logger.LogDebug(
+            "GoCardless API response: StatusCode={StatusCode}, IsSuccessStatusCode={IsSuccess}",
+            (int)apiResponse.StatusCode,
+            apiResponse.IsSuccessStatusCode);
+
         if (IsNotFound(apiResponse))
         {
-            logger.LogWarning("Account {AccountId} not found", accountId);
+            logger.LogWarning("Account {AccountId} not found (404)", accountId);
             return null;
         }
 
@@ -312,9 +290,9 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         List<Transaction> transactions = [];
 
         // Add booked transactions
-        foreach (TransactionDto transaction in response.Transactions.Booked)
+        if (response.Transactions.Booked != null)
         {
-            transactions.Add(MapTransactionDto(transaction, accountId, false));
+            transactions.AddRange(response.Transactions.Booked.Select(transaction => MapTransactionDto(transaction, accountId, false)));
         }
 
         // Add pending transactions if available
@@ -326,7 +304,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
             }
         }
 
-        logger.LogInformation("Successfully retrieved {TransactionCount} transactions for account {AccountId}", transactions.Count, accountId);
+        logger.LogDebug("Retrieved {TransactionCount} transactions for account {AccountId}", transactions.Count, accountId);
 
         return transactions;
     }
@@ -400,7 +378,7 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
     private static void EnsureSuccessStatusCode<T>(ApiResponse<T> response)
     {
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode == HttpStatusCode.NotFound)
         {
             return; // Allow 404s to be handled by the caller
         }
@@ -414,5 +392,5 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         }
     }
 
-    private static bool IsNotFound<T>(ApiResponse<T> response) => response.StatusCode == System.Net.HttpStatusCode.NotFound;
+    private static bool IsNotFound<T>(ApiResponse<T> response) => response.StatusCode == HttpStatusCode.NotFound;
 }

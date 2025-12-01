@@ -5,6 +5,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
+using Networth.Functions.Authentication;
 using Networth.Functions.Models.Requests;
 using Networth.Functions.Models.Responses;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
@@ -14,7 +15,7 @@ namespace Networth.Functions.Functions.Http.Accounts;
 /// <summary>
 ///     Azure Function for linking bank accounts by creating agreements and requisitions.
 /// </summary>
-public class LinkAccount(IMediator mediator)
+public class LinkAccount(IMediator mediator, ICurrentUserService currentUserService)
 {
     /// <summary>
     ///     Links a bank account by creating an agreement and requisition in sequence.
@@ -50,7 +51,7 @@ public class LinkAccount(IMediator mediator)
     {
         var command = new LinkAccountCommand
         {
-            UserId = request.UserId,
+            UserId = currentUserService.UserId,
             InstitutionId = request.InstitutionId,
         };
         var result = await mediator.Send<LinkAccountCommand, LinkAccountCommandResult>(command);
