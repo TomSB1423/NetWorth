@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>Networth.SystemTests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore"/>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL"/>
+    <PackageReference Include="xunit"/>
+    <PackageReference Include="xunit.runner.visualstudio"/>
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="GitHubActionsTestLogger"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Networth.AppHost\Networth.AppHost.csproj"/>
+    <ProjectReference Include="..\..\Networth.Functions\Networth.Functions.csproj"/>
+    <ProjectReference Include="..\..\Networth.Infrastructure\Networth.Infrastructure.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System.Net"/>
+    <Using Include="Microsoft.Extensions.DependencyInjection"/>
+    <Using Include="Aspire.Hosting.ApplicationModel"/>
+    <Using Include="Aspire.Hosting.Testing"/>
+    <Using Include="Xunit"/>
+  </ItemGroup>
+
+</Project>
