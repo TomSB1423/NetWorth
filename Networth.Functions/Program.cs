@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Storage.Queues;
-using Azure.Storage.Queues.Models;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -9,8 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Networth.Application.Extensions;
 using Networth.Functions.Authentication;
+using Networth.Functions.Extensions;
 using Networth.Functions.Middleware;
 using Networth.Infrastructure.Data.Context;
+using Networth.Infrastructure.Data.Entities;
 using Networth.Infrastructure.Extensions;
 using Networth.ServiceDefaults;
 using Serilog;
@@ -60,28 +61,7 @@ IHost host = builder.Build();
 IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
 if (environment.IsDevelopment() || environment.IsEnvironment("Test"))
 {
-    await using AsyncServiceScope serviceScope = host.Services.CreateAsyncScope();
-    await using NetworthDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<NetworthDbContext>();
-
-    // In development, create the database if it doesn't exist
-    await dbContext.Database.EnsureCreatedAsync();
-
-    // Ensure mock user exists for development
-    const string mockUserId = "mock-user-123";
-    if (!await dbContext.Users.AnyAsync(u => u.Id == mockUserId))
-    {
-        dbContext.Users.Add(new Networth.Infrastructure.Data.Entities.User
-        {
-            Id = mockUserId,
-            Name = "Mock Development User",
-        });
-        await dbContext.SaveChangesAsync();
-    }
-
-    // Create required queues
-    QueueServiceClient queueServiceClient = serviceScope.ServiceProvider.GetRequiredService<QueueServiceClient>();
-    QueueClient accountSyncQueue = queueServiceClient.GetQueueClient(ResourceNames.AccountSyncQueue);
-    await accountSyncQueue.CreateIfNotExistsAsync();
+    await host.Services.EnsureDatabaseSetupAsync();
 }
 
 host.Run();

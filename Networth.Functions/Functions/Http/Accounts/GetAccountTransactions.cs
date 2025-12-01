@@ -23,8 +23,6 @@ public class GetAccountTransactions(
     /// </summary>
     /// <param name="req">The HTTP request.</param>
     /// <param name="accountId">The account ID from the route.</param>
-    /// <param name="dateFromStr">The date to get transactions from.</param>
-    /// <param name="dateToStr">The date to get transactions till.</param>
     /// <returns>The account transactions.</returns>
     [Function("GetAccountTransactions")]
     [OpenApiOperation(
@@ -67,10 +65,12 @@ public class GetAccountTransactions(
     public async Task<IActionResult> RunAsync(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts/{accountId}/transactions")]
         HttpRequest req,
-        string accountId,
-        [FromQuery(Name = "dateFrom")] string dateFromStr,
-        [FromQuery(Name = "DateTo")] string dateToStr)
+        string accountId)
     {
+        // Read query parameters from the request
+        string dateFromStr = req.Query["dateFrom"].ToString();
+        string dateToStr = req.Query["dateTo"].ToString();
+
         logger.LogInformation(
             "Received request to get transactions for account {AccountId} from {DateFrom} to {DateTo}",
             accountId,

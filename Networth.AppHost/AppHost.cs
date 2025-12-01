@@ -30,6 +30,7 @@ builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend")
     .WithReference(functions)
     .WaitFor(functions)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
+    .WithEnvironment("REACT_APP_BACKEND_URL", functions.GetEndpoint("http"))
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();

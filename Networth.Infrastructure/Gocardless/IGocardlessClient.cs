@@ -49,7 +49,7 @@ internal interface IGocardlessClient
     [Headers("Authorization: Bearer")]
     Task<ApiResponse<GetAccountTransactionsResponseDto>> GetAccountTransactions(
         string id,
-        [Query("date_from")] string? dateFrom = null,
-        [Query("date_to")] string? dateTo = null,
+        [AliasAs("date_from")] string? dateFrom = null,
+        [AliasAs("date_to")] string? dateTo = null,
         CancellationToken cancellationToken = default);
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
@@ -13,7 +14,7 @@ namespace Networth.Functions.Functions.Http.Institutions;
 /// <summary>
 ///     Azure Function for retrieving available financial institutions.
 /// </summary>
-public class GetInstitutions(IMediator mediator, ILogger<GetInstitutions> logger)
+public class GetInstitutions(IMediator mediator, IHostEnvironment environment, ILogger<GetInstitutions> logger)
 {
     /// <summary>
     ///     Gets a list of available financial institutions.
@@ -40,7 +41,11 @@ public class GetInstitutions(IMediator mediator, ILogger<GetInstitutions> logger
     {
         logger.LogInformation("Received request to get institutions");
 
-        var query = new GetInstitutionsQuery { CountryCode = "GB" };
+        var query = new GetInstitutionsQuery
+        {
+            CountryCode = "GB",
+            IncludeSandbox = environment.IsDevelopment(),
+        };
         var result = await mediator.Send<GetInstitutionsQuery, GetInstitutionsQueryResult>(query);
 
         var response = result.Institutions.Select(i => new InstitutionResponse(

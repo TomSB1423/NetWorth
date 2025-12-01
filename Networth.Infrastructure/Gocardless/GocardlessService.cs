@@ -270,6 +270,12 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         string? dateFromStr = dateFrom.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         string? dateToStr = dateTo.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
+        logger.LogInformation(
+            "Calling GoCardless API with parameters: accountId={AccountId}, dateFrom={DateFrom}, dateTo={DateTo}",
+            accountId,
+            dateFromStr,
+            dateToStr);
+
         var apiResponse =
             await gocardlessClient.GetAccountTransactions(accountId, dateFromStr, dateToStr, cancellationToken);
 
@@ -385,8 +391,9 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
 
         if (!response.IsSuccessStatusCode)
         {
+            string errorDetails = response.Error?.Content ?? "No error details available";
             throw new HttpRequestException(
-                $"GoCardless API returned status code {response.StatusCode}",
+                $"GoCardless API returned status code {response.StatusCode}: {errorDetails}",
                 null,
                 response.StatusCode);
         }

@@ -156,11 +156,12 @@ public class SyncInstitutionCommandHandler(
                 }
             }
 
+            var failureInfo = failureCount > 0 ? $", {failureCount} failed" : string.Empty;
             logger.LogInformation(
                 "Enqueued {SuccessCount} account(s) for sync from institution {InstitutionId}{FailureInfo}",
                 successCount,
                 request.InstitutionId,
-                failureCount > 0 ? $", {failureCount} failed" : "");
+                failureInfo);
 
             return new SyncInstitutionCommandResult
             {
@@ -183,4 +184,3 @@ public class SyncInstitutionCommandHandler(
         };
     }
 }
-

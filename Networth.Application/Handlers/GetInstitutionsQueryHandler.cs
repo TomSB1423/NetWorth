@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
+using Networth.Domain.Entities;
 using Networth.Domain.Repositories;
 
 namespace Networth.Application.Handlers;
@@ -34,10 +35,17 @@ public class GetInstitutionsQueryHandler(
             logger.LogInformation("Cache is fresh for country {CountryCode}, retrieving from database", query.CountryCode);
 
             var cachedInstitutions = await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
+            var cachedList = cachedInstitutions.ToList();
+
+            // In development, add sandbox institution if requested
+            if (query.IncludeSandbox)
+            {
+                AddSandboxInstitution(cachedList);
+            }
 
             return new GetInstitutionsQueryResult
             {
-                Institutions = cachedInstitutions,
+                Institutions = cachedList,
             };
         }
 
@@ -55,9 +63,33 @@ public class GetInstitutionsQueryHandler(
 
         logger.LogInformation("Successfully refreshed cache for country {CountryCode} with {Count} institutions", query.CountryCode, institutionsList.Count);
 
+        var resultInstitutions = institutionsList;
+
+        // In development, add sandbox institution if requested
+        if (query.IncludeSandbox)
+        {
+            AddSandboxInstitution(resultInstitutions);
+        }
+
         return new GetInstitutionsQueryResult
         {
-            Institutions = institutionsList,
+            Institutions = resultInstitutions,
         };
+    }
+
+    private void AddSandboxInstitution(List<InstitutionMetadata> institutions)
+    {
+        const string sandboxId = "SANDBOXFINANCE_SFIN0000";
+        if (!institutions.Any(i => i.Id == sandboxId))
+        {
+            institutions.Insert(0, new InstitutionMetadata
+            {
+                Id = sandboxId,
+                Name = "Sandbox Finance",
+                LogoUrl = "https://cdn.nordigen.com/ais/SANDBOXFINANCE_SFIN0000.png",
+                Countries = ["GB"],
+            });
+            logger.LogInformation("Added sandbox institution to results");
+        }
     }
 }

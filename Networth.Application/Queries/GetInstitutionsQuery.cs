@@ -11,4 +11,9 @@ public class GetInstitutionsQuery : IRequest<GetInstitutionsQueryResult>
     ///     Gets the country code.
     /// </summary>
     public required string CountryCode { get; init; }
+
+    /// <summary>
+    ///     Gets a value indicating whether to include sandbox institutions (development only).
+    /// </summary>
+    public bool IncludeSandbox { get; init; }
 }
