@@ -14,7 +14,6 @@ using Networth.Application.Interfaces;
 using Networth.Application.Validators;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
-using Networth.Infrastructure.Data.Options;
 using Networth.Infrastructure.Data.Repositories;
 using Networth.Infrastructure.Gocardless;
 using Networth.Infrastructure.Gocardless.Auth;
@@ -30,9 +29,12 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Configure GoCardless options from settings
-        services.AddOptionsWithValidateOnStart<GocardlessOptions>()
-            .Bind(configuration.GetSection(Constants.OptionsNames.GocardlessSection));
+        // Configure GoCardless options from settings with FluentValidation
+        services.AddSingleton<IValidator<GocardlessOptions>, GocardlessOptionsValidator>();
+
+        services.AddOptions<GocardlessOptions>()
+            .Bind(configuration.GetSection(Constants.OptionsNames.GocardlessSection))
+            .ValidateFluently();
 
         // Configure HTTP client for GoCardless
         services.AddTransient<GoCardlessAuthHandler>();

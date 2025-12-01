@@ -1,12 +1,10 @@
-using System.Text.Json;
-using Aspire.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Networth.Domain.Enums;
 using Networth.Infrastructure.Data.Context;
 using Networth.ServiceDefaults;
 using Networth.SystemTests.Helpers;
-using Npgsql;
-using Projects;
+using Networth.SystemTests.Infrastructure;
+using Xunit.Abstractions;
 
 namespace Networth.SystemTests;
 
@@ -18,6 +16,12 @@ namespace Networth.SystemTests;
 public class InstitutionSyncSystemTests
 {
     private const string SandboxInstitutionId = "SANDBOXFINANCE_SFIN0000";
+    private readonly ITestOutputHelper _testOutput;
+
+    public InstitutionSyncSystemTests(ITestOutputHelper testOutput)
+    {
+        _testOutput = testOutput;
+    }
 
     /// <summary>
     ///     System test that verifies the complete sync workflow for SANDBOXFINANCE institution.
@@ -33,21 +37,23 @@ public class InstitutionSyncSystemTests
     public async Task SyncInstitution_WithSandboxFinance_EnqueuesAccountsForSync()
     {
         // Arrange
-        await using var app = await CreateDistributedApplicationAsync();
-
+        await using var app = await SystemTestFactory.CreateAsync(testOutput: _testOutput);
         string connectionString = await GetDatabaseConnectionStringAsync(app);
 
         HttpClient functionsClient = app.CreateHttpClient(ResourceNames.Functions);
         var client = new NetworthClient(functionsClient);
 
+        // Link account first
+        var linkResponse = await client.LinkAccountAsync(SandboxInstitutionId);
+        Assert.NotNull(linkResponse.AuthorizationLink);
+
+        // Authorize the requisition
+        await using var authorizer = new GoCardlessSandboxAuthorizer();
+        await authorizer.AuthorizeRequisitionAsync(linkResponse.AuthorizationLink);
+
         // Act
         var result = await client.SyncInstitutionAsync(SandboxInstitutionId);
 
-        // Assert - Verify API response
-        Assert.Equal(SandboxInstitutionId, result.InstitutionId);
-        Assert.True(result.AccountsEnqueued > 0, "Should enqueue at least one account for sync");
-        Assert.Equal(result.AccountsEnqueued, result.AccountIds.Count);
-        Assert.All(result.AccountIds, accountId => Assert.False(string.IsNullOrWhiteSpace(accountId)));
         // Assert - Verify API response
         Assert.Equal(SandboxInstitutionId, result.InstitutionId);
         Assert.True(result.AccountsEnqueued > 0, "Should enqueue at least one account for sync");
@@ -99,7 +105,7 @@ public class InstitutionSyncSystemTests
     public async Task GetInstitutions_ReturnsInstitutionsFromGoCardlessSandbox()
     {
         // Arrange
-        await using var app = await CreateDistributedApplicationAsync();
+        await using var app = await SystemTestFactory.CreateAsync(testOutput: _testOutput);
         HttpClient functionsClient = app.CreateHttpClient(ResourceNames.Functions);
         var client = new NetworthClient(functionsClient);
 
@@ -126,7 +132,7 @@ public class InstitutionSyncSystemTests
     public async Task LinkAccount_ThenSyncInstitution_CreatesAccountsInDatabase()
     {
         // Arrange
-        await using var app = await CreateDistributedApplicationAsync();
+        await using var app = await SystemTestFactory.CreateAsync(testOutput: _testOutput);
         string connectionString = await GetDatabaseConnectionStringAsync(app);
         HttpClient functionsClient = app.CreateHttpClient(ResourceNames.Functions);
         var client = new NetworthClient(functionsClient);
@@ -137,7 +143,7 @@ public class InstitutionSyncSystemTests
         // Assert - Verify link response
         Assert.NotNull(linkResult);
         Assert.NotEmpty(linkResult.AuthorizationLink);
-        Assert.Equal(Networth.Domain.Enums.AccountLinkStatus.Pending, linkResult.Status);
+        Assert.Equal(AccountLinkStatus.Pending, linkResult.Status);
 
         // Wait for database writes
         await Task.Delay(TimeSpan.FromSeconds(1));
@@ -226,27 +232,6 @@ public class InstitutionSyncSystemTests
         }
     }
 
-    /// <summary>
-    ///     Creates and starts a distributed application for system testing.
-    ///     This includes PostgreSQL, Azure Storage emulator, and the Functions service.
-    ///     Uses real GoCardless sandbox API (no mocking).
-    /// </summary>
-    private static async Task<DistributedApplication> CreateDistributedApplicationAsync()
-    {
-        IDistributedApplicationTestingBuilder appBuilder =
-            await DistributedApplicationTestingBuilder.CreateAsync<Networth_AppHost>(
-                [],
-                (appOptions, _) =>
-                {
-                    appOptions.DisableDashboard = true;
-                });
-
-        // Build and start the application
-        DistributedApplication app = await appBuilder.BuildAsync();
-        await app.StartAsync();
-
-        return app;
-    }
 
     /// <summary>
     ///     Gets the PostgreSQL database connection string from the running application.

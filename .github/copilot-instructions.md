@@ -1,5 +1,11 @@
 # Networth Application - AI Coding Agent Instructions
 
+## Agent Tips
+
+- Use context7 MCP server for obtaining documentation and codebase context.
+- Use Playwrite to interact with the browser-based parts of the application if needed.
+
+
 ## Architecture Overview
 
 This is a .NET 9 financial aggregation application using **.NET Aspire** for orchestration. The architecture follows a clean/onion pattern with clear separation of concerns:

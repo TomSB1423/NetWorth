@@ -1,8 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Azure.Storage.Queues;
 using Microsoft.Azure.Functions.Worker.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,8 +8,6 @@ using Networth.Application.Extensions;
 using Networth.Functions.Authentication;
 using Networth.Functions.Extensions;
 using Networth.Functions.Middleware;
-using Networth.Infrastructure.Data.Context;
-using Networth.Infrastructure.Data.Entities;
 using Networth.Infrastructure.Extensions;
 using Networth.ServiceDefaults;
 using Serilog;
@@ -59,9 +55,9 @@ builder.Services
 IHost host = builder.Build();
 
 IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
-if (environment.IsDevelopment() || environment.IsEnvironment("Test"))
+if (environment.IsDevelopment())
 {
     await host.Services.EnsureDatabaseSetupAsync();
 }
 
-host.Run();
+await host.RunAsync();

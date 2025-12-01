@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Networth.Functions.Middleware;
@@ -11,7 +12,8 @@ namespace Networth.Functions.Middleware;
 /// <summary>
 ///     Responsible for handling exceptions that occur during the execution of Azure Functions.
 /// </summary>
-public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logger) : IFunctionsWorkerMiddleware
+public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logger, IHostEnvironment environment)
+    : IFunctionsWorkerMiddleware
 {
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
@@ -68,15 +70,35 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
 
             HttpResponseData response = request.CreateResponse();
             response.StatusCode = HttpStatusCode.InternalServerError;
-            string responseBody = JsonSerializer.Serialize(
-                new
-                {
-                    errors = new[] { "An internal server error occurred. Please try again later." },
-                },
-                new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                });
+
+            string responseBody;
+            if (environment.IsDevelopment())
+            {
+                responseBody = JsonSerializer.Serialize(
+                    new
+                    {
+                        message = ex.Message,
+                        type = ex.GetType().Name,
+                        stackTrace = ex.StackTrace,
+                        innerException = ex.InnerException?.Message,
+                    },
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    });
+            }
+            else
+            {
+                responseBody = JsonSerializer.Serialize(
+                    new
+                    {
+                        message = "An internal server error occurred. Please try again later.",
+                    },
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    });
+            }
 
             await response.WriteStringAsync(responseBody);
             context.GetInvocationResult().Value = response;

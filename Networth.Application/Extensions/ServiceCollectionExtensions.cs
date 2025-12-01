@@ -21,6 +21,9 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        // Register all validators from the Application assembly
+        services.AddValidatorsFromAssemblyContaining<LinkAccountCommandValidator>();
+
         // Register simple mediator
         services.AddScoped<IMediator, Mediator>();
 
@@ -37,12 +40,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRequestHandler<GetTransactionsQuery, GetTransactionsQueryResult>, GetTransactionsQueryHandler>();
         services.AddScoped<IRequestHandler<GetInstitutionsQuery, GetInstitutionsQueryResult>, GetInstitutionsQueryHandler>();
         services.AddScoped<IRequestHandler<GetRequisitionQuery, GetRequisitionQueryResult>, GetRequisitionQueryHandler>();
-
-        // Register validators
-        services.AddScoped<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
-        services.AddScoped<IValidator<SyncAccountCommand>, SyncAccountCommandValidator>();
-        services.AddScoped<IValidator<SyncInstitutionCommand>, SyncInstitutionCommandValidator>();
-        services.AddScoped<IValidator<GetTransactionsQuery>, GetTransactionsQueryValidator>();
 
         return services;
     }

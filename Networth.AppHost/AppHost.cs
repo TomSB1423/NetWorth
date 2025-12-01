@@ -6,8 +6,13 @@ using Scalar.Aspire;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
+IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("postgres-password", secret: true);
+IResourceBuilder<ParameterResource> gocardlessSecretId = builder.AddParameter("gocardless-secret-id", secret: true);
+IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("gocardless-secret-key", secret: true);
+
 IResourceBuilder<PostgresServerResource> postgres = builder
     .AddPostgres(ResourceNames.Postgres)
+    .WithPassword(postgresPassword)
     .WithDataVolume();
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
@@ -24,7 +29,12 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .AddAzureFunctionsProject<Networth_Functions>(ResourceNames.Functions)
     .WithExternalHttpEndpoints()
     .WithReference(postgresdb)
-    .WithReference(queues);
+    .WaitFor(postgresdb)
+    .WithReference(queues)
+    .WaitFor(queues)
+    .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
+    .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
+    .WithHttpHealthCheck("/api/health");
 
 builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend")
     .WithReference(functions)
@@ -68,4 +78,4 @@ if (builder.Environment.IsDevelopment())
     });
 }
 
-builder.Build().Run();
+await builder.Build().RunAsync();

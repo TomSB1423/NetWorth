@@ -43,7 +43,7 @@ public class NetworthClient
             null,
             cancellationToken);
 
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeWithBodyAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<SyncInstitutionResponse>(
             _jsonOptions,
@@ -67,7 +67,7 @@ public class NetworthClient
     {
         var response = await _httpClient.GetAsync("/api/institutions", cancellationToken);
 
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeWithBodyAsync(response, cancellationToken);
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
@@ -103,7 +103,7 @@ public class NetworthClient
             _jsonOptions,
             cancellationToken);
 
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeWithBodyAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<LinkAccountResponse>(
             _jsonOptions,
@@ -115,5 +115,20 @@ public class NetworthClient
         }
 
         return result;
+    }
+
+    /// <summary>
+    ///     Ensures the response has a success status code, including the response body in the exception if not.
+    /// </summary>
+    private static async Task EnsureSuccessStatusCodeWithBodyAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(
+                $"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}). Response body: {body}");
+        }
     }
 }
