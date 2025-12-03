@@ -34,7 +34,6 @@ jobs:
       DOCKER_HOST: unix:///var/run/docker.sock
       # Playwright CI recommendations
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: false
-      PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
@@ -75,8 +74,7 @@ jobs:
       - name: Build solution
         run: dotnet build Networth.sln --no-restore --configuration Release
 
-      # Install Playwright as per official guidance
-      - name: Ensure Playwright browsers are installed (Chromium only)
+      - name: Install Playwright browsers
         run: pwsh Tests/Networth.SystemTests/bin/Release/net9.0/playwright.ps1 install --with-deps chromium
 
       - name: Test
