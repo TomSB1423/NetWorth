@@ -1,5 +1,6 @@
 export * from './common';
 export * from './institutions';
+export * from './layout';
 
 // Main layout components
 export { default as Sidebar } from './Sidebar';

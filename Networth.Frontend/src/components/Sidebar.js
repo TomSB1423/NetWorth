@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     DollarSign,
     Home,
@@ -15,15 +15,20 @@ import {
     BarChart3
 } from 'lucide-react';
 
-const Sidebar = ({ activeTab, setActiveTab }) => {
+const Sidebar = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    
     const menuItems = [
-        { id: 'overview', label: 'Overview', icon: Home },
-        { id: 'accounts', label: 'Accounts', icon: CreditCard },
-        { id: 'investments', label: 'Investments', icon: TrendingUp },
-        { id: 'expenses', label: 'Expenses', icon: Receipt },
-        { id: 'goals', label: 'Goals', icon: Target },
-        { id: 'transactions', label: 'Transactions', icon: BarChart3 },
+        { id: 'overview', label: 'Overview', icon: Home, path: '/overview' },
+        { id: 'accounts', label: 'Accounts', icon: CreditCard, path: '/accounts' },
+        { id: 'investments', label: 'Investments', icon: TrendingUp, path: '/investments' },
+        { id: 'expenses', label: 'Expenses', icon: Receipt, path: '/expenses' },
+        { id: 'goals', label: 'Goals', icon: Target, path: '/goals' },
+        { id: 'transactions', label: 'Transactions', icon: BarChart3, path: '/transactions' },
     ];
+
+    const isActive = (path) => location.pathname === path;
 
     return (
         <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
@@ -45,11 +50,13 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
                 <nav className="space-y-1">
                     {menuItems.map((item) => {
                         const IconComponent = item.icon;
+                        const active = isActive(item.path);
                         return (
                             <button
                                 key={item.id}
-                                onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${item.id === activeTab
+                                onClick={() => navigate(item.path)}
+                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                                    active
                                         ? 'bg-indigo-600 text-white'
                                         : 'text-gray-600 hover:bg-gray-100'
                                     }`}
@@ -64,11 +71,6 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
             </div>
         </div>
     );
-};
-
-Sidebar.propTypes = {
-    activeTab: PropTypes.string.isRequired,
-    setActiveTab: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

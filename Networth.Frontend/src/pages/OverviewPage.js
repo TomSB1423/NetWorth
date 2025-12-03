@@ -21,7 +21,7 @@ import {
     Zap,
     AlertTriangle
 } from 'lucide-react';
-import { OverviewCard, LoadingSpinner } from '../components';
+import { OverviewCard, LoadingSpinner, PageContainer } from '../components';
 import { useInstitutions } from '../hooks/useInstitutions';
 import { MOCK_NETWORTH_TREND_DATA } from '../constants/mockData';
 
@@ -220,21 +220,27 @@ const OverviewPage = () => {
     };
 
     if (loading) {
-        return <LoadingSpinner text="Loading overview..." />;
+        return (
+            <PageContainer>
+                <LoadingSpinner text="Loading overview..." size="large" />
+            </PageContainer>
+        );
     }
 
     if (error) {
         return (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-                Error loading data: {error}
-            </div>
+            <PageContainer>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+                    Error loading data: {error}
+                </div>
+            </PageContainer>
         );
     }
 
     const metrics = calculateMetrics();
 
     return (
-        <div>
+        <PageContainer maxWidth="large">
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>
@@ -291,7 +297,7 @@ const OverviewPage = () => {
 
             {/* AI Insights */}
             <AIInsightsPanel />
-        </div>
+        </PageContainer>
     );
 };
 

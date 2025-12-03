@@ -3,6 +3,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Eye,
     EyeOff,
@@ -13,13 +14,14 @@ import {
     PiggyBank,
     Shield,
     Building,
-    CreditCard,
-    RefreshCw
+    CreditCard
 } from 'lucide-react';
 import { LoadingSpinner } from '../components';
+import { PageHeader, PageContainer } from '../components/layout';
 import { useInstitutions } from '../hooks/useInstitutions';
 
 const AccountsPage = () => {
+    const navigate = useNavigate();
     const [showBalance, setShowBalance] = useState(true);
     const { accounts, institutions, loading, error, syncing, syncInstitution } = useInstitutions();
 
@@ -43,39 +45,49 @@ const AccountsPage = () => {
     };
 
     if (loading) {
-        return <LoadingSpinner text="Loading accounts..." />;
+        return (
+            <PageContainer>
+                <LoadingSpinner text="Loading accounts..." size="large" />
+            </PageContainer>
+        );
     }
 
     if (error) {
         return (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-                Error loading accounts: {error}
-            </div>
+            <PageContainer>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+                    Error loading accounts: {error}
+                </div>
+            </PageContainer>
         );
     }
 
+    const headerActions = (
+        <>
+            <button
+                onClick={() => setShowBalance(!showBalance)}
+                className="btn-secondary flex items-center space-x-2"
+            >
+                {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                <span>{showBalance ? 'Hide' : 'Show'} Balances</span>
+            </button>
+            <button 
+                onClick={() => navigate('/accounts/list')}
+                className="btn-primary flex items-center space-x-2"
+            >
+                <Plus className="w-4 h-4" />
+                <span>Manage Accounts</span>
+            </button>
+        </>
+    );
+
     return (
-        <div>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Accounts</h1>
-                    <p className="text-gray-600">Manage all your financial accounts in one place</p>
-                </div>
-                <div className="flex items-center space-x-3">
-                    <button
-                        onClick={() => setShowBalance(!showBalance)}
-                        className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                        {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                        <span className="text-sm">{showBalance ? 'Hide' : 'Show'} Balances</span>
-                    </button>
-                    <button className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                        <Plus className="w-4 h-4" />
-                        <span>Add Account</span>
-                    </button>
-                </div>
-            </div>
+        <PageContainer maxWidth="large">
+            <PageHeader
+                title="Accounts"
+                subtitle="Manage all your financial accounts in one place"
+                actions={headerActions}
+            />
 
             {/* Accounts Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -110,7 +122,7 @@ const AccountsPage = () => {
                                         className="p-1 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                                         title="Sync account"
                                     >
-                                        <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                                        <Plus className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
                                     </button>
                                 </div>
                             </div>
@@ -152,12 +164,15 @@ const AccountsPage = () => {
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No accounts connected</h3>
                     <p className="text-gray-600 mb-6">Get started by connecting your first financial account.</p>
-                    <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    <button 
+                        onClick={() => navigate('/accounts/list')}
+                        className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
                         Connect Your First Account
                     </button>
                 </div>
             )}
-        </div>
+        </PageContainer>
     );
 };
 
