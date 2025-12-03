@@ -7,6 +7,7 @@ on:
       - "**/*.md"
       - "**/*.gitignore"
       - "**/*.gitattributes"
+      - "Networth.Frontend/**"
 
   pull_request:
     paths-ignore:

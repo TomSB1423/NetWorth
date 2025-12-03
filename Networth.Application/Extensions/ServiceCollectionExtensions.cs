@@ -1,8 +1,10 @@
 using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Networth.Application.Commands;
 using Networth.Application.Handlers;
 using Networth.Application.Interfaces;
+using Networth.Application.Options;
 using Networth.Application.Queries;
 using Networth.Application.Services;
 using Networth.Application.Validators;
@@ -18,11 +20,18 @@ public static class ServiceCollectionExtensions
     ///     Adds application services to the dependency injection container.
     /// </summary>
     /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The configuration.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Register all validators from the Application assembly
         services.AddValidatorsFromAssemblyContaining<LinkAccountCommandValidator>();
+
+        // Configure Frontend options
+        services.AddOptions<FrontendOptions>()
+            .Bind(configuration.GetSection(FrontendOptions.SectionName))
+            .ValidateFluently()
+            .ValidateOnStart();
 
         // Register simple mediator
         services.AddScoped<IMediator, Mediator>();

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
+using Networth.Application.Options;
 using Networth.Domain.Entities;
 using Networth.Domain.Repositories;
 
@@ -13,6 +15,7 @@ public class LinkAccountCommandHandler(
     IFinancialProvider financialProvider,
     IAgreementRepository agreementRepository,
     IRequisitionRepository requisitionRepository,
+    IOptions<FrontendOptions> frontendOptions,
     ILogger<LinkAccountCommandHandler> logger)
     : IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>
 {
@@ -41,10 +44,13 @@ public class LinkAccountCommandHandler(
 
         logger.LogInformation("Saved agreement {AgreementId} to database", agreement.Id);
 
+        var frontendUrl = frontendOptions.Value.Url;
+        var callbackUrl = $"{frontendUrl}?institutionId={command.InstitutionId}";
+
         var requisition = await financialProvider.CreateRequisitionAsync(
             command.InstitutionId,
             agreement.Id,
-            "https://example.com/callback", // Replace with actual redirect URL
+            callbackUrl, // Redirect to frontend callback page
             cancellationToken);
 
         logger.LogInformation(

@@ -36,14 +36,15 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
     .WithHttpHealthCheck("/api/health");
 
-builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend")
+var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "dev")
     .WithReference(functions)
-    .WaitFor(functions)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
-    .WithEnvironment("REACT_APP_BACKEND_URL", functions.GetEndpoint("http"))
+    .WithEnvironment("VITE_API_URL", functions.GetEndpoint("http"))
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
+
+functions.WithEnvironment("Frontend__Url", frontend.GetEndpoint("http"));
 
 // Add Scalar API Reference
 IResourceBuilder<ScalarResource> scalar = builder.AddScalarApiReference("api-reference", options =>

@@ -1,54 +1,52 @@
-/**
- * API service for interacting with the NetWorth backend
- */
+const BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = BASE_URL ? `${BASE_URL}/api` : '/api';
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
+export const api = {
+    getAccounts: async () => {
+        const response = await fetch(`${API_BASE_URL}/accounts`);
+        if (!response.ok) throw new Error('Failed to fetch accounts');
+        return response.json();
+    },
 
-/**
- * Generic API request function with error handling
- */
-async function apiRequest(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
+    getAccountBalances: async (accountId) => {
+        const response = await fetch(`${API_BASE_URL}/accounts/${accountId}/balances`);
+        if (!response.ok) throw new Error('Failed to fetch balances');
+        return response.json();
+    },
 
-    const config = {
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-        ...options,
-    };
+    getInstitutions: async () => {
+        const response = await fetch(`${API_BASE_URL}/institutions`);
+        if (!response.ok) throw new Error('Failed to fetch institutions');
+        return response.json();
+    },
 
-    try {
-        const response = await fetch(url, config);
+    linkAccount: async (institutionId) => {
+        const response = await fetch(`${API_BASE_URL}/account/link`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ institutionId }),
+        });
+        if (!response.ok) throw new Error('Failed to initiate account linking');
+        return response.json();
+    },
 
-        if (!response.ok) {
-            throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-        }
+    syncInstitution: async (institutionId) => {
+        const response = await fetch(`${API_BASE_URL}/institutions/${institutionId}/sync`, {
+            method: 'POST',
+        });
+        if (!response.ok) throw new Error('Failed to sync institution');
+        return response.json();
+    },
 
-        return await response.json();
-    } catch (error) {
-        console.error(`API request to ${url} failed:`, error);
-        throw error;
+    getTransactions: async (accountId, dateFrom, dateTo) => {
+        const params = new URLSearchParams({
+            dateFrom,
+            dateTo
+        });
+        const response = await fetch(`${API_BASE_URL}/accounts/${accountId}/transactions?${params}`);
+        if (!response.ok) throw new Error('Failed to fetch transactions');
+        return response.json();
     }
-}
-
-/**
- * Institution-related API calls
- */
-export const institutionService = {
-    /**
-     * Fetch all available institutions
-     */
-    async getInstitutions() {
-        return apiRequest('/api/institutions');
-    },
-
-    /**
-     * Fetch a specific institution by ID
-     */
-    async getInstitution(id) {
-        return apiRequest(`/api/institutions/${id}`);
-    },
 };
-
-export default institutionService;
