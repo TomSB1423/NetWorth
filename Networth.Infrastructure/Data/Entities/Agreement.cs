@@ -1,5 +1,3 @@
-using Networth.Domain.Enums;
-
 namespace Networth.Infrastructure.Data.Entities;
 
 /// <summary>

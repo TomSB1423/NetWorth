@@ -1,5 +1,4 @@
 using Networth.Domain.Entities;
-using Networth.Domain.Enums;
 
 namespace Networth.Domain.Repositories;
 

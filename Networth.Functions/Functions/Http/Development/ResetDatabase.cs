@@ -1,13 +1,11 @@
 using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Networth.Functions.Extensions;
 using Networth.Infrastructure.Data.Context;
-using Networth.Infrastructure.Data.Entities;
 
 namespace Networth.Functions.Functions.Http.Development;
 

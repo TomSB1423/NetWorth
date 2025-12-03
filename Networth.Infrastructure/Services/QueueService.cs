@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Azure.Storage.Queues;
-using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 
