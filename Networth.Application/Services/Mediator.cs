@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Networth.Application.Diagnostics;
 using Networth.Application.Interfaces;
 
 namespace Networth.Application.Services;
@@ -12,6 +13,8 @@ public class Mediator(IServiceProvider serviceProvider, ILogger<Mediator> logger
 {
     public async Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
     {
+        using var activity = AppActivitySource.Instance.StartActivity(typeof(TRequest).Name);
+
         logger.LogDebug("Processing request {RequestType}", typeof(TRequest).Name);
 
         // Get and run validator if exists
