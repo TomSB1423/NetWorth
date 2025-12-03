@@ -1,42 +1,29 @@
 namespace Networth.Domain.Entities;
 
 /// <summary>
-///     Represents a bank account.
+///     Represents account metadata from GoCardless API.
+///     This is a read-only DTO and not stored in the database.
 /// </summary>
-public class Account
+public record Account
 {
     /// <summary>
-    ///     Gets or sets the unique identifier for the account.
+    ///     Gets the unique identifier for the account.
     /// </summary>
-    public required string Id { get; set; }
+    public required string Id { get; init; }
 
     /// <summary>
-    ///     Gets or sets the owner user ID.
+    ///     Gets the institution identifier this account belongs to.
     /// </summary>
-    public required string OwnerId { get; set; }
+    public required string InstitutionId { get; init; }
 
     /// <summary>
-    ///     Gets or sets the owner user.
+    ///     Gets the status of the account.
     /// </summary>
-    public User Owner { get; set; } = null!;
+    public required string Status { get; init; }
 
     /// <summary>
-    ///     Gets or sets the institution ID.
+    ///     Gets the name of the account.
     /// </summary>
-    public required string InstitutionId { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the institution.
-    /// </summary>
-    public Institution Institution { get; set; } = null!;
-
-    /// <summary>
-    ///     Gets or sets the name of the account.
-    /// </summary>
-    public required string Name { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the transactions associated with this account.
-    /// </summary>
-    public ICollection<Transaction> Transactions { get; set; } = [];
+    public string? Name { get; init; }
 }
+

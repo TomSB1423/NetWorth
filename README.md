@@ -20,9 +20,19 @@ Services:
 
 ## Configuration
 
-Set the following user secrets using the .NET CLI:
+### Local Development
+
+Set the following user secrets in the AppHost project using the .NET CLI:
 
 ```shell
-dotnet user-secrets set "Gocardless:SecretId" "SECRET_VALUE"
-dotnet user-secrets set "Gocardless:SecretKey" "SECRET_VALUE"
+dotnet user-secrets set "Gocardless:SecretId" "YOUR_SECRET_ID" --project Networth.AppHost
+dotnet user-secrets set "Gocardless:SecretKey" "YOUR_SECRET_KEY" --project Networth.AppHost
+```
+
+The PostgreSQL password is configured in `appsettings.json`:
+
+```json
+"Parameters": {
+    "postgres-password": "LocalDevPassword123!"
+}
 ```

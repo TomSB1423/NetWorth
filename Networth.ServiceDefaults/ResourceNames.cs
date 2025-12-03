@@ -24,5 +24,20 @@ public static class ResourceNames
     ///     Gets the resource name for the React frontend.
     /// </summary>
     public const string React = "react";
+
+    /// <summary>
+    ///     Gets the resource name for the Azure Storage account.
+    /// </summary>
+    public const string Storage = "storage";
+
+    /// <summary>
+    ///     Gets the resource name for the Azure Storage Queues.
+    /// </summary>
+    public const string Queues = "queues";
+
+    /// <summary>
+    ///     Gets the queue name for account sync operations.
+    /// </summary>
+    public const string AccountSyncQueue = "account-sync";
 }
 

@@ -13,12 +13,12 @@ public class LinkAccountCommandValidator : AbstractValidator<LinkAccountCommand>
     /// </summary>
     public LinkAccountCommandValidator()
     {
+        RuleFor(x => x.UserId)
+            .NotEmpty()
+            .WithMessage("User ID is required");
+
         RuleFor(x => x.InstitutionId)
             .NotEmpty()
             .WithMessage("Institution ID is required");
     }
-
-    private static bool BeAValidUrl(string url) =>
-        Uri.TryCreate(url, UriKind.Absolute, out Uri? result) &&
-        (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
 }

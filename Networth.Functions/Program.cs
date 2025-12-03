@@ -6,13 +6,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Networth.Application.Extensions;
 using Networth.Functions.Authentication;
+using Networth.Functions.Extensions;
 using Networth.Functions.Middleware;
-using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Extensions;
 using Networth.ServiceDefaults;
 using Serilog;
 
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
+
+builder.ConfigureFunctionsWebApplication();
 
 builder.AddServiceDefaults();
 
@@ -39,6 +41,9 @@ builder.Services.Configure<JsonSerializerOptions>(options =>
 // Add Aspire observability to postgres
 builder.AddNpgsqlDataSource(ResourceNames.NetworthDb);
 
+// Add Aspire Azure Queue Service client
+builder.AddAzureQueueServiceClient(ResourceNames.Queues);
+
 // Configure services
 builder.Services
     .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })
@@ -50,16 +55,9 @@ builder.Services
 IHost host = builder.Build();
 
 IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
-if (environment.IsDevelopment() || environment.IsEnvironment("Test"))
+if (environment.IsDevelopment())
 {
-    await using AsyncServiceScope serviceScope = host.Services.CreateAsyncScope();
-    await using NetworthDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<NetworthDbContext>();
-
-    // Only create if database doesn't exist (idempotent)
-    if (!await dbContext.Database.CanConnectAsync())
-    {
-        await dbContext.Database.EnsureCreatedAsync();
-    }
+    await host.Services.EnsureDatabaseSetupAsync();
 }
 
-host.Run();
+await host.RunAsync();

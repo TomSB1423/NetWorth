@@ -1,4 +1,3 @@
-using System.Reflection;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Networth.Application.Commands;
@@ -22,16 +21,25 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        // Register all validators from the Application assembly
+        services.AddValidatorsFromAssemblyContaining<LinkAccountCommandValidator>();
+
         // Register simple mediator
         services.AddScoped<IMediator, Mediator>();
 
-        // Register handlers
-        services.AddScoped<IRequestHandler<GetTransactionsQuery, GetTransactionsQueryResult>, GetTransactionsQueryHandler>();
+        // Register command handlers
         services.AddScoped<IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>, LinkAccountCommandHandler>();
+        services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
+        services.AddScoped<IRequestHandler<SyncInstitutionCommand, SyncInstitutionCommandResult>, SyncInstitutionCommandHandler>();
 
-        // Register validators
-        services.AddScoped<IValidator<GetTransactionsQuery>, GetTransactionsQueryValidator>();
-        services.AddScoped<IValidator<LinkAccountCommand>, LinkAccountCommandValidator>();
+        // Register query handlers
+        services.AddScoped<IRequestHandler<GetAccountsQuery, GetAccountsQueryResult>, GetAccountsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAccountQuery, GetAccountQueryResult>, GetAccountQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAccountBalancesQuery, GetAccountBalancesQueryResult>, GetAccountBalancesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAccountDetailsQuery, GetAccountDetailsQueryResult>, GetAccountDetailsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetTransactionsQuery, GetTransactionsQueryResult>, GetTransactionsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetInstitutionsQuery, GetInstitutionsQueryResult>, GetInstitutionsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetRequisitionQuery, GetRequisitionQueryResult>, GetRequisitionQueryHandler>();
 
         return services;
     }

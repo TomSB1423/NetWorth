@@ -56,24 +56,24 @@ public interface IFinancialProvider
     /// </summary>
     /// <param name="requisitionId">The requisition ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The requisition details.</returns>
-    Task<Requisition> GetRequisitionAsync(string requisitionId, CancellationToken cancellationToken = default);
+    /// <returns>The requisition details, or null if not found.</returns>
+    Task<Requisition?> GetRequisitionAsync(string requisitionId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets account metadata by account ID.
     /// </summary>
     /// <param name="accountId">The account ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The account metadata from GoCardless.</returns>
-    Task<AccountMetadata> GetAccountAsync(string accountId, CancellationToken cancellationToken = default);
+    /// <returns>The account metadata from GoCardless, or null if not found.</returns>
+    Task<Account?> GetAccountAsync(string accountId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets account balances by account ID.
     /// </summary>
     /// <param name="accountId">The account ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The account balances.</returns>
-    Task<IEnumerable<AccountBalance>> GetAccountBalancesAsync(
+    /// <returns>The account balances, or null if not found.</returns>
+    Task<IEnumerable<AccountBalance>?> GetAccountBalancesAsync(
         string accountId,
         CancellationToken cancellationToken = default);
 
@@ -82,8 +82,8 @@ public interface IFinancialProvider
     /// </summary>
     /// <param name="accountId">The account ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The account details.</returns>
-    Task<AccountDetail> GetAccountDetailsAsync(string accountId, CancellationToken cancellationToken = default);
+    /// <returns>The account details, or null if not found.</returns>
+    Task<AccountDetail?> GetAccountDetailsAsync(string accountId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets account transactions by account ID.
@@ -92,8 +92,8 @@ public interface IFinancialProvider
     /// <param name="dateFrom">Start date for transaction filtering (optional).</param>
     /// <param name="dateTo">End date for transaction filtering (optional).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The account transactions from GoCardless.</returns>
-    Task<IEnumerable<TransactionMetadata>> GetAccountTransactionsAsync(
+    /// <returns>The account transactions from GoCardless, or null if not found.</returns>
+    Task<IEnumerable<Transaction>?> GetAccountTransactionsAsync(
         string accountId,
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,

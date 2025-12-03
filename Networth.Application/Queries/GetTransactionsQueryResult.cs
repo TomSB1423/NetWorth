@@ -13,7 +13,7 @@ public record GetTransactionsQueryResult
     public required string AccountId { get; init; }
 
     /// <summary>
-    ///     Gets the transactions for the account from GoCardless.
+    ///     Gets the transactions for the account from GoCardless, or null if the account was not found.
     /// </summary>
-    public IEnumerable<TransactionMetadata> Transactions { get; init; } = [];
+    public IEnumerable<Transaction>? Transactions { get; init; }
 }
