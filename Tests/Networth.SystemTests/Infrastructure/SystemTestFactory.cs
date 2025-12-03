@@ -24,15 +24,6 @@ public static class SystemTestFactory
         ITestOutputHelper? testOutput,
         bool enableDashboard = false)
     {
-        // Helper to write to both test output and console (for CI visibility)
-        void Log(string message)
-        {
-            testOutput?.WriteLine(message);
-            Console.WriteLine($"[SystemTestFactory] {message}");
-        }
-
-        Log("Initializing SystemTestFactory...");
-
         IDistributedApplicationTestingBuilder builder = await DistributedApplicationTestingBuilder.CreateAsync<Networth_AppHost>(
             [],
             (appOptions, hostSettings) =>
@@ -42,7 +33,7 @@ public static class SystemTestFactory
                 appOptions.AllowUnsecuredTransport = enableDashboard;
             });
 
-        // Load user secrets from AppHost project - DistributedApplicationTestingBuilder doesn't load them by default
+        // Load user secrets from AppHost project
         ConfigurationBuilder configBuilder = new();
         configBuilder.AddUserSecrets(typeof(Networth_AppHost).Assembly);
         configBuilder.AddEnvironmentVariables();
@@ -54,8 +45,7 @@ public static class SystemTestFactory
 
         foreach (string param in requiredParameters)
         {
-            string? value = userSecretsConfig[$"Parameters:{param}"];
-            if (string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(userSecretsConfig[$"Parameters:{param}"]))
             {
                 missingParameters.Add(param);
             }
@@ -63,26 +53,22 @@ public static class SystemTestFactory
 
         if (missingParameters.Count > 0)
         {
-            string error = $"Missing required configuration parameters for system tests: {string.Join(", ", missingParameters)}. " +
-                           "Ensure these are set in User Secrets (local) or Environment Variables (CI) with 'Parameters__' prefix (e.g. Parameters__gocardless-secret-id).";
-            Log(error);
-            throw new InvalidOperationException(error);
+            throw new InvalidOperationException(
+                $"Missing required configuration parameters for system tests: {string.Join(", ", missingParameters)}. " +
+                "Ensure these are set in User Secrets (local) or Environment Variables (CI) with 'Parameters__' prefix.");
         }
 
         // Ensure postgres-password is set (required by AppHost), default to a test value if missing
         if (string.IsNullOrWhiteSpace(userSecretsConfig["Parameters:postgres-password"]))
         {
-            Log("Setting default 'postgres-password' for test environment.");
             builder.Configuration["Parameters:postgres-password"] = "test-password-123!";
         }
 
         // Copy Parameters from user secrets to the test builder's configuration
         var parameters = userSecretsConfig.GetSection("Parameters").GetChildren().ToList();
-        Log($"Found {parameters.Count} parameters in 'Parameters' configuration section.");
 
         foreach (IConfigurationSection section in parameters)
         {
-            Log($"Setting Parameter: {section.Key} (Value length: {section.Value?.Length ?? 0})");
             builder.Configuration[$"Parameters:{section.Key}"] = section.Value;
         }
 
@@ -93,8 +79,6 @@ public static class SystemTestFactory
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders();
-            logging.AddSimpleConsole();
-            logging.AddFakeLogging();
             if (testOutput is not null)
             {
                 logging.AddXUnit(testOutput);
@@ -106,50 +90,14 @@ public static class SystemTestFactory
         });
 
         // Build and start the application
-        Log("Building application...");
         DistributedApplication app = await builder.BuildAsync();
 
-        Log("Starting application...");
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(180));
         await app.StartAsync(cts.Token);
 
-        try
-        {
-            Log("Waiting for Functions resource to be healthy...");
-            await app.ResourceNotifications.WaitForResourceHealthyAsync(
-                ResourceNames.Functions,
-                cts.Token);
-            Log("Functions resource is healthy.");
-        }
-        catch (Exception ex)
-        {
-            // Capture diagnostic information
-            var sb = new System.Text.StringBuilder();
-            sb.AppendLine($"Failed to wait for Functions resource: {ex.Message}");
-            sb.AppendLine("--------------------------------------------------");
-            sb.AppendLine("RESOURCE STATES:");
-
-            var rns = app.Services.GetRequiredService<ResourceNotificationService>();
-            var appModel = app.Services.GetRequiredService<DistributedApplicationModel>();
-
-            foreach (IResource resource in appModel.Resources)
-            {
-                var snapshot = await rns.WaitForResourceAsync(resource.Name, re => true, cts.Token)
-                    .ContinueWith(t => t.IsCompletedSuccessfully ? t.Result.Snapshot : null, TaskScheduler.Default);
-
-                var state = snapshot?.State?.Text ?? "unknown";
-                var health = snapshot?.HealthStatus?.ToString() ?? "unknown";
-
-                string info = $" - {resource.Name}: State={state}, Health={health}";
-                sb.AppendLine(info);
-                Log(info); // Also log to console just in case
-            }
-
-            sb.AppendLine("--------------------------------------------------");
-
-            // Throw a new exception with the diagnostic info in the message so it appears in the test failure report
-            throw new InvalidOperationException(sb.ToString(), ex);
-        }
+        await app.ResourceNotifications.WaitForResourceHealthyAsync(
+            ResourceNames.Functions,
+            cts.Token);
 
         return app;
     }

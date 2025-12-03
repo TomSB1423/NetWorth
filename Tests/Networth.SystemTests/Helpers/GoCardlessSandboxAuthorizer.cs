@@ -37,43 +37,32 @@ public class GoCardlessSandboxAuthorizer : IAsyncDisposable
             // Step 1: Navigate to GoCardless consent page
             await page.GotoAsync(authorizationLink);
             await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-            Console.WriteLine($"Step 1 - GoCardless consent page: {page.Url}");
 
             // Click "Agree and continue" on the GoCardless consent page
             var agreeButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Agree and continue" });
             await agreeButton.ClickAsync();
             await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-            Console.WriteLine($"Step 2 - After agreeing to consent: {page.Url}");
 
             // Step 2: Sandbox Finance login page (fields should be pre-filled)
             // Wait for the Sign in button to appear
             var signInButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Sign in" });
             await signInButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
-            Console.WriteLine($"Step 3 - Sandbox Finance login page ready");
 
             // Click Sign in
             await signInButton.ClickAsync();
             await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-            Console.WriteLine($"Step 4 - After signing in: {page.Url}");
 
             // Step 3: Sandbox Finance approval/consent page
             // Wait for the Approve button/link to appear
             var approveLink = page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = "Approve" });
             await approveLink.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
-            Console.WriteLine($"Step 5 - Sandbox Finance approval page ready");
 
             // Click Approve
             await approveLink.ClickAsync();
             await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-            Console.WriteLine($"Step 6 - After approval (final redirect): {page.Url}");
 
             // Wait a moment for any final processing
             await page.WaitForTimeoutAsync(1000);
-
-            // Take a final screenshot
-            var screenshotPath = Path.Combine(Path.GetTempPath(), $"gocardless_auth_{DateTime.Now:yyyyMMddHHmmss}.png");
-            await page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath });
-            Console.WriteLine($"Authorization complete! Screenshot saved to: {screenshotPath}");
         }
         finally
         {
