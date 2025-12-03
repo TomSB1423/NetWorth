@@ -1,7 +1,8 @@
 using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Networth.Infrastructure.Extensions;
+namespace Networth.Application.Extensions;
 
 /// <summary>
 ///     Validates options using FluentValidation.
@@ -10,18 +11,18 @@ namespace Networth.Infrastructure.Extensions;
 internal class FluentValidationOptions<TOptions> : IValidateOptions<TOptions>
     where TOptions : class
 {
-    private readonly IValidator<TOptions> _validator;
+    private readonly IServiceProvider _serviceProvider;
     private readonly string _name;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="FluentValidationOptions{TOptions}"/> class.
     /// </summary>
     /// <param name="name">The name of the options instance.</param>
-    /// <param name="validator">The FluentValidation validator.</param>
-    public FluentValidationOptions(string name, IValidator<TOptions> validator)
+    /// <param name="serviceProvider">The service provider.</param>
+    public FluentValidationOptions(string name, IServiceProvider serviceProvider)
     {
         _name = name;
-        _validator = validator;
+        _serviceProvider = serviceProvider;
     }
 
     /// <inheritdoc />
@@ -34,7 +35,10 @@ internal class FluentValidationOptions<TOptions> : IValidateOptions<TOptions>
 
         ArgumentNullException.ThrowIfNull(options);
 
-        var result = _validator.Validate(options);
+        using var scope = _serviceProvider.CreateScope();
+        var validator = scope.ServiceProvider.GetRequiredService<IValidator<TOptions>>();
+
+        var result = validator.Validate(options);
 
         if (result.IsValid)
         {

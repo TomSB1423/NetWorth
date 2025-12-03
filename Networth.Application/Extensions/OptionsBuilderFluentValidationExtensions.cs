@@ -2,7 +2,7 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Networth.Infrastructure.Extensions;
+namespace Networth.Application.Extensions;
 
 /// <summary>
 ///     Extension methods for validating options using FluentValidation.
@@ -22,7 +22,7 @@ public static class OptionsBuilderFluentValidationExtensions
         optionsBuilder.Services.AddSingleton<IValidateOptions<TOptions>>(
             serviceProvider => new FluentValidationOptions<TOptions>(
                 optionsBuilder.Name,
-                serviceProvider.GetRequiredService<IValidator<TOptions>>()));
+                serviceProvider));
 
         return optionsBuilder;
     }

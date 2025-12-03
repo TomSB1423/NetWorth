@@ -53,7 +53,7 @@ builder.Services
     .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })
     .AddApplicationInsightsTelemetryWorkerService()
     .AddScoped<ICurrentUserService, CurrentUserService>()
-    .AddApplicationServices()
+    .AddApplicationServices(builder.Configuration)
     .AddInfrastructure(builder.Configuration);
 
 IHost host = builder.Build();

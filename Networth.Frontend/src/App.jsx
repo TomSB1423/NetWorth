@@ -1,35 +1,95 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from "react-router-dom";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { AccountProvider, useAccounts } from "./contexts/AccountContext";
+import { api } from "./services/api";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Index from "./pages/Index";
+import Onboarding from "./pages/Onboarding";
+import SelectBank from "./pages/SelectBank";
+import NameAccount from "./pages/NameAccount";
+import Transactions from "./pages/Transactions";
+import NotFound from "./pages/NotFound";
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+        },
+    },
+});
+
+function AppRoutes() {
+    const { hasAccounts, isLoading } = useAccounts();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const queryClient = useQueryClient();
+    const institutionId = searchParams.get("institutionId");
+
+    useEffect(() => {
+        const sync = async () => {
+            if (institutionId) {
+                try {
+                    await api.syncInstitution(institutionId);
+                    await queryClient.invalidateQueries({ queryKey: ["accounts"] });
+                    await queryClient.invalidateQueries({ queryKey: ["balances"] });
+                    
+                    // Remove the institutionId from the URL
+                    const newParams = new URLSearchParams(searchParams);
+                    newParams.delete("institutionId");
+                    setSearchParams(newParams);
+                } catch (error) {
+                    console.error("Failed to sync institution:", error);
+                }
+            }
+        };
+        sync();
+    }, [institutionId, queryClient, searchParams, setSearchParams]);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+                Loading...
+            </div>
+        );
+    }
+
+    return (
+        <Routes>
+            <Route
+                path="/"
+                element={
+                    hasAccounts ? (
+                        <Index />
+                    ) : (
+                        <Navigate to="/onboarding" replace />
+                    )
+                }
+            />
+            <Route
+                path="/onboarding"
+                element={
+                    hasAccounts ? <Navigate to="/" replace /> : <Onboarding />
+                }
+            />
+            <Route path="/select-bank" element={<SelectBank />} />
+            <Route path="/name-account" element={<NameAccount />} />
+            <Route path="/accounts/:id/transactions" element={<Transactions />} />
+            <Route path="*" element={<NotFound />} />
+        </Routes>
+    );
 }
 
-export default App
+function App() {
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AccountProvider>
+                <BrowserRouter>
+                    <AppRoutes />
+                </BrowserRouter>
+            </AccountProvider>
+        </QueryClientProvider>
+    );
+}
+
+export default App;
