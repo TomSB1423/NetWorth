@@ -63,8 +63,6 @@ public static class DistributedApplicationTestFactory
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders();
-            logging.AddSimpleConsole();
-            logging.AddFakeLogging();
             if (testOutput is not null)
             {
                 logging.AddXUnit(testOutput);

@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

@@ -1,17 +1,12 @@
 using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Azure.Storage.Queues;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Networth.Application.Commands;
-using Networth.Application.Handlers;
 using Networth.Application.Interfaces;
-using Networth.Application.Validators;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Data.Repositories;
