@@ -6,32 +6,41 @@ using Scalar.Aspire;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
+IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("postgres-password", secret: true);
+IResourceBuilder<ParameterResource> gocardlessSecretId = builder.AddParameter("gocardless-secret-id", secret: true);
+IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("gocardless-secret-key", secret: true);
+
 IResourceBuilder<PostgresServerResource> postgres = builder
-    .AddPostgres(ResourceNames.Postgres);
-
-if (!builder.Environment.IsEnvironment("Test"))
-{
-    postgres.WithDataVolume();
-}
-
-if (builder.Environment.IsDevelopment())
-{
-    postgres.WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050))
-        .WithExplicitStart();
-}
+    .AddPostgres(ResourceNames.Postgres)
+    .WithPassword(postgresPassword)
+    .WithDataVolume();
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
     .AddDatabase(ResourceNames.NetworthDb);
 
+// Add Azure Storage for queues
+IResourceBuilder<AzureStorageResource> storage = builder
+    .AddAzureStorage(ResourceNames.Storage)
+    .RunAsEmulator();
+
+IResourceBuilder<AzureQueueStorageResource> queues = storage.AddQueues(ResourceNames.Queues);
+
 IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .AddAzureFunctionsProject<Networth_Functions>(ResourceNames.Functions)
     .WithExternalHttpEndpoints()
-    .WithReference(postgresdb);
+    .WithReference(postgresdb)
+    .WaitFor(postgresdb)
+    .WithReference(queues)
+    .WaitFor(queues)
+    .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
+    .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
+    .WithHttpHealthCheck("/api/health");
 
 builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend")
     .WithReference(functions)
     .WaitFor(functions)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
+    .WithEnvironment("REACT_APP_BACKEND_URL", functions.GetEndpoint("http"))
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
@@ -41,6 +50,9 @@ IResourceBuilder<ScalarResource> scalar = builder.AddScalarApiReference("api-ref
 {
     options
     .WithTheme(ScalarTheme.Purple)
+    .ExpandAllTags()
+    .ExpandAllResponses()
+    .HideClientButton()
     .HideDarkModeToggle()
         .AddMetadata("title", "Networth API Reference")
         .AddMetadata("description", "Unified API documentation for Networth backend services");
@@ -56,4 +68,14 @@ scalar.WithApiReference(functions, options =>
         .AddMetadata("summary", "Public endpoints exposed by the Networth Azure Functions app");
 });
 
-builder.Build().Run();
+if (builder.Environment.IsDevelopment())
+{
+    postgres.WithPgAdmin(pgAdmin =>
+    {
+        pgAdmin
+            .WithHostPort(5050)
+            .WithExplicitStart();
+    });
+}
+
+await builder.Build().RunAsync();

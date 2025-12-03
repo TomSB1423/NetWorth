@@ -9,7 +9,7 @@ namespace Networth.Functions.Tests.Integration.Infrastructure;
 /// <summary>
 ///     Factory for creating configured distributed applications for integration testing.
 /// </summary>
-internal static class DistributedApplicationTestFactory
+public static class DistributedApplicationTestFactory
 {
     /// <summary>
     /// Creates and starts a distributed application configured for integration testing with Mockoon.
@@ -47,16 +47,18 @@ internal static class DistributedApplicationTestFactory
             [],
             (appOptions, hostSettings) =>
             {
-                hostSettings.EnvironmentName = "Test";
+                hostSettings.EnvironmentName = "Development";
                 appOptions.DisableDashboard = !enableDashboard;
                 appOptions.AllowUnsecuredTransport = enableDashboard;
             });
 
+        // Provide dummy values for required parameters (will be overridden by Mockoon config)
+        builder.Configuration["Parameters:gocardless-secret-id"] = "test-secret-id";
+        builder.Configuration["Parameters:gocardless-secret-key"] = "test-secret-key";
+
         // Apply standard integration test setup
         // Random volume names ensure each test run gets fresh database state
         builder.WithRandomVolumeNames();
-        // Session lifetime keeps containers running across tests for performance
-        builder.WithContainersLifetime(ContainerLifetime.Session);
 
         builder.Services.AddLogging(logging =>
         {
@@ -90,8 +92,11 @@ internal static class DistributedApplicationTestFactory
 
         // Build and start
         DistributedApplication app = await builder.BuildAsync();
-        await app.StartAsync();
-        await app.WaitForResourcesAsync();
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(180));
+        await app.StartAsync(cts.Token);
+        await app.ResourceNotifications.WaitForResourceHealthyAsync(
+            ResourceNames.Functions,
+            cts.Token);
 
         return app;
     }

@@ -3,27 +3,28 @@ using System.Text.Json.Serialization;
 namespace Networth.Domain.Enums;
 
 /// <summary>
-///     Represents the status of an account link.
+///     Represents the status of an account link requisition.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AccountLinkStatus
 {
     /// <summary>
-    ///     The account is successfully linked.
+    ///     The requisition is pending or in progress.
     /// </summary>
-    Linked = 0,
+    Pending = 0,
 
     /// <summary>
-    ///     The linking failed.
+    ///     The account is successfully linked.
+    /// </summary>
+    Linked,
+
+    /// <summary>
+    ///     The requisition failed or was rejected.
     /// </summary>
     Failed,
 
     /// <summary>
-    ///     The linking process is pending.
-    /// </summary>
-    Pending,
-
-    /// <summary>
-    ///     The account expired.
+    ///     The requisition has expired.
     /// </summary>
     Expired,
 }

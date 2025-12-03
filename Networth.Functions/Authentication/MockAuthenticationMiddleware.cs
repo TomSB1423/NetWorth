@@ -8,6 +8,7 @@ namespace Networth.Functions.Authentication;
 /// <summary>
 ///     Middleware for mock authentication in development.
 ///     Provides a fake authenticated user for testing purposes.
+///     Creates a mock user with ID "mock-user-123" which corresponds to a user in the database.
 /// </summary>
 public class MockAuthenticationMiddleware : IFunctionsWorkerMiddleware
 {
@@ -23,7 +24,7 @@ public class MockAuthenticationMiddleware : IFunctionsWorkerMiddleware
             [
                 new Claim(ClaimTypes.NameIdentifier, "mock-user-123"),
                 new Claim(ClaimTypes.Name, "Mock Development User"),
-                new Claim("IsActive", "true")
+                new Claim("IsActive", "true"),
             ],
             "MockAuthentication");
 

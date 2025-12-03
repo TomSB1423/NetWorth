@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Networth.Domain.Entities;
+using Networth.Infrastructure.Data.Entities;
 
 namespace Networth.Infrastructure.Data.Configurations;
 
@@ -17,7 +17,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Id)
-            .HasMaxLength(100)
+            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(u => u.Name)
@@ -25,20 +25,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         // Relationships
-        builder.HasMany(u => u.Institutions)
-            .WithOne(i => i.Owner)
-            .HasForeignKey(i => i.OwnerId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasMany(u => u.Accounts)
-            .WithOne(a => a.Owner)
-            .HasForeignKey(a => a.OwnerId)
+            .WithOne()
+            .HasForeignKey("UserId")
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(u => u.Transactions)
-            .WithOne(t => t.Owner)
-            .HasForeignKey(t => t.OwnerId)
+            .WithOne()
+            .HasForeignKey("UserId")
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
-

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Networth.Domain.Entities;
+using Networth.Infrastructure.Data.Entities;
+using Account = Networth.Infrastructure.Data.Entities.Account;
+using Transaction = Networth.Infrastructure.Data.Entities.Transaction;
 
 namespace Networth.Infrastructure.Data.Context;
 
@@ -23,9 +25,22 @@ public class NetworthDbContext : DbContext
     public DbSet<User> Users { get; set; } = null!;
 
     /// <summary>
-    ///     Gets or sets the Institutions DbSet.
+    ///     Gets or sets the InstitutionMetadata DbSet.
+    ///     For caching institution information from GoCardless.
     /// </summary>
-    public DbSet<Institution> Institutions { get; set; } = null!;
+    public DbSet<InstitutionMetadata> Institutions { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the Agreements DbSet.
+    ///     For tracking user agreements with institutions.
+    /// </summary>
+    public DbSet<Agreement> Agreements { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets or sets the Requisitions DbSet.
+    ///     For tracking GoCardless requisition state.
+    /// </summary>
+    public DbSet<Requisition> Requisitions { get; set; } = null!;
 
     /// <summary>
     ///     Gets or sets the Accounts DbSet.
@@ -33,15 +48,20 @@ public class NetworthDbContext : DbContext
     public DbSet<Account> Accounts { get; set; } = null!;
 
     /// <summary>
+    ///     Gets or sets the AccountBalances DbSet.
+    /// </summary>
+    public DbSet<AccountBalance> AccountBalances { get; set; } = null!;
+
+    /// <summary>
     ///     Gets or sets the Transactions DbSet.
     /// </summary>
     public DbSet<Transaction> Transactions { get; set; } = null!;
 
     /// <summary>
-    ///     Gets or sets the Requisitions DbSet.
-    ///     For tracking GoCardless requisition state.
+    ///     Gets or sets the CacheMetadata DbSet.
+    ///     For tracking data cache freshness.
     /// </summary>
-    public DbSet<Requisition> Requisitions { get; set; } = null!;
+    public DbSet<CacheMetadata> CacheMetadata { get; set; } = null!;
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
