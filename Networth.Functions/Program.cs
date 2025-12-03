@@ -19,7 +19,11 @@ builder.ConfigureFunctionsWebApplication();
 builder.AddServiceDefaults();
 
 // Middleware
-builder.UseMiddleware<MockAuthenticationMiddleware>();
+if (builder.Environment.IsDevelopment())
+{
+    builder.UseMiddleware<MockAuthenticationMiddleware>();
+}
+
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
 // Configure additional app settings
