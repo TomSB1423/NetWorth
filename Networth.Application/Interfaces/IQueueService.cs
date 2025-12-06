@@ -19,4 +19,13 @@ public interface IQueueService
         DateTimeOffset? dateFrom = null,
         DateTimeOffset? dateTo = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Enqueues a message to trigger running balance calculation.
+    /// </summary>
+    /// <param name="accountId">The account ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task EnqueueCalculateRunningBalanceAsync(
+        string accountId,
+        CancellationToken cancellationToken = default);
 }

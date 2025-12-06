@@ -97,4 +97,22 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
 
         logger.LogInformation("Successfully upserted account {AccountId}", accountId);
     }
+
+    /// <inheritdoc />
+    public async Task UpdateAccountStatusAsync(string accountId, Domain.Enums.AccountLinkStatus status, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Updating status for account {AccountId} to {Status}", accountId, status);
+
+        var account = await context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
+        if (account != null)
+        {
+            account.Status = status;
+            await context.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Updated status for account {AccountId} to {Status}", accountId, status);
+        }
+        else
+        {
+            logger.LogWarning("Account {AccountId} not found, cannot update status", accountId);
+        }
+    }
 }

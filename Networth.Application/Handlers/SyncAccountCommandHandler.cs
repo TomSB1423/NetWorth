@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
+using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 
 namespace Networth.Application.Handlers;
@@ -24,6 +25,9 @@ public class SyncAccountCommandHandler(
             "Syncing account {AccountId} for user {UserId}",
             request.AccountId,
             request.UserId);
+
+        await accountRepository.UpdateAccountStatusAsync(request.AccountId, AccountLinkStatus.Syncing, cancellationToken);
+
         var account = await financialProvider.GetAccountAsync(request.AccountId, cancellationToken);
 
         if (account is null)
@@ -122,6 +126,8 @@ public class SyncAccountCommandHandler(
             "Synced {Count} transactions for account {AccountId}",
             transactionList.Count,
             request.AccountId);
+
+        await accountRepository.UpdateAccountStatusAsync(request.AccountId, AccountLinkStatus.Linked, cancellationToken);
 
         return new SyncAccountCommandResult
         {

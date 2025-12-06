@@ -32,4 +32,13 @@ public interface IAccountRepository
         string institutionId,
         AccountDetail accountDetails,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Updates the status of an account.
+    /// </summary>
+    /// <param name="accountId">The account ID.</param>
+    /// <param name="status">The new status.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task UpdateAccountStatusAsync(string accountId, Enums.AccountLinkStatus status, CancellationToken cancellationToken = default);
 }

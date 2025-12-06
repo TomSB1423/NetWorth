@@ -11,6 +11,7 @@ namespace Networth.Infrastructure.Services;
 public class QueueService : IQueueService
 {
     private const string AccountSyncQueueName = "account-sync";
+    private const string CalculateRunningBalanceQueueName = "calculate-running-balance";
     private readonly QueueServiceClient _queueServiceClient;
     private readonly ILogger<QueueService> _logger;
 
@@ -57,5 +58,26 @@ public class QueueService : IQueueService
         _logger.LogInformation(
             "Successfully enqueued account sync for account {AccountId}",
             accountId);
+    }
+
+    /// <inheritdoc />
+    public async Task EnqueueCalculateRunningBalanceAsync(
+        string accountId,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Enqueueing calculate running balance for account {AccountId}", accountId);
+
+        var queueClient = _queueServiceClient.GetQueueClient(CalculateRunningBalanceQueueName);
+        await queueClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+
+        var message = new { AccountId = accountId };
+        var messageJson = JsonSerializer.Serialize(message);
+
+        var messageBytes = System.Text.Encoding.UTF8.GetBytes(messageJson);
+        var base64Message = Convert.ToBase64String(messageBytes);
+
+        await queueClient.SendMessageAsync(base64Message, cancellationToken);
+
+        _logger.LogInformation("Successfully enqueued calculate running balance for account {AccountId}", accountId);
     }
 }

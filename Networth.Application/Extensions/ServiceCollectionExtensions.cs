@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>, LinkAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncInstitutionCommand, SyncInstitutionCommandResult>, SyncInstitutionCommandHandler>();
+        services.AddScoped<IRequestHandler<CalculateRunningBalanceCommand, CalculateRunningBalanceCommandResult>, CalculateRunningBalanceCommandHandler>();
 
         // Register query handlers
         services.AddScoped<IRequestHandler<GetAccountsQuery, GetAccountsQueryResult>, GetAccountsQueryHandler>();

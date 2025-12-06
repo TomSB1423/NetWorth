@@ -19,6 +19,16 @@ public enum AccountLinkStatus
     Linked,
 
     /// <summary>
+    ///     The account is currently syncing transactions.
+    /// </summary>
+    Syncing,
+
+    /// <summary>
+    ///     The account is currently calculating running balances.
+    /// </summary>
+    Calculating,
+
+    /// <summary>
     ///     The requisition failed or was rejected.
     /// </summary>
     Failed,

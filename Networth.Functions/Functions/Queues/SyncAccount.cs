@@ -14,7 +14,8 @@ namespace Networth.Functions.Functions.Queues;
 /// </summary>
 public class SyncAccount(
     ILogger<SyncAccount> logger,
-    IMediator mediator)
+    IMediator mediator,
+    IQueueService queueService)
 {
     /// <summary>
     ///     Processes account sync messages from the queue.
@@ -45,5 +46,7 @@ public class SyncAccount(
             result.AccountId,
             result.DateFrom,
             result.DateTo);
+
+        await queueService.EnqueueCalculateRunningBalanceAsync(result.AccountId, cancellationToken);
     }
 }

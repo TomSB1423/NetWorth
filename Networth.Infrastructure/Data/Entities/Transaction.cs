@@ -74,4 +74,9 @@ public class Transaction
     ///     Gets or sets when this transaction was imported.
     /// </summary>
     public DateTime ImportedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    ///     Gets or sets the running balance after this transaction.
+    /// </summary>
+    public decimal? RunningBalance { get; set; }
 }
