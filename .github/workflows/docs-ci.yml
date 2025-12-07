@@ -63,10 +63,20 @@ jobs:
           # Start func in background
           func start --port 7071 --no-build &
           PID=$!
-          # Wait for startup
-          sleep 30
+          # Wait for Functions service to be ready (up to 30s)
+          for i in {1..30}; do
+            if curl -s http://localhost:7071/api/health > /dev/null; then
+              echo "Functions service is ready"
+              break
+            fi
+            sleep 1
+          done
           # Fetch swagger
-          curl http://localhost:7071/api/swagger.json -o ../Networth.Docs/static/openapi.json
+          if ! curl -f http://localhost:7071/api/swagger.json -o ../Networth.Docs/static/openapi.json; then
+            echo "Failed to fetch OpenAPI spec"
+            kill $PID
+            exit 1
+          fi
           # Kill func
           kill $PID
         shell: bash
