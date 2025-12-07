@@ -19,7 +19,7 @@ const PERIODS = [
     { label: "All", days: null },
 ];
 
-export function NetWorthChart() {
+export function NetWorthChart({ isSyncing }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -73,10 +73,11 @@ export function NetWorthChart() {
         }).format(value);
     };
 
-    if (loading) {
+    if (loading || isSyncing) {
         return (
-            <div className="h-[300px] w-full flex items-center justify-center text-gray-500">
-                <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="h-[300px] w-full flex items-center justify-center text-gray-400">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <span className="ml-2">Loading data...</span>
             </div>
         );
     }

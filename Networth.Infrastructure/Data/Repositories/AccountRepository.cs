@@ -33,6 +33,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
                 Iban = a.Iban,
                 Currency = a.Currency,
                 Product = a.Product,
+                LastSynced = a.LastSynced,
             })
             .ToListAsync(cancellationToken);
 

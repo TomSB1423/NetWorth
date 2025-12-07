@@ -1,6 +1,16 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from "react-router-dom";
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    Navigate,
+    useSearchParams,
+} from "react-router-dom";
+import {
+    QueryClient,
+    QueryClientProvider,
+    useQueryClient,
+} from "@tanstack/react-query";
 import { AccountProvider, useAccounts } from "./contexts/AccountContext";
 import { api } from "./services/api";
 
@@ -31,22 +41,26 @@ function AppRoutes() {
             if (institutionId) {
                 try {
                     await api.syncInstitution(institutionId);
-                    await queryClient.invalidateQueries({ queryKey: ["accounts"] });
-                    await queryClient.invalidateQueries({ queryKey: ["balances"] });
-                    
+                    await queryClient.invalidateQueries({
+                        queryKey: ["accounts"],
+                    });
+                    await queryClient.invalidateQueries({
+                        queryKey: ["balances"],
+                    });
+                } catch (error) {
+                    console.error("Failed to sync institution:", error);
+                } finally {
                     // Remove the institutionId from the URL
                     const newParams = new URLSearchParams(searchParams);
                     newParams.delete("institutionId");
                     setSearchParams(newParams);
-                } catch (error) {
-                    console.error("Failed to sync institution:", error);
                 }
             }
         };
         sync();
     }, [institutionId, queryClient, searchParams, setSearchParams]);
 
-    if (isLoading) {
+    if (isLoading || institutionId) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
                 Loading...
@@ -74,7 +88,10 @@ function AppRoutes() {
             />
             <Route path="/select-bank" element={<SelectBank />} />
             <Route path="/name-account" element={<NameAccount />} />
-            <Route path="/accounts/:id/transactions" element={<Transactions />} />
+            <Route
+                path="/accounts/:id/transactions"
+                element={<Transactions />}
+            />
             <Route path="*" element={<NotFound />} />
         </Routes>
     );

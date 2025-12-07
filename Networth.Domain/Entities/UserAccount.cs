@@ -44,4 +44,9 @@ public class UserAccount
     ///     Gets the product name/type.
     /// </summary>
     public string? Product { get; init; }
+
+    /// <summary>
+    ///     Gets when this account was last synced.
+    /// </summary>
+    public DateTime? LastSynced { get; init; }
 }

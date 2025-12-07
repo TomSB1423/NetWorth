@@ -12,7 +12,11 @@ import { useAccounts } from "../contexts/AccountContext";
 
 export default function Index() {
     const navigate = useNavigate();
-    const { balances, isLoading } = useAccounts();
+    const { accounts, balances, isLoading } = useAccounts();
+
+    const isSyncing = useMemo(() => {
+        return accounts.some((a) => !a.lastSynced);
+    }, [accounts]);
 
     const metrics = useMemo(() => {
         let totalAssets = 0;
@@ -88,28 +92,40 @@ export default function Index() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <MetricCard
                         label="NET WORTH"
-                        value={formatCurrency(metrics.netWorth)}
+                        value={
+                            isSyncing
+                                ? "Loading..."
+                                : formatCurrency(metrics.netWorth)
+                        }
                         change="+$0.00 MTD"
                         changeType="neutral"
                         accentColor="blue"
                     />
                     <MetricCard
                         label="TOTAL ASSETS"
-                        value={formatCurrency(metrics.totalAssets)}
+                        value={
+                            isSyncing
+                                ? "Loading..."
+                                : formatCurrency(metrics.totalAssets)
+                        }
                         change="+0.0% QTD"
                         changeType="neutral"
                         accentColor="green"
                     />
                     <MetricCard
                         label="LIABILITIES"
-                        value={formatCurrency(metrics.totalLiabilities)}
+                        value={
+                            isSyncing
+                                ? "Loading..."
+                                : formatCurrency(metrics.totalLiabilities)
+                        }
                         change="-0.0% MTD"
                         changeType="neutral"
                         accentColor="red"
                     />
                     <MetricCard
                         label="CASH FLOW"
-                        value={formatCurrency(0)}
+                        value={isSyncing ? "Loading..." : formatCurrency(0)}
                         change="Monthly surplus"
                         changeType="neutral"
                         accentColor="orange"
@@ -129,12 +145,12 @@ export default function Index() {
                                     </h3>
                                 </div>
                             </div>
-                            <NetWorthChart />
+                            <NetWorthChart isSyncing={isSyncing} />
                         </div>
 
                         {/* Top Accounts */}
                         <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
-                            <TopAccounts />
+                            <TopAccounts isSyncing={isSyncing} />
                         </div>
 
                         {/* Performance Metrics */}
@@ -150,7 +166,7 @@ export default function Index() {
                             <h3 className="text-lg font-semibold text-white mb-6">
                                 Asset Allocation
                             </h3>
-                            <AssetAllocationChart />
+                            <AssetAllocationChart isSyncing={isSyncing} />
                         </div>
 
                         {/* Goals */}

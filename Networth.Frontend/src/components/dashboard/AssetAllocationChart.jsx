@@ -7,6 +7,7 @@ import {
     Legend,
     Tooltip,
 } from "recharts";
+import { Loader2 } from "lucide-react";
 
 const data = [
     { name: "Cash", value: 400 },
@@ -17,7 +18,16 @@ const data = [
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-export function AssetAllocationChart() {
+export function AssetAllocationChart({ isSyncing }) {
+    if (isSyncing) {
+        return (
+            <div className="h-[300px] w-full flex items-center justify-center text-gray-400">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <span className="ml-2">Loading data...</span>
+            </div>
+        );
+    }
+
     return (
         <div className="h-[300px] w-full relative">
             <ResponsiveContainer width="100%" height="100%">
