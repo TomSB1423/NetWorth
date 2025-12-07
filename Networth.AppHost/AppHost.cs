@@ -52,6 +52,8 @@ var docs = builder.AddNpmApp(ResourceNames.Docs, "../Networth.Docs")
     .WithExternalHttpEndpoints()
     .WithEnvironment("BROWSER", "none")
     .WithEnvironment("API_SPEC_URL", ReferenceExpression.Create($"{functions.GetEndpoint("http")}/api/swagger.json"))
+    .WithReference(functions)
+    .WaitFor(functions)
     .WithExplicitStart();
 
 // Add Scalar API Reference
