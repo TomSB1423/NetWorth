@@ -7,7 +7,7 @@ tags: [finance, maths, flowchart, fire]
 
 I remember my first paycheck, free money I thought! Then the bills arrived, and suddenly that freedom felt a lot more constrained. I graduated university with £50k in student loans, and almost little to no savings. This project was created from my journey from financial chaos to clarity.
 
-I stumbled upon the [r/UKPersonalFinance](https://www.reddit.com/r/UKPersonalFinance/) reddit community, a treasure trove of practical advice on managing money in the UK. They advocate a structured approach to personal finance, breaking it down into clear, actionable steps. Some of the resources I found particuarly useful were:
+I stumbled upon the [r/UKPersonalFinance](https://www.reddit.com/r/UKPersonalFinance/) reddit community, a treasure trove of practical advice on managing money in the UK. They advocate a structured approach to personal finance, breaking it down into clear, actionable steps. Some of the resources I found particularly useful were:
     - [UK Personal Finance (UKPF) flowchart](https://ukpersonal.finance/flowchart/)
     - [Compiled Sanity Spreadsheet](https://cspersonalfinance.io/)
 
