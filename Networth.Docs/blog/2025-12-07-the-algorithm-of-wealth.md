@@ -18,7 +18,7 @@ The following are the the principles I have used over the years to build a solid
 <!--truncate-->
 
 :::info Disclaimer
-I am not a financial advisor. This is not financial advice. This is simply the strategy that has worked (do far) for me personally. Please do your own research and consult a professional before making any financial decisions.
+I am not a financial advisor. This is not financial advice. This is simply the strategy that has worked (so far) for me personally. Please do your own research and consult a professional before making any financial decisions.
 :::
 
 ## Pay Yourself Last
