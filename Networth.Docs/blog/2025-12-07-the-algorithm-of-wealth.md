@@ -79,7 +79,7 @@ Think of it this way: The stock market *might* give you 7% this year. But your c
 * **Credit Card Debt:** 20% (Guaranteed Loss).
 :::
 
-Paying off a £1,000 debt at 20% is exactly the same as finding an investment that pays you a guaranteed, tax-free 20% return. Lets eliminate garenteed losses before chasing uncertain gains.
+Paying off a £1,000 debt at 20% is exactly the same as finding an investment that pays you a guaranteed, tax-free 20% return. Lets eliminate guaranteed losses before chasing uncertain gains.
 
 ## Bulletproofing (Full Emergency Fund)
 
