@@ -13,7 +13,8 @@ IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("
 IResourceBuilder<PostgresServerResource> postgres = builder
     .AddPostgres(ResourceNames.Postgres)
     .WithPassword(postgresPassword)
-    .WithDataVolume();
+    .WithDataVolume()
+    .WithLifetime(ContainerLifetime.Persistent);
 
 IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
     .AddDatabase(ResourceNames.NetworthDb);
