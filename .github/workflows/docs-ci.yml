@@ -39,6 +39,38 @@ jobs:
           cache: "npm"
           cache-dependency-path: Networth.Docs/package-lock.json
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Install Tools
+        run: |
+          npm install -g azure-functions-core-tools@4
+          npm install -g azurite
+
+      - name: Start Azurite
+        run: azurite --silent --location . &
+
+      - name: Build Functions
+        run: dotnet build ../Networth.Functions/Networth.Functions.csproj --configuration Release
+
+      - name: Generate Swagger
+        run: |
+          cd ../Networth.Functions
+          # Create dummy settings
+          echo '{ "IsEncrypted": false, "Values": { "AzureWebJobsStorage": "UseDevelopmentStorage=true", "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated" } }' > local.settings.json
+          # Start func in background
+          func start --port 7071 --no-build &
+          PID=$!
+          # Wait for startup
+          sleep 30
+          # Fetch swagger
+          curl http://localhost:7071/api/swagger.json -o ../Networth.Docs/static/openapi.json
+          # Kill func
+          kill $PID
+        shell: bash
+
       - name: Install dependencies
         run: npm ci
 
@@ -47,6 +79,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          API_SPEC_URL: "openapi.json"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
