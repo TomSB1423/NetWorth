@@ -32,22 +32,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.x"
-          cache: "npm"
-          cache-dependency-path: Networth.Docs/package-lock.json
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "9.0.x"
-
-      - name: Install Tools
-        run: |
-          npm install -g azure-functions-core-tools@4
-          npm install -g azurite
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build-env
 
       - name: Start Azurite
         run: azurite --silent --location . &
@@ -61,6 +47,10 @@ jobs:
           # Create dummy settings
           echo '{ "IsEncrypted": false, "Values": { "AzureWebJobsStorage": "UseDevelopmentStorage=true", "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated" } }' > local.settings.json
           # Start func in background
+          export ConnectionStrings__networth-db="Host=localhost;Database=networth;Username=postgres;Password=password"
+          export ConnectionStrings__queues="UseDevelopmentStorage=true"
+          export Gocardless__SecretId="dummy"
+          export Gocardless__SecretKey="dummy"
           func start --port 7071 --no-build &
           PID=$!
           # Wait for Functions service to be ready (up to 30s)
