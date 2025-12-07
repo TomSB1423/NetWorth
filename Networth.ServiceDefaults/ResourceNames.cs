@@ -36,6 +36,11 @@ public static class ResourceNames
     public const string Queues = "queues";
 
     /// <summary>
+    ///     Gets the resource name for the Docusaurus documentation site.
+    /// </summary>
+    public const string Docs = "docs";
+
+    /// <summary>
     ///     Gets the queue name for account sync operations.
     /// </summary>
     public const string AccountSyncQueue = "account-sync";

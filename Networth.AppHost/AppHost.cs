@@ -46,6 +46,13 @@ var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "d
 
 functions.WithEnvironment("Frontend__Url", frontend.GetEndpoint("http"));
 
+// Add Docusaurus documentation site
+var docs = builder.AddNpmApp(ResourceNames.Docs, "../Networth.Docs", "start")
+    .WithHttpEndpoint(env: "PORT", port: 3001)
+    .WithExternalHttpEndpoints()
+    .WithEnvironment("BROWSER", "none")
+    .WithEnvironment("API_SPEC_URL", functions.GetEndpoint("http").Property(e => $"{e}/api/swagger.json"));
+
 // Add Scalar API Reference
 IResourceBuilder<ScalarResource> scalar = builder.AddScalarApiReference("api-reference", options =>
 {
