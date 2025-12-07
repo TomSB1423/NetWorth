@@ -1,4 +1,4 @@
-import React from "react";
+
 import {
     PieChart,
     Pie,
@@ -18,7 +18,11 @@ const data = [
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-export function AssetAllocationChart({ isSyncing }) {
+interface AssetAllocationChartProps {
+    isSyncing: boolean;
+}
+
+export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
     if (isSyncing) {
         return (
             <div className="h-[300px] w-full flex items-center justify-center text-gray-400">
@@ -42,12 +46,13 @@ export function AssetAllocationChart({ isSyncing }) {
                         paddingAngle={5}
                         dataKey="value"
                     >
-                        {data.map((entry, index) => (
+                        {data.map((_, index) => (
                             <Cell
                                 key={`cell-${index}`}
                                 fill={COLORS[index % COLORS.length]}
                             />
                         ))}
+
                     </Pie>
                     <Tooltip
                         contentStyle={{

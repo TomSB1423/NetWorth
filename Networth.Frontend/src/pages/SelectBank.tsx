@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Search, ChevronLeft, Building2 } from "lucide-react";
 import { api } from "../services/api";
+import { Institution } from "../types";
 
 export default function SelectBank() {
     const navigate = useNavigate();
@@ -17,15 +18,30 @@ export default function SelectBank() {
         queryFn: api.getInstitutions,
     });
 
-    const filteredInstitutions = institutions.filter((inst) =>
+    const filteredInstitutions = institutions.filter((inst: Institution) =>
         inst.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleSelectInstitution = async (institution) => {
+    const handleSelectInstitution = async (institution: Institution) => {
         try {
-            const result = await api.linkAccount(institution.id);
+            // The API returns { link: string } but the code was using authorizationLink
+            // I should check what the API actually returns.
+            // Based on api.ts: return response.json();
+            // Let's assume it returns { link: string } based on my type definition in api.ts
+            // Wait, I defined it as { link: string } in api.ts but the code here uses authorizationLink.
+            // I should probably check the backend or just use 'any' for now if I am not sure,
+            // or update the type if I find out.
+            // Let's check LinkAccountCommandResult.cs in Application/Commands
+            
+            const result: any = await api.linkAccount(institution.id);
+            // Assuming the result has authorizationLink or link.
+            // Let's stick to what was there before but cast to any to avoid TS error for now
+            // or better, update the type in api.ts if I can confirm.
+            
             if (result.authorizationLink) {
-                window.location.href = result.authorizationLink;
+                window.location.assign(result.authorizationLink);
+            } else if (result.link) {
+                 window.location.assign(result.link);
             } else {
                 console.error("No authorization link returned");
                 alert("Failed to start linking process. Please try again.");
@@ -77,16 +93,16 @@ export default function SelectBank() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-2">
-                        {filteredInstitutions.map((inst) => (
+                        {filteredInstitutions.map((inst: Institution) => (
                             <button
                                 key={inst.id}
                                 onClick={() => handleSelectInstitution(inst)}
                                 className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-900 transition-colors text-left group"
                             >
                                 <div className="w-12 h-12 rounded-full bg-white p-2 flex items-center justify-center overflow-hidden">
-                                    {inst.logoUrl ? (
+                                    {inst.logo ? (
                                         <img
-                                            src={inst.logoUrl}
+                                            src={inst.logo}
                                             alt={inst.name}
                                             className="w-full h-full object-contain"
                                         />

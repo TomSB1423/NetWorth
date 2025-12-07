@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
     AreaChart,
     Area,
@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { api } from "../../services/api";
 import { Loader2 } from "lucide-react";
+import { NetWorthDataPoint } from "../../types";
 
 const PERIODS = [
     { label: "1M", days: 30 },
@@ -19,10 +20,14 @@ const PERIODS = [
     { label: "All", days: null },
 ];
 
-export function NetWorthChart({ isSyncing }) {
-    const [data, setData] = useState([]);
+interface NetWorthChartProps {
+    isSyncing: boolean;
+}
+
+export function NetWorthChart({ isSyncing }: NetWorthChartProps) {
+    const [data, setData] = useState<NetWorthDataPoint[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [selectedPeriod, setSelectedPeriod] = useState("1Y");
 
     useEffect(() => {
@@ -31,7 +36,7 @@ export function NetWorthChart({ isSyncing }) {
                 const history = await api.getNetWorthHistory();
                 // Ensure data is sorted by date
                 const sorted = history.sort(
-                    (a, b) => new Date(a.date) - new Date(b.date)
+                    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
                 );
                 setData(sorted);
             } catch (err) {
@@ -57,15 +62,15 @@ export function NetWorthChart({ isSyncing }) {
         return data.filter((d) => new Date(d.date) >= cutoffDate);
     }, [data, selectedPeriod]);
 
-    const formatXAxis = (tickItem) => {
+    const formatXAxis = (tickItem: string) => {
         const date = new Date(tickItem);
-        return date.toLocaleDateString(undefined, {
+        return date.toLocaleDateString("en-GB", {
             month: "short",
             day: "numeric",
         });
     };
 
-    const formatCurrency = (value) => {
+    const formatCurrency = (value: number) => {
         return new Intl.NumberFormat("en-GB", {
             style: "currency",
             currency: "GBP",
@@ -98,6 +103,7 @@ export function NetWorthChart({ isSyncing }) {
                         key={period.label}
                         onClick={() => setSelectedPeriod(period.label)}
                         className={`px-3 py-1 text-sm rounded-md transition-colors ${
+
                             selectedPeriod === period.label
                                 ? "bg-blue-600 text-white"
                                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -162,11 +168,11 @@ export function NetWorthChart({ isSyncing }) {
                             }}
                             itemStyle={{ color: "#F3F4F6" }}
                             labelFormatter={(label) =>
-                                new Date(label).toLocaleDateString(undefined, {
+                                new Date(label).toLocaleDateString("en-GB", {
                                     dateStyle: "medium",
                                 })
                             }
-                            formatter={(value) => [
+                            formatter={(value: number) => [
                                 new Intl.NumberFormat("en-GB", {
                                     style: "currency",
                                     currency: "GBP",

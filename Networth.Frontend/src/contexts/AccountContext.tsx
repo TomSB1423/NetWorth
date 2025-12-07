@@ -1,10 +1,19 @@
-import React, { createContext, useContext } from "react";
+import { createContext, useContext, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
+import { Account, AccountBalances } from "../types";
 
-const AccountContext = createContext();
+interface AccountContextType {
+    accounts: Account[];
+    balances: AccountBalances[];
+    isLoading: boolean;
+    hasAccounts: boolean;
+    error: Error | null;
+}
 
-export function AccountProvider({ children }) {
+const AccountContext = createContext<AccountContextType | null>(null);
+
+export function AccountProvider({ children }: { children: ReactNode }) {
     const {
         data: accounts = [],
         isLoading: isLoadingAccounts,
@@ -36,7 +45,7 @@ export function AccountProvider({ children }) {
         balances,
         isLoading: isLoadingAccounts || isLoadingBalances,
         hasAccounts: accounts.length > 0,
-        error: accountsError,
+        error: accountsError as Error | null,
     };
 
     return (
@@ -46,10 +55,12 @@ export function AccountProvider({ children }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAccounts() {
     const context = useContext(AccountContext);
-    if (context === undefined) {
+    if (context === null) {
         throw new Error("useAccounts must be used within an AccountProvider");
     }
     return context;
 }
+

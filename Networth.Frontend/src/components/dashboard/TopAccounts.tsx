@@ -1,9 +1,14 @@
-import React from "react";
+
 import { useNavigate } from "react-router-dom";
 import { useAccounts } from "../../contexts/AccountContext";
-import { ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Balance } from "../../types";
 
-export function TopAccounts({ isSyncing }) {
+interface TopAccountsProps {
+    isSyncing: boolean;
+}
+
+export function TopAccounts({ isSyncing }: TopAccountsProps) {
     const { accounts, balances } = useAccounts();
     const navigate = useNavigate();
 
@@ -17,14 +22,14 @@ export function TopAccounts({ isSyncing }) {
     }
 
     // Helper to get balance for an account
-    const getAccountBalance = (accountId) => {
+    const getAccountBalance = (accountId: string): Balance | null => {
         const accountBalances =
             balances.find((b) => b.accountId === accountId)?.balances || [];
         // Prefer 'interimAvailable' or first available
         const balance =
             accountBalances.find((b) => b.balanceType === "interimAvailable") ||
             accountBalances[0];
-        return balance;
+        return balance || null;
     };
 
     return (
@@ -42,10 +47,6 @@ export function TopAccounts({ isSyncing }) {
                     const balance = getAccountBalance(account.id);
                     const amount = balance ? parseFloat(balance.amount) : 0;
                     const currency = balance ? balance.currency : "GBP";
-
-                    // Dummy change data for now
-                    const isPositive = Math.random() > 0.5;
-                    const change = (Math.random() * 5).toFixed(1);
 
                     return (
                         <div
@@ -77,19 +78,8 @@ export function TopAccounts({ isSyncing }) {
                                         currency: currency,
                                     }).format(amount)}
                                 </div>
-                                <div
-                                    className={`text-xs flex items-center justify-end gap-1 ${
-                                        isPositive
-                                            ? "text-green-400"
-                                            : "text-red-400"
-                                    }`}
-                                >
-                                    {isPositive ? (
-                                        <ArrowUpRight size={12} />
-                                    ) : (
-                                        <ArrowDownRight size={12} />
-                                    )}
-                                    {change}%
+                                <div className="text-xs text-slate-500 mt-1">
+                                    Coming soon
                                 </div>
                             </div>
                         </div>
@@ -104,3 +94,4 @@ export function TopAccounts({ isSyncing }) {
         </div>
     );
 }
+

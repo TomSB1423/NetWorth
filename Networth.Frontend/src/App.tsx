@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
     BrowserRouter,
     Routes,
@@ -48,6 +48,7 @@ function AppRoutes() {
                         queryKey: ["balances"],
                     });
                 } catch (error) {
+
                     console.error("Failed to sync institution:", error);
                 } finally {
                     // Remove the institutionId from the URL

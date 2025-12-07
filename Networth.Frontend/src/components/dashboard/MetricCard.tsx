@@ -1,5 +1,14 @@
-import React from "react";
+import { ReactNode } from "react";
 import { cn } from "../../lib/utils";
+
+interface MetricCardProps {
+    label: string;
+    value: string;
+    change: string;
+    changeType: "positive" | "negative" | "neutral";
+    icon?: ReactNode;
+    accentColor?: "blue" | "green" | "red" | "orange";
+}
 
 export function MetricCard({
     label,
@@ -8,7 +17,7 @@ export function MetricCard({
     changeType,
     icon,
     accentColor = "blue",
-}) {
+}: MetricCardProps) {
     const colorClasses = {
         blue: "border-blue-500 bg-gradient-to-br from-blue-950/20 to-blue-900/10",
         green: "border-green-500 bg-gradient-to-br from-green-950/20 to-green-900/10",
@@ -42,3 +51,4 @@ export function MetricCard({
         </div>
     );
 }
+

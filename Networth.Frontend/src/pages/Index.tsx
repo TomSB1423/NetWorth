@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { MetricCard } from "../components/dashboard/MetricCard";
@@ -9,25 +9,27 @@ import { GoalsSection } from "../components/dashboard/GoalsSection";
 import { FinancialHealthMetrics } from "../components/dashboard/FinancialHealthMetrics";
 import { PerformanceMetrics } from "../components/dashboard/PerformanceMetrics";
 import { useAccounts } from "../contexts/AccountContext";
+import { Account, AccountBalances, Balance } from "../types";
 
 export default function Index() {
     const navigate = useNavigate();
     const { accounts, balances, isLoading } = useAccounts();
 
     const isSyncing = useMemo(() => {
-        return accounts.some((a) => !a.lastSynced);
+        return accounts.some((a: Account) => !a.lastSynced);
     }, [accounts]);
 
     const metrics = useMemo(() => {
         let totalAssets = 0;
         let totalLiabilities = 0;
 
-        balances.forEach((accountBalance) => {
+        balances.forEach((accountBalance: AccountBalances) => {
             const balanceList = accountBalance.balances || [];
             // Prefer 'interimAvailable' or first available
             const balanceObj =
-                balanceList.find((b) => b.balanceType === "interimAvailable") ||
-                balanceList[0];
+                balanceList.find((b: Balance) => b.balanceType === "interimAvailable") ??
+                balanceList[0] ??
+                null;
 
             if (balanceObj) {
                 const amount = parseFloat(balanceObj.amount);
@@ -48,7 +50,7 @@ export default function Index() {
         };
     }, [balances]);
 
-    const formatCurrency = (value) => {
+    const formatCurrency = (value: number) => {
         return new Intl.NumberFormat("en-GB", {
             style: "currency",
             currency: "GBP",
@@ -130,6 +132,7 @@ export default function Index() {
                         changeType="neutral"
                         accentColor="orange"
                     />
+
                 </div>
 
                 {/* Main Grid */}

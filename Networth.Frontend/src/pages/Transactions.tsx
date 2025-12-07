@@ -3,28 +3,36 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { api } from "../services/api";
+import { Transaction } from "../types";
 
 export default function Transactions() {
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
     // Default to last 90 days
-    const dateTo = new Date().toISOString().split('T')[0];
-    const dateFrom = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    const { data: transactions = [], isLoading, error } = useQuery({
-        queryKey: ["transactions", id, dateFrom, dateTo],
-        queryFn: () => api.getTransactions(id, dateFrom, dateTo),
+    const [dateRange] = React.useState(() => {
+        const to = new Date().toISOString().split('T')[0];
+        const from = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        return { from, to };
     });
 
-    const formatCurrency = (amount, currency) => {
+    const { data: transactions = [], isLoading, error } = useQuery({
+        queryKey: ["transactions", id, dateRange.from, dateRange.to],
+        queryFn: () => {
+            if (!id) return Promise.resolve([]);
+            return api.getTransactions(id, dateRange.from, dateRange.to);
+        },
+        enabled: !!id,
+    });
+
+    const formatCurrency = (amount: string, currency: string) => {
         return new Intl.NumberFormat("en-GB", {
             style: "currency",
             currency: currency,
-        }).format(amount);
+        }).format(parseFloat(amount));
     };
 
-    const formatDate = (dateString) => {
+    const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("en-GB", {
             day: "numeric",
             month: "short",
@@ -32,11 +40,9 @@ export default function Transactions() {
         });
     };
 
-    const getTransactionDescription = (tx) => {
+    const getTransactionDescription = (tx: Transaction) => {
         return tx.remittanceInformationUnstructured || 
-               tx.creditorName || 
-               tx.debtorName || 
-               tx.proprietaryBankTransactionCode || 
+               tx.description || 
                "Transaction";
     };
 
@@ -70,25 +76,25 @@ export default function Transactions() {
                                 No transactions found for the last 90 days.
                             </div>
                         ) : (
-                            transactions.map((tx) => (
+                            transactions.map((tx: Transaction) => (
                                 <div
-                                    key={tx.id}
+                                    key={tx.transactionId}
                                     className="bg-slate-900/50 rounded-xl p-4 flex items-center justify-between hover:bg-slate-900 transition-colors"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className={`p-2 rounded-full ${tx.amount > 0 ? 'bg-green-500/10 text-green-500' : 'bg-white/5 text-white'}`}>
-                                            {tx.amount > 0 ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                                        <div className={`p-2 rounded-full ${parseFloat(tx.amount) > 0 ? 'bg-green-500/10 text-green-500' : 'bg-white/5 text-white'}`}>
+                                            {parseFloat(tx.amount) > 0 ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
                                         </div>
                                         <div>
                                             <div className="font-medium text-white">
                                                 {getTransactionDescription(tx)}
                                             </div>
                                             <div className="text-sm text-gray-400">
-                                                {formatDate(tx.bookingDate || tx.valueDate)}
+                                                {formatDate(tx.bookingDate)}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className={`font-semibold ${tx.amount > 0 ? 'text-green-400' : 'text-white'}`}>
+                                    <div className={`font-semibold ${parseFloat(tx.amount) > 0 ? 'text-green-400' : 'text-white'}`}>
                                         {formatCurrency(tx.amount, tx.currency)}
                                     </div>
                                 </div>

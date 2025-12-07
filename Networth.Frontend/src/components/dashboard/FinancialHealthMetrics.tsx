@@ -1,16 +1,16 @@
-import React from "react";
 
-export function PerformanceMetrics() {
+export function FinancialHealthMetrics() {
     return (
         <div className="relative min-h-[200px] flex items-center justify-center border border-dashed border-slate-700 rounded-lg p-6">
             <div className="text-center space-y-4 opacity-50">
                 <h3 className="text-lg font-semibold text-white">
-                    Performance Metrics
+                    Financial Health
                 </h3>
-                <div className="space-y-2">
-                    <div className="h-4 bg-slate-700 rounded w-full"></div>
-                    <div className="h-4 bg-slate-700 rounded w-full"></div>
-                    <div className="h-4 bg-slate-700 rounded w-full"></div>
+                <div className="grid grid-cols-2 gap-4">
+
+
+                    <div className="h-20 bg-slate-700 rounded"></div>
+                    <div className="h-20 bg-slate-700 rounded"></div>
                 </div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[1px] rounded-lg">
