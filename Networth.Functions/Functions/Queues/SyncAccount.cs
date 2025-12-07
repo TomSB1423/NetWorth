@@ -24,7 +24,7 @@ public class SyncAccount(
     /// <param name="cancellationToken">Cancellation token.</param>
     [Function("SyncAccount")]
     public async Task RunAsync(
-        [QueueTrigger("account-sync", Connection = ResourceNames.Queues)]
+        [QueueTrigger(ResourceNames.AccountSyncQueue, Connection = ResourceNames.Queues)]
         string message,
         CancellationToken cancellationToken)
     {

@@ -62,6 +62,7 @@ IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment
 if (environment.IsDevelopment())
 {
     await host.Services.EnsureDatabaseSetupAsync();
+    await host.Services.EnsureQueuesCreatedAsync();
 }
 
 await host.RunAsync();

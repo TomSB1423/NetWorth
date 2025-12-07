@@ -22,7 +22,7 @@ public class CalculateRunningBalance(
     /// <param name="cancellationToken">Cancellation token.</param>
     [Function("CalculateRunningBalance")]
     public async Task RunAsync(
-        [QueueTrigger("calculate-running-balance", Connection = ResourceNames.Queues)]
+        [QueueTrigger(ResourceNames.CalculateRunningBalanceQueue, Connection = ResourceNames.Queues)]
         string message,
         CancellationToken cancellationToken)
     {
