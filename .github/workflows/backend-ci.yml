@@ -1,19 +1,14 @@
-name: CI
+name: Backend CI
 
 on:
   push:
     branches: [main]
     paths-ignore:
-      - "**/*.md"
-      - "**/*.gitignore"
-      - "**/*.gitattributes"
       - "Networth.Frontend/**"
 
   pull_request:
     paths-ignore:
-      - "**/*.md"
-      - "**/*.gitignore"
-      - "**/*.gitattributes"
+      - "Networth.Frontend/**"
 
   workflow_dispatch:
 
