@@ -29,6 +29,7 @@
   <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
     <ItemGroup>
       <PackageJsons Include="..\Networth.Frontend\package.json" />
+      <PackageJsons Include="..\Networth.Docs\package.json" />
     </ItemGroup>
 
     <!-- Install npm packages if node_modules is missing -->
