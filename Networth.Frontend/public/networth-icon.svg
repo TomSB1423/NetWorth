@@ -10,20 +10,20 @@
     </defs>
   <circle cx="100" cy="100" r="90" fill="url(#grad1)" />
   <g clip-path="url(#circleClip)">
-    
+
     <!-- Background Range (Left) -->
     <path d="M20 140 L60 85 L100 140 Z" fill="#ffffff" opacity="0.4" />
     <!-- Background Range (Right) -->
     <path d="M100 140 L140 85 L180 140 Z" fill="#ffffff" opacity="0.4" />
-    
-    
+
+
     <!-- Main Peak Body -->
     <path d="M50 140 L100 40 L150 140 Z" fill="#ffffff" opacity="0.95" />
-    
+
     <path d="M100 40 L100 140 L150 140 Z" fill="#4a148c" opacity="0.25" />
-    
+
     <!-- Snow Cap -->
     <path d="M100 40 L118 70 L108 65 L100 77 L92 65 L82 70 Z" fill="#ffffff" />
-    
+
   </g>
 </svg>

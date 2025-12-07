@@ -1,13 +1,9 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAccounts } from "../../contexts/AccountContext";
 import { Loader2 } from "lucide-react";
-import { Balance } from "../../types";
 
-interface TopAccountsProps {
-    isSyncing: boolean;
-}
-
-export function TopAccounts({ isSyncing }: TopAccountsProps) {
+export function TopAccounts({ isSyncing }) {
     const { accounts, balances } = useAccounts();
     const navigate = useNavigate();
 
@@ -21,14 +17,14 @@ export function TopAccounts({ isSyncing }: TopAccountsProps) {
     }
 
     // Helper to get balance for an account
-    const getAccountBalance = (accountId: string): Balance | null => {
+    const getAccountBalance = (accountId) => {
         const accountBalances =
             balances.find((b) => b.accountId === accountId)?.balances || [];
         // Prefer 'interimAvailable' or first available
         const balance =
             accountBalances.find((b) => b.balanceType === "interimAvailable") ||
             accountBalances[0];
-        return balance || null;
+        return balance;
     };
 
     return (

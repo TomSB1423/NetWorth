@@ -16,18 +16,26 @@ export default function Index() {
     const { accounts, balances, isLoading } = useAccounts();
 
     const isSyncing = useMemo(() => {
-        return accounts.some((a: Account) => !a.lastSynced);
-    }, [accounts]);
+        const hasAnyBalance = balances.some((b) => b.balances.length > 0);
+        if (hasAnyBalance) return false;
+
+        return (
+            accounts.length > 0 && accounts.every((a: Account) => !a.lastSynced)
+        );
+    }, [accounts, balances]);
 
     const metrics = useMemo(() => {
         let totalAssets = 0;
         let totalLiabilities = 0;
+        let currency = "GBP";
 
         balances.forEach((accountBalance: AccountBalances) => {
             const balanceList = accountBalance.balances || [];
             // Prefer 'interimAvailable' or first available
             const balanceObj =
-                balanceList.find((b: Balance) => b.balanceType === "interimAvailable") ??
+                balanceList.find(
+                    (b: Balance) => b.balanceType === "interimAvailable"
+                ) ??
                 balanceList[0] ??
                 null;
 
@@ -38,6 +46,9 @@ export default function Index() {
                 } else {
                     totalLiabilities += amount;
                 }
+                if (balanceObj.currency) {
+                    currency = balanceObj.currency;
+                }
             }
         });
 
@@ -47,13 +58,14 @@ export default function Index() {
             netWorth,
             totalAssets,
             totalLiabilities,
+            currency,
         };
     }, [balances]);
 
-    const formatCurrency = (value: number) => {
+    const formatCurrency = (value: number, currency: string) => {
         return new Intl.NumberFormat("en-GB", {
             style: "currency",
-            currency: "GBP",
+            currency: currency,
         }).format(value);
     };
 
@@ -97,7 +109,10 @@ export default function Index() {
                         value={
                             isSyncing
                                 ? "Loading..."
-                                : formatCurrency(metrics.netWorth)
+                                : formatCurrency(
+                                      metrics.netWorth,
+                                      metrics.currency
+                                  )
                         }
                         change="+$0.00 MTD"
                         changeType="neutral"
@@ -108,7 +123,10 @@ export default function Index() {
                         value={
                             isSyncing
                                 ? "Loading..."
-                                : formatCurrency(metrics.totalAssets)
+                                : formatCurrency(
+                                      metrics.totalAssets,
+                                      metrics.currency
+                                  )
                         }
                         change="+0.0% QTD"
                         changeType="neutral"
@@ -119,7 +137,10 @@ export default function Index() {
                         value={
                             isSyncing
                                 ? "Loading..."
-                                : formatCurrency(metrics.totalLiabilities)
+                                : formatCurrency(
+                                      metrics.totalLiabilities,
+                                      metrics.currency
+                                  )
                         }
                         change="-0.0% MTD"
                         changeType="neutral"
@@ -127,12 +148,15 @@ export default function Index() {
                     />
                     <MetricCard
                         label="CASH FLOW"
-                        value={isSyncing ? "Loading..." : formatCurrency(0)}
+                        value={
+                            isSyncing
+                                ? "Loading..."
+                                : formatCurrency(0, metrics.currency)
+                        }
                         change="Monthly surplus"
                         changeType="neutral"
                         accentColor="orange"
                     />
-
                 </div>
 
                 {/* Main Grid */}
@@ -148,7 +172,10 @@ export default function Index() {
                                     </h3>
                                 </div>
                             </div>
-                            <NetWorthChart isSyncing={isSyncing} />
+                            <NetWorthChart
+                                isSyncing={isSyncing}
+                                currency={metrics.currency}
+                            />
                         </div>
 
                         {/* Top Accounts */}

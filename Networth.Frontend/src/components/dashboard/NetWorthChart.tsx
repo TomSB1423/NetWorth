@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
     AreaChart,
     Area,
@@ -22,33 +23,29 @@ const PERIODS = [
 
 interface NetWorthChartProps {
     isSyncing: boolean;
+    currency?: string;
 }
 
-export function NetWorthChart({ isSyncing }: NetWorthChartProps) {
-    const [data, setData] = useState<NetWorthDataPoint[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export function NetWorthChart({
+    isSyncing,
+    currency = "GBP",
+}: NetWorthChartProps) {
     const [selectedPeriod, setSelectedPeriod] = useState("1Y");
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const history = await api.getNetWorthHistory();
-                // Ensure data is sorted by date
-                const sorted = history.sort(
-                    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-                );
-                setData(sorted);
-            } catch (err) {
-                console.error("Failed to fetch net worth history:", err);
-                setError("Failed to load data");
-            } finally {
-                setLoading(false);
-            }
-        };
+    const {
+        data: history = [],
+        isLoading,
+        error,
+    } = useQuery<NetWorthDataPoint[]>({
+        queryKey: ["netWorthHistory"],
+        queryFn: api.getNetWorthHistory,
+    });
 
-        fetchData();
-    }, []);
+    const data = useMemo(() => {
+        return [...history].sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+    }, [history]);
 
     const filteredData = useMemo(() => {
         if (selectedPeriod === "All") return data;
@@ -73,12 +70,12 @@ export function NetWorthChart({ isSyncing }: NetWorthChartProps) {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat("en-GB", {
             style: "currency",
-            currency: "GBP",
+            currency: currency,
             notation: "compact",
         }).format(value);
     };
 
-    if (loading || isSyncing) {
+    if (isLoading || isSyncing) {
         return (
             <div className="h-[300px] w-full flex items-center justify-center text-gray-400">
                 <Loader2 className="w-8 h-8 animate-spin" />
@@ -90,7 +87,7 @@ export function NetWorthChart({ isSyncing }: NetWorthChartProps) {
     if (error) {
         return (
             <div className="h-[300px] w-full flex items-center justify-center text-red-500">
-                {error}
+                {(error as Error).message || "Failed to load data"}
             </div>
         );
     }
@@ -103,7 +100,6 @@ export function NetWorthChart({ isSyncing }: NetWorthChartProps) {
                         key={period.label}
                         onClick={() => setSelectedPeriod(period.label)}
                         className={`px-3 py-1 text-sm rounded-md transition-colors ${
-
                             selectedPeriod === period.label
                                 ? "bg-blue-600 text-white"
                                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -175,7 +171,7 @@ export function NetWorthChart({ isSyncing }: NetWorthChartProps) {
                             formatter={(value: number) => [
                                 new Intl.NumberFormat("en-GB", {
                                     style: "currency",
-                                    currency: "GBP",
+                                    currency: currency,
                                 }).format(value),
                                 "Net Worth",
                             ]}

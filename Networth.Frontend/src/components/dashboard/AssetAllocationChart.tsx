@@ -1,4 +1,3 @@
-
 import {
     PieChart,
     Pie,
@@ -52,7 +51,6 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
                                 fill={COLORS[index % COLORS.length]}
                             />
                         ))}
-
                     </Pie>
                     <Tooltip
                         contentStyle={{

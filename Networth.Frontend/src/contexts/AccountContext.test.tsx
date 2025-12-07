@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { AccountProvider, useAccounts } from './AccountContext';
-import { api } from '../services/api';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { AccountProvider, useAccounts } from "./AccountContext";
+import { api } from "../services/api";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Mock API
-vi.mock('../services/api', () => ({
+vi.mock("../services/api", () => ({
     api: {
         getAccounts: vi.fn(),
         getAccountBalances: vi.fn(),
@@ -39,42 +39,42 @@ const createWrapper = () => {
     );
 };
 
-describe('AccountContext', () => {
+describe("AccountContext", () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    it('provides initial state', async () => {
+    it("provides initial state", async () => {
         (api.getAccounts as Mock).mockResolvedValue([]);
         (api.getAccountBalances as Mock).mockResolvedValue([]);
 
         render(<TestComponent />, { wrapper: createWrapper() });
 
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
-        
+        expect(screen.getByText("Loading...")).toBeInTheDocument();
+
         await waitFor(() => {
-            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+            expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
         });
 
-        expect(screen.getByTestId('has-accounts')).toHaveTextContent('false');
-        expect(screen.getByTestId('accounts-count')).toHaveTextContent('0');
+        expect(screen.getByTestId("has-accounts")).toHaveTextContent("false");
+        expect(screen.getByTestId("accounts-count")).toHaveTextContent("0");
     });
 
-    it('fetches accounts and balances', async () => {
-        const mockAccounts = [{ id: '1', name: 'Acc 1' }];
+    it("fetches accounts and balances", async () => {
+        const mockAccounts = [{ id: "1", name: "Acc 1" }];
         const mockBalances = [{ amount: 100 }];
-        
+
         (api.getAccounts as Mock).mockResolvedValue(mockAccounts);
         (api.getAccountBalances as Mock).mockResolvedValue(mockBalances);
 
         render(<TestComponent />, { wrapper: createWrapper() });
 
         await waitFor(() => {
-            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+            expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
         });
 
-        expect(screen.getByTestId('has-accounts')).toHaveTextContent('true');
-        expect(screen.getByTestId('accounts-count')).toHaveTextContent('1');
-        expect(screen.getByTestId('balances-count')).toHaveTextContent('1');
+        expect(screen.getByTestId("has-accounts")).toHaveTextContent("true");
+        expect(screen.getByTestId("accounts-count")).toHaveTextContent("1");
+        expect(screen.getByTestId("balances-count")).toHaveTextContent("1");
     });
 });

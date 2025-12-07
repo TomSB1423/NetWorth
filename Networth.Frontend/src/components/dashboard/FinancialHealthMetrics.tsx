@@ -1,4 +1,3 @@
-
 export function FinancialHealthMetrics() {
     return (
         <div className="relative min-h-[200px] flex items-center justify-center border border-dashed border-slate-700 rounded-lg p-6">
@@ -7,8 +6,6 @@ export function FinancialHealthMetrics() {
                     Financial Health
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-
-
                     <div className="h-20 bg-slate-700 rounded"></div>
                     <div className="h-20 bg-slate-700 rounded"></div>
                 </div>

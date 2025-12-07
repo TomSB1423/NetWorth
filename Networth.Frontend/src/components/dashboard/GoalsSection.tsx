@@ -1,4 +1,3 @@
-
 export function GoalsSection() {
     return (
         <div className="relative min-h-[200px] flex items-center justify-center border border-dashed border-slate-700 rounded-lg p-6">

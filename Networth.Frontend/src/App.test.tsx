@@ -78,8 +78,10 @@ describe("App", () => {
     });
 
     it("redirects to dashboard if accounts exist", async () => {
-        (api.getAccounts as Mock).mockResolvedValue([{ id: "1", name: "Test Account" }]);
-        
+        (api.getAccounts as Mock).mockResolvedValue([
+            { id: "1", name: "Test Account" },
+        ]);
+
         render(<App />);
     });
 });

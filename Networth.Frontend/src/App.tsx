@@ -48,7 +48,6 @@ function AppRoutes() {
                         queryKey: ["balances"],
                     });
                 } catch (error) {
-
                     console.error("Failed to sync institution:", error);
                 } finally {
                     // Remove the institutionId from the URL

@@ -3,10 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { api } from "../services/api";
-import { Transaction } from "../types";
 
 export default function Transactions() {
-    const { id } = useParams<{ id: string }>();
+    const { id } = useParams();
     const navigate = useNavigate();
 
     // Default to last 90 days
@@ -24,21 +23,17 @@ export default function Transactions() {
         error,
     } = useQuery({
         queryKey: ["transactions", id, dateRange.from, dateRange.to],
-        queryFn: () => {
-            if (!id) return Promise.resolve([]);
-            return api.getTransactions(id, dateRange.from, dateRange.to);
-        },
-        enabled: !!id,
+        queryFn: () => api.getTransactions(id, dateRange.from, dateRange.to),
     });
 
-    const formatCurrency = (amount: string, currency: string) => {
+    const formatCurrency = (amount, currency) => {
         return new Intl.NumberFormat("en-GB", {
             style: "currency",
             currency: currency,
-        }).format(parseFloat(amount));
+        }).format(amount);
     };
 
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString("en-GB", {
             day: "numeric",
             month: "short",
@@ -46,10 +41,12 @@ export default function Transactions() {
         });
     };
 
-    const getTransactionDescription = (tx: Transaction) => {
+    const getTransactionDescription = (tx) => {
         return (
             tx.remittanceInformationUnstructured ||
-            tx.description ||
+            tx.creditorName ||
+            tx.debtorName ||
+            tx.proprietaryBankTransactionCode ||
             "Transaction"
         );
     };
@@ -84,20 +81,20 @@ export default function Transactions() {
                                 No transactions found for the last 90 days.
                             </div>
                         ) : (
-                            transactions.map((tx: Transaction) => (
+                            transactions.map((tx) => (
                                 <div
-                                    key={tx.transactionId}
+                                    key={tx.id}
                                     className="bg-slate-900/50 rounded-xl p-4 flex items-center justify-between hover:bg-slate-900 transition-colors"
                                 >
                                     <div className="flex items-center gap-4">
                                         <div
                                             className={`p-2 rounded-full ${
-                                                parseFloat(tx.amount) > 0
+                                                tx.amount > 0
                                                     ? "bg-green-500/10 text-green-500"
                                                     : "bg-white/5 text-white"
                                             }`}
                                         >
-                                            {parseFloat(tx.amount) > 0 ? (
+                                            {tx.amount > 0 ? (
                                                 <ArrowDownLeft size={20} />
                                             ) : (
                                                 <ArrowUpRight size={20} />
@@ -108,13 +105,16 @@ export default function Transactions() {
                                                 {getTransactionDescription(tx)}
                                             </div>
                                             <div className="text-sm text-gray-400">
-                                                {formatDate(tx.bookingDate)}
+                                                {formatDate(
+                                                    tx.bookingDate ||
+                                                        tx.valueDate
+                                                )}
                                             </div>
                                         </div>
                                     </div>
                                     <div
                                         className={`font-semibold ${
-                                            parseFloat(tx.amount) > 0
+                                            tx.amount > 0
                                                 ? "text-green-400"
                                                 : "text-white"
                                         }`}
