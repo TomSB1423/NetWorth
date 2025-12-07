@@ -449,5 +449,10 @@ __queuestorage__/
 __tablestorage__/
 
 # Generated OpenAPI specifications
-openapi.json
 swagger.json
+
+# Docusaurus
+Networth.Docs/.docusaurus/
+Networth.Docs/build/
+Networth.Docs/node_modules/
+Networth.Docs/.cache/

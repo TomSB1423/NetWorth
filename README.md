@@ -1,10 +1,10 @@
 # Networth Application
 
-![Financial Dashboard](docs/dashboard.png)
-
 ## Overview
 
 Networth is a personal financial aggregation application built with **.NET 9** and **.NET Aspire**. It allows users to track their net worth, view asset allocation, and sync accounts from various financial institutions using the GoCardless API.
+
+![Financial Dashboard](readme-assets/ui-dashboard.jpg)
 
 ## Features
 
@@ -29,11 +29,33 @@ Networth is a personal financial aggregation application built with **.NET 9** a
 
 ## Running with .NET Aspire
 
-Run the complete application stack (PostgreSQL, Azure Functions, React frontend):
+Run the complete application stack (PostgreSQL, Azure Functions, React frontend, Documentation):
 
 ```shell
 dotnet run --project Networth.AppHost
 ```
+
+This starts all services including:
+
+- **PostgreSQL** with PgAdmin (port 5050)
+- **Azure Functions** backend
+- **React** frontend (port 3000)
+- **Docusaurus** documentation (port 3001)
+- **Aspire Dashboard** (<https://localhost:17065>)
+
+## Documentation
+
+Comprehensive architecture documentation is available in the Docusaurus site:
+
+- **Local**: Run `dotnet run --project Networth.AppHost` and navigate to <http://localhost:3001>
+- **Standalone**: See [Networth.Docs/README.md](Networth.Docs/README.md) for running docs independently
+
+The documentation includes:
+
+- Architecture overview and design patterns
+- Component documentation (Functions, Application, Infrastructure, Domain)
+- Data flow diagrams
+- API reference with Scalar integration
 
 ## Configuration
 
