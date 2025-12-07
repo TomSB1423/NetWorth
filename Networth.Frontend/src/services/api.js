@@ -48,5 +48,11 @@ export const api = {
         const response = await fetch(`${API_BASE_URL}/accounts/${accountId}/transactions?${params}`);
         if (!response.ok) throw new Error('Failed to fetch transactions');
         return response.json();
-    }
+    },
+
+    getNetWorthHistory: async () => {
+        const response = await fetch(`${API_BASE_URL}/statistics/net-worth`);
+        if (!response.ok) throw new Error('Failed to fetch net worth history');
+        return response.json();
+    },
 };

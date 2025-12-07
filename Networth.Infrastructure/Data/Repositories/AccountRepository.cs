@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Networth.Domain.Entities;
+using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
 using UserAccount = Networth.Domain.Entities.UserAccount;
@@ -99,7 +100,50 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
     }
 
     /// <inheritdoc />
-    public async Task UpdateAccountStatusAsync(string accountId, Domain.Enums.AccountLinkStatus status, CancellationToken cancellationToken = default)
+    public async Task UpsertAccountBalancesAsync(
+        string accountId,
+        IEnumerable<Networth.Domain.Entities.AccountBalance> balances,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Upserting balances for account {AccountId}", accountId);
+
+        foreach (var balance in balances)
+        {
+            var existingBalance = await context.AccountBalances
+                .FirstOrDefaultAsync(
+                    b => b.AccountId == accountId &&
+                         b.BalanceType == balance.BalanceType &&
+                         b.ReferenceDate == balance.ReferenceDate,
+                    cancellationToken);
+
+            if (existingBalance != null)
+            {
+                existingBalance.Amount = balance.Amount;
+                existingBalance.Currency = balance.Currency;
+                existingBalance.RetrievedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                var newBalance = new Networth.Infrastructure.Data.Entities.AccountBalance
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    AccountId = accountId,
+                    BalanceType = balance.BalanceType,
+                    Amount = balance.Amount,
+                    Currency = balance.Currency,
+                    ReferenceDate = balance.ReferenceDate,
+                    RetrievedAt = DateTime.UtcNow
+                };
+                await context.AccountBalances.AddAsync(newBalance, cancellationToken);
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Successfully upserted balances for account {AccountId}", accountId);
+    }
+
+    /// <inheritdoc />
+    public async Task UpdateAccountStatusAsync(string accountId, AccountLinkStatus status, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Updating status for account {AccountId} to {Status}", accountId, status);
 

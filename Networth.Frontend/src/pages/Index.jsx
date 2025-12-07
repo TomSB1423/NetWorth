@@ -128,17 +128,6 @@ export default function Index() {
                                         Net Worth Trend
                                     </h3>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button className="text-xs px-3 py-1 text-gray-400 hover:text-gray-300 transition-colors">
-                                        3M
-                                    </button>
-                                    <button className="text-xs px-3 py-1 text-gray-400 hover:text-gray-300 transition-colors">
-                                        6M
-                                    </button>
-                                    <button className="text-xs px-3 py-1 bg-slate-700 text-white rounded transition-colors">
-                                        1Y
-                                    </button>
-                                </div>
                             </div>
                             <NetWorthChart />
                         </div>

@@ -41,4 +41,13 @@ public interface IAccountRepository
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A task representing the async operation.</returns>
     Task UpdateAccountStatusAsync(string accountId, Enums.AccountLinkStatus status, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Upserts account balances to the database.
+    /// </summary>
+    /// <param name="accountId">The account ID.</param>
+    /// <param name="balances">The account balances.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task UpsertAccountBalancesAsync(string accountId, IEnumerable<AccountBalance> balances, CancellationToken cancellationToken = default);
 }

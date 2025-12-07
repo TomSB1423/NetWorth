@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
+using Networth.Infrastructure.Data.Queries;
 using DomainTransaction = Networth.Domain.Entities.Transaction;
 using InfraTransaction = Networth.Infrastructure.Data.Entities.Transaction;
 
@@ -20,7 +21,7 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
         IEnumerable<DomainTransaction> transactions,
         CancellationToken cancellationToken = default)
     {
-        var transactionList = transactions.ToList();
+        var transactionList = transactions.DistinctBy(t => t.Id).ToList();
 
         logger.LogInformation(
             "Upserting {Count} transactions for account {AccountId}",
@@ -29,52 +30,59 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
 
         var transactionIds = transactionList.Select(t => t.Id).ToList();
 
-        // Get existing transactions
+        // Get existing transactions with tracking
         var existingTransactions = await context.Transactions
             .Where(t => t.AccountId == accountId && transactionIds.Contains(t.Id))
-            .ToListAsync(cancellationToken);
+            .ToDictionaryAsync(t => t.Id, cancellationToken);
 
-        var existingIds = existingTransactions.Select(t => t.Id).ToHashSet();
+        var newTransactions = new List<InfraTransaction>();
 
-        // Map domain to infrastructure entities
-        var infraTransactions = transactionList.Select(dt => new InfraTransaction
+        foreach (var dt in transactionList)
         {
-            Id = dt.Id,
-            UserId = userId,
-            AccountId = dt.AccountId,
-            TransactionId = dt.TransactionId ?? dt.Id,
-            DebtorName = dt.DebtorName,
-            DebtorAccountIban = dt.DebtorAccount,
-            Amount = dt.Amount,
-            Currency = dt.Currency,
-            BankTransactionCode = dt.BankTransactionCode,
-            BookingDate = dt.BookingDate,
-            ValueDate = dt.ValueDate,
-            RemittanceInformationUnstructured = dt.RemittanceInformationUnstructured,
-            Status = dt.Status,
-        }).ToList();
+            if (existingTransactions.TryGetValue(dt.Id, out var existingTransaction))
+            {
+                // Update existing transaction
+                existingTransaction.TransactionId = dt.TransactionId ?? dt.Id;
+                existingTransaction.DebtorName = dt.DebtorName;
+                existingTransaction.DebtorAccountIban = dt.DebtorAccount;
+                existingTransaction.Amount = dt.Amount;
+                existingTransaction.Currency = dt.Currency;
+                existingTransaction.BankTransactionCode = dt.BankTransactionCode;
+                existingTransaction.BookingDate = dt.BookingDate;
+                existingTransaction.ValueDate = dt.ValueDate;
+                existingTransaction.RemittanceInformationUnstructured = dt.RemittanceInformationUnstructured;
+                existingTransaction.Status = dt.Status;
+                existingTransaction.RunningBalance = dt.BalanceAfterTransaction;
+            }
+            else
+            {
+                // Create new transaction
+                newTransactions.Add(new InfraTransaction
+                {
+                    Id = dt.Id,
+                    UserId = userId,
+                    AccountId = dt.AccountId,
+                    TransactionId = dt.TransactionId ?? dt.Id,
+                    DebtorName = dt.DebtorName,
+                    DebtorAccountIban = dt.DebtorAccount,
+                    Amount = dt.Amount,
+                    Currency = dt.Currency,
+                    BankTransactionCode = dt.BankTransactionCode,
+                    BookingDate = dt.BookingDate,
+                    ValueDate = dt.ValueDate,
+                    RemittanceInformationUnstructured = dt.RemittanceInformationUnstructured,
+                    Status = dt.Status,
+                    RunningBalance = dt.BalanceAfterTransaction,
+                });
+            }
+        }
 
-        // Separate new and existing
-        var newTransactions = infraTransactions.Where(t => !existingIds.Contains(t.Id)).ToList();
-        var updatedTransactions = infraTransactions.Where(t => existingIds.Contains(t.Id)).ToList();
-
-        // Add new transactions
         if (newTransactions.Any())
         {
             await context.Transactions.AddRangeAsync(newTransactions, cancellationToken);
             logger.LogInformation(
                 "Added {Count} new transactions for account {AccountId}",
                 newTransactions.Count,
-                accountId);
-        }
-
-        // Update existing transactions
-        if (updatedTransactions.Any())
-        {
-            context.Transactions.UpdateRange(updatedTransactions);
-            logger.LogInformation(
-                "Updated {Count} existing transactions for account {AccountId}",
-                updatedTransactions.Count,
                 accountId);
         }
 
@@ -170,29 +178,47 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
         // calculates exactly that sum of newer transactions.
         //
         // Note: We use NULLS LAST for BookingDate to match C# OrderByDescending behavior for nulls.
+        // Note: We use ExecuteSqlRawAsync instead of ExecuteSqlInterpolatedAsync because we want to use
+        // nameof() for table/column names (which should be literals) but still parameterize values.
 
-        int count = await context.Database.ExecuteSqlInterpolatedAsync(
-            $"""
+        var sql = $$"""
             WITH RunningTotals AS (
                 SELECT
-                    "Id",
-                    SUM("Amount") OVER (
-                        PARTITION BY "AccountId"
-                        ORDER BY "BookingDate" DESC NULLS LAST, "TransactionId" DESC
+                    "{{nameof(InfraTransaction.Id)}}",
+                    SUM("{{nameof(InfraTransaction.Amount)}}") OVER (
+                        PARTITION BY "{{nameof(InfraTransaction.AccountId)}}"
+                        ORDER BY "{{nameof(InfraTransaction.BookingDate)}}" DESC NULLS LAST, "{{nameof(InfraTransaction.TransactionId)}}" DESC
                         ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
                     ) as "AmountToSubtract"
-                FROM "Transactions"
-                WHERE "AccountId" = {accountId}
+                FROM "{{nameof(context.Transactions)}}"
+                WHERE "{{nameof(InfraTransaction.AccountId)}}" = {0}
             )
-            UPDATE "Transactions" t
-            SET "RunningBalance" = {latestBalance.Amount} - COALESCE(rt."AmountToSubtract", 0)
+            UPDATE "{{nameof(context.Transactions)}}" t
+            SET "{{nameof(InfraTransaction.RunningBalance)}}" = {1} - COALESCE(rt."AmountToSubtract", 0)
             FROM RunningTotals rt
-            WHERE t."Id" = rt."Id"
-            """,
+            WHERE t."{{nameof(InfraTransaction.Id)}}" = rt."{{nameof(InfraTransaction.Id)}}"
+            """;
+
+        int count = await context.Database.ExecuteSqlRawAsync(
+            sql,
+            new object[] { accountId, latestBalance.Amount },
             cancellationToken);
 
         logger.LogInformation("Updated running balance for {Count} transactions", count);
 
         return count;
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<Networth.Domain.Entities.NetWorthPoint>> GetNetWorthHistoryAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        var sql = NetWorthHistoryQuery.GetFullQuery("{0}");
+
+        return await context.Database.SqlQueryRaw<Networth.Domain.Entities.NetWorthPoint>(
+            sql,
+            userId)
+            .ToListAsync(cancellationToken);
     }
 }
