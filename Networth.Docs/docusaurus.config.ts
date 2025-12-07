@@ -1,18 +1,30 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
     title: "Networth Documentation",
     tagline: "Architecture and API Documentation for the Networth Application",
-    favicon: "img/favicon.ico",
+    favicon: "img/networth-icon.svg",
 
     // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
     future: {
         v4: true, // Improve compatibility with the upcoming Docusaurus v4
     },
+
+    stylesheets: [
+        {
+            href: "https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css",
+            type: "text/css",
+            integrity:
+                "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
+            crossorigin: "anonymous",
+        },
+    ],
 
     // Set the production url of your site here
     url: "https://TomSB1423.github.io",
@@ -46,8 +58,16 @@ const config: Config = {
                     routeBasePath: "/",
                     editUrl:
                         "https://github.com/TomSB1423/NetWorth/tree/main/Networth.Docs/",
+                    remarkPlugins: [remarkMath],
+                    rehypePlugins: [rehypeKatex],
                 },
-                blog: false,
+                blog: {
+                    showReadingTime: true,
+                    editUrl:
+                        "https://github.com/TomSB1423/NetWorth/tree/main/Networth.Docs/",
+                    remarkPlugins: [remarkMath],
+                    rehypePlugins: [rehypeKatex],
+                },
                 theme: {
                     customCss: "./src/css/custom.css",
                 },
@@ -121,7 +141,7 @@ const config: Config = {
             title: "Networth",
             logo: {
                 alt: "Networth Logo",
-                src: "img/logo.svg",
+                src: "img/networth-icon.svg",
                 href: "/",
             },
             items: [
@@ -131,6 +151,7 @@ const config: Config = {
                     position: "left",
                     label: "Documentation",
                 },
+                { to: "/blog", label: "Blog", position: "left" },
                 {
                     href: "https://github.com/TomSB1423/NetWorth",
                     position: "right",
@@ -165,7 +186,7 @@ const config: Config = {
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} Networth Project. Built with Docusaurus.`,
+            copyright: `Copyright © ${new Date().getFullYear()} Networth Project.`,
         },
         prism: {
             theme: prismThemes.github,
