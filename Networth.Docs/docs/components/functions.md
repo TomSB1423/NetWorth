@@ -233,10 +233,13 @@ Run Functions locally:
 # Via Aspire (recommended)
 dotnet run --project Networth.AppHost
 
-# Standalone (not recommended, missing dependencies)
+# Standalone (requires Azure Functions Core Tools)
+# Install: npm install -g azure-functions-core-tools@4
 cd Networth.Functions
 func start
 ```
+
+**Note**: Running standalone is not recommended as it requires manual configuration of PostgreSQL, Queues, and other dependencies. Use Aspire for local development.
 
 ## Monitoring
 
