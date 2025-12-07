@@ -1,6 +1,6 @@
 # Networth Application
 
-![Financial Dashboard](docs/dashboard.png)
+![Financial Dashboard](readme-assets/ui-dashboard.jpg)
 
 ## Overview
 
@@ -36,25 +36,26 @@ dotnet run --project Networth.AppHost
 ```
 
 This starts all services including:
+
 - **PostgreSQL** with PgAdmin (port 5050)
 - **Azure Functions** backend
 - **React** frontend (port 3000)
 - **Docusaurus** documentation (port 3001)
-- **Aspire Dashboard** (https://localhost:17065)
+- **Aspire Dashboard** (<https://localhost:17065>)
 
 ## Documentation
 
 Comprehensive architecture documentation is available in the Docusaurus site:
 
-- **Local**: Run `dotnet run --project Networth.AppHost` and navigate to http://localhost:3001
+- **Local**: Run `dotnet run --project Networth.AppHost` and navigate to <http://localhost:3001>
 - **Standalone**: See [Networth.Docs/README.md](Networth.Docs/README.md) for running docs independently
 
 The documentation includes:
+
 - Architecture overview and design patterns
 - Component documentation (Functions, Application, Infrastructure, Domain)
 - Data flow diagrams
 - API reference with Scalar integration
-
 
 ## Configuration
 

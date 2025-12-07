@@ -5,6 +5,8 @@ slug: /
 
 # Welcome to Networth
 
+![Networth Dashboard](/img/project-networth/ui-dashboard.jpg)
+
 **Networth** is a modern personal finance application designed to help you track your financial health in one place.
 
 By aggregating data from your various bank accounts, investments, and liabilities, Networth provides a clear and consolidated view of your total financial standing.
