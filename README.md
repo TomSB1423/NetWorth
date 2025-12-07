@@ -1,10 +1,10 @@
 # Networth Application
 
-![Financial Dashboard](readme-assets/ui-dashboard.jpg)
-
 ## Overview
 
 Networth is a personal financial aggregation application built with **.NET 9** and **.NET Aspire**. It allows users to track their net worth, view asset allocation, and sync accounts from various financial institutions using the GoCardless API.
+
+![Financial Dashboard](readme-assets/ui-dashboard.jpg)
 
 ## Features
 
