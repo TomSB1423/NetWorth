@@ -35,41 +35,8 @@ jobs:
       - name: Setup Build Environment
         uses: ./.github/actions/setup-build-env
 
-      - name: Start Azurite
-        run: azurite --silent --location . &
-
-      - name: Build Functions
-        run: dotnet build ../Networth.Functions/Networth.Functions.csproj --configuration Release
-
-      - name: Generate Swagger
-        run: |
-          cd ../Networth.Functions/bin/Release/net9.0
-          # Start func in background
-          env "AzureWebJobsStorage=UseDevelopmentStorage=true" \
-              "FUNCTIONS_WORKER_RUNTIME=dotnet-isolated" \
-              "ConnectionStrings__networth-db=Host=localhost;Database=networth;Username=postgres;Password=password" \
-              "ConnectionStrings__queues=UseDevelopmentStorage=true" \
-              "Gocardless__SecretId=dummy" \
-              "Gocardless__SecretKey=dummy" \
-              func start --port 7071 --no-build &
-          PID=$!
-          # Wait for Functions service to be ready (up to 30s)
-          for i in {1..30}; do
-            if curl -s http://localhost:7071/api/health > /dev/null; then
-              echo "Functions service is ready"
-              break
-            fi
-            sleep 1
-          done
-          # Fetch swagger
-          if ! curl -f http://localhost:7071/api/swagger.json -o ../../../../Networth.Docs/static/openapi.json; then
-            echo "Failed to fetch OpenAPI spec"
-            kill $PID
-            exit 1
-          fi
-          # Kill func
-          kill $PID
-        shell: bash
+      - name: Copy OpenAPI Spec
+        run: cp ../openapi.json static/openapi.json
 
       - name: Install dependencies
         run: npm ci

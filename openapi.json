@@ -1,0 +1,614 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "OpenAPI Document on Azure Functions",
+        "description": "This is the OpenAPI Document on Azure Functions",
+        "version": "1.0.0"
+    },
+    "host": "localhost:59024",
+    "basePath": "/api",
+    "schemes": ["http"],
+    "paths": {
+        "/user/me": {
+            "get": {
+                "tags": ["User"],
+                "summary": "Get current authenticated user",
+                "description": "Returns information about the currently authenticated user",
+                "operationId": "GetCurrentUser",
+                "produces": ["application/json"],
+                "responses": {
+                    "200": {
+                        "description": "Current user information",
+                        "schema": {
+                            "$ref": "#/definitions/currentUserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/requisitions/{requisitionId}": {
+            "get": {
+                "tags": ["Requisitions"],
+                "summary": "Get requisition",
+                "description": "Retrieves the details of a specific requisition by ID.",
+                "operationId": "GetRequisition",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "requisitionId",
+                        "description": "The requisition ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved requisition",
+                        "schema": {
+                            "$ref": "#/definitions/requisitionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid requisition ID"
+                    },
+                    "404": {
+                        "description": "Requisition not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/institutions": {
+            "get": {
+                "tags": ["Institutions"],
+                "summary": "Get financial institutions",
+                "description": "Retrieves a list of available financial institutions for account linking.",
+                "operationId": "GetInstitutions",
+                "produces": ["application/json"],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved institutions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/institutionResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/institutions/{institutionId}/sync": {
+            "post": {
+                "tags": ["Institutions"],
+                "summary": "Sync institution accounts",
+                "description": "Enqueues sync operations for all accounts belonging to the specified institution for the authenticated user.",
+                "operationId": "SyncInstitution",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "institutionId",
+                        "description": "The institution ID to sync",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully enqueued account syncs",
+                        "schema": {
+                            "$ref": "#/definitions/syncInstitutionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "401": {
+                        "description": "User is not authenticated"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/accounts/{accountId}": {
+            "get": {
+                "tags": ["Accounts"],
+                "summary": "Get account metadata",
+                "description": "Retrieves the metadata for a specific bank account.",
+                "operationId": "GetAccount",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "accountId",
+                        "description": "The account ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved account metadata",
+                        "schema": {
+                            "$ref": "#/definitions/accountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid account ID"
+                    },
+                    "404": {
+                        "description": "Account not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/accounts/{accountId}/balances": {
+            "get": {
+                "tags": ["Accounts"],
+                "summary": "Get account balances",
+                "description": "Retrieves the current balances for a specific bank account.",
+                "operationId": "GetAccountBalances",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "accountId",
+                        "description": "The account ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved account balances",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/accountBalanceResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid account ID"
+                    },
+                    "404": {
+                        "description": "Account not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/accounts/{accountId}/details": {
+            "get": {
+                "tags": ["Accounts"],
+                "summary": "Get account details",
+                "description": "Retrieves detailed information for a specific bank account including owner details and account properties.",
+                "operationId": "GetAccountDetails",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "accountId",
+                        "description": "The account ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved account details",
+                        "schema": {
+                            "$ref": "#/definitions/accountDetailResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid account ID"
+                    },
+                    "404": {
+                        "description": "Account not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/accounts": {
+            "get": {
+                "tags": ["Accounts"],
+                "summary": "Get user accounts",
+                "description": "Retrieves all bank accounts owned by the current authenticated user.",
+                "operationId": "GetAccounts",
+                "produces": ["application/json"],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved user accounts",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/userAccountResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "User is not authenticated"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/accounts/{accountId}/transactions": {
+            "get": {
+                "tags": ["Accounts"],
+                "summary": "Get account transactions",
+                "description": "Retrieves transactions for a specific bank account with optional date range filtering.",
+                "operationId": "GetAccountTransactions",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "accountId",
+                        "description": "The account ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "dateFrom",
+                        "description": "Start date for transaction filtering",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "dateTo",
+                        "description": "End date for transaction filtering",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved account transactions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/transactionResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid account ID or date format"
+                    },
+                    "404": {
+                        "description": "Account not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/account/link": {
+            "post": {
+                "tags": ["Accounts"],
+                "summary": "Link bank account",
+                "description": "Links a bank account by creating an agreement with the financial institution and then creating a requisition for account access.",
+                "operationId": "LinkAccount",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Account linking parameters",
+                        "schema": {
+                            "$ref": "#/definitions/linkAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully linked account",
+                        "schema": {
+                            "$ref": "#/definitions/linkAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "accountBalanceResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "format": "double",
+                    "type": "number"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "balanceType": {
+                    "type": "string"
+                },
+                "creditLimitIncluded": {
+                    "type": "boolean"
+                },
+                "referenceDate": {
+                    "format": "date-time",
+                    "type": "string"
+                }
+            }
+        },
+        "accountDetailResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "product": {
+                    "type": "string"
+                },
+                "cashAccountType": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "accountResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "institutionId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "currentUserResponse": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "isAuthenticated": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "institutionResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "logoUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "linkAccountRequest": {
+            "type": "object",
+            "properties": {
+                "institutionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "linkAccountResponse": {
+            "type": "object",
+            "properties": {
+                "authorizationLink": {
+                    "type": "string"
+                },
+                "status": {
+                    "format": "int32",
+                    "default": 0,
+                    "enum": [0, 1, 2, 3],
+                    "type": "integer"
+                }
+            }
+        },
+        "requisitionResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "institutionId": {
+                    "type": "string"
+                },
+                "agreementId": {
+                    "type": "string"
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "authenticationLink": {
+                    "type": "string"
+                }
+            }
+        },
+        "syncInstitutionResponse": {
+            "type": "object",
+            "properties": {
+                "institutionId": {
+                    "type": "string"
+                },
+                "accountsEnqueued": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "accountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "transactionResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "accountId": {
+                    "type": "string"
+                },
+                "transactionId": {
+                    "type": "string"
+                },
+                "amount": {
+                    "format": "double",
+                    "type": "number"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "bookingDate": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "valueDate": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "creditorName": {
+                    "type": "string"
+                },
+                "debtorName": {
+                    "type": "string"
+                },
+                "creditorAccount": {
+                    "type": "string"
+                },
+                "debtorAccount": {
+                    "type": "string"
+                },
+                "remittanceInformationUnstructured": {
+                    "type": "string"
+                },
+                "bankTransactionCode": {
+                    "type": "string"
+                },
+                "proprietaryBankTransactionCode": {
+                    "type": "string"
+                },
+                "endToEndId": {
+                    "type": "string"
+                },
+                "mandateId": {
+                    "type": "string"
+                },
+                "creditorId": {
+                    "type": "string"
+                },
+                "ultimateCreditor": {
+                    "type": "string"
+                },
+                "ultimateDebtor": {
+                    "type": "string"
+                },
+                "purposeCode": {
+                    "type": "string"
+                },
+                "additionalInformation": {
+                    "type": "string"
+                },
+                "balanceAfterTransaction": {
+                    "format": "double",
+                    "type": "number"
+                },
+                "isPending": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "userAccountResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "requisitionId": {
+                    "type": "string"
+                },
+                "institutionId": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "product": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

@@ -449,7 +449,6 @@ __queuestorage__/
 __tablestorage__/
 
 # Generated OpenAPI specifications
-openapi.json
 swagger.json
 
 # Docusaurus
