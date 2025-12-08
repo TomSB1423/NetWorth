@@ -35,31 +35,25 @@ public class GoCardlessSandboxAuthorizer : IAsyncDisposable
         try
         {
             // Step 1: Navigate to GoCardless consent page
-            await page.GotoAsync(authorizationLink);
-            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+            await Assertions.Expect(async () => await page.GotoAsync(authorizationLink)).ToPassAsync();
 
             // Click "Agree and continue" on the GoCardless consent page
             var agreeButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Agree and continue" });
             await agreeButton.ClickAsync();
-            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
             // Step 2: Sandbox Finance login page (fields should be pre-filled)
             // Wait for the Sign in button to appear
             var signInButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Sign in" });
-            await signInButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 30000 });
-
+            
             // Click Sign in
             await signInButton.ClickAsync();
-            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
             // Step 3: Sandbox Finance approval/consent page
             // Wait for the Approve button/link to appear
             var approveLink = page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = "Approve" });
-            await approveLink.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 30000 });
-
+            
             // Click Approve
             await approveLink.ClickAsync();
-            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
             // Wait a moment for any final processing
             await page.WaitForTimeoutAsync(1000);
