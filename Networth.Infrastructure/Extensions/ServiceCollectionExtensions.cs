@@ -67,7 +67,13 @@ public static class ServiceCollectionExtensions
             {
                 options.Retry.BackoffType = DelayBackoffType.Exponential;
                 options.Retry.UseJitter = true;
-                options.Retry.MaxRetryAttempts = 3;
+                options.Retry.MaxRetryAttempts = 5;
+                options.Retry.ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                    .Handle<HttpRequestException>()
+                    .HandleResult(response =>
+                        response.StatusCode == System.Net.HttpStatusCode.Conflict ||
+                        response.StatusCode == System.Net.HttpStatusCode.TooManyRequests ||
+                        (int)response.StatusCode >= 500);
             });
 
         // Add rate limit logging handler after resilience handler so it logs every attempt (inner handler)

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Networth.Functions.Tests.Integration.Fixtures;
 using Networth.Functions.Tests.Integration.Infrastructure;
 using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Data.Repositories;
@@ -10,14 +11,14 @@ using DomainTransaction = Networth.Domain.Entities.Transaction;
 
 namespace Networth.Functions.Tests.Integration;
 
-public class TransactionRepositoryTests(ITestOutputHelper testOutput)
+public class TransactionRepositoryTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
+    : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
     [Fact]
     public async Task UpsertTransactionsAsync_PersistsRunningBalance()
     {
         // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(testOutput);
-        var dbConnectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        var dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
 
         var services = new ServiceCollection();
         services.AddDbContext<NetworthDbContext>(options => options.UseNpgsql(dbConnectionString));

@@ -10,7 +10,7 @@ namespace Networth.Functions.Tests.Integration;
 ///     Integration tests for the Azure Functions backend using shared Mockoon fixture.
 /// </summary>
 public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
-    : IClassFixture<MockoonTestFixture>
+    : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
     /// <summary>
     ///     Tests that the GetInstitutions endpoint returns OK status code and valid JSON response.
@@ -18,13 +18,8 @@ public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, IT
     [Fact]
     public async Task GetInstitutionsEndpointReturnsOkStatusCodeAndValidJson()
     {
-        // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(
-            testOutput,
-            mockoonTestFixture.MockoonBaseUrl);
-
         // Act
-        var client = app.CreateHttpClient(ResourceNames.Functions);
+        var client = App.CreateHttpClient(ResourceNames.Functions);
         var response = await client.GetAsync("/api/institutions", CancellationToken.None);
 
         // Assert

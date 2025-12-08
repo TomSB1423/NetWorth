@@ -14,19 +14,14 @@ using Xunit.Abstractions;
 namespace Networth.Functions.Tests.Integration;
 
 public class CalculateRunningBalanceTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
-    : IClassFixture<MockoonTestFixture>
+    : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
     [Fact]
     public async Task CalculateRunningBalance_UpdatesTransactionsCorrectly()
     {
-        // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(
-            testOutput,
-            mockoonTestFixture.MockoonBaseUrl);
-
         // Get connection strings
-        var dbConnectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
-        var storageConnectionString = await app.GetConnectionStringAsync(ResourceNames.Queues);
+        var dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        var storageConnectionString = await App.GetConnectionStringAsync(ResourceNames.Queues);
 
         if (string.IsNullOrEmpty(dbConnectionString) || string.IsNullOrEmpty(storageConnectionString))
         {

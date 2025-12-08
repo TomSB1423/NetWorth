@@ -14,17 +14,12 @@ using DomainEntities = Networth.Domain.Entities;
 namespace Networth.Functions.Tests.Integration;
 
 public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
-    : IClassFixture<MockoonTestFixture>
+    : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
     [Fact]
     public async Task GetNetWorthHistory_ReturnsCorrectDailyTotals()
     {
-        // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(
-            testOutput,
-            mockoonTestFixture.MockoonBaseUrl);
-
-        var dbConnectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        var dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
         if (string.IsNullOrEmpty(dbConnectionString))
         {
             Assert.Fail("Connection string not found");
@@ -161,7 +156,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         await dbContext.SaveChangesAsync();
 
         // Act
-        var httpClient = app.CreateHttpClient(ResourceNames.Functions);
+        var httpClient = App.CreateHttpClient(ResourceNames.Functions);
         var response = await httpClient.GetAsync("api/statistics/net-worth");
 
         // Assert
@@ -195,11 +190,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
     public async Task GetNetWorthHistory_ReturnsCorrectDailyTotals_SingleAccount()
     {
         // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(
-            testOutput,
-            mockoonTestFixture.MockoonBaseUrl);
-
-        var dbConnectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        var dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
         if (string.IsNullOrEmpty(dbConnectionString))
         {
             Assert.Fail("Connection string not found");
@@ -297,7 +288,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
 
         await dbContext.SaveChangesAsync();
 
-        var httpClient = app.CreateHttpClient(ResourceNames.Functions);
+        var httpClient = App.CreateHttpClient(ResourceNames.Functions);
 
         // Act
         var response = await httpClient.GetAsync("api/statistics/net-worth");

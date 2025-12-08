@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Networth.Domain.Enums;
-using Networth.Infrastructure.Data.Context;
-using Networth.ServiceDefaults;
 using Networth.SystemTests.Helpers;
 using Networth.SystemTests.Infrastructure;
 using Xunit.Abstractions;
@@ -13,14 +11,13 @@ namespace Networth.SystemTests;
 ///     These tests spin up the complete Aspire application with all real services
 ///     (PostgreSQL, Azure Storage, Functions) and interact with the real GoCardless sandbox API.
 /// </summary>
-public class InstitutionSyncSystemTests
+public class InstitutionSyncSystemTests : SystemTestBase
 {
     private const string SandboxInstitutionId = "SANDBOXFINANCE_SFIN0000";
-    private readonly ITestOutputHelper _testOutput;
 
     public InstitutionSyncSystemTests(ITestOutputHelper testOutput)
+        : base(testOutput)
     {
-        _testOutput = testOutput;
     }
 
     /// <summary>
@@ -36,15 +33,10 @@ public class InstitutionSyncSystemTests
     [Fact]
     public async Task SyncInstitution_WithSandboxFinance_EnqueuesAccountsForSync()
     {
-        // Arrange
-        await using var app = await SystemTestFactory.CreateAsync(testOutput: _testOutput);
-        string connectionString = await GetDatabaseConnectionStringAsync(app);
-
-        HttpClient functionsClient = app.CreateHttpClient(ResourceNames.Functions);
-        var client = new NetworthClient(functionsClient);
+        // Arrange - Setup is done in InitializeAsync
 
         // Link account first
-        var linkResponse = await client.LinkAccountAsync(SandboxInstitutionId);
+        var linkResponse = await Client.LinkAccountAsync(SandboxInstitutionId);
         Assert.NotNull(linkResponse.AuthorizationLink);
 
         // Authorize the requisition
@@ -52,7 +44,7 @@ public class InstitutionSyncSystemTests
         await authorizer.AuthorizeRequisitionAsync(linkResponse.AuthorizationLink);
 
         // Act
-        var result = await client.SyncInstitutionAsync(SandboxInstitutionId);
+        var result = await Client.SyncInstitutionAsync(SandboxInstitutionId);
 
         // Assert - Verify API response
         Assert.Equal(SandboxInstitutionId, result.InstitutionId);
@@ -64,7 +56,7 @@ public class InstitutionSyncSystemTests
         await Task.Delay(TimeSpan.FromSeconds(2));
 
         // Assert - Verify database changes
-        await using var dbContext = CreateDbContext(connectionString);
+        await using var dbContext = CreateDbContext();
 
         // Verify requisition was updated/created
         var requisitions = await dbContext.Requisitions
@@ -104,13 +96,10 @@ public class InstitutionSyncSystemTests
     [Fact]
     public async Task GetInstitutions_ReturnsInstitutionsFromGoCardlessSandbox()
     {
-        // Arrange
-        await using var app = await SystemTestFactory.CreateAsync(testOutput: _testOutput);
-        HttpClient functionsClient = app.CreateHttpClient(ResourceNames.Functions);
-        var client = new NetworthClient(functionsClient);
+        // Arrange - Setup is done in InitializeAsync
 
         // Act
-        var institutions = await client.GetInstitutionsAsync();
+        var institutions = await Client.GetInstitutionsAsync();
 
         // Assert
         Assert.NotEmpty(institutions);
@@ -131,14 +120,10 @@ public class InstitutionSyncSystemTests
     [Fact]
     public async Task LinkAccount_ThenSyncInstitution_CreatesAccountsInDatabase()
     {
-        // Arrange
-        await using var app = await SystemTestFactory.CreateAsync(testOutput: _testOutput);
-        string connectionString = await GetDatabaseConnectionStringAsync(app);
-        HttpClient functionsClient = app.CreateHttpClient(ResourceNames.Functions);
-        var client = new NetworthClient(functionsClient);
+        // Arrange - Setup is done in InitializeAsync
 
         // Act - Step 1: Link the account
-        var linkResult = await client.LinkAccountAsync(SandboxInstitutionId);
+        var linkResult = await Client.LinkAccountAsync(SandboxInstitutionId);
 
         // Assert - Verify link response
         Assert.NotNull(linkResult);
@@ -149,7 +134,7 @@ public class InstitutionSyncSystemTests
         await Task.Delay(TimeSpan.FromSeconds(1));
 
         // Verify requisition was created in database
-        await using var dbContext1 = CreateDbContext(connectionString);
+        await using var dbContext1 = CreateDbContext();
         var requisitions = await dbContext1.Requisitions
             .Where(r => r.InstitutionId == SandboxInstitutionId)
             .ToListAsync();
@@ -167,7 +152,7 @@ public class InstitutionSyncSystemTests
         await Task.Delay(TimeSpan.FromSeconds(3));
 
         // Act - Step 3: Sync the institution
-        var syncResult = await client.SyncInstitutionAsync(SandboxInstitutionId);
+        var syncResult = await Client.SyncInstitutionAsync(SandboxInstitutionId);
 
         // Assert - Verify sync response
         Assert.Equal(SandboxInstitutionId, syncResult.InstitutionId);
@@ -179,7 +164,7 @@ public class InstitutionSyncSystemTests
         await Task.Delay(TimeSpan.FromSeconds(10));
 
         // Verify accounts were created in database
-        await using var dbContext2 = CreateDbContext(connectionString);
+        await using var dbContext2 = CreateDbContext();
         var accounts = await dbContext2.Accounts
             .Where(a => a.InstitutionId == SandboxInstitutionId)
             .ToListAsync();
@@ -230,33 +215,5 @@ public class InstitutionSyncSystemTests
             // Skip transaction validation but don't fail the test
             Assert.True(true, "No transactions found - this may be expected in GoCardless Sandbox");
         }
-    }
-
-
-    /// <summary>
-    ///     Gets the PostgreSQL database connection string from the running application.
-    /// </summary>
-    private static async Task<string> GetDatabaseConnectionStringAsync(DistributedApplication app)
-    {
-        // Get the connection string from the networth-db resource
-        var connectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
-
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            throw new InvalidOperationException("Database connection string not found");
-        }
-
-        return connectionString;
-    }
-
-    /// <summary>
-    ///     Creates a DbContext for direct database access in tests.
-    /// </summary>
-    private static NetworthDbContext CreateDbContext(string connectionString)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<NetworthDbContext>();
-        optionsBuilder.UseNpgsql(connectionString);
-
-        return new NetworthDbContext(optionsBuilder.Options);
     }
 }

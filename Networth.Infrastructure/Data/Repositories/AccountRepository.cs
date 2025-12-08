@@ -59,46 +59,61 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
             accountId,
             userId);
 
-        var existingAccount = await context.Accounts
-            .FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
-
-        if (existingAccount != null)
+        var retries = 3;
+        while (retries > 0)
         {
-            // Update existing account
-            existingAccount.Name = accountDetails.Name ?? existingAccount.Name;
-            existingAccount.Currency = accountDetails.Currency ?? existingAccount.Currency;
-            existingAccount.Product = accountDetails.Product;
-            existingAccount.CashAccountType = accountDetails.CashAccountType;
-            existingAccount.LastSynced = DateTime.UtcNow;
-
-            logger.LogInformation("Updated existing account {AccountId}", accountId);
-        }
-        else
-        {
-            // Create new account
-            var newAccount = new Entities.Account
+            try
             {
-                Id = accountId,
-                UserId = userId,
-                RequisitionId = requisitionId,
-                InstitutionId = institutionId,
-                Name = accountDetails.Name ?? "Unknown Account",
-                Currency = accountDetails.Currency ?? "GBP",
-                Product = accountDetails.Product,
-                CashAccountType = accountDetails.CashAccountType,
-                Created = DateTime.UtcNow,
-                LastSynced = DateTime.UtcNow,
-            };
+                var existingAccount = await context.Accounts
+                    .FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
 
-            await context.Accounts.AddAsync(newAccount, cancellationToken);
+                if (existingAccount != null)
+                {
+                    // Update existing account
+                    existingAccount.Name = accountDetails.Name ?? existingAccount.Name;
+                    existingAccount.Currency = accountDetails.Currency ?? existingAccount.Currency;
+                    existingAccount.Product = accountDetails.Product;
+                    existingAccount.CashAccountType = accountDetails.CashAccountType;
+                    existingAccount.LastSynced = DateTime.UtcNow;
 
-            logger.LogInformation("Created new account {AccountId}", accountId);
+                    logger.LogInformation("Updated existing account {AccountId}", accountId);
+                }
+                else
+                {
+                    // Create new account
+                    var newAccount = new Entities.Account
+                    {
+                        Id = accountId,
+                        UserId = userId,
+                        RequisitionId = requisitionId,
+                        InstitutionId = institutionId,
+                        Name = accountDetails.Name ?? "Unknown Account",
+                        Currency = accountDetails.Currency ?? "GBP",
+                        Product = accountDetails.Product,
+                        CashAccountType = accountDetails.CashAccountType,
+                        Created = DateTime.UtcNow,
+                        LastSynced = DateTime.UtcNow,
+                    };
+
+                    await context.Accounts.AddAsync(newAccount, cancellationToken);
+
+                    logger.LogInformation("Created new account {AccountId}", accountId);
+                }
+
+                await context.SaveChangesAsync(cancellationToken);
+                logger.LogInformation("Successfully upserted account {AccountId}", accountId);
+                return;
+            }
+            catch (DbUpdateException ex) when (IsDuplicateKeyException(ex) && retries > 1)
+            {
+                logger.LogWarning(ex, "Concurrency conflict upserting account {AccountId}. Retrying...", accountId);
+                context.ChangeTracker.Clear();
+                retries--;
+            }
         }
-
-        await context.SaveChangesAsync(cancellationToken);
-
-        logger.LogInformation("Successfully upserted account {AccountId}", accountId);
     }
+
+
 
     /// <inheritdoc />
     public async Task UpsertAccountBalancesAsync(
@@ -159,5 +174,10 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
         {
             logger.LogWarning("Account {AccountId} not found, cannot update status", accountId);
         }
+    }
+
+    private static bool IsDuplicateKeyException(DbUpdateException ex)
+    {
+        return ex.InnerException is Npgsql.PostgresException pgEx && pgEx.SqlState == "23505";
     }
 }

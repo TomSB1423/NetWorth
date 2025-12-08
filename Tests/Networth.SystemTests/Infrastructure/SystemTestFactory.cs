@@ -1,6 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Networth.Functions.Tests.Integration.Infrastructure;
+using Networth.Infrastructure.Data.Context;
 using Networth.ServiceDefaults;
 using Projects;
 using Xunit.Abstractions;
@@ -24,7 +26,7 @@ public static class SystemTestFactory
         ITestOutputHelper? testOutput,
         bool enableDashboard = false)
     {
-        IDistributedApplicationTestingBuilder builder = await DistributedApplicationTestingBuilder.CreateAsync<Networth_AppHost>(
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Networth_AppHost>(
             [],
             (appOptions, hostSettings) =>
             {
@@ -33,44 +35,8 @@ public static class SystemTestFactory
                 appOptions.AllowUnsecuredTransport = enableDashboard;
             });
 
-        // Load user secrets from AppHost project
-        ConfigurationBuilder configBuilder = new();
-        configBuilder.AddUserSecrets(typeof(Networth_AppHost).Assembly);
-        configBuilder.AddEnvironmentVariables();
-        IConfigurationRoot userSecretsConfig = configBuilder.Build();
-
-        // Validate required parameters
-        string[] requiredParameters = ["gocardless-secret-id", "gocardless-secret-key"];
-        List<string> missingParameters = [];
-
-        foreach (string param in requiredParameters)
-        {
-            if (string.IsNullOrWhiteSpace(userSecretsConfig[$"Parameters:{param}"]))
-            {
-                missingParameters.Add(param);
-            }
-        }
-
-        if (missingParameters.Count > 0)
-        {
-            throw new InvalidOperationException(
-                $"Missing required configuration parameters for system tests: {string.Join(", ", missingParameters)}. " +
-                "Ensure these are set in User Secrets (local) or Environment Variables (CI) with 'Parameters__' prefix.");
-        }
-
-        // Ensure postgres-password is set (required by AppHost), default to a test value if missing
-        if (string.IsNullOrWhiteSpace(userSecretsConfig["Parameters:postgres-password"]))
-        {
-            builder.Configuration["Parameters:postgres-password"] = "test-password-123!";
-        }
-
-        // Copy Parameters from user secrets to the test builder's configuration
-        var parameters = userSecretsConfig.GetSection("Parameters").GetChildren().ToList();
-
-        foreach (IConfigurationSection section in parameters)
-        {
-            builder.Configuration[$"Parameters:{section.Key}"] = section.Value;
-        }
+        // Ensure user secrets are loaded from the AppHost assembly
+        builder.Configuration.AddUserSecrets<Networth_AppHost>();
 
         // Apply standard system test setup
         // Random volume names ensure test isolation from development environment
@@ -100,5 +66,44 @@ public static class SystemTestFactory
             cts.Token);
 
         return app;
+    }
+
+    /// <summary>
+    ///     Gets the PostgreSQL database connection string from the running application.
+    /// </summary>
+    public static async Task<string> GetDatabaseConnectionStringAsync(DistributedApplication app)
+    {
+        // Get the connection string from the networth-db resource
+        var connectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException("Database connection string not found");
+        }
+
+        return connectionString;
+    }
+
+    /// <summary>
+    ///     Ensures the database is created and ready for testing.
+    ///     Note: Since we use random volume names, we start with a fresh DB for each test,
+    ///     so we don't need to delete/recreate it.
+    /// </summary>
+    public static async Task ResetDatabaseAsync(string connectionString)
+    {
+        await using var dbContext = CreateDbContext(connectionString);
+
+        await dbContext.Database.EnsureCreatedAsync();
+    }
+
+    /// <summary>
+    ///     Creates a DbContext for direct database access in tests.
+    /// </summary>
+    public static NetworthDbContext CreateDbContext(string connectionString)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<NetworthDbContext>();
+        optionsBuilder.UseNpgsql(connectionString);
+
+        return new NetworthDbContext(optionsBuilder.Options);
     }
 }

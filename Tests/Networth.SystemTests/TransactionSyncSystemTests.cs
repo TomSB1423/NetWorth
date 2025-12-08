@@ -7,21 +7,17 @@ using Xunit.Abstractions;
 
 namespace Networth.SystemTests;
 
-public class TransactionSyncSystemTests(ITestOutputHelper testOutput)
+public class TransactionSyncSystemTests(ITestOutputHelper testOutput) : SystemTestBase(testOutput)
 {
     private const string SandboxInstitutionId = "SANDBOXFINANCE_SFIN0000";
 
     [Fact]
     public async Task SyncTransactions_PersistsRunningBalance()
     {
-        // Arrange
-        await using var app = await SystemTestFactory.CreateAsync(testOutput: testOutput);
-        string connectionString = await GetDatabaseConnectionStringAsync(app);
-        HttpClient functionsClient = app.CreateHttpClient(ResourceNames.Functions);
-        var client = new NetworthClient(functionsClient);
+        // Arrange - Setup is done in InitializeAsync
 
         // 1. Link Account
-        var linkResult = await client.LinkAccountAsync(SandboxInstitutionId);
+        var linkResult = await Client.LinkAccountAsync(SandboxInstitutionId);
 
         // 2. Authorize
         await using var authorizer = new GoCardlessSandboxAuthorizer();
@@ -31,7 +27,7 @@ public class TransactionSyncSystemTests(ITestOutputHelper testOutput)
         await Task.Delay(TimeSpan.FromSeconds(5));
 
         // 3. Sync Institution (triggers account sync)
-        var syncResult = await client.SyncInstitutionAsync(SandboxInstitutionId);
+        var syncResult = await Client.SyncInstitutionAsync(SandboxInstitutionId);
 
         // 4. Wait for Queue Processing
         // The sync endpoint enqueues messages. We need to wait for the Functions to process them.
@@ -39,7 +35,7 @@ public class TransactionSyncSystemTests(ITestOutputHelper testOutput)
         await Task.Delay(TimeSpan.FromSeconds(15));
 
         // 5. Verify DB
-        await using var dbContext = CreateDbContext(connectionString);
+        await using var dbContext = CreateDbContext();
 
         var transactions = await dbContext.Transactions
             .Where(t => syncResult.AccountIds.Contains(t.AccountId))
@@ -56,32 +52,14 @@ public class TransactionSyncSystemTests(ITestOutputHelper testOutput)
 
         if (!transactions.Any(t => t.RunningBalance.HasValue))
         {
-            testOutput.WriteLine("WARNING: No transactions have RunningBalance. This might be a sandbox limitation.");
+            TestOutput.WriteLine("WARNING: No transactions have RunningBalance. This might be a sandbox limitation.");
             if (transactions.Count > 0)
             {
-                 testOutput.WriteLine($"First transaction: {System.Text.Json.JsonSerializer.Serialize(transactions[0])}");
+                 TestOutput.WriteLine($"First transaction: {System.Text.Json.JsonSerializer.Serialize(transactions[0])}");
             }
         }
 
         // Also verify the value is reasonable (not 0 if it shouldn't be, though 0 is a valid balance)
         // Just checking HasValue is the main regression test for "column is empty".
-    }
-
-    private static async Task<string> GetDatabaseConnectionStringAsync(DistributedApplication app)
-    {
-        var connectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            throw new InvalidOperationException("Database connection string not found");
-        }
-
-        return connectionString;
-    }
-
-    private static NetworthDbContext CreateDbContext(string connectionString)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<NetworthDbContext>();
-        optionsBuilder.UseNpgsql(connectionString);
-        return new NetworthDbContext(optionsBuilder.Options);
     }
 }

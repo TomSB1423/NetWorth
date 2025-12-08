@@ -13,17 +13,12 @@ using Xunit.Abstractions;
 namespace Networth.Functions.Tests.Integration;
 
 public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
-    : IClassFixture<MockoonTestFixture>
+    : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
     [Fact]
     public async Task SyncInstitution_EnqueuesSyncForLinkedAccounts()
     {
-        // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(
-            testOutput,
-            mockoonTestFixture.MockoonBaseUrl);
-
-        var dbConnectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        var dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
         if (string.IsNullOrEmpty(dbConnectionString))
         {
             Assert.Fail("Connection string not found");
@@ -98,7 +93,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await dbContext.Accounts.AddRangeAsync(account1, account2);
         await dbContext.SaveChangesAsync();
 
-        var httpClient = app.CreateHttpClient(ResourceNames.Functions);
+        var httpClient = App.CreateHttpClient(ResourceNames.Functions);
         httpClient.DefaultRequestHeaders.Add("X-Mock-User-Id", userId);
 
         // Act
@@ -116,11 +111,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
     public async Task SyncInstitution_EnqueuesSyncForSingleAccount()
     {
         // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(
-            testOutput,
-            mockoonTestFixture.MockoonBaseUrl);
-
-        var dbConnectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        var dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
         if (string.IsNullOrEmpty(dbConnectionString))
         {
             Assert.Fail("Connection string not found");
@@ -184,7 +175,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await dbContext.Accounts.AddAsync(account);
         await dbContext.SaveChangesAsync();
 
-        var httpClient = app.CreateHttpClient(ResourceNames.Functions);
+        var httpClient = App.CreateHttpClient(ResourceNames.Functions);
         httpClient.DefaultRequestHeaders.Add("X-Mock-User-Id", userId);
 
         // Act
@@ -201,11 +192,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
     public async Task SyncInstitution_ReturnsZeroForNoAccounts()
     {
         // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(
-            testOutput,
-            mockoonTestFixture.MockoonBaseUrl);
-
-        var dbConnectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        var dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
         if (string.IsNullOrEmpty(dbConnectionString))
         {
             Assert.Fail("Connection string not found");
@@ -256,7 +243,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         dbContext.Requisitions.Add(requisition);
         await dbContext.SaveChangesAsync();
 
-        var httpClient = app.CreateHttpClient(ResourceNames.Functions);
+        var httpClient = App.CreateHttpClient(ResourceNames.Functions);
         httpClient.DefaultRequestHeaders.Add("X-Mock-User-Id", userId);
 
         // Act

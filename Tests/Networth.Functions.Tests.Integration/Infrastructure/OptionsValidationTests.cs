@@ -5,6 +5,9 @@ using Networth.Infrastructure.Gocardless.Options;
 
 namespace Networth.Functions.Tests.Integration.Infrastructure;
 
+/// <summary>
+///     Tests for validating configuration options.
+/// </summary>
 public class OptionsValidationTests
 {
     [Fact]

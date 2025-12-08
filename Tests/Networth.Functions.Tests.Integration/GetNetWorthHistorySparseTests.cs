@@ -12,17 +12,12 @@ using Xunit.Abstractions;
 namespace Networth.Functions.Tests.Integration;
 
 public class GetNetWorthHistorySparseTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
-    : IClassFixture<MockoonTestFixture>
+    : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
     [Fact]
     public async Task GetNetWorthHistory_SkipsDaysWithNoChange()
     {
-        // Arrange
-        await using var app = await DistributedApplicationTestFactory.CreateAsync(
-            testOutput,
-            mockoonTestFixture.MockoonBaseUrl);
-
-        var dbConnectionString = await app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        var dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
         if (string.IsNullOrEmpty(dbConnectionString))
         {
             Assert.Fail("Connection string not found");
