@@ -1,9 +1,7 @@
-using Azure.Storage.Queues;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Data.Entities;
-using Networth.ServiceDefaults;
 
 namespace Networth.Functions.Extensions;
 
@@ -25,11 +23,6 @@ public static class DatabaseExtensions
 
         // Ensure mock user exists
         await EnsureMockUserExistsAsync(dbContext);
-
-        // Create required queues
-        QueueServiceClient queueServiceClient = scope.ServiceProvider.GetRequiredService<QueueServiceClient>();
-        QueueClient accountSyncQueue = queueServiceClient.GetQueueClient(ResourceNames.AccountSyncQueue);
-        await accountSyncQueue.CreateIfNotExistsAsync();
     }
 
     /// <summary>
