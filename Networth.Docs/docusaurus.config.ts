@@ -188,6 +188,9 @@ const config: Config = {
             ],
             copyright: `Copyright © ${new Date().getFullYear()} Networth Project.`,
         },
+        mermaid: {
+            theme: { light: "neutral", dark: "dark" },
+        },
         prism: {
             theme: prismThemes.github,
             darkTheme: prismThemes.dracula,
