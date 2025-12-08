@@ -4,6 +4,8 @@ using Networth.Domain.Entities;
 using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
+using Npgsql;
+using Account = Networth.Infrastructure.Data.Entities.Account;
 using UserAccount = Networth.Domain.Entities.UserAccount;
 
 namespace Networth.Infrastructure.Data.Repositories;
@@ -81,7 +83,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
                 else
                 {
                     // Create new account
-                    var newAccount = new Entities.Account
+                    var newAccount = new Account
                     {
                         Id = accountId,
                         UserId = userId,
@@ -118,7 +120,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
     /// <inheritdoc />
     public async Task UpsertAccountBalancesAsync(
         string accountId,
-        IEnumerable<Networth.Domain.Entities.AccountBalance> balances,
+        IEnumerable<AccountBalance> balances,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Upserting balances for account {AccountId}", accountId);
@@ -140,7 +142,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
             }
             else
             {
-                var newBalance = new Networth.Infrastructure.Data.Entities.AccountBalance
+                var newBalance = new Entities.AccountBalance
                 {
                     Id = Guid.NewGuid().ToString(),
                     AccountId = accountId,
@@ -148,7 +150,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
                     Amount = balance.Amount,
                     Currency = balance.Currency,
                     ReferenceDate = balance.ReferenceDate,
-                    RetrievedAt = DateTime.UtcNow
+                    RetrievedAt = DateTime.UtcNow,
                 };
                 await context.AccountBalances.AddAsync(newBalance, cancellationToken);
             }
@@ -178,6 +180,6 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
 
     private static bool IsDuplicateKeyException(DbUpdateException ex)
     {
-        return ex.InnerException is Npgsql.PostgresException pgEx && pgEx.SqlState == "23505";
+        return ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505";
     }
 }

@@ -82,6 +82,18 @@ The PostgreSQL password is configured in `appsettings.json`:
 }
 ```
 
+## Testing
+
+### System Tests (Playwright)
+
+System tests use Playwright for end-to-end testing. You must install the Playwright browsers before running these tests:
+
+Install the required browsers:
+
+```shell
+pwsh Tests/Networth.Functions.System.Tests/bin/Debug/net9.0/playwright.ps1 install
+```
+
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

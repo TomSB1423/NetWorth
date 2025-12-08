@@ -1,7 +1,9 @@
+using System.Text;
 using System.Text.Json;
 using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
+using Networth.ServiceDefaults;
 
 namespace Networth.Infrastructure.Services;
 
@@ -10,8 +12,6 @@ namespace Networth.Infrastructure.Services;
 /// </summary>
 public class QueueService : IQueueService
 {
-    private const string AccountSyncQueueName = "account-sync";
-    private const string CalculateRunningBalanceQueueName = "calculate-running-balance";
     private readonly QueueServiceClient _queueServiceClient;
     private readonly ILogger<QueueService> _logger;
 
@@ -25,8 +25,6 @@ public class QueueService : IQueueService
     public async Task EnqueueAccountSyncAsync(
         string accountId,
         string userId,
-        DateTimeOffset? dateFrom = null,
-        DateTimeOffset? dateTo = null,
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation(
@@ -34,23 +32,20 @@ public class QueueService : IQueueService
             accountId,
             userId);
 
-        var queueClient = _queueServiceClient.GetQueueClient(AccountSyncQueueName);
+        var queueClient = _queueServiceClient.GetQueueClient(ResourceNames.AccountSyncQueue);
 
         // Ensure queue exists
         await queueClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
 
         var message = new
         {
-            AccountId = accountId,
-            UserId = userId,
-            DateFrom = dateFrom,
-            DateTo = dateTo
+            AccountId = accountId, UserId = userId,
         };
 
         var messageJson = JsonSerializer.Serialize(message);
 
         // Manually encode as Base64 to match Azure Functions default expectation
-        var messageBytes = System.Text.Encoding.UTF8.GetBytes(messageJson);
+        var messageBytes = Encoding.UTF8.GetBytes(messageJson);
         var base64Message = Convert.ToBase64String(messageBytes);
 
         await queueClient.SendMessageAsync(base64Message, cancellationToken);
@@ -61,19 +56,53 @@ public class QueueService : IQueueService
     }
 
     /// <inheritdoc />
+    public async Task EnqueueInstitutionSyncAsync(
+        string institutionId,
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation(
+            "Enqueueing institution sync for institution {InstitutionId}, user {UserId}",
+            institutionId,
+            userId);
+
+        var queueClient = _queueServiceClient.GetQueueClient(ResourceNames.InstitutionSyncQueue);
+
+        // Ensure queue exists
+        await queueClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+
+        var message = new
+        {
+            InstitutionId = institutionId, UserId = userId,
+        };
+
+        var messageJson = JsonSerializer.Serialize(message);
+
+        // Manually encode as Base64 to match Azure Functions default expectation
+        var messageBytes = Encoding.UTF8.GetBytes(messageJson);
+        var base64Message = Convert.ToBase64String(messageBytes);
+
+        await queueClient.SendMessageAsync(base64Message, cancellationToken);
+
+        _logger.LogInformation(
+            "Successfully enqueued institution sync for institution {InstitutionId}",
+            institutionId);
+    }
+
+    /// <inheritdoc />
     public async Task EnqueueCalculateRunningBalanceAsync(
         string accountId,
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Enqueueing calculate running balance for account {AccountId}", accountId);
 
-        var queueClient = _queueServiceClient.GetQueueClient(CalculateRunningBalanceQueueName);
+        var queueClient = _queueServiceClient.GetQueueClient(ResourceNames.CalculateRunningBalanceQueue);
         await queueClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
 
         var message = new { AccountId = accountId };
         var messageJson = JsonSerializer.Serialize(message);
 
-        var messageBytes = System.Text.Encoding.UTF8.GetBytes(messageJson);
+        var messageBytes = Encoding.UTF8.GetBytes(messageJson);
         var base64Message = Convert.ToBase64String(messageBytes);
 
         await queueClient.SendMessageAsync(base64Message, cancellationToken);

@@ -15,7 +15,7 @@ public static class QueueExtensions
         var queues = new[]
         {
             ResourceNames.AccountSyncQueue,
-            ResourceNames.CalculateRunningBalanceQueue
+            ResourceNames.InstitutionSyncQueue, ResourceNames.CalculateRunningBalanceQueue,
         };
 
         foreach (var queueName in queues)

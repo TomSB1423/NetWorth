@@ -5,10 +5,8 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Networth.Application.Commands;
 using Networth.Application.Interfaces;
 using Networth.Functions.Authentication;
-using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions.Http.Institutions;
 
@@ -16,7 +14,7 @@ namespace Networth.Functions.Functions.Http.Institutions;
 ///     Azure Function for syncing all accounts of an institution.
 /// </summary>
 public class SyncInstitution(
-    IMediator mediator,
+    IQueueService queueService,
     ICurrentUserService currentUserService,
     ILogger<SyncInstitution> logger)
 {
@@ -38,11 +36,9 @@ public class SyncInstitution(
         Required = true,
         Type = typeof(string),
         Description = "The institution ID to sync")]
-    [OpenApiResponseWithBody(
-        HttpStatusCode.OK,
-        "application/json",
-        typeof(SyncInstitutionResponse),
-        Description = "Successfully enqueued account syncs")]
+    [OpenApiResponseWithoutBody(
+        HttpStatusCode.Accepted,
+        Description = "Successfully enqueued institution sync")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.Unauthorized,
         Description = "User is not authenticated")]
@@ -68,26 +64,12 @@ public class SyncInstitution(
             institutionId,
             currentUserService.UserId);
 
-        var command = new SyncInstitutionCommand
-        {
-            InstitutionId = institutionId,
-            UserId = currentUserService.UserId,
-        };
-
-        var result = await mediator.Send<SyncInstitutionCommand, SyncInstitutionCommandResult>(command);
+        await queueService.EnqueueInstitutionSyncAsync(institutionId, currentUserService.UserId);
 
         logger.LogInformation(
-            "Successfully enqueued {Count} accounts for sync from institution {InstitutionId}",
-            result.AccountsEnqueued,
+            "Successfully enqueued institution sync for institution {InstitutionId}",
             institutionId);
 
-        var response = new SyncInstitutionResponse
-        {
-            InstitutionId = result.InstitutionId,
-            AccountsEnqueued = result.AccountsEnqueued,
-            AccountIds = result.AccountIds.ToList(),
-        };
-
-        return new OkObjectResult(response);
+        return new AcceptedResult();
     }
 }

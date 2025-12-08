@@ -1,4 +1,3 @@
-using Networth.Infrastructure.Data.Entities;
 using InfraTransaction = Networth.Infrastructure.Data.Entities.Transaction;
 
 namespace Networth.Infrastructure.Data.Queries;

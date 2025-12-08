@@ -10,14 +10,21 @@ public interface IQueueService
     /// </summary>
     /// <param name="accountId">The account ID to synchronize.</param>
     /// <param name="userId">The user ID who owns the account.</param>
-    /// <param name="dateFrom">Optional start date for transaction sync.</param>
-    /// <param name="dateTo">Optional end date for transaction sync.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task EnqueueAccountSyncAsync(
         string accountId,
         string userId,
-        DateTimeOffset? dateFrom = null,
-        DateTimeOffset? dateTo = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Enqueues a message to trigger institution synchronization.
+    /// </summary>
+    /// <param name="institutionId">The institution ID to synchronize.</param>
+    /// <param name="userId">The user ID who owns the institution accounts.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task EnqueueInstitutionSyncAsync(
+        string institutionId,
+        string userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -35,7 +35,8 @@ public class SyncAccount(
 
         SyncAccountCommand command = new()
         {
-            AccountId = syncMessage.AccountId, UserId = syncMessage.UserId, DateFrom = syncMessage.DateFrom, DateTo = syncMessage.DateTo,
+            AccountId = syncMessage.AccountId,
+            UserId = syncMessage.UserId,
         };
 
         SyncAccountCommandResult result = await mediator.Send<SyncAccountCommand, SyncAccountCommandResult>(command, cancellationToken);

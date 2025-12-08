@@ -1,0 +1,87 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            docs:
+              - "Networth.Docs/**"
+              - "openapi.json"
+              - ".github/actions/build-docs/**"
+              - ".github/actions/setup-build-env/**"
+
+  build-docs:
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.docs == 'true' }}
+    runs-on: ubuntu-latest
+    name: Build - Docs
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Copy OpenAPI Spec
+        shell: bash
+        working-directory: Networth.Docs
+        run: cp ../openapi.json static/openapi.json
+
+      - name: Install dependencies
+        shell: bash
+        working-directory: Networth.Docs
+        run: npm ci
+
+      - name: Typecheck
+        shell: bash
+        working-directory: Networth.Docs
+        run: npm run typecheck
+
+      - name: Build
+        shell: bash
+        working-directory: Networth.Docs
+        run: npm run build
+        env:
+          API_SPEC_URL: "openapi.json"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: Networth.Docs/build
+
+  deploy-docs:
+    needs: build-docs
+    if: ${{ github.ref == 'refs/heads/main' }}
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

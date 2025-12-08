@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 using System.Text.Json;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -41,8 +40,8 @@ public class CalculateRunningBalance(
 
         if (command == null)
         {
-             logger.LogError("Deserialized command is null for message: {Message}", message);
-             return;
+            logger.LogError("Deserialized command is null for message: {Message}", message);
+            return;
         }
 
         await mediator.Send<CalculateRunningBalanceCommand, CalculateRunningBalanceCommandResult>(command, cancellationToken);

@@ -35,7 +35,7 @@ public class SyncAccountCommandHandler(
                 AccountId = request.AccountId,
                 TransactionCount = 0,
                 DateFrom = request.DateFrom ?? DateTimeOffset.UtcNow.AddDays(-90),
-                DateTo = request.DateTo ?? DateTimeOffset.UtcNow
+                DateTo = request.DateTo ?? DateTimeOffset.UtcNow,
             };
         }
 
@@ -53,7 +53,7 @@ public class SyncAccountCommandHandler(
                 AccountId = request.AccountId,
                 TransactionCount = 0,
                 DateFrom = dateFrom,
-                DateTo = dateTo
+                DateTo = dateTo,
             };
         }
 
@@ -64,7 +64,7 @@ public class SyncAccountCommandHandler(
             AccountId = request.AccountId,
             TransactionCount = transactionCount.Value,
             DateFrom = dateFrom,
-            DateTo = dateTo
+            DateTo = dateTo,
         };
     }
 

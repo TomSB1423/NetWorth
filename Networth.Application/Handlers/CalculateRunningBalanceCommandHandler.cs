@@ -30,8 +30,7 @@ public class CalculateRunningBalanceCommandHandler(
 
         return new CalculateRunningBalanceCommandResult
         {
-            Success = true,
-            ProcessedTransactions = count
+            Success = true, ProcessedTransactions = count,
         };
     }
 }

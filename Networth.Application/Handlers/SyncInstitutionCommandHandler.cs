@@ -34,7 +34,9 @@ public class SyncInstitutionCommandHandler(
         {
             return new SyncInstitutionCommandResult
             {
-                InstitutionId = request.InstitutionId, AccountsEnqueued = 0, AccountIds = [],
+                InstitutionId = request.InstitutionId,
+                AccountsEnqueued = 0,
+                AccountIds = [],
             };
         }
 
@@ -50,7 +52,9 @@ public class SyncInstitutionCommandHandler(
 
         return new SyncInstitutionCommandResult
         {
-            InstitutionId = request.InstitutionId, AccountsEnqueued = 0, AccountIds = [],
+            InstitutionId = request.InstitutionId,
+            AccountsEnqueued = 0,
+            AccountIds = [],
         };
     }
 
@@ -147,8 +151,6 @@ public class SyncInstitutionCommandHandler(
                     await queueService.EnqueueAccountSyncAsync(
                         accountId,
                         request.UserId,
-                        request.DateFrom,
-                        request.DateTo,
                         cancellationToken);
 
                     accountIds.Add(accountId);
@@ -184,7 +186,9 @@ public class SyncInstitutionCommandHandler(
 
         return new SyncInstitutionCommandResult
         {
-            InstitutionId = request.InstitutionId, AccountsEnqueued = accountIds.Count, AccountIds = accountIds,
+            InstitutionId = request.InstitutionId,
+            AccountsEnqueued = accountIds.Count,
+            AccountIds = accountIds,
         };
     }
 }
