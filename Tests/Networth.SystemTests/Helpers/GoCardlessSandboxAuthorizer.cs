@@ -35,7 +35,8 @@ public class GoCardlessSandboxAuthorizer : IAsyncDisposable
         try
         {
             // Step 1: Navigate to GoCardless consent page
-            await Assertions.Expect(async () => await page.GotoAsync(authorizationLink)).ToPassAsync();
+            await NavigateWithRetryAsync(page, authorizationLink, cancellationToken);
+            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
             // Click "Agree and continue" on the GoCardless consent page
             var agreeButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Agree and continue" });
@@ -44,14 +45,14 @@ public class GoCardlessSandboxAuthorizer : IAsyncDisposable
             // Step 2: Sandbox Finance login page (fields should be pre-filled)
             // Wait for the Sign in button to appear
             var signInButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Sign in" });
-            
+
             // Click Sign in
             await signInButton.ClickAsync();
 
             // Step 3: Sandbox Finance approval/consent page
             // Wait for the Approve button/link to appear
             var approveLink = page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = "Approve" });
-            
+
             // Click Approve
             await approveLink.ClickAsync();
 
@@ -85,5 +86,27 @@ public class GoCardlessSandboxAuthorizer : IAsyncDisposable
         _disposed = true;
 
         GC.SuppressFinalize(this);
+    }
+
+    private async Task NavigateWithRetryAsync(IPage page, string url, CancellationToken cancellationToken)
+    {
+        const int maxRetries = 3;
+        for (int i = 0; i < maxRetries; i++)
+        {
+            try
+            {
+                await page.GotoAsync(url);
+                return;
+            }
+            catch (PlaywrightException ex) when (ex.Message.Contains("ERR_NETWORK_CHANGED") || ex.Message.Contains("ERR_CONNECTION_RESET"))
+            {
+                if (i == maxRetries - 1)
+                {
+                    throw;
+                }
+
+                await Task.Delay(1000, cancellationToken);
+            }
+        }
     }
 }
