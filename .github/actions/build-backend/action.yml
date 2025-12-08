@@ -1,11 +1,11 @@
-name: 'Build Backend'
-description: 'Builds and tests the backend'
+name: "Build Backend"
+description: "Builds and tests the backend"
 inputs:
   gocardless-secret-id:
-    description: 'GoCardless Secret ID'
+    description: "GoCardless Secret ID"
     required: true
   gocardless-secret-key:
-    description: 'GoCardless Secret Key'
+    description: "GoCardless Secret Key"
     required: true
 
 runs:
@@ -24,8 +24,6 @@ runs:
         echo "TESTCONTAINERS_HOST_OVERRIDE=localhost" >> $GITHUB_ENV
         echo "DOCKER_HOST=unix:///var/run/docker.sock" >> $GITHUB_ENV
         echo "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=false" >> $GITHUB_ENV
-
-    - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
     - name: Setup Build Environment
       uses: ./.github/actions/setup-build-env

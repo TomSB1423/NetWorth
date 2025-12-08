@@ -1,11 +1,9 @@
-name: 'Build Docs'
-description: 'Builds the documentation'
+name: "Build Docs"
+description: "Builds the documentation"
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-
     - name: Setup Build Environment
       uses: ./.github/actions/setup-build-env
 
