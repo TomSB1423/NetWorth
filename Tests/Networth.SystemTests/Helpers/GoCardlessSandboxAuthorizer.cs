@@ -46,7 +46,7 @@ public class GoCardlessSandboxAuthorizer : IAsyncDisposable
             // Step 2: Sandbox Finance login page (fields should be pre-filled)
             // Wait for the Sign in button to appear
             var signInButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Sign in" });
-            await signInButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
+            await signInButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 30000 });
 
             // Click Sign in
             await signInButton.ClickAsync();
@@ -55,7 +55,7 @@ public class GoCardlessSandboxAuthorizer : IAsyncDisposable
             // Step 3: Sandbox Finance approval/consent page
             // Wait for the Approve button/link to appear
             var approveLink = page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = "Approve" });
-            await approveLink.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
+            await approveLink.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 30000 });
 
             // Click Approve
             await approveLink.ClickAsync();
