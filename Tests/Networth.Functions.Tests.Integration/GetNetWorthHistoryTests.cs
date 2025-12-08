@@ -215,7 +215,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        var userId = "mock-user-single";
+        var userId = "mock-user-123";
         var accountId = "acc-single";
 
         var user = await dbContext.Users.FindAsync(userId);
@@ -298,7 +298,6 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         await dbContext.SaveChangesAsync();
 
         var httpClient = app.CreateHttpClient(ResourceNames.Functions);
-        httpClient.DefaultRequestHeaders.Add("X-Mock-User-Id", userId);
 
         // Act
         var response = await httpClient.GetAsync("api/statistics/net-worth");
