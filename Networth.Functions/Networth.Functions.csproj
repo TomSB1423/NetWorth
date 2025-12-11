@@ -18,8 +18,6 @@
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights"/>
     <PackageReference Include="Microsoft.Azure.Functions.Extensions"/>
-    <PackageReference Include="Microsoft.Extensions.Hosting"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
     <PackageReference Include="FluentValidation"/>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
     <PackageReference Include="Serilog"/>

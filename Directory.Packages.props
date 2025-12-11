@@ -55,11 +55,11 @@
     <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup Label="Entity Framework">
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.11" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup Label="Testing">
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
@@ -68,7 +68,7 @@
     <PackageVersion Include="MartinCostello.Logging.XUnit" Version="0.7.0"/>
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.10.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="10.0.0"/>
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.56.0" />
     <PackageVersion Include="Moq" Version="4.20.72"/>
@@ -80,7 +80,7 @@
   <ItemGroup Label="Code Analysis">
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="SerilogAnalyzer" Version="0.15.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
   </ItemGroup>
 </Project>

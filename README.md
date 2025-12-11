@@ -22,14 +22,14 @@ Networth is a personal financial aggregation application built with **.NET Aspir
 ## Tech Stack
 
 - **Orchestration**: .NET Aspire
-- **Backend**: Azure Functions (.NET 9 Isolated Worker)
+- **Backend**: Azure Functions (.NET 10 Isolated Worker)
 - **Frontend**: React (Vite + Tailwind CSS)
 - **Database**: PostgreSQL (EF Core)
 - **Infrastructure**: Azure Storage Queues (Azurite for local dev)
 
 ## Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
 - [Node.js](https://nodejs.org/) (optional, for frontend development)
 
@@ -91,7 +91,7 @@ System tests use Playwright for end-to-end testing. You must install the Playwri
 Install the required browsers:
 
 ```shell
-pwsh Tests/Networth.Functions.System.Tests/bin/Debug/net9.0/playwright.ps1 install
+pwsh Tests/Networth.Functions.System.Tests/bin/Debug/net10.0/playwright.ps1 install
 ```
 
 ## License

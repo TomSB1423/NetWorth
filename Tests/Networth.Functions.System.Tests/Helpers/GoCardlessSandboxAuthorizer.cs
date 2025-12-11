@@ -27,6 +27,7 @@ public class GoCardlessSandboxAuthorizer : IAsyncDisposable
         _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
             Headless = headless,
+            Args = new[] { "--disable-ipv6" }
         });
 
         var context = await _browser.NewContextAsync();
