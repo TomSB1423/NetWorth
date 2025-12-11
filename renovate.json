@@ -27,7 +27,13 @@
             "automerge": true
         },
         {
-            "groupName": "Major updates",
+            "groupName": ".NET major updates",
+            "matchManagers": ["nuget"],
+            "matchUpdateTypes": ["major"]
+        },
+        {
+            "groupName": "Node major updates",
+            "matchManagers": ["npm"],
             "matchUpdateTypes": ["major"]
         }
     ]
