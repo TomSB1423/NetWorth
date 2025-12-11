@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -29,6 +30,29 @@ public class NetworthClient
     }
 
     /// <summary>
+    ///     Sets a fake bearer token for testing with claim values.
+    ///     Sends JSON-encoded claims with the Bearer scheme.
+    /// </summary>
+    /// <param name="userId">The user ID (will be set as 'sub' claim).</param>
+    /// <param name="email">Optional email claim.</param>
+    /// <param name="name">Optional name claim.</param>
+    public void SetFakeAuthToken(string userId, string? email = null, string? name = null)
+    {
+        var claims = new
+        {
+            sub = userId,
+            email = email ?? $"{userId}@test.com",
+            name = name ?? $"Test User {userId}",
+        };
+
+        // Serialize claims to JSON and set as a custom X-Test-User header
+        // Using a custom header avoids Azure Functions/ASP.NET Core JWT validation entirely
+        var jsonToken = JsonSerializer.Serialize(claims);
+        _httpClient.DefaultRequestHeaders.Remove("X-Test-User");
+        _httpClient.DefaultRequestHeaders.Add("X-Test-User", jsonToken);
+    }
+
+    /// <summary>
     ///     Syncs all accounts for a specific institution.
     /// </summary>
     /// <param name="institutionId">The institution ID to sync.</param>
@@ -38,10 +62,13 @@ public class NetworthClient
         string institutionId,
         CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsync(
-            $"/api/institutions/{institutionId}/sync",
-            null,
-            cancellationToken);
+        var url = $"/api/institutions/{institutionId}/sync";
+        Console.WriteLine($"[DEBUG] SyncInstitutionAsync: BaseAddress={_httpClient.BaseAddress}, URL={url}");
+        Console.WriteLine($"[DEBUG] Headers: {string.Join(", ", _httpClient.DefaultRequestHeaders.Select(h => $"{h.Key}={string.Join(",", h.Value)}"))}");
+
+        var response = await _httpClient.PostAsync(url, null, cancellationToken);
+
+        Console.WriteLine($"[DEBUG] Response: {response.StatusCode}");
 
         await EnsureSuccessStatusCodeWithBodyAsync(response, cancellationToken);
     }
@@ -114,6 +141,25 @@ public class NetworthClient
         await EnsureSuccessStatusCodeWithBodyAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<List<Domain.Entities.NetWorthPoint>>(
+            _jsonOptions,
+            cancellationToken);
+
+        return result;
+    }
+
+    /// <summary>
+    ///     Gets the current authenticated user.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The current user.</returns>
+    public async Task<CurrentUserResponse?> GetCurrentUserAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.GetAsync("api/user/me", cancellationToken);
+
+        await EnsureSuccessStatusCodeWithBodyAsync(response, cancellationToken);
+
+        var result = await response.Content.ReadFromJsonAsync<CurrentUserResponse>(
             _jsonOptions,
             cancellationToken);
 

@@ -1,8 +1,8 @@
 using System.Net;
 using System.Text.Json;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -27,23 +27,24 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
                 "Validation failed: {ValidationErrors}",
                 string.Join(", ", validationEx.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}")));
 
-            HttpRequestData? request = await context.GetHttpRequestDataAsync();
+            var httpContext = context.GetHttpContext();
 
-            if (request == null)
+            if (httpContext == null)
             {
-                logger.LogError("Unable to get HttpRequestData from context");
+                logger.LogError("Unable to get HttpContext from context");
                 throw;
             }
 
-            HttpResponseData response = request.CreateResponse();
             var errors = validationEx.Errors
                 .GroupBy(e => e.PropertyName)
                 .ToDictionary(
                     g => g.Key,
                     g => g.Select(e => e.ErrorMessage).ToArray());
 
-            response.StatusCode = HttpStatusCode.BadRequest;
-            string responseBody = JsonSerializer.Serialize(
+            httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            httpContext.Response.ContentType = "application/json";
+
+            await httpContext.Response.WriteAsJsonAsync(
                 new
                 {
                     message = "Validation failed",
@@ -53,28 +54,25 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 });
-
-            await response.WriteStringAsync(responseBody);
-            context.GetInvocationResult().Value = response;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
-            HttpRequestData? request = await context.GetHttpRequestDataAsync();
 
-            if (request == null)
+            var httpContext = context.GetHttpContext();
+
+            if (httpContext == null)
             {
-                logger.LogError("Unable to get HttpRequestData from context");
+                logger.LogError("Unable to get HttpContext from context");
                 throw;
             }
 
-            HttpResponseData response = request.CreateResponse();
-            response.StatusCode = HttpStatusCode.InternalServerError;
+            httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            httpContext.Response.ContentType = "application/json";
 
-            string responseBody;
             if (environment.IsDevelopment())
             {
-                responseBody = JsonSerializer.Serialize(
+                await httpContext.Response.WriteAsJsonAsync(
                     new
                     {
                         message = ex.Message,
@@ -89,7 +87,7 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
             }
             else
             {
-                responseBody = JsonSerializer.Serialize(
+                await httpContext.Response.WriteAsJsonAsync(
                     new
                     {
                         message = "An internal server error occurred. Please try again later.",
@@ -99,9 +97,6 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     });
             }
-
-            await response.WriteStringAsync(responseBody);
-            context.GetInvocationResult().Value = response;
         }
     }
 }

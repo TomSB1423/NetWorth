@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -13,6 +14,7 @@ namespace Networth.Functions.Functions.Http.Institutions;
 /// <summary>
 ///     Azure Function for syncing all accounts of an institution.
 /// </summary>
+[AllowAnonymous]
 public class SyncInstitution(
     IQueueService queueService,
     ICurrentUserService currentUserService,
@@ -49,7 +51,7 @@ public class SyncInstitution(
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "institutions/{institutionId}/sync")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "institutions/{institutionId}/sync")]
         HttpRequest req,
         string institutionId)
     {

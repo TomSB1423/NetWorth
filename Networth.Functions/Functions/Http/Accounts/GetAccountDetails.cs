@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -14,6 +15,7 @@ namespace Networth.Functions.Functions.Http.Accounts;
 /// <summary>
 ///     Azure Function for retrieving detailed account information.
 /// </summary>
+[Authorize]
 public class GetAccountDetails(IMediator mediator, ILogger<GetAccountDetails> logger)
 {
     /// <summary>

@@ -21,6 +21,12 @@ namespace Networth.Functions.Tests.Integration.Functions.Http.Statistics;
 public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+        AuthenticateAs(Constants.MockUserId);
+    }
+
     [Fact]
     public async Task GetNetWorthHistory_ReturnsCorrectDailyTotals()
     {
@@ -289,16 +295,11 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
 
         await dbContext.SaveChangesAsync();
 
-        var httpClient = App.CreateHttpClient(ResourceNames.Functions);
-
         // Act
-        var response = await httpClient.GetAsync("api/statistics/net-worth");
+        var historyList = await Client.GetNetWorthHistoryAsync();
 
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        IEnumerable<NetWorthPoint>? history = await response.Content.ReadFromJsonAsync<IEnumerable<NetWorthPoint>>();
-        Assert.NotNull(history);
-        var historyList = history.ToList();
+        Assert.NotNull(historyList);
 
         var p1 = historyList.FirstOrDefault(p => p.Date.Date == day1);
         var p2 = historyList.FirstOrDefault(p => p.Date.Date == day2);
@@ -337,7 +338,8 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         // Seed User, Institution, Agreement, Requisition, Account
         dbContext.Users.Add(new User
         {
-            Id = userId, Name = "Sparse User",
+            Id = userId,
+            Name = "Sparse User",
         });
 
         dbContext.Institutions.Add(new InstitutionMetadata

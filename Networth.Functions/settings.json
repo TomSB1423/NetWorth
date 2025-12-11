@@ -3,6 +3,14 @@
     "Values": {
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
     },
+    "AzureAd": {
+        "Instance": "https://login.microsoftonline.com/",
+        "TenantId": "",
+        "ClientId": ""
+    },
+    "Authentication": {
+        "UseMockAuthentication": false
+    },
     "Gocardless": {
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2"
     },
@@ -11,10 +19,15 @@
     },
     "Serilog": {
         "Using": ["Serilog.Sinks.Console"],
-        "MinimumLevel": "Debug",
+        "MinimumLevel": "Information",
         "WriteTo": [
             {
-                "Name": "Console"
+                "Name": "Console",
+                "Args": {
+                    "theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Code, Serilog.Sinks.Console",
+                    "outputTemplate": "[{Timestamp:HH:mm:ss.fff} {Level:u4}] [{TraceId}] {EventName:l} : {Message:lj} <{SourceContext}>{NewLine}{Exception}",
+                    "formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact"
+                }
             }
         ]
     }

@@ -38,23 +38,38 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IClassFixture<Mockoo
     /// <summary>
     ///     Gets the test output helper.
     /// </summary>
-    private ITestOutputHelper TestOutput { get; }
+    protected ITestOutputHelper TestOutput { get; }
 
     /// <summary>
     ///     Gets the Mockoon fixture.
     /// </summary>
-    private MockoonTestFixture MockoonFixture { get; }
+    protected MockoonTestFixture MockoonFixture { get; }
 
     /// <inheritdoc />
     public virtual async Task InitializeAsync()
     {
         App = await CreateAppAsync();
-        var httpClient = App.CreateHttpClient(ResourceNames.Functions);
+
+        // Use direct HttpClient without Aspire's proxy/factory to avoid any auth middleware
+        var endpoint = App.GetEndpoint(ResourceNames.Functions);
+        var httpClient = new HttpClient { BaseAddress = endpoint };
+
         Client = new NetworthClient(httpClient);
     }
 
     /// <inheritdoc />
     public virtual async Task DisposeAsync() => await App.DisposeAsync();
+
+    /// <summary>
+    ///     Sets up fake authentication for the specified user.
+    ///     Uses the FakeJwtBearer library format which sends JSON-encoded claims.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="name">The user name.</param>
+    protected void AuthenticateAs(string userId, string name = "Test User")
+    {
+        Client.SetFakeAuthToken(userId, $"{userId}@test.com", name);
+    }
 
     /// <summary>
     ///     Polls the specified queue for a message containing the expected text.
@@ -104,6 +119,6 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IClassFixture<Mockoo
     ///     Creates the distributed application instance.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains the distributed application.</returns>
-    private Task<DistributedApplication> CreateAppAsync() =>
-        DistributedApplicationTestFactory.CreateAsync(TestOutput, MockoonFixture.MockoonBaseUrl);
+    protected virtual Task<DistributedApplication> CreateAppAsync() =>
+        DistributedApplicationTestFactory.CreateAsync(TestOutput, MockoonFixture.MockoonBaseUrl, useMockAuthentication: true);
 }

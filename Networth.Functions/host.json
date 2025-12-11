@@ -2,7 +2,10 @@
     "version": "2.0",
     "logging": {
         "logLevel": {
-            "default": "Debug"
+            "default": "Information",
+            "Microsoft.Azure.WebJobs.Host.Queues": "Warning",
+            "Azure.Core": "Warning",
+            "Host.Triggers.Queue": "Warning"
         },
         "applicationInsights": {
             "samplingSettings": {

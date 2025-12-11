@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -14,6 +15,7 @@ namespace Networth.Functions.Functions.Http.Statistics;
 /// <summary>
 ///     Azure Function for retrieving the net worth history for the current user.
 /// </summary>
+[Authorize]
 public class GetNetWorthHistory(
     IMediator mediator,
     ICurrentUserService currentUserService,

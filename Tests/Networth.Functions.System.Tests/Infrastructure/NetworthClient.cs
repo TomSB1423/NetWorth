@@ -29,6 +29,28 @@ public class NetworthClient
     }
 
     /// <summary>
+    ///     Sets a fake bearer token for testing with claim values.
+    ///     Sends JSON-encoded claims with the X-Test-User header.
+    /// </summary>
+    /// <param name="userId">The user ID (will be set as 'sub' claim).</param>
+    /// <param name="email">Optional email claim.</param>
+    /// <param name="name">Optional name claim.</param>
+    public void SetFakeAuthToken(string userId, string? email = null, string? name = null)
+    {
+        var claims = new
+        {
+            sub = userId,
+            email = email ?? $"{userId}@test.com",
+            name = name ?? $"Test User {userId}",
+        };
+
+        // Serialize claims to JSON and set as a custom X-Test-User header
+        var jsonToken = JsonSerializer.Serialize(claims);
+        _httpClient.DefaultRequestHeaders.Remove("X-Test-User");
+        _httpClient.DefaultRequestHeaders.Add("X-Test-User", jsonToken);
+    }
+
+    /// <summary>
     ///     Syncs all accounts for a specific institution.
     /// </summary>
     /// <param name="institutionId">The institution ID to sync.</param>

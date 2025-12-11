@@ -19,20 +19,23 @@ public static class DistributedApplicationTestFactory
     /// <param name="mockoonBaseUrl">Base URL of the Mockoon container.</param>
     /// <param name="enableDashboard">Whether to enable the Aspire dashboard.</param>
     /// <param name="disableFunctions">Whether to disable certain Azure Functions. Defaults to false.</param>
+    /// <param name="useMockAuthentication">Whether to use mock authentication. Defaults to false.</param>
     /// <returns>Started DistributedApplication instance.</returns>
     public static Task<DistributedApplication> CreateAsync(
         ITestOutputHelper? testOutput,
         string mockoonBaseUrl,
         bool enableDashboard = false,
-        bool disableFunctions = false)
-        => CreateAsync(testOutput, mockoonBaseUrl, true, enableDashboard, disableFunctions);
+        bool disableFunctions = false,
+        bool useMockAuthentication = false)
+        => CreateAsync(testOutput, mockoonBaseUrl, true, enableDashboard, disableFunctions, useMockAuthentication);
 
     private static async Task<DistributedApplication> CreateAsync(
         ITestOutputHelper? testOutput,
         string? mockoonBaseUrl,
         bool configureMockoon,
         bool enableDashboard,
-        bool disableFunctions)
+        bool disableFunctions,
+        bool useMockAuthentication)
     {
         IDistributedApplicationTestingBuilder builder = await DistributedApplicationTestingBuilder.CreateAsync<Networth_AppHost>(
             [],
@@ -87,6 +90,15 @@ public static class DistributedApplicationTestFactory
                 env.EnvironmentVariables["AzureWebJobs.CalculateRunningBalance.Disabled"] = queueFunctionToggle;
                 env.EnvironmentVariables["AzureWebJobs.SyncInstitutionQueue.Disabled"] = queueFunctionToggle;
                 env.EnvironmentVariables["AzureWebJobs.SyncAccount.Disabled"] = queueFunctionToggle;
+            }));
+        }
+
+        if (useMockAuthentication)
+        {
+            functionsResource.Annotations.Add(new EnvironmentCallbackAnnotation(env =>
+            {
+                // Use double underscore (__) for .NET Configuration hierarchy separator in environment variables
+                env.EnvironmentVariables["Authentication__UseMockAuthentication"] = "true";
             }));
         }
 
