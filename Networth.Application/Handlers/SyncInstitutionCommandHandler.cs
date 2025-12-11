@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
+using Networth.Domain.Entities;
 using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 
@@ -27,16 +28,48 @@ public class SyncInstitutionCommandHandler(
             request.InstitutionId,
             request.UserId);
 
+        Requisition? latestRequisition = await GetRequisitionAsync(request.InstitutionId, request.UserId, cancellationToken);
+
+        if (latestRequisition == null)
+        {
+            return new SyncInstitutionCommandResult
+            {
+                InstitutionId = request.InstitutionId,
+                AccountsEnqueued = 0,
+                AccountIds = [],
+            };
+        }
+
+        if (latestRequisition is { Status: AccountLinkStatus.Linked, Accounts.Length: > 0 })
+        {
+            return await ProcessLinkedAccountsAsync(request, latestRequisition, cancellationToken);
+        }
+
+        logger.LogWarning(
+            "Requisition {RequisitionId} has status {Status} with no linked accounts to process",
+            latestRequisition.Id,
+            latestRequisition.Status);
+
+        return new SyncInstitutionCommandResult
+        {
+            InstitutionId = request.InstitutionId,
+            AccountsEnqueued = 0,
+            AccountIds = [],
+        };
+    }
+
+    private async Task<Requisition?> GetRequisitionAsync(string institutionId, string userId, CancellationToken cancellationToken)
+    {
         var requisitions = await requisitionRepository.GetRequisitionsByInstitutionAndUserAsync(
-            request.InstitutionId,
-            request.UserId,
+            institutionId,
+            userId,
             cancellationToken);
 
         var requisitionsList = requisitions.ToList();
         logger.LogDebug(
             "Found {Count} requisition(s) for institution {InstitutionId}",
             requisitionsList.Count,
-            request.InstitutionId);
+            institutionId);
 
         var requisition = requisitionsList.FirstOrDefault();
 
@@ -44,15 +77,9 @@ public class SyncInstitutionCommandHandler(
         {
             logger.LogWarning(
                 "No requisition found for institution {InstitutionId} and user {UserId}. User needs to link their account first.",
-                request.InstitutionId,
-                request.UserId);
-
-            return new SyncInstitutionCommandResult
-            {
-                InstitutionId = request.InstitutionId,
-                AccountsEnqueued = 0,
-                AccountIds = [],
-            };
+                institutionId,
+                userId);
+            return null;
         }
 
         logger.LogDebug(
@@ -66,13 +93,7 @@ public class SyncInstitutionCommandHandler(
             logger.LogError(
                 "Requisition {RequisitionId} not found in GoCardless API. It may have been deleted.",
                 requisition.Id);
-
-            return new SyncInstitutionCommandResult
-            {
-                InstitutionId = request.InstitutionId,
-                AccountsEnqueued = 0,
-                AccountIds = [],
-            };
+            return null;
         }
 
         logger.LogDebug(
@@ -86,101 +107,88 @@ public class SyncInstitutionCommandHandler(
                 "Requisition {RequisitionId} is still pending with status {Status}. User needs to complete authorization.",
                 requisition.Id,
                 latestRequisition.Status);
-
-            return new SyncInstitutionCommandResult
-            {
-                InstitutionId = request.InstitutionId,
-                AccountsEnqueued = 0,
-                AccountIds = [],
-            };
+            return null;
         }
 
         await requisitionRepository.UpdateRequisitionAsync(latestRequisition, cancellationToken);
 
-        if (latestRequisition.Status == AccountLinkStatus.Linked && latestRequisition.Accounts.Length > 0)
+        return latestRequisition;
+    }
+
+    private async Task<SyncInstitutionCommandResult> ProcessLinkedAccountsAsync(
+        SyncInstitutionCommand request,
+        Requisition latestRequisition,
+        CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            "Processing {Count} linked account(s)",
+            latestRequisition.Accounts.Length);
+
+        List<string> accountIds = [];
+        int successCount = 0;
+        int failureCount = 0;
+
+        foreach (string accountId in latestRequisition.Accounts)
         {
-            logger.LogInformation(
-                "Processing {Count} linked account(s)",
-                latestRequisition.Accounts.Length);
-
-            var accountIds = new List<string>();
-            int successCount = 0;
-            int failureCount = 0;
-
-            foreach (var accountId in latestRequisition.Accounts)
+            try
             {
-                try
+                AccountDetail? accountDetails = await financialProvider.GetAccountDetailsAsync(accountId, cancellationToken);
+
+                if (accountDetails != null)
                 {
-                    var accountDetails = await financialProvider.GetAccountDetailsAsync(accountId, cancellationToken);
+                    logger.LogDebug(
+                        "Account details for {AccountId}: {Name}",
+                        accountId,
+                        accountDetails.DisplayName ?? accountDetails.Name);
+                    await accountRepository.UpsertAccountAsync(
+                        accountId,
+                        request.UserId,
+                        latestRequisition.Id,
+                        request.InstitutionId,
+                        accountDetails,
+                        cancellationToken);
 
-                    if (accountDetails != null)
-                    {
-                        logger.LogDebug(
-                            "Account details for {AccountId}: {Name}",
-                            accountId,
-                            accountDetails.DisplayName ?? accountDetails.Name);
-                        await accountRepository.UpsertAccountAsync(
-                            accountId,
-                            request.UserId,
-                            latestRequisition.Id,
-                            request.InstitutionId,
-                            accountDetails,
-                            cancellationToken);
+                    await queueService.EnqueueAccountSyncAsync(
+                        accountId,
+                        request.UserId,
+                        cancellationToken);
 
-                        await queueService.EnqueueAccountSyncAsync(
-                            accountId,
-                            request.UserId,
-                            request.DateFrom,
-                            request.DateTo,
-                            cancellationToken);
-
-                        accountIds.Add(accountId);
-                        successCount++;
-                    }
-                    else
-                    {
-                        failureCount++;
-                        logger.LogError(
-                            "Could not fetch details for account {AccountId} - received null response from GoCardless",
-                            accountId);
-                    }
+                    accountIds.Add(accountId);
+                    successCount++;
                 }
-                catch (Exception ex)
+                else
                 {
                     failureCount++;
                     logger.LogError(
-                        ex,
-                        "Error processing account {AccountId}: {ErrorMessage}",
-                        accountId,
-                        ex.Message);
+                        "Could not fetch details for account {AccountId} - received null response from GoCardless",
+                        accountId);
                 }
             }
-
-            var failureInfo = failureCount > 0 ? $", {failureCount} failed" : string.Empty;
-            logger.LogInformation(
-                "Enqueued {SuccessCount} account(s) for sync from institution {InstitutionId}{FailureInfo}",
-                successCount,
-                request.InstitutionId,
-                failureInfo);
-
-            return new SyncInstitutionCommandResult
+            catch (Exception ex)
             {
-                InstitutionId = request.InstitutionId,
-                AccountsEnqueued = accountIds.Count,
-                AccountIds = accountIds,
-            };
+                failureCount++;
+                logger.LogError(
+                    ex,
+                    "Error processing account {AccountId}: {ErrorMessage}",
+                    accountId,
+                    ex.Message);
+            }
         }
 
-        logger.LogWarning(
-            "Requisition {RequisitionId} has status {Status} with no linked accounts to process",
-            latestRequisition.Id,
-            latestRequisition.Status);
+        string failureInfo = failureCount > 0
+            ? $", {failureCount} failed"
+            : string.Empty;
+        logger.LogInformation(
+            "Enqueued {SuccessCount} account(s) for sync from institution {InstitutionId}{FailureInfo}",
+            successCount,
+            request.InstitutionId,
+            failureInfo);
 
         return new SyncInstitutionCommandResult
         {
             InstitutionId = request.InstitutionId,
-            AccountsEnqueued = 0,
-            AccountIds = [],
+            AccountsEnqueued = accountIds.Count,
+            AccountIds = accountIds,
         };
     }
 }

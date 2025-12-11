@@ -26,6 +26,17 @@ public class LinkAccountCommandHandler(
             command.UserId,
             command.InstitutionId);
 
+        var agreement = await CreateAndSaveAgreementAsync(command, cancellationToken);
+        var requisition = await CreateAndSaveRequisitionAsync(command, agreement.Id, cancellationToken);
+
+        return new LinkAccountCommandResult
+        {
+            AuthorizationLink = requisition.AuthenticationLink, Status = requisition.Status,
+        };
+    }
+
+    private async Task<Domain.Entities.Agreement> CreateAndSaveAgreementAsync(LinkAccountCommand command, CancellationToken cancellationToken)
+    {
         InstitutionMetadata institution = await financialProvider.GetInstitutionAsync(command.InstitutionId, cancellationToken);
 
         var agreement = await financialProvider.CreateAgreementAsync(
@@ -44,12 +55,17 @@ public class LinkAccountCommandHandler(
 
         logger.LogInformation("Saved agreement {AgreementId} to database", agreement.Id);
 
+        return agreement;
+    }
+
+    private async Task<Domain.Entities.Requisition> CreateAndSaveRequisitionAsync(LinkAccountCommand command, string agreementId, CancellationToken cancellationToken)
+    {
         var frontendUrl = frontendOptions.Value.Url;
         var callbackUrl = $"{frontendUrl}?institutionId={command.InstitutionId}";
 
         var requisition = await financialProvider.CreateRequisitionAsync(
             command.InstitutionId,
-            agreement.Id,
+            agreementId,
             callbackUrl, // Redirect to frontend callback page
             cancellationToken);
 
@@ -63,9 +79,6 @@ public class LinkAccountCommandHandler(
 
         logger.LogInformation("Saved requisition {RequisitionId} to database", requisition.Id);
 
-        return new LinkAccountCommandResult
-        {
-            AuthorizationLink = requisition.AuthenticationLink, Status = requisition.Status,
-        };
+        return requisition;
     }
 }

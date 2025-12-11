@@ -46,6 +46,7 @@ export function AccountProvider({ children }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAccounts() {
     const context = useContext(AccountContext);
     if (context === undefined) {

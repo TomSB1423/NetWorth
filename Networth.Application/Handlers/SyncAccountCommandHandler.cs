@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
+using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 
 namespace Networth.Application.Handlers;
@@ -24,20 +25,59 @@ public class SyncAccountCommandHandler(
             "Syncing account {AccountId} for user {UserId}",
             request.AccountId,
             request.UserId);
-        var account = await financialProvider.GetAccountAsync(request.AccountId, cancellationToken);
 
-        if (account is null)
+        await accountRepository.UpdateAccountStatusAsync(request.AccountId, AccountLinkStatus.Syncing, cancellationToken);
+
+        if (!await SyncAccountMetadataAsync(request.AccountId, request.UserId, cancellationToken))
         {
-            logger.LogError(
-                "Account {AccountId} not found during sync - may have been deleted or access revoked",
-                request.AccountId);
             return new SyncAccountCommandResult
             {
                 AccountId = request.AccountId,
                 TransactionCount = 0,
                 DateFrom = request.DateFrom ?? DateTimeOffset.UtcNow.AddDays(-90),
-                DateTo = request.DateTo ?? DateTimeOffset.UtcNow
+                DateTo = request.DateTo ?? DateTimeOffset.UtcNow,
             };
+        }
+
+        await SyncAccountBalancesAsync(request.AccountId, cancellationToken);
+
+        var dateTo = request.DateTo ?? DateTimeOffset.UtcNow;
+        var dateFrom = request.DateFrom ?? dateTo.AddDays(-90);
+
+        var transactionCount = await SyncAccountTransactionsAsync(request.AccountId, request.UserId, dateFrom, dateTo, cancellationToken);
+
+        if (transactionCount == null)
+        {
+            return new SyncAccountCommandResult
+            {
+                AccountId = request.AccountId,
+                TransactionCount = 0,
+                DateFrom = dateFrom,
+                DateTo = dateTo,
+            };
+        }
+
+        await accountRepository.UpdateAccountStatusAsync(request.AccountId, AccountLinkStatus.Linked, cancellationToken);
+
+        return new SyncAccountCommandResult
+        {
+            AccountId = request.AccountId,
+            TransactionCount = transactionCount.Value,
+            DateFrom = dateFrom,
+            DateTo = dateTo,
+        };
+    }
+
+    private async Task<bool> SyncAccountMetadataAsync(string accountId, string userId, CancellationToken cancellationToken)
+    {
+        var account = await financialProvider.GetAccountAsync(accountId, cancellationToken);
+
+        if (account is null)
+        {
+            logger.LogError(
+                "Account {AccountId} not found during sync - may have been deleted or access revoked",
+                accountId);
+            return false;
         }
 
         logger.LogDebug(
@@ -45,7 +85,7 @@ public class SyncAccountCommandHandler(
             account.InstitutionId,
             account.Status,
             account.Name);
-        var accountDetails = await financialProvider.GetAccountDetailsAsync(request.AccountId, cancellationToken);
+        var accountDetails = await financialProvider.GetAccountDetailsAsync(accountId, cancellationToken);
 
         if (accountDetails != null)
         {
@@ -54,14 +94,14 @@ public class SyncAccountCommandHandler(
                 accountDetails.Currency,
                 accountDetails.CashAccountType,
                 accountDetails.Product);
-            var existingAccounts = await accountRepository.GetAccountsByUserIdAsync(request.UserId, cancellationToken);
-            var existingAccount = existingAccounts.FirstOrDefault(a => a.Id == request.AccountId);
+            var existingAccounts = await accountRepository.GetAccountsByUserIdAsync(userId, cancellationToken);
+            var existingAccount = existingAccounts.FirstOrDefault(a => a.Id == accountId);
 
             if (existingAccount != null)
             {
                 await accountRepository.UpsertAccountAsync(
-                    request.AccountId,
-                    request.UserId,
+                    accountId,
+                    userId,
                     existingAccount.RequisitionId,
                     account.InstitutionId,
                     accountDetails,
@@ -71,23 +111,43 @@ public class SyncAccountCommandHandler(
             {
                 logger.LogWarning(
                     "Account {AccountId} not found in database, cannot save without requisitionId. Skipping account metadata save.",
-                    request.AccountId);
+                    accountId);
             }
         }
         else
         {
-            logger.LogDebug("Account details not available for {AccountId}", request.AccountId);
+            logger.LogDebug("Account details not available for {AccountId}", accountId);
         }
 
-        var dateTo = request.DateTo ?? DateTimeOffset.UtcNow;
-        var dateFrom = request.DateFrom ?? dateTo.AddDays(-90);
+        return true;
+    }
 
+    private async Task SyncAccountBalancesAsync(string accountId, CancellationToken cancellationToken)
+    {
+        var balances = await financialProvider.GetAccountBalancesAsync(accountId, cancellationToken);
+        if (balances != null)
+        {
+            await accountRepository.UpsertAccountBalancesAsync(accountId, balances, cancellationToken);
+        }
+        else
+        {
+            logger.LogWarning("Balances not available for account {AccountId}", accountId);
+        }
+    }
+
+    private async Task<int?> SyncAccountTransactionsAsync(
+        string accountId,
+        string userId,
+        DateTimeOffset dateFrom,
+        DateTimeOffset dateTo,
+        CancellationToken cancellationToken)
+    {
         logger.LogDebug(
             "Fetching transactions from {DateFrom} to {DateTo}",
             dateFrom.ToString("yyyy-MM-dd"),
             dateTo.ToString("yyyy-MM-dd"));
         var transactions = await financialProvider.GetAccountTransactionsAsync(
-            request.AccountId,
+            accountId,
             dateFrom,
             dateTo,
             cancellationToken);
@@ -96,14 +156,8 @@ public class SyncAccountCommandHandler(
         {
             logger.LogError(
                 "Failed to retrieve transactions for account {AccountId} - account may have been deleted",
-                request.AccountId);
-            return new SyncAccountCommandResult
-            {
-                AccountId = request.AccountId,
-                TransactionCount = 0,
-                DateFrom = dateFrom,
-                DateTo = dateTo
-            };
+                accountId);
+            return null;
         }
 
         var transactionList = transactions.ToList();
@@ -111,24 +165,18 @@ public class SyncAccountCommandHandler(
         logger.LogDebug(
             "Retrieved {Count} transactions for account {AccountId}",
             transactionList.Count,
-            request.AccountId);
+            accountId);
         await transactionRepository.UpsertTransactionsAsync(
-            request.AccountId,
-            request.UserId,
+            accountId,
+            userId,
             transactionList,
             cancellationToken);
 
         logger.LogInformation(
             "Synced {Count} transactions for account {AccountId}",
             transactionList.Count,
-            request.AccountId);
+            accountId);
 
-        return new SyncAccountCommandResult
-        {
-            AccountId = request.AccountId,
-            TransactionCount = transactionList.Count,
-            DateFrom = dateFrom,
-            DateTo = dateTo
-        };
+        return transactionList.Count;
     }
 }

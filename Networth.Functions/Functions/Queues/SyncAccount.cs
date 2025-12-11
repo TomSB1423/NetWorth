@@ -14,7 +14,8 @@ namespace Networth.Functions.Functions.Queues;
 /// </summary>
 public class SyncAccount(
     ILogger<SyncAccount> logger,
-    IMediator mediator)
+    IMediator mediator,
+    IQueueService queueService)
 {
     /// <summary>
     ///     Processes account sync messages from the queue.
@@ -23,7 +24,7 @@ public class SyncAccount(
     /// <param name="cancellationToken">Cancellation token.</param>
     [Function("SyncAccount")]
     public async Task RunAsync(
-        [QueueTrigger("account-sync", Connection = ResourceNames.Queues)]
+        [QueueTrigger(ResourceNames.AccountSyncQueue, Connection = ResourceNames.Queues)]
         string message,
         CancellationToken cancellationToken)
     {
@@ -34,7 +35,8 @@ public class SyncAccount(
 
         SyncAccountCommand command = new()
         {
-            AccountId = syncMessage.AccountId, UserId = syncMessage.UserId, DateFrom = syncMessage.DateFrom, DateTo = syncMessage.DateTo,
+            AccountId = syncMessage.AccountId,
+            UserId = syncMessage.UserId,
         };
 
         SyncAccountCommandResult result = await mediator.Send<SyncAccountCommand, SyncAccountCommandResult>(command, cancellationToken);
@@ -45,5 +47,7 @@ public class SyncAccount(
             result.AccountId,
             result.DateFrom,
             result.DateTo);
+
+        await queueService.EnqueueCalculateRunningBalanceAsync(result.AccountId, cancellationToken);
     }
 }

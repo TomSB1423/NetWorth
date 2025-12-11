@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Networth.Domain\Networth.Domain.csproj" />
     <ProjectReference Include="..\Networth.Application\Networth.Application.csproj" />
+    <ProjectReference Include="..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>

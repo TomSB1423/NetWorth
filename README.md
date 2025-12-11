@@ -1,8 +1,14 @@
 # Networth Application
 
-## Overview
+[![Backend CI](https://github.com/TomSB1423/NetWorth/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/TomSB1423/NetWorth/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/TomSB1423/NetWorth/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/TomSB1423/NetWorth/actions/workflows/frontend-ci.yml)
+[![Docs CI](https://github.com/TomSB1423/NetWorth/actions/workflows/docs-ci.yml/badge.svg)](https://github.com/TomSB1423/NetWorth/actions/workflows/docs-ci.yml)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
+[![Networth Docs](https://img.shields.io/badge/docs-Networth-blue)](https://tomsb1423.github.io/NetWorth/)
 
-Networth is a personal financial aggregation application built with **.NET 9** and **.NET Aspire**. It allows users to track their net worth, view asset allocation, and sync accounts from various financial institutions using the GoCardless API.
+Networth is a personal financial aggregation application built with **.NET Aspire**. It allows users to track their net worth, view asset allocation, and sync accounts from various financial institutions using the GoCardless API.
+
+[**Visit the Documentation Site**](https://tomsb1423.github.io/NetWorth/)
 
 ![Financial Dashboard](readme-assets/ui-dashboard.jpg)
 
@@ -74,6 +80,18 @@ The PostgreSQL password is configured in `appsettings.json`:
 "Parameters": {
     "postgres-password": "LocalDevPassword123!"
 }
+```
+
+## Testing
+
+### System Tests (Playwright)
+
+System tests use Playwright for end-to-end testing. You must install the Playwright browsers before running these tests:
+
+Install the required browsers:
+
+```shell
+pwsh Tests/Networth.Functions.System.Tests/bin/Debug/net9.0/playwright.ps1 install
 ```
 
 ## License

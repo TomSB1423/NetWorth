@@ -44,5 +44,15 @@ public static class ResourceNames
     ///     Gets the queue name for account sync operations.
     /// </summary>
     public const string AccountSyncQueue = "account-sync";
+
+    /// <summary>
+    ///     Gets the queue name for institution sync operations.
+    /// </summary>
+    public const string InstitutionSyncQueue = "institution-sync";
+
+    /// <summary>
+    ///     Gets the queue name for calculate running balance operations.
+    /// </summary>
+    public const string CalculateRunningBalanceQueue = "calculate-running-balance";
 }
 

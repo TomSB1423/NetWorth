@@ -58,6 +58,9 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.Property(t => t.ImportedAt)
             .IsRequired();
 
+        builder.Property(t => t.RunningBalance)
+            .HasPrecision(18, 2);
+
         // Foreign Keys
         builder.HasOne<Entities.User>()
             .WithMany(u => u.Transactions)

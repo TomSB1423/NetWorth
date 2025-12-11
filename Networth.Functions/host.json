@@ -11,5 +11,10 @@
             },
             "enableLiveMetricsFilters": true
         }
+    },
+    "extensions": {
+        "queues": {
+            "maxDequeueCount": 3
+        }
     }
 }

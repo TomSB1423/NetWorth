@@ -1,3 +1,5 @@
+using Networth.Domain.Enums;
+
 namespace Networth.Infrastructure.Data.Entities;
 
 /// <summary>
@@ -49,6 +51,11 @@ public class Account
     ///     Gets or sets the cash account type (e.g., CACC).
     /// </summary>
     public string? CashAccountType { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the status of the account.
+    /// </summary>
+    public AccountLinkStatus Status { get; set; } = AccountLinkStatus.Linked;
 
     /// <summary>
     ///     Gets or sets additional account data as JSON.

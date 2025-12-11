@@ -27,4 +27,20 @@ public interface ITransactionRepository
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A collection of transactions for the account.</returns>
     Task<IEnumerable<Transaction>> GetByAccountIdAsync(string accountId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Calculates and updates running balances for all transactions of an account.
+    /// </summary>
+    /// <param name="accountId">The account ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The number of transactions updated.</returns>
+    Task<int> CalculateRunningBalancesAsync(string accountId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Gets the net worth history for a user.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A collection of net worth points.</returns>
+    Task<IEnumerable<NetWorthPoint>> GetNetWorthHistoryAsync(string userId, CancellationToken cancellationToken = default);
 }
