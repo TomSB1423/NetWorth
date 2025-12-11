@@ -9,12 +9,21 @@ export default function Transactions() {
     const navigate = useNavigate();
 
     // Default to last 90 days
-    const dateTo = new Date().toISOString().split('T')[0];
-    const dateFrom = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const [dateRange] = React.useState(() => {
+        const to = new Date().toISOString().split("T")[0];
+        const from = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0];
+        return { from, to };
+    });
 
-    const { data: transactions = [], isLoading, error } = useQuery({
-        queryKey: ["transactions", id, dateFrom, dateTo],
-        queryFn: () => api.getTransactions(id, dateFrom, dateTo),
+    const {
+        data: transactions = [],
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["transactions", id, dateRange.from, dateRange.to],
+        queryFn: () => api.getTransactions(id, dateRange.from, dateRange.to),
     });
 
     const formatCurrency = (amount, currency) => {
@@ -33,11 +42,13 @@ export default function Transactions() {
     };
 
     const getTransactionDescription = (tx) => {
-        return tx.remittanceInformationUnstructured || 
-               tx.creditorName || 
-               tx.debtorName || 
-               tx.proprietaryBankTransactionCode || 
-               "Transaction";
+        return (
+            tx.remittanceInformationUnstructured ||
+            tx.creditorName ||
+            tx.debtorName ||
+            tx.proprietaryBankTransactionCode ||
+            "Transaction"
+        );
     };
 
     return (
@@ -76,19 +87,38 @@ export default function Transactions() {
                                     className="bg-slate-900/50 rounded-xl p-4 flex items-center justify-between hover:bg-slate-900 transition-colors"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className={`p-2 rounded-full ${tx.amount > 0 ? 'bg-green-500/10 text-green-500' : 'bg-white/5 text-white'}`}>
-                                            {tx.amount > 0 ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                                        <div
+                                            className={`p-2 rounded-full ${
+                                                tx.amount > 0
+                                                    ? "bg-green-500/10 text-green-500"
+                                                    : "bg-white/5 text-white"
+                                            }`}
+                                        >
+                                            {tx.amount > 0 ? (
+                                                <ArrowDownLeft size={20} />
+                                            ) : (
+                                                <ArrowUpRight size={20} />
+                                            )}
                                         </div>
                                         <div>
                                             <div className="font-medium text-white">
                                                 {getTransactionDescription(tx)}
                                             </div>
                                             <div className="text-sm text-gray-400">
-                                                {formatDate(tx.bookingDate || tx.valueDate)}
+                                                {formatDate(
+                                                    tx.bookingDate ||
+                                                        tx.valueDate
+                                                )}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className={`font-semibold ${tx.amount > 0 ? 'text-green-400' : 'text-white'}`}>
+                                    <div
+                                        className={`font-semibold ${
+                                            tx.amount > 0
+                                                ? "text-green-400"
+                                                : "text-white"
+                                        }`}
+                                    >
                                         {formatCurrency(tx.amount, tx.currency)}
                                     </div>
                                 </div>

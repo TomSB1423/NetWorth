@@ -8,6 +8,13 @@ namespace Networth.Domain.Repositories;
 public interface ICacheMetadataRepository : IBaseRepository<CacheMetadata, string>
 {
     /// <summary>
+    ///     Gets the cache key for institutions.
+    /// </summary>
+    /// <param name="countryCode">The country code.</param>
+    /// <returns>The cache key.</returns>
+    string GetInstitutionsCacheKey(string countryCode);
+
+    /// <summary>
     ///     Gets cache metadata by cache key.
     /// </summary>
     /// <param name="cacheKey">The cache key.</param>

@@ -12,34 +12,46 @@ Networth is built using modern, reliable technologies to ensure performance, sec
 The application is composed of a frontend dashboard, a backend API, and secure data storage, all orchestrated together.
 
 ```mermaid
-graph TD
-    User((User))
+graph TB
+    %% C4 Style Classes
+    classDef person fill:#2c3e50,stroke:#1a252f,color:#fff,stroke-width:2px;
+    classDef container fill:#8226d6,stroke:#5b1a96,color:#fff,stroke-width:2px;
+    classDef component fill:#a866e2,stroke:#7522c1,color:#fff,stroke-width:2px;
+    classDef database fill:#336791,stroke:#1a3a52,color:#fff,stroke-width:2px;
+    classDef external fill:#95a5a6,stroke:#7f8c8d,color:#fff,stroke-width:2px;
 
-    subgraph "Frontend (React)"
-        UI[Web Dashboard]
+    %% Actors
+    User((User)):::person
+
+    %% External Systems
+    GoCardless[GoCardless API<br/>External Banking Provider]:::external
+
+    %% Networth System Boundary
+    subgraph "Networth System"
+        direction TB
+
+        SPA[SPA<br/>React, Vite]:::container
+
+        subgraph "Azure Functions App"
+            direction TB
+            HttpFunc[HTTP Triggers<br/>API Controllers]:::component
+            QueueFunc[Queue Triggers<br/>Background Workers]:::component
+        end
+
+        Postgres[(PostgreSQL<br/>Database)]:::database
+        Storage[[Azure Storage<br/>Queues]]:::database
     end
 
-    subgraph "Backend (Azure Functions)"
-        API[HTTP API]
-        Queue[Queue Triggers]
-    end
+    %% Relationships
+    User -->|Uses| SPA
+    SPA -->|JSON/HTTPS| HttpFunc
 
-    subgraph "Data"
-        DB[(PostgreSQL)]
-        Storage[Azure Storage]
-    end
+    HttpFunc -->|Reads/Writes| Postgres
+    HttpFunc -->|Enqueues| Storage
 
-    subgraph "External"
-        Bank[GoCardless API]
-    end
-
-    User -->|HTTPS| UI
-    UI -->|HTTPS| API
-    API -->|EF Core| DB
-    API -->|Queue| Storage
-    Queue -->|Read| Storage
-    Queue -->|Write| DB
-    Queue -->|HTTPS| Bank
+    QueueFunc -->|Dequeues| Storage
+    QueueFunc -->|Writes| Postgres
+    QueueFunc -->|Syncs Data| GoCardless
 ```
 
 ## Core Technologies

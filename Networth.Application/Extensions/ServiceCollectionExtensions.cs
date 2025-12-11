@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>, LinkAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncInstitutionCommand, SyncInstitutionCommandResult>, SyncInstitutionCommandHandler>();
+        services.AddScoped<IRequestHandler<CalculateRunningBalanceCommand, CalculateRunningBalanceCommandResult>, CalculateRunningBalanceCommandHandler>();
 
         // Register query handlers
         services.AddScoped<IRequestHandler<GetAccountsQuery, GetAccountsQueryResult>, GetAccountsQueryHandler>();
@@ -47,6 +48,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRequestHandler<GetAccountBalancesQuery, GetAccountBalancesQueryResult>, GetAccountBalancesQueryHandler>();
         services.AddScoped<IRequestHandler<GetAccountDetailsQuery, GetAccountDetailsQueryResult>, GetAccountDetailsQueryHandler>();
         services.AddScoped<IRequestHandler<GetTransactionsQuery, GetTransactionsQueryResult>, GetTransactionsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetNetWorthHistoryQuery, GetNetWorthHistoryQueryResult>, GetNetWorthHistoryQueryHandler>();
         services.AddScoped<IRequestHandler<GetInstitutionsQuery, GetInstitutionsQueryResult>, GetInstitutionsQueryHandler>();
         services.AddScoped<IRequestHandler<GetRequisitionQuery, GetRequisitionQueryResult>, GetRequisitionQueryHandler>();
 

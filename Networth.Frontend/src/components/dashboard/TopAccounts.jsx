@@ -1,11 +1,20 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAccounts } from "../../contexts/AccountContext";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-export function TopAccounts() {
+export function TopAccounts({ isSyncing }) {
     const { accounts, balances } = useAccounts();
     const navigate = useNavigate();
+
+    if (isSyncing) {
+        return (
+            <div className="h-[200px] w-full flex items-center justify-center text-gray-400">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <span className="ml-2">Loading data...</span>
+            </div>
+        );
+    }
 
     // Helper to get balance for an account
     const getAccountBalance = (accountId) => {
@@ -34,14 +43,12 @@ export function TopAccounts() {
                     const amount = balance ? parseFloat(balance.amount) : 0;
                     const currency = balance ? balance.currency : "GBP";
 
-                    // Dummy change data for now
-                    const isPositive = Math.random() > 0.5;
-                    const change = (Math.random() * 5).toFixed(1);
-
                     return (
                         <div
                             key={account.id}
-                            onClick={() => navigate(`/accounts/${account.id}/transactions`)}
+                            onClick={() =>
+                                navigate(`/accounts/${account.id}/transactions`)
+                            }
                             className="flex items-center justify-between p-4 rounded-lg bg-slate-700/30 border border-slate-700/50 hover:bg-slate-700/50 transition-colors cursor-pointer"
                         >
                             <div className="flex items-center gap-4">
@@ -66,19 +73,8 @@ export function TopAccounts() {
                                         currency: currency,
                                     }).format(amount)}
                                 </div>
-                                <div
-                                    className={`text-xs flex items-center justify-end gap-1 ${
-                                        isPositive
-                                            ? "text-green-400"
-                                            : "text-red-400"
-                                    }`}
-                                >
-                                    {isPositive ? (
-                                        <ArrowUpRight size={12} />
-                                    ) : (
-                                        <ArrowDownRight size={12} />
-                                    )}
-                                    {change}%
+                                <div className="text-xs text-slate-500 mt-1">
+                                    Coming soon
                                 </div>
                             </div>
                         </div>

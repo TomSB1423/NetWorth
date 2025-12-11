@@ -1,0 +1,66 @@
+name: Frontend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - "Networth.Frontend/**"
+              - ".github/actions/build-frontend/**"
+
+  build-and-test-frontend:
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    name: Build & Test - Frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: Networth.Frontend/package-lock.json
+
+      - name: Install dependencies
+        shell: bash
+        working-directory: Networth.Frontend
+        run: npm ci
+
+      - name: Lint
+        shell: bash
+        working-directory: Networth.Frontend
+        run: npm run lint
+
+      - name: Test
+        shell: bash
+        working-directory: Networth.Frontend
+        run: npm test -- --run
+
+      - name: Build
+        shell: bash
+        working-directory: Networth.Frontend
+        run: npm run build

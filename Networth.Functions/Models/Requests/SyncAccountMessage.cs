@@ -14,14 +14,4 @@ public class SyncAccountMessage
     ///     Gets or sets the user ID who owns the account.
     /// </summary>
     public required string UserId { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the start date for transaction sync (optional).
-    /// </summary>
-    public DateTimeOffset? DateFrom { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the end date for transaction sync (optional).
-    /// </summary>
-    public DateTimeOffset? DateTo { get; set; }
 }

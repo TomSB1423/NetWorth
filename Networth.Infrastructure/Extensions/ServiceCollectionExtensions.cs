@@ -13,6 +13,7 @@ using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Data.Repositories;
 using Networth.Infrastructure.Gocardless;
 using Networth.Infrastructure.Gocardless.Auth;
+using Networth.Infrastructure.Gocardless.Handlers;
 using Networth.Infrastructure.Gocardless.Options;
 using Networth.Infrastructure.Services;
 using Npgsql;
@@ -34,6 +35,7 @@ public static class ServiceCollectionExtensions
 
         // Configure HTTP client for GoCardless
         services.AddTransient<GoCardlessAuthHandler>();
+        services.AddTransient<RateLimitLoggingHandler>();
         services.AddSingleton<GoCardlessTokenManager>(serviceProvider =>
         {
             IOptions<GocardlessOptions> options = serviceProvider.GetRequiredService<IOptions<GocardlessOptions>>();
@@ -51,7 +53,7 @@ public static class ServiceCollectionExtensions
             },
         };
 
-        services.AddRefitClient<IGocardlessClient>(_ =>
+        var refitClientBuilder = services.AddRefitClient<IGocardlessClient>(_ =>
                 new RefitSettings { ContentSerializer = new SystemTextJsonContentSerializer(options) })
             .ConfigureHttpClient((serviceProvider, httpClient) =>
             {
@@ -59,12 +61,23 @@ public static class ServiceCollectionExtensions
                     .GetRequiredService<IOptions<GocardlessOptions>>().Value;
                 httpClient.BaseAddress = new Uri(gocardlessOptions.BankAccountDataBaseUrl);
             })
-            .AddHttpMessageHandler<GoCardlessAuthHandler>()
-            .AddStandardResilienceHandler(options =>
+            .AddHttpMessageHandler<GoCardlessAuthHandler>();
+
+        refitClientBuilder.AddStandardResilienceHandler(options =>
             {
                 options.Retry.BackoffType = DelayBackoffType.Exponential;
                 options.Retry.UseJitter = true;
+                options.Retry.MaxRetryAttempts = 5;
+                options.Retry.ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                    .Handle<HttpRequestException>()
+                    .HandleResult(response =>
+                        response.StatusCode == System.Net.HttpStatusCode.Conflict ||
+                        response.StatusCode == System.Net.HttpStatusCode.TooManyRequests ||
+                        (int)response.StatusCode >= 500);
             });
+
+        // Add rate limit logging handler after resilience handler so it logs every attempt (inner handler)
+        refitClientBuilder.AddHttpMessageHandler<RateLimitLoggingHandler>();
 
         // Register Infrastructure services
         services.AddTransient<IFinancialProvider, GocardlessService>();

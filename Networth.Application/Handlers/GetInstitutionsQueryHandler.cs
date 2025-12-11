@@ -25,30 +25,44 @@ public class GetInstitutionsQueryHandler(
     {
         logger.LogInformation("Retrieving institutions for country {CountryCode}", query.CountryCode);
 
-        var cacheKey = $"institutions_{query.CountryCode}";
+        string cacheKey = $"institutions_{query.CountryCode}";
 
         // Check if cache is fresh (less than 30 days old)
         bool isCacheFresh = await cacheMetadataRepository.IsCacheFreshAsync(cacheKey, CacheMaxAgeDays, cancellationToken);
 
         if (isCacheFresh)
         {
-            logger.LogInformation("Cache is fresh for country {CountryCode}, retrieving from database", query.CountryCode);
-
-            var cachedInstitutions = await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
-            var cachedList = cachedInstitutions.ToList();
-
-            // In development, add sandbox institution if requested
-            if (query.IncludeSandbox)
-            {
-                AddSandboxInstitution(cachedList);
-            }
-
-            return new GetInstitutionsQueryResult
-            {
-                Institutions = cachedList,
-            };
+            return await GetCachedInstitutionsAsync(query, cancellationToken);
         }
 
+        return await FetchAndCacheInstitutionsAsync(query, cacheKey, cancellationToken);
+    }
+
+    private async Task<GetInstitutionsQueryResult> GetCachedInstitutionsAsync(GetInstitutionsQuery query, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Cache is fresh for country {CountryCode}, retrieving from database", query.CountryCode);
+
+        IEnumerable<InstitutionMetadata> cachedInstitutions =
+            await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
+        List<InstitutionMetadata> cachedList = cachedInstitutions.ToList();
+
+        // In development, add sandbox institution if requested
+        if (query.IncludeSandbox)
+        {
+            AddSandboxInstitution(cachedList);
+        }
+
+        return new GetInstitutionsQueryResult
+        {
+            Institutions = cachedList,
+        };
+    }
+
+    private async Task<GetInstitutionsQueryResult> FetchAndCacheInstitutionsAsync(
+        GetInstitutionsQuery query,
+        string cacheKey,
+        CancellationToken cancellationToken)
+    {
         // Cache is stale or doesn't exist, fetch from GoCardless
         logger.LogInformation("Cache is stale for country {CountryCode}, fetching from GoCardless", query.CountryCode);
 
@@ -80,16 +94,18 @@ public class GetInstitutionsQueryHandler(
     private void AddSandboxInstitution(List<InstitutionMetadata> institutions)
     {
         const string sandboxId = "SANDBOXFINANCE_SFIN0000";
-        if (!institutions.Any(i => i.Id == sandboxId))
+        if (institutions.Any(i => i.Id == sandboxId))
         {
-            institutions.Insert(0, new InstitutionMetadata
-            {
-                Id = sandboxId,
-                Name = "Sandbox Finance",
-                LogoUrl = "https://cdn.nordigen.com/ais/SANDBOXFINANCE_SFIN0000.png",
-                Countries = ["GB"],
-            });
-            logger.LogInformation("Added sandbox institution to results");
+            return;
         }
+
+        institutions.Insert(0, new InstitutionMetadata
+        {
+            Id = sandboxId,
+            Name = "Sandbox Finance",
+            LogoUrl = "https://cdn.iconscout.com/icon/free/png-256/free-code-sandbox-logo-icon-svg-download-png-3031688.png",
+            Countries = ["GB"],
+        });
+        logger.LogInformation("Added sandbox institution to results");
     }
 }

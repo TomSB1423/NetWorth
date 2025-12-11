@@ -8,7 +8,8 @@ public class FrontendOptionsValidator : AbstractValidator<FrontendOptions>
     {
         RuleFor(x => x.Url)
             .NotEmpty()
-            .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
-            .WithMessage("Frontend URL must be a valid absolute URI.");
+            .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out var outUri) &&
+                         (outUri.Scheme == Uri.UriSchemeHttp || outUri.Scheme == Uri.UriSchemeHttps))
+            .WithMessage("Frontend URL must be a valid HTTP or HTTPS URI.");
     }
 }

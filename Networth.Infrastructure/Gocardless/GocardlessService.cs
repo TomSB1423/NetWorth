@@ -356,12 +356,12 @@ internal class GocardlessService(ILogger<GocardlessService> logger, IGocardlessC
         // Try different date formats
         if (DateTime.TryParse(dateTimeString, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime result))
         {
-            return result;
+            return DateTime.SpecifyKind(result, DateTimeKind.Utc);
         }
 
         if (DateTime.TryParseExact(dateTimeString, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
         {
-            return result;
+            return DateTime.SpecifyKind(result, DateTimeKind.Utc);
         }
 
         return null;

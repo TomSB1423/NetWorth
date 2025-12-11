@@ -25,7 +25,7 @@ export default function SelectBank() {
         try {
             const result = await api.linkAccount(institution.id);
             if (result.authorizationLink) {
-                window.location.href = result.authorizationLink;
+                window.location.assign(result.authorizationLink);
             } else {
                 console.error("No authorization link returned");
                 alert("Failed to start linking process. Please try again.");

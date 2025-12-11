@@ -22,6 +22,12 @@ public class CacheMetadataRepository : BaseRepository<InfrastructureCacheMetadat
     }
 
     /// <inheritdoc />
+    public string GetInstitutionsCacheKey(string countryCode)
+    {
+        return $"institutions_{countryCode}";
+    }
+
+    /// <inheritdoc />
     public async Task<DomainCacheMetadata?> GetByCacheKeyAsync(string cacheKey, CancellationToken cancellationToken = default)
     {
         var entity = await DbSet.FirstOrDefaultAsync(c => c.CacheKey == cacheKey, cancellationToken);
