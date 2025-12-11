@@ -91,7 +91,7 @@ System tests use Playwright for end-to-end testing. You must install the Playwri
 Install the required browsers:
 
 ```shell
-pwsh Tests/Networth.Functions.System.Tests/bin/Debug/net9.0/playwright.ps1 install
+pwsh Tests/Networth.Functions.System.Tests/bin/Debug/net10.0/playwright.ps1 install
 ```
 
 ## License
