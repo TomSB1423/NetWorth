@@ -31,7 +31,7 @@ public class SyncAccount(
         logger.LogInformation("Processing account sync message: {Message}", message);
 
         SyncAccountMessage syncMessage = JsonSerializer.Deserialize<SyncAccountMessage>(message)
-                                         ?? throw new SerializationException("Failed to deserialize sync account message.");
+                                        ?? throw new SerializationException("Failed to deserialize sync account message.");
 
         SyncAccountCommand command = new()
         {
