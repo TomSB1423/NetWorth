@@ -4,11 +4,11 @@
 [![Frontend](https://github.com/TomSB1423/NetWorth/actions/workflows/frontend.yml/badge.svg?branch=main)](https://github.com/TomSB1423/NetWorth/actions/workflows/frontend.yml)
 [![Docs](https://github.com/TomSB1423/NetWorth/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/TomSB1423/NetWorth/actions/workflows/docs.yml)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
-[![Networth Docs](https://img.shields.io/badge/docs-Networth-blue)](https://tomsb1423.github.io/NetWorth/)
+[![Networth Docs](https://img.shields.io/badge/docs-Networth-blue)](https://networth.tbushell.co.uk/)
 
 Networth is a personal financial aggregation application built with **.NET Aspire**. It allows users to track their net worth, view asset allocation, and sync accounts from various financial institutions using the GoCardless API.
 
-[**Visit the Documentation Site**](https://tomsb1423.github.io/NetWorth/)
+[**Visit the Documentation Site**](https://networth.tbushell.co.uk/)
 
 ![Financial Dashboard](readme-assets/ui-dashboard.jpg)
 
