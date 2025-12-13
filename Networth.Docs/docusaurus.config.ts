@@ -63,6 +63,10 @@ const config: Config = {
                 },
                 blog: {
                     showReadingTime: true,
+                    feedOptions: {
+                        type: ["rss", "atom"],
+                        xslt: true,
+                    },
                     editUrl:
                         "https://github.com/TomSB1423/NetWorth/tree/main/Networth.Docs/",
                     remarkPlugins: [remarkMath],
