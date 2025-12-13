@@ -9,8 +9,6 @@ IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(ar
 IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("postgres-password", secret: true);
 IResourceBuilder<ParameterResource> gocardlessSecretId = builder.AddParameter("gocardless-secret-id", secret: true);
 IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("gocardless-secret-key", secret: true);
-IResourceBuilder<ParameterResource> entraClientId = builder.AddParameter("entra-client-id");
-IResourceBuilder<ParameterResource> entraTenantId = builder.AddParameter("entra-tenant-id");
 
 IResourceBuilder<PostgresServerResource> postgres = builder
     .AddPostgres(ResourceNames.Postgres)
@@ -36,16 +34,12 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .WaitFor(queues)
     .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
     .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
-    .WithEnvironment("AzureAd__ClientId", entraClientId)
-    .WithEnvironment("AzureAd__TenantId", entraTenantId)
     .WithHttpHealthCheck("/api/health");
 
 var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "dev")
     .WithReference(functions)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
     .WithEnvironment("VITE_API_URL", functions.GetEndpoint("http"))
-    .WithEnvironment("VITE_ENTRA_CLIENT_ID", entraClientId)
-    .WithEnvironment("VITE_ENTRA_TENANT_ID", entraTenantId)
     .WithHttpEndpoint(env: "PORT", port: 3000)
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();

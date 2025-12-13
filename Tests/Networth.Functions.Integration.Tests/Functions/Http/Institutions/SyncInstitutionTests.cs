@@ -1,4 +1,3 @@
-using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Networth.Domain.Enums;
 using Networth.Functions.Tests.Integration.Fixtures;
@@ -13,12 +12,6 @@ namespace Networth.Functions.Tests.Integration.Functions.Http.Institutions;
 public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
-    public override async Task InitializeAsync()
-    {
-        await base.InitializeAsync();
-        AuthenticateAs(Constants.MockUserId);
-    }
-
     [Fact]
     public async Task SyncInstitution_EnqueuesSyncForLinkedAccounts()
     {
@@ -175,20 +168,6 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await Client.SyncInstitutionAsync(institutionId);
 
         await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, "123");
-    }
-
-    [Fact]
-    public async Task SyncInstitution_ReturnsUnauthorized_WithoutAuth()
-    {
-        // Arrange - create an unauthenticated client
-        var endpoint = App.GetEndpoint(ResourceNames.Functions);
-        using var httpClient = new HttpClient { BaseAddress = endpoint };
-
-        // Act - POST without auth header
-        var response = await httpClient.PostAsync("/api/institutions/inst-1/sync", null);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]

@@ -29,12 +29,11 @@ public class SyncInstitution(
         logger.LogInformation("Processing institution sync message: {Message}", message);
 
         SyncInstitutionMessage syncMessage = JsonSerializer.Deserialize<SyncInstitutionMessage>(message)
-                                            ?? throw new InvalidOperationException("Failed to deserialize sync message");
+                                             ?? throw new InvalidOperationException("Failed to deserialize sync message");
 
         var command = new SyncInstitutionCommand
         {
-            InstitutionId = syncMessage.InstitutionId,
-            UserId = syncMessage.UserId,
+            InstitutionId = syncMessage.InstitutionId, UserId = syncMessage.UserId,
         };
 
         await mediator.Send<SyncInstitutionCommand, SyncInstitutionCommandResult>(command, cancellationToken);

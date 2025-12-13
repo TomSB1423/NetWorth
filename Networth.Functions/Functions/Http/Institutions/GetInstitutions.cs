@@ -1,5 +1,4 @@
 using System.Net;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -15,7 +14,6 @@ namespace Networth.Functions.Functions.Http.Institutions;
 /// <summary>
 ///     Azure Function for retrieving available financial institutions.
 /// </summary>
-[Authorize]
 public class GetInstitutions(IMediator mediator, IHostEnvironment environment, ILogger<GetInstitutions> logger)
 {
     /// <summary>

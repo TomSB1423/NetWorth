@@ -54,9 +54,6 @@ public abstract class SystemTestBase : IAsyncLifetime
 
         HttpClient functionsClient = App.CreateHttpClient(ResourceNames.Functions);
         Client = new NetworthClient(functionsClient);
-
-        // Default authentication - can be overridden in derived tests
-        Client.SetFakeAuthToken(Constants.MockUserId, $"{Constants.MockUserId}@test.com", "Test User");
     }
 
     /// <inheritdoc />

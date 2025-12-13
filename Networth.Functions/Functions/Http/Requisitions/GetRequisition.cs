@@ -1,5 +1,4 @@
 using System.Net;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -15,7 +14,6 @@ namespace Networth.Functions.Functions.Http.Requisitions;
 /// <summary>
 ///     Azure Function for retrieving requisition details.
 /// </summary>
-[Authorize]
 public class GetRequisition(IMediator mediator, ILogger<GetRequisition> logger)
 {
     /// <summary>

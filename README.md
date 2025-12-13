@@ -1,8 +1,8 @@
 # Networth Application
 
-[![Backend](https://github.com/TomSB1423/NetWorth/actions/workflows/backend.yml/badge.svg?branch=main)](https://github.com/TomSB1423/NetWorth/actions/workflows/backend.yml)
-[![Frontend](https://github.com/TomSB1423/NetWorth/actions/workflows/frontend.yml/badge.svg?branch=main)](https://github.com/TomSB1423/NetWorth/actions/workflows/frontend.yml)
-[![Docs](https://github.com/TomSB1423/NetWorth/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/TomSB1423/NetWorth/actions/workflows/docs.yml)
+[![Backend CI](https://github.com/TomSB1423/NetWorth/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/TomSB1423/NetWorth/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/TomSB1423/NetWorth/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/TomSB1423/NetWorth/actions/workflows/frontend-ci.yml)
+[![Docs CI](https://github.com/TomSB1423/NetWorth/actions/workflows/docs-ci.yml/badge.svg)](https://github.com/TomSB1423/NetWorth/actions/workflows/docs-ci.yml)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 [![Networth Docs](https://img.shields.io/badge/docs-Networth-blue)](https://networth.tbushell.co.uk/)
 
@@ -72,21 +72,6 @@ Set the following user secrets in the AppHost project using the .NET CLI:
 ```shell
 dotnet user-secrets set "Gocardless:SecretId" "YOUR_SECRET_ID" --project Networth.AppHost
 dotnet user-secrets set "Gocardless:SecretKey" "YOUR_SECRET_KEY" --project Networth.AppHost
-```
-
-### Authentication (Microsoft Entra ID)
-
-To enable authentication, you need to configure a Microsoft Entra ID (Azure AD) tenant with a Single Page Application (SPA) registration.
-
-1. **Create an App Registration** in Azure Portal.
-2. Add a **SPA** platform with Redirect URI: `http://localhost:3000`.
-3. Configure **Google Federation** in External Identities if you want to use Google Sign-In.
-
-Set the following secrets:
-
-```shell
-dotnet user-secrets set "entra-client-id" "YOUR_CLIENT_ID" --project Networth.AppHost
-dotnet user-secrets set "entra-tenant-id" "YOUR_TENANT_ID" --project Networth.AppHost
 ```
 
 The PostgreSQL password is configured in `appsettings.json`:

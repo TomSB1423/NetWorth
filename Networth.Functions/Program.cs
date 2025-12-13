@@ -1,28 +1,37 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Networth.Application.Extensions;
+using Networth.Functions.Authentication;
 using Networth.Functions.Extensions;
 using Networth.Functions.Middleware;
 using Networth.Infrastructure.Extensions;
 using Networth.ServiceDefaults;
+using Serilog;
 
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
+builder.AddServiceDefaults();
+
+// Middleware
+if (builder.Environment.IsDevelopment())
+{
+    builder.UseMiddleware<MockAuthenticationMiddleware>();
+}
+
+builder.UseMiddleware<ExceptionHandlerMiddleware>();
+
 // Configure additional app settings
 builder.Configuration
     .AddJsonFile("settings.json", false, true)
     .AddJsonFile("local.settings.json", true, true)
-    .AddUserSecrets<Program>()
-    .AddEnvironmentVariables();
-
-builder.AddServiceDefaults();
+    .AddEnvironmentVariables()
+    .AddUserSecrets<Program>();
 
 builder.Services.Configure<JsonSerializerOptions>(options =>
 {
@@ -41,12 +50,11 @@ builder.AddAzureQueueServiceClient(ResourceNames.Queues);
 
 // Configure services
 builder.Services
-    .AddFunctionsServices(builder.Configuration)
+    .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })
+    .AddApplicationInsightsTelemetryWorkerService()
+    .AddScoped<ICurrentUserService, CurrentUserService>()
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructure(builder.Configuration);
-
-// Middleware
-builder.ConfigureMiddleware();
 
 IHost host = builder.Build();
 
