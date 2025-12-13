@@ -27,10 +27,10 @@ const config: Config = {
     ],
 
     // Set the production url of your site here
-    url: "https://TomSB1423.github.io",
+    url: "https://networth.tbushell.co.uk",
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
-    baseUrl: "/NetWorth/",
+    baseUrl: "/",
 
     // GitHub pages deployment config.
     organizationName: "TomSB1423",
