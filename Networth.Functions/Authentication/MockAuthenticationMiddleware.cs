@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Networth.Functions.Authentication;
 
@@ -10,6 +9,12 @@ namespace Networth.Functions.Authentication;
 ///     Provides a fake authenticated user for testing purposes.
 ///     Creates a mock user with ID "mock-user-123" which corresponds to a user in the database.
 /// </summary>
+/// <remarks>
+///     This middleware is deprecated. Authentication is now handled via:
+///     - Production: Easy Auth (App Service Authentication) with Microsoft.Identity.Web.
+///     - Development: Mock ClaimsPrincipal registered in DI (Program.cs).
+/// </remarks>
+[Obsolete("Use Microsoft.Identity.Web AppServicesAuthentication instead. Mock users are registered via DI in Program.cs.")]
 public class MockAuthenticationMiddleware : IFunctionsWorkerMiddleware
 {
     /// <summary>
@@ -30,15 +35,8 @@ public class MockAuthenticationMiddleware : IFunctionsWorkerMiddleware
 
         ClaimsPrincipal principal = new(identity);
 
-        // Store the principal in the function context
+        // Store the principal in the function context for any downstream consumers
         context.Items["User"] = principal;
-
-        // Set the context on the current user service
-        ICurrentUserService? currentUserService = context.InstanceServices.GetService<ICurrentUserService>();
-        if (currentUserService is CurrentUserService service)
-        {
-            service.SetContext(context);
-        }
 
         await next(context);
     }

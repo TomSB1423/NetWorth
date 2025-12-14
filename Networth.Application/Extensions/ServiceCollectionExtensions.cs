@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Register all validators from the Application assembly
-        services.AddValidatorsFromAssemblyContaining<LinkAccountCommandValidator>();
+        services.AddValidatorsFromAssemblyContaining<LinkInstitutionCommandValidator>();
 
         // Configure Frontend options
         services.AddOptions<FrontendOptions>()
@@ -37,7 +37,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMediator, Mediator>();
 
         // Register command handlers
-        services.AddScoped<IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>, LinkAccountCommandHandler>();
+        services.AddScoped<IRequestHandler<LinkInstitutionCommand, LinkInstitutionCommandResult>, LinkInstitutionCommandHandler>();
         services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncInstitutionCommand, SyncInstitutionCommandResult>, SyncInstitutionCommandHandler>();
         services.AddScoped<IRequestHandler<CalculateRunningBalanceCommand, CalculateRunningBalanceCommandResult>, CalculateRunningBalanceCommandHandler>();

@@ -49,7 +49,7 @@ public class SyncInstitution(
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "institutions/{institutionId}/sync")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "institutions/{institutionId}/sync")]
         HttpRequest req,
         string institutionId)
     {

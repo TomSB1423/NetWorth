@@ -49,7 +49,7 @@ public class GetAccount(IMediator mediator, ILogger<GetAccount> logger)
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts/{accountId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "accounts/{accountId}")]
         HttpRequest req,
         string accountId)
     {

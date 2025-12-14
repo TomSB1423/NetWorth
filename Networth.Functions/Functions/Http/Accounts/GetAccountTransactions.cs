@@ -63,7 +63,7 @@ public class GetAccountTransactions(
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts/{accountId}/transactions")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "accounts/{accountId}/transactions")]
         HttpRequest req,
         string accountId)
     {

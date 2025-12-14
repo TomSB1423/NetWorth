@@ -24,7 +24,7 @@ public class InstitutionSyncTests(ITestOutputHelper testOutput)
     [Fact]
     public async Task SyncInstitution_WithSandboxFinance_EnqueuesAccountsForSync()
     {
-        LinkAccountResponse linkResponse = await Client.LinkAccountAsync(Constants.SandboxInstitutionId);
+        LinkInstitutionResponse linkResponse = await Client.LinkInstitutionAsync(Constants.SandboxInstitutionId);
         Assert.NotNull(linkResponse.AuthorizationLink);
 
         await using GoCardlessSandboxAuthorizer authorizer = new();
@@ -92,7 +92,7 @@ public class InstitutionSyncTests(ITestOutputHelper testOutput)
     [Fact]
     public async Task LinkAccount_ThenSyncInstitution_CreatesAccountsInDatabase()
     {
-        LinkAccountResponse linkResult = await Client.LinkAccountAsync(Constants.SandboxInstitutionId);
+        LinkInstitutionResponse linkResult = await Client.LinkInstitutionAsync(Constants.SandboxInstitutionId);
 
         Assert.NotNull(linkResult);
         Assert.NotEmpty(linkResult.AuthorizationLink);

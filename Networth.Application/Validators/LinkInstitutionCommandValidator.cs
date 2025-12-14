@@ -4,14 +4,14 @@ using Networth.Application.Commands;
 namespace Networth.Application.Validators;
 
 /// <summary>
-///     Validator for LinkAccountCommand.
+///     Validator for LinkInstitutionCommand.
 /// </summary>
-public class LinkAccountCommandValidator : AbstractValidator<LinkAccountCommand>
+public class LinkInstitutionCommandValidator : AbstractValidator<LinkInstitutionCommand>
 {
     /// <summary>
-    ///     Initializes a new instance of the <see cref="LinkAccountCommandValidator"/> class.
+    ///     Initializes a new instance of the <see cref="LinkInstitutionCommandValidator"/> class.
     /// </summary>
-    public LinkAccountCommandValidator()
+    public LinkInstitutionCommandValidator()
     {
         RuleFor(x => x.UserId)
             .NotEmpty()

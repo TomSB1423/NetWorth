@@ -36,7 +36,7 @@ public class GetInstitutions(IMediator mediator, IHostEnvironment environment, I
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "institutions")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "institutions")]
         HttpRequest req)
     {
         logger.LogInformation("Received request to get institutions");

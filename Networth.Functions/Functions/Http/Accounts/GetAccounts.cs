@@ -42,7 +42,7 @@ public class GetAccounts(
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "accounts")]
         HttpRequest req)
     {
         if (!currentUserService.IsAuthenticated)

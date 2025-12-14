@@ -3,9 +3,9 @@ using Networth.Domain.Enums;
 namespace Networth.Functions.Models.Responses;
 
 /// <summary>
-///     Response model for linking a bank account.
+///     Response model for linking an institution.
 /// </summary>
-public record LinkAccountResponse
+public record LinkInstitutionResponse
 {
     /// <summary>
     ///     Gets the authorization link for the user to complete bank authentication.

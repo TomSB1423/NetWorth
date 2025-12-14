@@ -31,9 +31,9 @@ export default function SelectBank() {
             // Wait, I defined it as { link: string } in api.ts but the code here uses authorizationLink.
             // I should probably check the backend or just use 'any' for now if I am not sure,
             // or update the type if I find out.
-            // Let's check LinkAccountCommandResult.cs in Application/Commands
+            // Let's check LinkInstitutionCommandResult.cs in Application/Commands
 
-            const result: any = await api.linkAccount(institution.id);
+            const result: any = await api.linkInstitution(institution.id);
             // Assuming the result has authorizationLink or link.
             // Let's stick to what was there before but cast to any to avoid TS error for now
             // or better, update the type in api.ts if I can confirm.

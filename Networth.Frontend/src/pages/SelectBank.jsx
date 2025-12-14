@@ -23,7 +23,7 @@ export default function SelectBank() {
 
     const handleSelectInstitution = async (institution) => {
         try {
-            const result = await api.linkAccount(institution.id);
+            const result = await api.linkInstitution(institution.id);
             if (result.authorizationLink) {
                 window.location.assign(result.authorizationLink);
             } else {

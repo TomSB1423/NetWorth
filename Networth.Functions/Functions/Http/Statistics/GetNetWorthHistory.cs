@@ -38,7 +38,7 @@ public class GetNetWorthHistory(
         HttpStatusCode.Unauthorized,
         Description = "User is not authenticated")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "statistics/net-worth")] HttpRequest unused)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "statistics/net-worth")] HttpRequest unused)
     {
         var userId = currentUserService.UserId;
         if (string.IsNullOrEmpty(userId))

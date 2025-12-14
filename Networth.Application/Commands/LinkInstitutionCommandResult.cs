@@ -3,9 +3,9 @@ using Networth.Domain.Enums;
 namespace Networth.Application.Commands;
 
 /// <summary>
-///     Result of the link account command containing both agreement and requisition details.
+///     Result of the link institution command containing both agreement and requisition details.
 /// </summary>
-public class LinkAccountCommandResult
+public class LinkInstitutionCommandResult
 {
     /// <summary>
     ///     Gets or sets the authorization link for the user to complete bank authentication.

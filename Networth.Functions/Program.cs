@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Networth.Application.Extensions;
-using Networth.Functions.Authentication;
 using Networth.Functions.Extensions;
 using Networth.Functions.Middleware;
 using Networth.Infrastructure.Extensions;
@@ -17,12 +16,6 @@ FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
 builder.ConfigureFunctionsWebApplication();
 
 builder.AddServiceDefaults();
-
-// Middleware
-if (builder.Environment.IsDevelopment())
-{
-    builder.UseMiddleware<MockAuthenticationMiddleware>();
-}
 
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
@@ -52,7 +45,7 @@ builder.AddAzureQueueServiceClient(ResourceNames.Queues);
 builder.Services
     .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })
     .AddApplicationInsightsTelemetryWorkerService()
-    .AddScoped<ICurrentUserService, CurrentUserService>()
+    .AddAppAuthentication(builder.Environment)
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructure(builder.Configuration);
 

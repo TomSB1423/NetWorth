@@ -9,33 +9,34 @@ using Networth.Domain.Repositories;
 namespace Networth.Application.Handlers;
 
 /// <summary>
-///     Handler for link account commands that creates both agreement and requisition.
+///     Handler for link institution commands that creates both agreement and requisition.
 /// </summary>
-public class LinkAccountCommandHandler(
+public class LinkInstitutionCommandHandler(
     IFinancialProvider financialProvider,
     IAgreementRepository agreementRepository,
     IRequisitionRepository requisitionRepository,
     IOptions<FrontendOptions> frontendOptions,
-    ILogger<LinkAccountCommandHandler> logger)
-    : IRequestHandler<LinkAccountCommand, LinkAccountCommandResult>
+    ILogger<LinkInstitutionCommandHandler> logger)
+    : IRequestHandler<LinkInstitutionCommand, LinkInstitutionCommandResult>
 {
-    public async Task<LinkAccountCommandResult> HandleAsync(LinkAccountCommand command, CancellationToken cancellationToken = default)
+    public async Task<LinkInstitutionCommandResult> HandleAsync(LinkInstitutionCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
-            "Starting account link process for user {UserId} and institution {InstitutionId}",
+            "Starting institution link process for user {UserId} and institution {InstitutionId}",
             command.UserId,
             command.InstitutionId);
 
         var agreement = await CreateAndSaveAgreementAsync(command, cancellationToken);
         var requisition = await CreateAndSaveRequisitionAsync(command, agreement.Id, cancellationToken);
 
-        return new LinkAccountCommandResult
+        return new LinkInstitutionCommandResult
         {
-            AuthorizationLink = requisition.AuthenticationLink, Status = requisition.Status,
+            AuthorizationLink = requisition.AuthenticationLink,
+            Status = requisition.Status,
         };
     }
 
-    private async Task<Domain.Entities.Agreement> CreateAndSaveAgreementAsync(LinkAccountCommand command, CancellationToken cancellationToken)
+    private async Task<Domain.Entities.Agreement> CreateAndSaveAgreementAsync(LinkInstitutionCommand command, CancellationToken cancellationToken)
     {
         InstitutionMetadata institution = await financialProvider.GetInstitutionAsync(command.InstitutionId, cancellationToken);
 
@@ -58,7 +59,7 @@ public class LinkAccountCommandHandler(
         return agreement;
     }
 
-    private async Task<Domain.Entities.Requisition> CreateAndSaveRequisitionAsync(LinkAccountCommand command, string agreementId, CancellationToken cancellationToken)
+    private async Task<Domain.Entities.Requisition> CreateAndSaveRequisitionAsync(LinkInstitutionCommand command, string agreementId, CancellationToken cancellationToken)
     {
         var frontendUrl = frontendOptions.Value.Url;
         var callbackUrl = $"{frontendUrl}?institutionId={command.InstitutionId}";

@@ -30,15 +30,17 @@ export const api = {
         return response.json();
     },
 
-    linkAccount: async (institutionId: string): Promise<{ link: string }> => {
-        const response = await fetch(`${API_BASE_URL}/account/link`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ institutionId }),
-        });
-        if (!response.ok) throw new Error("Failed to initiate account linking");
+    linkInstitution: async (
+        institutionId: string
+    ): Promise<{ link: string }> => {
+        const response = await fetch(
+            `${API_BASE_URL}/institutions/${institutionId}/link`,
+            {
+                method: "POST",
+            }
+        );
+        if (!response.ok)
+            throw new Error("Failed to initiate institution linking");
         return response.json();
     },
 

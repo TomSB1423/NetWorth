@@ -33,7 +33,7 @@ public class GetCurrentUser
     [OpenApiOperation("GetCurrentUser", ["User"], Summary = "Get current authenticated user", Description = "Returns information about the currently authenticated user")]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(CurrentUserResponse), Description = "Current user information")]
     public IActionResult Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "user/me")] HttpRequest req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "users/me")] HttpRequest req)
     {
         if (!_currentUserService.IsAuthenticated)
         {
