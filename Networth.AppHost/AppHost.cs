@@ -41,8 +41,7 @@ var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "d
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
     .WithEnvironment("VITE_API_URL", functions.GetEndpoint("http"))
     .WithHttpEndpoint(env: "PORT", port: 3000)
-    .WithExternalHttpEndpoints()
-    .PublishAsDockerFile();
+    .WithExternalHttpEndpoints();
 
 functions.WithEnvironment("Frontend__Url", frontend.GetEndpoint("http"));
 
