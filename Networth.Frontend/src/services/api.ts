@@ -5,9 +5,9 @@ import {
     Transaction,
     NetWorthDataPoint,
 } from "../types";
+import { config } from "../config";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
-const API_BASE_URL = BASE_URL ? `${BASE_URL}/api` : "/api";
+const API_BASE_URL = `${config.api.baseUrl}/api`;
 
 export const api = {
     getAccounts: async (): Promise<Account[]> => {

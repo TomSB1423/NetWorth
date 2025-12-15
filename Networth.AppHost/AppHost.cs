@@ -1,5 +1,4 @@
 using Aspire.Hosting.Azure;
-using Microsoft.Extensions.Hosting;
 using Networth.ServiceDefaults;
 using Projects;
 using Scalar.Aspire;
@@ -10,12 +9,11 @@ IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("pos
 IResourceBuilder<ParameterResource> gocardlessSecretId = builder.AddParameter("gocardless-secret-id", secret: true);
 IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("gocardless-secret-key", secret: true);
 
-IResourceBuilder<PostgresServerResource> postgres = builder
-    .AddPostgres(ResourceNames.Postgres)
-    .WithPassword(postgresPassword)
-    .WithDataVolume();
+IResourceBuilder<AzurePostgresFlexibleServerResource> postgres = builder
+    .AddAzurePostgresFlexibleServer(ResourceNames.Postgres)
+    .RunAsContainer(container => { container.WithPassword(postgresPassword); });
 
-IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres
+var postgresdb = postgres
     .AddDatabase(ResourceNames.NetworthDb);
 
 // Add Azure Storage for queues
@@ -23,7 +21,13 @@ IResourceBuilder<AzureStorageResource> storage = builder
     .AddAzureStorage(ResourceNames.Storage)
     .RunAsEmulator();
 
+IResourceBuilder<AzureBlobStorageResource> blobs = storage.AddBlobs("blobs");
+IResourceBuilder<AzureTableStorageResource> tables = storage.AddTables("tables");
 IResourceBuilder<AzureQueueStorageResource> queues = storage.AddQueues(ResourceNames.Queues);
+
+storage.AddQueue(ResourceNames.AccountSyncQueue);
+storage.AddQueue(ResourceNames.InstitutionSyncQueue);
+storage.AddQueue(ResourceNames.CalculateRunningBalanceQueue);
 
 IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .AddAzureFunctionsProject<Networth_Functions>(ResourceNames.Functions)
@@ -31,7 +35,10 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .WithReference(postgresdb)
     .WaitFor(postgresdb)
     .WithReference(queues)
+    .WithReference(blobs)
+    .WithReference(tables)
     .WaitFor(queues)
+    .WithEnvironment("AzureWebJobsStorage", blobs.Resource.ConnectionStringExpression)
     .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
     .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
     .WithHttpHealthCheck("/api/health");
@@ -53,20 +60,22 @@ var docs = builder.AddNpmApp(ResourceNames.Docs, "../Networth.Docs")
     .WithEnvironment("API_SPEC_URL", ReferenceExpression.Create($"{functions.GetEndpoint("http")}/api/swagger.json"))
     .WithReference(functions)
     .WaitFor(functions)
-    .WithExplicitStart();
+    .WithExplicitStart()
+    .ExcludeFromManifest(); // Local dev only
 
 // Add Scalar API Reference
 IResourceBuilder<ScalarResource> scalar = builder.AddScalarApiReference("api-reference", options =>
 {
     options
-    .WithTheme(ScalarTheme.Purple)
-    .ExpandAllTags()
-    .ExpandAllResponses()
-    .HideClientButton()
-    .HideDarkModeToggle()
+        .WithTheme(ScalarTheme.Purple)
+        .ExpandAllTags()
+        .ExpandAllResponses()
+        .HideClientButton()
+        .HideDarkModeToggle()
         .AddMetadata("title", "Networth API Reference")
         .AddMetadata("description", "Unified API documentation for Networth backend services");
-});
+}).ExcludeFromManifest(); // Local dev only
+
 
 // Register Functions service with Scalar
 scalar.WithApiReference(functions, options =>
@@ -77,15 +86,5 @@ scalar.WithApiReference(functions, options =>
         .AddServer("/api", "Azure Functions API")
         .AddMetadata("summary", "Public endpoints exposed by the Networth Azure Functions app");
 });
-
-if (builder.Environment.IsDevelopment())
-{
-    postgres.WithPgAdmin(pgAdmin =>
-    {
-        pgAdmin
-            .WithHostPort(5050)
-            .WithExplicitStart();
-    });
-}
 
 await builder.Build().RunAsync();
