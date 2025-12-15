@@ -1,0 +1,62 @@
+name: "Deploy Static Site"
+description: "Build and deploy a static site (React or Docusaurus) to Azure Static Web App"
+
+inputs:
+  swa-name:
+    description: "Name of the Static Web App"
+    required: true
+  resource-group:
+    description: "Resource group name"
+    required: true
+  working-directory:
+    description: "Directory containing the static site source"
+    required: true
+  build-output:
+    description: "Build output directory relative to working-directory (e.g., 'dist' or 'build')"
+    required: true
+  api-url:
+    description: "Backend API URL (optional, sets VITE_API_URL for React builds)"
+    required: false
+    default: ""
+  azure-client-id:
+    description: "Azure Client ID"
+    required: true
+  azure-tenant-id:
+    description: "Azure Tenant ID"
+    required: true
+  azure-subscription-id:
+    description: "Azure Subscription ID"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install and Build
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        VITE_API_URL: ${{ inputs.api-url }}
+      run: |
+        npm ci
+        npm run build
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Deploy to Static Web App
+      shell: bash
+      run: |
+        az staticwebapp deploy \
+          --name ${{ inputs.swa-name }} \
+          --resource-group ${{ inputs.resource-group }} \
+          --source ./${{ inputs.working-directory }}/${{ inputs.build-output }} \
+          --env production

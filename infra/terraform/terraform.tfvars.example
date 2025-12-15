@@ -1,0 +1,6 @@
+location                = "uksouth"
+environment             = "dev"
+project_name            = "networth"
+postgres_admin_password = "ChangeMe123!"
+gocardless_secret_id    = "your-secret-id"
+gocardless_secret_key   = "your-secret-key"

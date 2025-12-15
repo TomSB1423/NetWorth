@@ -1,0 +1,81 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches:
+      - develop
+      - "feature/**"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_USE_OIDC: true
+  TF_VAR_postgres_admin_password: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD }}
+  TF_VAR_gocardless_secret_id: ${{ secrets.TF_VAR_GOCARDLESS_SECRET_ID }}
+  TF_VAR_gocardless_secret_key: ${{ secrets.TF_VAR_GOCARDLESS_SECRET_KEY }}
+
+jobs:
+  terraform:
+    name: "Terraform (Dev)"
+    runs-on: ubuntu-latest
+    environment: dev
+    outputs:
+      resource_group_name: ${{ steps.terraform.outputs.resource_group_name }}
+      container_app_name: ${{ steps.terraform.outputs.container_app_name }}
+      container_app_url: ${{ steps.terraform.outputs.container_app_url }}
+      acr_name: ${{ steps.terraform.outputs.acr_name }}
+      acr_login_server: ${{ steps.terraform.outputs.acr_login_server }}
+      frontend_swa_name: ${{ steps.terraform.outputs.frontend_swa_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Terraform Apply
+        id: terraform
+        uses: ./.github/actions/terraform-apply
+        with:
+          environment: dev
+
+  deploy-functions:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Functions
+        uses: ./.github/actions/deploy-functions
+        with:
+          acr-name: ${{ needs.terraform.outputs.acr_name }}
+          acr-login-server: ${{ needs.terraform.outputs.acr_login_server }}
+          container-app-name: ${{ needs.terraform.outputs.container_app_name }}
+          resource-group: ${{ needs.terraform.outputs.resource_group_name }}
+          image-name: networth-functions
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  deploy-frontend:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Frontend
+        uses: ./.github/actions/deploy-static-site
+        with:
+          swa-name: ${{ needs.terraform.outputs.frontend_swa_name }}
+          resource-group: ${{ needs.terraform.outputs.resource_group_name }}
+          working-directory: Networth.Frontend
+          build-output: dist
+          api-url: ${{ needs.terraform.outputs.container_app_url }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

@@ -1,0 +1,64 @@
+name: "Terraform Apply"
+description: "Initialize and apply Terraform configuration"
+
+inputs:
+  environment:
+    description: "Environment name (dev/prod)"
+    required: true
+  working-directory:
+    description: "Terraform working directory"
+    required: false
+    default: "infra/terraform"
+
+outputs:
+  resource_group_name:
+    description: "The resource group name"
+    value: ${{ steps.tf-output.outputs.resource_group_name }}
+  container_app_name:
+    description: "The container app name"
+    value: ${{ steps.tf-output.outputs.container_app_name }}
+  container_app_url:
+    description: "The container app URL"
+    value: ${{ steps.tf-output.outputs.container_app_url }}
+  acr_name:
+    description: "The ACR name"
+    value: ${{ steps.tf-output.outputs.acr_name }}
+  acr_login_server:
+    description: "The ACR login server"
+    value: ${{ steps.tf-output.outputs.acr_login_server }}
+  frontend_swa_name:
+    description: "The frontend SWA name"
+    value: ${{ steps.tf-output.outputs.frontend_swa_name }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: terraform init
+
+    - name: Select Workspace
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
+
+    - name: Terraform Apply
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: terraform apply -auto-approve -var="environment=${{ inputs.environment }}"
+
+    - name: Get Terraform Outputs
+      id: tf-output
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "resource_group_name=$(terraform output -raw resource_group_name)" >> $GITHUB_OUTPUT
+        echo "container_app_name=$(terraform output -raw container_app_name)" >> $GITHUB_OUTPUT
+        echo "container_app_url=$(terraform output -raw container_app_url)" >> $GITHUB_OUTPUT
+        echo "acr_name=$(terraform output -raw acr_name)" >> $GITHUB_OUTPUT
+        echo "acr_login_server=$(terraform output -raw acr_login_server)" >> $GITHUB_OUTPUT
+        echo "frontend_swa_name=$(terraform output -raw frontend_swa_name)" >> $GITHUB_OUTPUT

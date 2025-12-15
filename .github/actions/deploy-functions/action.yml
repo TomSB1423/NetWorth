@@ -1,0 +1,60 @@
+name: "Deploy Functions to Container Apps"
+description: "Build container image and deploy to Azure Container Apps"
+
+inputs:
+  acr-name:
+    description: "Name of the Azure Container Registry"
+    required: true
+  acr-login-server:
+    description: "ACR login server URL"
+    required: true
+  container-app-name:
+    description: "Name of the Container App"
+    required: true
+  resource-group:
+    description: "Resource group name"
+    required: true
+  image-name:
+    description: "Name for the container image"
+    required: true
+  azure-client-id:
+    description: "Azure Client ID"
+    required: true
+  azure-tenant-id:
+    description: "Azure Tenant ID"
+    required: true
+  azure-subscription-id:
+    description: "Azure Subscription ID"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Login to ACR
+      shell: bash
+      run: az acr login --name ${{ inputs.acr-name }}
+
+    - name: Build and Push Container Image
+      shell: bash
+      run: |
+        IMAGE_TAG="${{ inputs.acr-login-server }}/${{ inputs.image-name }}:${{ github.sha }}"
+        IMAGE_LATEST="${{ inputs.acr-login-server }}/${{ inputs.image-name }}:latest"
+
+        docker build -t $IMAGE_TAG -t $IMAGE_LATEST -f Networth.Functions/Dockerfile .
+        docker push $IMAGE_TAG
+        docker push $IMAGE_LATEST
+
+    - name: Deploy to Container App
+      shell: bash
+      run: |
+        az containerapp update \
+          --name ${{ inputs.container-app-name }} \
+          --resource-group ${{ inputs.resource-group }} \
+          --image ${{ inputs.acr-login-server }}/${{ inputs.image-name }}:${{ github.sha }}
