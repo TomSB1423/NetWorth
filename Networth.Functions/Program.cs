@@ -17,7 +17,20 @@ builder.ConfigureFunctionsWebApplication();
 
 builder.AddServiceDefaults();
 
+// FunctionContextMiddleware must be first to capture the context for DI
+builder.UseMiddleware<FunctionContextMiddleware>();
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
+
+// Use conditional middleware to enforce authentication on all HTTP endpoints except Health
+builder.UseWhen<JwtAuthenticationMiddleware>(context =>
+{
+    // We want to use this middleware only for http trigger invocations.
+    var isHttpTrigger = context.FunctionDefinition.InputBindings.Values
+        .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
+
+    // Exclude the Health endpoint
+    return isHttpTrigger && context.FunctionDefinition.Name != "GetHealth";
+});
 
 // Configure additional app settings
 builder.Configuration
@@ -45,16 +58,18 @@ builder.AddAzureQueueServiceClient(ResourceNames.Queues);
 builder.Services
     .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })
     .AddApplicationInsightsTelemetryWorkerService()
-    .AddAppAuthentication(builder.Environment)
+    .AddAppAuthentication(builder.Configuration, builder.Environment)
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructure(builder.Configuration);
 
 IHost host = builder.Build();
 
+// In development, apply migrations and seed mock user automatically
 IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
 if (environment.IsDevelopment())
 {
-    await host.Services.EnsureDatabaseSetupAsync();
+    await host.Services.ApplyMigrationsAsync();
+    await host.Services.EnsureMockUserAsync();
 }
 
 await host.RunAsync();

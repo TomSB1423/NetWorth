@@ -11,23 +11,31 @@ namespace Networth.Functions.Extensions;
 public static class DatabaseExtensions
 {
     /// <summary>
-    /// Ensures the database exists and sets up initial data (mock user, queues).
+    /// Applies pending EF Core migrations to the database.
     /// </summary>
-    public static async Task EnsureDatabaseSetupAsync(this IServiceProvider serviceProvider)
+    public static async Task ApplyMigrationsAsync(this IServiceProvider serviceProvider)
     {
         await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
         await using NetworthDbContext dbContext = scope.ServiceProvider.GetRequiredService<NetworthDbContext>();
 
-        // Ensure database exists
-        await dbContext.Database.EnsureCreatedAsync();
+        await dbContext.Database.MigrateAsync();
+    }
 
-        // Ensure mock user exists
+    /// <summary>
+    /// Ensures the mock user exists (development only).
+    /// </summary>
+    public static async Task EnsureMockUserAsync(this IServiceProvider serviceProvider)
+    {
+        await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
+        await using NetworthDbContext dbContext = scope.ServiceProvider.GetRequiredService<NetworthDbContext>();
+
         await EnsureMockUserExistsAsync(dbContext);
     }
 
     /// <summary>
     /// Ensures the mock development user exists in the database.
     /// </summary>
+    /// <param name="dbContext">The database context.</param>
     public static async Task EnsureMockUserExistsAsync(this NetworthDbContext dbContext)
     {
         const string mockUserId = "mock-user-123";
@@ -37,6 +45,26 @@ public static class DatabaseExtensions
             {
                 Id = mockUserId,
                 Name = "Mock Development User",
+            });
+            await dbContext.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Ensures a user exists in the database, creating them if they don't exist.
+    /// This is called on first authenticated request to auto-provision the user record.
+    /// </summary>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="userId">The user ID from the authentication token.</param>
+    /// <param name="userName">The user name from the authentication token (optional).</param>
+    public static async Task EnsureUserExistsAsync(this NetworthDbContext dbContext, string userId, string? userName)
+    {
+        if (!await dbContext.Users.AnyAsync(u => u.Id == userId))
+        {
+            dbContext.Users.Add(new User
+            {
+                Id = userId,
+                Name = userName ?? "Unknown User",
             });
             await dbContext.SaveChangesAsync();
         }

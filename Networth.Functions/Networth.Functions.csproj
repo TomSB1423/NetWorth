@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!-- .NET 10 is now supported in Azure Functions isolated worker -->
+    <TargetFramework>net10.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
     <UserSecretsId>09bd123b-3401-4507-b92c-0b283b95b537</UserSecretsId>
@@ -8,6 +10,8 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Identity.Web" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="Aspire.Npgsql" />
     <PackageReference Include="Aspire.Azure.Storage.Queues" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" />

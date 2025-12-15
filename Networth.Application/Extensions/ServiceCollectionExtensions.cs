@@ -37,6 +37,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMediator, Mediator>();
 
         // Register command handlers
+        services.AddScoped<IRequestHandler<CreateUserCommand, CreateUserCommandResult>, CreateUserCommandHandler>();
         services.AddScoped<IRequestHandler<LinkInstitutionCommand, LinkInstitutionCommandResult>, LinkInstitutionCommandHandler>();
         services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncInstitutionCommand, SyncInstitutionCommandResult>, SyncInstitutionCommandHandler>();
