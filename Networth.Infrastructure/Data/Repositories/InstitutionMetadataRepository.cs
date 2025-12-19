@@ -36,12 +36,40 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
     /// <inheritdoc />
     public async Task SaveInstitutionsAsync(string countryCode, IEnumerable<DomainInstitutionMetadata> institutions, CancellationToken cancellationToken = default)
     {
-        // Delete existing institutions for this country
-        await DeleteByCountryAsync(countryCode, cancellationToken);
+        var incoming = institutions.ToList();
 
-        // Add new institutions
-        var entities = institutions.Select(i => MapToInfrastructure(i, countryCode));
-        await _context.Institutions.AddRangeAsync(entities, cancellationToken);
+        var existingEntities = await _context.Institutions
+            .Where(i => i.CountryCode == countryCode)
+            .ToDictionaryAsync(i => i.Id, cancellationToken);
+
+        foreach (var domainInst in incoming)
+        {
+            if (existingEntities.TryGetValue(domainInst.Id, out var entity))
+            {
+                // Update existing
+                entity.Name = domainInst.Name;
+                entity.LogoUrl = domainInst.LogoUrl;
+                entity.Bic = domainInst.Bic;
+                entity.Countries = JsonSerializer.Serialize(domainInst.Countries);
+                entity.LastUpdated = DateTime.UtcNow;
+
+                // Remove from dictionary so we know it was processed
+                existingEntities.Remove(domainInst.Id);
+            }
+            else
+            {
+                // Insert new
+                var newEntity = MapToInfrastructure(domainInst, countryCode);
+                await _context.Institutions.AddAsync(newEntity, cancellationToken);
+            }
+        }
+
+        // Delete any remaining entities that were not in the incoming list
+        if (existingEntities.Count > 0)
+        {
+            _context.Institutions.RemoveRange(existingEntities.Values);
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 

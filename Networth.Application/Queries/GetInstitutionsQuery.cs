@@ -13,7 +13,12 @@ public class GetInstitutionsQuery : IRequest<GetInstitutionsQueryResult>
     public required string CountryCode { get; init; }
 
     /// <summary>
-    ///     Gets a value indicating whether to include sandbox institutions (development only).
+    ///     Gets the user ID to filter out already linked institutions.
     /// </summary>
-    public bool IncludeSandbox { get; init; }
+    public string? UserId { get; init; }
+
+    /// <summary>
+    ///     Gets a value indicating whether to exclude institutions the user has already linked.
+    /// </summary>
+    public bool ExcludeLinked { get; init; }
 }

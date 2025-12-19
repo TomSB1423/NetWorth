@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    * {
+        @apply border-slate-800;
+    }
+
+    body {
+        @apply bg-slate-950 text-gray-100;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+}
+
+@layer components {
+    .stat-card {
+        @apply bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-2xl;
+    }
+
+    .glass-effect {
+        @apply bg-slate-900/80 backdrop-blur-xl;
+    }
+
+    .number-counter {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+@layer utilities {
+    .text-gradient {
+        @apply bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent;
+    }
+}

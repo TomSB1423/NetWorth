@@ -60,7 +60,7 @@ describe("NetWorthChart", () => {
         // Wait for the effect to finish to avoid act warnings
         await waitFor(() => expect(api.getNetWorthHistory).toHaveBeenCalled());
 
-        expect(screen.getByText(/Loading data/i)).toBeInTheDocument();
+        expect(screen.getByText(/Syncing account data/i)).toBeInTheDocument();
     });
 
     it("renders chart when data is loaded", async () => {
@@ -92,7 +92,12 @@ describe("NetWorthChart", () => {
     });
 
     it("allows changing time periods", async () => {
-        (api.getNetWorthHistory as Mock).mockResolvedValue([]);
+        // Provide data spanning more than 30 days to show 1M period
+        const mockData = [
+            { date: "2023-01-01", value: 1000 },
+            { date: "2023-02-15", value: 1100 },
+        ];
+        (api.getNetWorthHistory as Mock).mockResolvedValue(mockData);
         renderWithClient(<NetWorthChart isSyncing={false} />);
 
         await waitFor(() => {

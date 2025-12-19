@@ -14,4 +14,9 @@ public class UserInfo
     ///     Gets or sets the display name of the user.
     /// </summary>
     public required string Name { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether the user has completed onboarding.
+    /// </summary>
+    public bool HasCompletedOnboarding { get; set; }
 }

@@ -43,6 +43,22 @@ public interface IAccountRepository
     Task UpdateAccountStatusAsync(string accountId, Enums.AccountLinkStatus status, CancellationToken cancellationToken = default);
 
     /// <summary>
+    ///     Updates an account's user-defined fields.
+    /// </summary>
+    /// <param name="accountId">The account ID.</param>
+    /// <param name="userId">The user ID who owns the account.</param>
+    /// <param name="displayName">The new display name, or null to leave unchanged.</param>
+    /// <param name="category">The new account category, or null to leave unchanged.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The updated account, or null if not found.</returns>
+    Task<UserAccount?> UpdateAccountAsync(
+        string accountId,
+        string userId,
+        string? displayName,
+        Enums.AccountCategory? category,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     ///     Upserts account balances to the database.
     /// </summary>
     /// <param name="accountId">The account ID.</param>

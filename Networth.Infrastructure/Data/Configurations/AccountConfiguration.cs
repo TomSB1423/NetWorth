@@ -36,6 +36,12 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .HasMaxLength(200)
             .IsRequired();
 
+        builder.Property(a => a.DisplayName)
+            .HasMaxLength(200);
+
+        builder.Property(a => a.Category)
+            .HasMaxLength(50);
+
         builder.Property(a => a.Iban)
             .HasMaxLength(34);
 

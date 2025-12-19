@@ -24,6 +24,7 @@ public class TransactionSyncTests(ITestOutputHelper testOutput)
     {
         LinkInstitutionResponse linkResult = await Client.LinkInstitutionAsync(SandboxInstitutionId);
 
+        Assert.NotNull(linkResult.AuthorizationLink);
         await using GoCardlessSandboxAuthorizer authorizer = new();
         await authorizer.AuthorizeRequisitionAsync(linkResult.AuthorizationLink);
 

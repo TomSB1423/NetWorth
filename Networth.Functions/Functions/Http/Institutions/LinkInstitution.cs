@@ -61,6 +61,8 @@ public class LinkInstitution(IMediator mediator, ICurrentUserService currentUser
         {
             AuthorizationLink = result.AuthorizationLink,
             Status = result.Status,
+            IsAlreadyLinked = result.IsAlreadyLinked,
+            ExistingRequisitionId = result.ExistingRequisitionId,
         };
 
         return new OkObjectResult(response);

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
 using DomainRequisition = Networth.Domain.Entities.Requisition;
@@ -111,5 +112,17 @@ public class RequisitionRepository : BaseRepository<DomainRequisition, string>, 
             AuthenticationLink = entity.Link,
             AccountSelection = entity.AccountSelection ? "true" : null,
         });
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<string>> GetLinkedInstitutionIdsForUserAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await Context.Requisitions
+            .Where(r => r.UserId == userId && r.Status == AccountLinkStatus.Linked)
+            .Select(r => r.InstitutionId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
     }
 }

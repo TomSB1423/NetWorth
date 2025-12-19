@@ -19,4 +19,9 @@ public class CreateUserCommandResult
     ///     Gets or sets a value indicating whether the user was newly created (true) or already existed (false).
     /// </summary>
     public bool IsNewUser { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether the user has completed onboarding.
+    /// </summary>
+    public bool HasCompletedOnboarding { get; set; }
 }

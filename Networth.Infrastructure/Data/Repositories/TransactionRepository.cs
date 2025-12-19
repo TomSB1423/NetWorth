@@ -130,6 +130,57 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
     }
 
     /// <inheritdoc />
+    public async Task<(IEnumerable<DomainTransaction> Items, int TotalCount)> GetByAccountIdPagedAsync(
+        string accountId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation(
+            "Retrieving paginated transactions for account {AccountId}, page {Page}, pageSize {PageSize}",
+            accountId,
+            page,
+            pageSize);
+
+        var query = context.Transactions
+            .Where(t => t.AccountId == accountId)
+            .OrderByDescending(t => t.BookingDate ?? t.ValueDate ?? t.ImportedAt);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var transactions = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        logger.LogInformation(
+            "Successfully retrieved {Count} of {Total} transactions for account {AccountId} (page {Page})",
+            transactions.Count,
+            totalCount,
+            accountId,
+            page);
+
+        // Map infrastructure to domain entities
+        var items = transactions.Select(it => new DomainTransaction
+        {
+            Id = it.Id,
+            AccountId = it.AccountId,
+            TransactionId = it.TransactionId,
+            DebtorName = it.DebtorName,
+            DebtorAccount = it.DebtorAccountIban,
+            Amount = it.Amount,
+            Currency = it.Currency,
+            BankTransactionCode = it.BankTransactionCode,
+            BookingDate = it.BookingDate,
+            ValueDate = it.ValueDate,
+            RemittanceInformationUnstructured = it.RemittanceInformationUnstructured,
+            Status = it.Status,
+        });
+
+        return (items, totalCount);
+    }
+
+    /// <inheritdoc />
     public async Task<int> CalculateRunningBalancesAsync(string accountId, CancellationToken cancellationToken = default)
     {
         // 1. Fetch balances to determine the starting point (latest balance)

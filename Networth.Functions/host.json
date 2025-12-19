@@ -4,7 +4,9 @@
         "logLevel": {
             "default": "Information",
             "Azure.Core": "Warning",
-            "Azure.Storage": "Warning"
+            "Azure.Storage": "Warning",
+            "Npgsql": "Warning",
+            "Microsoft.EntityFrameworkCore": "Warning"
         },
         "applicationInsights": {
             "samplingSettings": {

@@ -21,4 +21,18 @@ public interface IUserRepository
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A tuple containing the user info and whether the user was newly created.</returns>
     Task<(UserInfo User, bool IsNew)> CreateOrGetUserAsync(string userId, string name, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Updates a user's fields.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="name">The new name, or null to keep existing.</param>
+    /// <param name="hasCompletedOnboarding">The new onboarding status, or null to keep existing.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The updated user info, or null if user not found.</returns>
+    Task<UserInfo?> UpdateUserAsync(
+        string userId,
+        string? name,
+        bool? hasCompletedOnboarding,
+        CancellationToken cancellationToken = default);
 }

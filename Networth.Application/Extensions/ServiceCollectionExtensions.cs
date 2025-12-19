@@ -38,6 +38,8 @@ public static class ServiceCollectionExtensions
 
         // Register command handlers
         services.AddScoped<IRequestHandler<CreateUserCommand, CreateUserCommandResult>, CreateUserCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateUserCommand, UpdateUserCommandResult>, UpdateUserCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateAccountCommand, UpdateAccountCommandResult>, UpdateAccountCommandHandler>();
         services.AddScoped<IRequestHandler<LinkInstitutionCommand, LinkInstitutionCommandResult>, LinkInstitutionCommandHandler>();
         services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncInstitutionCommand, SyncInstitutionCommandResult>, SyncInstitutionCommandHandler>();

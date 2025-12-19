@@ -35,6 +35,7 @@ public class CreateUserCommandHandler(
             UserId = user.Id,
             Name = user.Name,
             IsNewUser = isNew,
+            HasCompletedOnboarding = user.HasCompletedOnboarding,
         };
     }
 }

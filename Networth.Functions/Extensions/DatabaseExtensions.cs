@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Networth.Infrastructure.Data.Context;
@@ -30,6 +31,39 @@ public static class DatabaseExtensions
         await using NetworthDbContext dbContext = scope.ServiceProvider.GetRequiredService<NetworthDbContext>();
 
         await EnsureMockUserExistsAsync(dbContext);
+    }
+
+    /// <summary>
+    /// Ensures the sandbox institution exists (development only).
+    /// </summary>
+    public static async Task EnsureSandboxInstitutionAsync(this IServiceProvider serviceProvider)
+    {
+        await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
+        await using NetworthDbContext dbContext = scope.ServiceProvider.GetRequiredService<NetworthDbContext>();
+
+        await EnsureSandboxInstitutionExistsAsync(dbContext);
+    }
+
+    /// <summary>
+    /// Ensures the sandbox institution exists in the database.
+    /// </summary>
+    /// <param name="dbContext">The database context.</param>
+    public static async Task EnsureSandboxInstitutionExistsAsync(this NetworthDbContext dbContext)
+    {
+        const string sandboxId = "SANDBOXFINANCE_SFIN0000";
+        if (!await dbContext.Institutions.AnyAsync(i => i.Id == sandboxId))
+        {
+            dbContext.Institutions.Add(new InstitutionMetadata
+            {
+                Id = sandboxId,
+                Name = "Sandbox Finance",
+                LogoUrl = "https://cdn.iconscout.com/icon/free/png-256/free-code-sandbox-logo-icon-svg-download-png-3031688.png",
+                CountryCode = "GB",
+                Countries = JsonSerializer.Serialize(new[] { "GB" }),
+                LastUpdated = DateTime.UtcNow,
+            });
+            await dbContext.SaveChangesAsync();
+        }
     }
 
     /// <summary>

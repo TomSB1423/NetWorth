@@ -1,13 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Search, ChevronLeft, Building2 } from "lucide-react";
-import { api } from "../services/api";
-import { Institution } from "../types";
+import {
+    Search,
+    ChevronLeft,
+    Building2,
+    LineChart,
+    LogOut,
+} from "lucide-react";
+import { api } from "../../services/api";
+import { Institution } from "../../types";
+import { useUser } from "../../contexts/UserContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function SelectBank() {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
+    const [isLinking, setIsLinking] = useState(false);
+    const { logout } = useAuth();
+    const {
+        isProvisioned,
+        isLoading: isUserLoading,
+        error: userError,
+    } = useUser();
 
     const {
         data: institutions = [],
@@ -16,6 +31,7 @@ export default function SelectBank() {
     } = useQuery({
         queryKey: ["institutions"],
         queryFn: api.getInstitutions,
+        enabled: isProvisioned, // Only fetch institutions after user is provisioned
     });
 
     const filteredInstitutions = institutions.filter((inst: Institution) =>
@@ -23,48 +39,77 @@ export default function SelectBank() {
     );
 
     const handleSelectInstitution = async (institution: Institution) => {
+        setIsLinking(true);
         try {
-            // The API returns { link: string } but the code was using authorizationLink
-            // I should check what the API actually returns.
-            // Based on api.ts: return response.json();
-            // Let's assume it returns { link: string } based on my type definition in api.ts
-            // Wait, I defined it as { link: string } in api.ts but the code here uses authorizationLink.
-            // I should probably check the backend or just use 'any' for now if I am not sure,
-            // or update the type if I find out.
-            // Let's check LinkInstitutionCommandResult.cs in Application/Commands
-
-            const result: any = await api.linkInstitution(institution.id);
-            // Assuming the result has authorizationLink or link.
-            // Let's stick to what was there before but cast to any to avoid TS error for now
-            // or better, update the type in api.ts if I can confirm.
+            const result = await api.linkInstitution(institution.id);
 
             if (result.authorizationLink) {
                 window.location.assign(result.authorizationLink);
-            } else if (result.link) {
-                window.location.assign(result.link);
             } else {
                 console.error("No authorization link returned");
                 alert("Failed to start linking process. Please try again.");
+                setIsLinking(false);
             }
         } catch (err) {
             console.error("Failed to link account:", err);
             alert("Failed to link account. Please try again.");
+            setIsLinking(false);
         }
     };
+
+    // Show loading while user is being provisioned
+    if (isUserLoading || !isProvisioned) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+            </div>
+        );
+    }
+
+    // Show error if user provisioning failed
+    if (userError) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                <div className="text-center">
+                    <p className="text-red-500 mb-4">{userError}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-950">
             <header className="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-10">
-                <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
+                <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="p-2 hover:bg-slate-800 rounded-full text-gray-400 hover:text-white transition-colors"
+                        >
+                            <ChevronLeft size={24} />
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 via-blue-500 to-emerald-500 flex items-center justify-center">
+                                <LineChart size={16} className="text-white" />
+                            </div>
+                            <h1 className="text-lg font-semibold text-white">
+                                Select your bank
+                            </h1>
+                        </div>
+                    </div>
                     <button
-                        onClick={() => navigate(-1)}
-                        className="p-2 hover:bg-slate-800 rounded-full text-gray-400 hover:text-white transition-colors"
+                        onClick={() => logout()}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors"
                     >
-                        <ChevronLeft size={24} />
+                        <LogOut size={16} />
+                        <span className="text-sm">Sign Out</span>
                     </button>
-                    <h1 className="text-xl font-semibold text-white">
-                        Select your bank
-                    </h1>
                 </div>
             </header>
 
@@ -97,12 +142,13 @@ export default function SelectBank() {
                             <button
                                 key={inst.id}
                                 onClick={() => handleSelectInstitution(inst)}
-                                className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-900 transition-colors text-left group"
+                                disabled={isLinking}
+                                className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-900 transition-colors text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <div className="w-12 h-12 rounded-full bg-white p-2 flex items-center justify-center overflow-hidden">
-                                    {inst.logo ? (
+                                    {inst.logoUrl ? (
                                         <img
-                                            src={inst.logo}
+                                            src={inst.logoUrl}
                                             alt={inst.name}
                                             className="w-full h-full object-contain"
                                         />
@@ -125,6 +171,18 @@ export default function SelectBank() {
                     </div>
                 )}
             </main>
+
+            {/* Linking in Progress Overlay */}
+            {isLinking && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="text-center space-y-4">
+                        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p className="text-white font-medium">
+                            Connecting to bank...
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

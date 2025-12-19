@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
 using Networth.Domain.Entities;
+using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 
 namespace Networth.Application.Handlers;
@@ -13,6 +14,7 @@ public class GetInstitutionsQueryHandler(
     IFinancialProvider financialProvider,
     ICacheMetadataRepository cacheMetadataRepository,
     IInstitutionMetadataRepository institutionMetadataRepository,
+    IRequisitionRepository requisitionRepository,
     ILogger<GetInstitutionsQueryHandler> logger)
     : IRequestHandler<GetInstitutionsQuery, GetInstitutionsQueryResult>
 {
@@ -30,12 +32,52 @@ public class GetInstitutionsQueryHandler(
         // Check if cache is fresh (less than 30 days old)
         bool isCacheFresh = await cacheMetadataRepository.IsCacheFreshAsync(cacheKey, CacheMaxAgeDays, cancellationToken);
 
+        GetInstitutionsQueryResult result;
         if (isCacheFresh)
         {
-            return await GetCachedInstitutionsAsync(query, cancellationToken);
+            result = await GetCachedInstitutionsAsync(query, cancellationToken);
+        }
+        else
+        {
+            result = await FetchAndCacheInstitutionsAsync(query, cacheKey, cancellationToken);
         }
 
-        return await FetchAndCacheInstitutionsAsync(query, cacheKey, cancellationToken);
+        // Filter out linked institutions if requested
+        if (query.ExcludeLinked && !string.IsNullOrEmpty(query.UserId))
+        {
+            result = await FilterOutLinkedInstitutionsAsync(result, query.UserId, cancellationToken);
+        }
+
+        return result;
+    }
+
+    private async Task<GetInstitutionsQueryResult> FilterOutLinkedInstitutionsAsync(
+        GetInstitutionsQueryResult result,
+        string userId,
+        CancellationToken cancellationToken)
+    {
+        // Get all linked institution IDs for this user
+        var linkedInstitutionIds = await requisitionRepository.GetLinkedInstitutionIdsForUserAsync(userId, cancellationToken);
+        var linkedSet = linkedInstitutionIds.ToHashSet();
+
+        if (linkedSet.Count == 0)
+        {
+            return result;
+        }
+
+        logger.LogInformation(
+            "Filtering out {Count} already linked institutions for user {UserId}",
+            linkedSet.Count,
+            userId);
+
+        var filteredInstitutions = result.Institutions
+            .Where(i => !linkedSet.Contains(i.Id))
+            .ToList();
+
+        return new GetInstitutionsQueryResult
+        {
+            Institutions = filteredInstitutions,
+        };
     }
 
     private async Task<GetInstitutionsQueryResult> GetCachedInstitutionsAsync(GetInstitutionsQuery query, CancellationToken cancellationToken)
@@ -45,12 +87,6 @@ public class GetInstitutionsQueryHandler(
         IEnumerable<InstitutionMetadata> cachedInstitutions =
             await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
         List<InstitutionMetadata> cachedList = cachedInstitutions.ToList();
-
-        // In development, add sandbox institution if requested
-        if (query.IncludeSandbox)
-        {
-            AddSandboxInstitution(cachedList);
-        }
 
         return new GetInstitutionsQueryResult
         {
@@ -77,35 +113,9 @@ public class GetInstitutionsQueryHandler(
 
         logger.LogInformation("Successfully refreshed cache for country {CountryCode} with {Count} institutions", query.CountryCode, institutionsList.Count);
 
-        var resultInstitutions = institutionsList;
-
-        // In development, add sandbox institution if requested
-        if (query.IncludeSandbox)
-        {
-            AddSandboxInstitution(resultInstitutions);
-        }
-
         return new GetInstitutionsQueryResult
         {
-            Institutions = resultInstitutions,
+            Institutions = institutionsList,
         };
-    }
-
-    private void AddSandboxInstitution(List<InstitutionMetadata> institutions)
-    {
-        const string sandboxId = "SANDBOXFINANCE_SFIN0000";
-        if (institutions.Any(i => i.Id == sandboxId))
-        {
-            return;
-        }
-
-        institutions.Insert(0, new InstitutionMetadata
-        {
-            Id = sandboxId,
-            Name = "Sandbox Finance",
-            LogoUrl = "https://cdn.iconscout.com/icon/free/png-256/free-code-sandbox-logo-icon-svg-download-png-3031688.png",
-            Countries = ["GB"],
-        });
-        logger.LogInformation("Added sandbox institution to results");
     }
 }

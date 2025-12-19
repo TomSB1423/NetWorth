@@ -1,4 +1,5 @@
 using Networth.Domain.Enums;
+using AccountCategory = Networth.Domain.Enums.AccountCategory;
 
 namespace Networth.Infrastructure.Data.Entities;
 
@@ -31,6 +32,16 @@ public class Account
     ///     Gets or sets the name of the account.
     /// </summary>
     public required string Name { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the user-defined display name for the account.
+    /// </summary>
+    public string? DisplayName { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the user-specified category for the account.
+    /// </summary>
+    public AccountCategory? Category { get; set; }
 
     /// <summary>
     ///     Gets or sets the IBAN of the account.

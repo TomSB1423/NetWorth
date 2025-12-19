@@ -62,6 +62,7 @@ public class CreateUser(
             UserId = result.UserId,
             Name = result.Name,
             IsNewUser = result.IsNewUser,
+            HasCompletedOnboarding = result.HasCompletedOnboarding,
         });
     }
 }

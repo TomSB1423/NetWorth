@@ -47,7 +47,8 @@ namespace Networth.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    HasCompletedOnboarding = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -124,11 +125,13 @@ namespace Networth.Infrastructure.Data.Migrations
                     RequisitionId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     InstitutionId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    DisplayName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Category = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     Iban = table.Column<string>(type: "character varying(34)", maxLength: 34, nullable: true),
                     Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     Product = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     CashAccountType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
                     AdditionalAccountData = table.Column<string>(type: "jsonb", nullable: true),
                     Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastSynced = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -212,8 +215,8 @@ namespace Networth.Infrastructure.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "Name" },
-                values: new object[] { "mock-user-123", "Mock Development User" });
+                columns: new[] { "Id", "HasCompletedOnboarding", "Name" },
+                values: new object[] { "mock-user-123", false, "Mock Development User" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AccountBalances_AccountId",

@@ -1,5 +1,7 @@
 namespace Networth.Domain.Entities;
 
+using Networth.Domain.Enums;
+
 /// <summary>
 ///     Represents a user's bank account stored in the database.
 /// </summary>
@@ -26,9 +28,29 @@ public class UserAccount
     public required string InstitutionId { get; init; }
 
     /// <summary>
+    ///     Gets the institution name.
+    /// </summary>
+    public string? InstitutionName { get; init; }
+
+    /// <summary>
+    ///     Gets the institution logo URL.
+    /// </summary>
+    public string? InstitutionLogo { get; init; }
+
+    /// <summary>
     ///     Gets the name of the account.
     /// </summary>
     public required string Name { get; init; }
+
+    /// <summary>
+    ///     Gets the user-defined display name for the account.
+    /// </summary>
+    public string? DisplayName { get; init; }
+
+    /// <summary>
+    ///     Gets the user-specified category for the account.
+    /// </summary>
+    public AccountCategory? Category { get; init; }
 
     /// <summary>
     ///     Gets the IBAN of the account.
@@ -41,7 +63,7 @@ public class UserAccount
     public required string Currency { get; init; }
 
     /// <summary>
-    ///     Gets the product name/type.
+    ///     Gets the product name/type from the bank.
     /// </summary>
     public string? Product { get; init; }
 

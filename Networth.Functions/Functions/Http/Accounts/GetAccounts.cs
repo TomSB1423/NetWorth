@@ -64,10 +64,15 @@ public class GetAccounts(
             UserId = a.UserId,
             RequisitionId = a.RequisitionId,
             InstitutionId = a.InstitutionId,
+            InstitutionName = a.InstitutionName,
+            InstitutionLogo = a.InstitutionLogo,
             Name = a.Name,
+            DisplayName = a.DisplayName,
+            Category = a.Category,
             Iban = a.Iban,
             Currency = a.Currency,
             Product = a.Product,
+            LastSynced = a.LastSynced,
         });
 
         return new OkObjectResult(response);

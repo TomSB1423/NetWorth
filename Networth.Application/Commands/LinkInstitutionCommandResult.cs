@@ -9,11 +9,22 @@ public class LinkInstitutionCommandResult
 {
     /// <summary>
     ///     Gets or sets the authorization link for the user to complete bank authentication.
+    ///     This will be null if the institution is already linked.
     /// </summary>
-    public required string AuthorizationLink { get; set; }
+    public string? AuthorizationLink { get; set; }
 
     /// <summary>
     ///     Gets or sets status of the link.
     /// </summary>
     public required AccountLinkStatus Status { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether this institution is already linked.
+    /// </summary>
+    public bool IsAlreadyLinked { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the existing requisition ID if already linked.
+    /// </summary>
+    public string? ExistingRequisitionId { get; set; }
 }

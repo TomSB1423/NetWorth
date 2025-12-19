@@ -1,4 +1,6 @@
 using Aspire.Hosting.Azure;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Networth.ServiceDefaults;
 using Projects;
 using Scalar.Aspire;
@@ -9,9 +11,14 @@ IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("pos
 IResourceBuilder<ParameterResource> gocardlessSecretId = builder.AddParameter("gocardless-secret-id", secret: true);
 IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("gocardless-secret-key", secret: true);
 
-IResourceBuilder<AzurePostgresFlexibleServerResource> postgres = builder
-    .AddAzurePostgresFlexibleServer(ResourceNames.Postgres)
-    .RunAsContainer(container => { container.WithPassword(postgresPassword); });
+IResourceBuilder<ParameterResource> entraClientId = builder.AddParameter("entra-client-id");
+IResourceBuilder<ParameterResource> entraTenantId = builder.AddParameter("entra-tenant-id");
+IResourceBuilder<ParameterResource> entraApiClientId = builder.AddParameter("entra-api-client-id");
+
+var postgres = builder
+    .AddPostgres(ResourceNames.Postgres)
+    .WithPassword(postgresPassword)
+    .WithDataVolume("networth-postgres-data");
 
 var postgresdb = postgres
     .AddDatabase(ResourceNames.NetworthDb);
@@ -39,14 +46,20 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .WithReference(tables)
     .WaitFor(queues)
     .WithEnvironment("AzureWebJobsStorage", blobs.Resource.ConnectionStringExpression)
-    .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
-    .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
     .WithHttpHealthCheck("/api/health");
+
+// Configure GoCardless
+functions
+    .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
+    .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey);
 
 var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "dev")
     .WithReference(functions)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
     .WithEnvironment("VITE_API_URL", functions.GetEndpoint("http"))
+    .WithEnvironment("VITE_ENTRA_CLIENT_ID", entraClientId)
+    .WithEnvironment("VITE_ENTRA_TENANT_ID", entraTenantId)
+    .WithEnvironment("VITE_ENTRA_API_CLIENT_ID", entraApiClientId)
     .WithHttpEndpoint(env: "PORT", port: 3000)
     .WithExternalHttpEndpoints();
 
@@ -86,5 +99,16 @@ scalar.WithApiReference(functions, options =>
         .AddServer("/api", "Azure Functions API")
         .AddMetadata("summary", "Public endpoints exposed by the Networth Azure Functions app");
 });
+
+if (builder.Environment.IsDevelopment())
+{
+    postgres.WithPgAdmin(pgAdmin =>
+    {
+        pgAdmin
+            .WithHostPort(5050)
+            .WithExplicitStart();
+    });
+}
+
 
 await builder.Build().RunAsync();

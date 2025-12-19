@@ -46,10 +46,9 @@ export function AccountProvider({ children }) {
     );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useAccounts() {
     const context = useContext(AccountContext);
-    if (context === undefined) {
+    if (context == null) {
         throw new Error("useAccounts must be used within an AccountProvider");
     }
     return context;

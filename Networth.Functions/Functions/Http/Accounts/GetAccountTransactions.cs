@@ -18,18 +18,21 @@ public class GetAccountTransactions(
     IMediator mediator,
     ILogger<GetAccountTransactions> logger)
 {
+    private const int DefaultPageSize = 50;
+    private const int MaxPageSize = 100;
+
     /// <summary>
-    ///     Gets the transactions for a specific account with optional date filtering.
+    ///     Gets paginated transactions for a specific account.
     /// </summary>
     /// <param name="req">The HTTP request.</param>
     /// <param name="accountId">The account ID from the route.</param>
-    /// <returns>The account transactions.</returns>
+    /// <returns>The paginated account transactions.</returns>
     [Function("GetAccountTransactions")]
     [OpenApiOperation(
         "GetAccountTransactions",
         "Accounts",
         Summary = "Get account transactions",
-        Description = "Retrieves transactions for a specific bank account with optional date range filtering.")]
+        Description = "Retrieves paginated transactions for a specific bank account.")]
     [OpenApiParameter(
         "accountId",
         In = ParameterLocation.Path,
@@ -37,25 +40,25 @@ public class GetAccountTransactions(
         Type = typeof(string),
         Description = "The account ID")]
     [OpenApiParameter(
-        "dateFrom",
+        "page",
         In = ParameterLocation.Query,
-        Required = true,
-        Type = typeof(string),
-        Description = "Start date for transaction filtering")]
+        Required = false,
+        Type = typeof(int),
+        Description = "Page number (1-based, default: 1)")]
     [OpenApiParameter(
-        "dateTo",
+        "pageSize",
         In = ParameterLocation.Query,
-        Required = true,
-        Type = typeof(string),
-        Description = "End date for transaction filtering")]
+        Required = false,
+        Type = typeof(int),
+        Description = "Number of items per page (default: 50, max: 100)")]
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(IEnumerable<TransactionResponse>),
-        Description = "Successfully retrieved account transactions")]
+        typeof(PagedResponse<TransactionResponse>),
+        Description = "Successfully retrieved paginated account transactions")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.BadRequest,
-        Description = "Invalid account ID or date format")]
+        Description = "Invalid parameters")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.NotFound,
         Description = "Account not found")]
@@ -67,48 +70,38 @@ public class GetAccountTransactions(
         HttpRequest req,
         string accountId)
     {
-        // Read query parameters from the request
-        string dateFromStr = req.Query["dateFrom"].ToString();
-        string dateToStr = req.Query["dateTo"].ToString();
+        // Parse pagination parameters
+        int page = 1;
+        int pageSize = DefaultPageSize;
+
+        if (req.Query.TryGetValue("page", out var pageStr) && int.TryParse(pageStr, out var parsedPage))
+        {
+            page = Math.Max(1, parsedPage);
+        }
+
+        if (req.Query.TryGetValue("pageSize", out var pageSizeStr) && int.TryParse(pageSizeStr, out var parsedPageSize))
+        {
+            pageSize = Math.Clamp(parsedPageSize, 1, MaxPageSize);
+        }
 
         logger.LogInformation(
-            "Received request to get transactions for account {AccountId} from {DateFrom} to {DateTo}",
+            "Received request to get paginated transactions for account {AccountId}, page {Page}, pageSize {PageSize}",
             accountId,
-            dateFromStr,
-            dateToStr);
-
-        // Parse date strings to DateTimeOffset for validation
-        if (!DateTimeOffset.TryParse(dateFromStr, out DateTimeOffset dateFrom))
-        {
-            logger.LogWarning("Invalid dateFrom format: {DateFromStr}", dateFromStr);
-            return new BadRequestObjectResult(new { errors = new[] { $"Invalid dateFrom format: {dateFromStr}. Expected ISO 8601 format." } });
-        }
-
-        if (!DateTimeOffset.TryParse(dateToStr, out DateTimeOffset dateTo))
-        {
-            logger.LogWarning("Invalid dateTo format: {DateToStr}", dateToStr);
-            return new BadRequestObjectResult(new { errors = new[] { $"Invalid dateTo format: {dateToStr}. Expected ISO 8601 format." } });
-        }
+            page,
+            pageSize);
 
         // Create query object
         GetTransactionsQuery query = new()
         {
             AccountId = accountId,
-            DateFrom = dateFrom,
-            DateTo = dateTo,
+            Page = page,
+            PageSize = pageSize,
         };
 
         // Send through mediator (includes validation)
         GetTransactionsQueryResult result = await mediator.Send<GetTransactionsQuery, GetTransactionsQueryResult>(query);
 
-        // Return 404 if account not found
-        if (result.Transactions is null)
-        {
-            logger.LogWarning("Account {AccountId} not found", accountId);
-            return new NotFoundResult();
-        }
-
-        var response = result.Transactions.Select(t => new TransactionResponse
+        var transactionItems = result.Transactions.Items.Select(t => new TransactionResponse
         {
             Id = t.Id,
             AccountId = t.AccountId,
@@ -118,11 +111,26 @@ public class GetAccountTransactions(
             BookingDate = t.BookingDate,
             ValueDate = t.ValueDate,
             RemittanceInformationUnstructured = t.RemittanceInformationUnstructured,
+            DebtorName = t.DebtorName,
+            DebtorAccount = t.DebtorAccount,
         });
 
+        var response = new PagedResponse<TransactionResponse>
+        {
+            Items = transactionItems,
+            Page = result.Transactions.Page,
+            PageSize = result.Transactions.PageSize,
+            TotalCount = result.Transactions.TotalCount,
+            TotalPages = result.Transactions.TotalPages,
+            HasNextPage = result.Transactions.HasNextPage,
+            HasPreviousPage = result.Transactions.HasPreviousPage,
+        };
+
         logger.LogInformation(
-            "Successfully retrieved {TransactionCount} transactions for account {AccountId}",
-            response.Count(),
+            "Successfully retrieved page {Page} of {TotalPages} ({Count} items) for account {AccountId}",
+            response.Page,
+            response.TotalPages,
+            response.Items.Count(),
             accountId);
 
         return new OkObjectResult(response);

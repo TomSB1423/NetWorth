@@ -28,7 +28,6 @@ public class RequisitionConfiguration : IEntityTypeConfiguration<Requisition>
             .IsRequired();
 
         builder.Property(r => r.Status)
-            .HasConversion<string>()
             .HasMaxLength(50)
             .IsRequired();
 

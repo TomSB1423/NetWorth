@@ -2,6 +2,8 @@ import { createContext, useContext, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { Account, AccountBalances } from "../types";
+import { useAuth } from "./AuthContext";
+import { useUser } from "./UserContext";
 
 interface AccountContextType {
     accounts: Account[];
@@ -11,9 +13,15 @@ interface AccountContextType {
     error: Error | null;
 }
 
-const AccountContext = createContext<AccountContextType | null>(null);
+const AccountContext = createContext<AccountContextType | undefined>(undefined);
 
 export function AccountProvider({ children }: { children: ReactNode }) {
+    const { isReady } = useAuth();
+    const { isProvisioned } = useUser();
+
+    // Only fetch accounts after auth is ready AND user is provisioned
+    const canFetch = isReady && isProvisioned;
+
     const {
         data: accounts = [],
         isLoading: isLoadingAccounts,
@@ -21,6 +29,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     } = useQuery({
         queryKey: ["accounts"],
         queryFn: api.getAccounts,
+        enabled: canFetch,
     });
 
     // Fetch balances for all accounts
@@ -37,7 +46,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
             );
             return Promise.all(promises);
         },
-        enabled: accounts.length > 0,
+        enabled: canFetch && accounts.length > 0,
     });
 
     const value = {
@@ -58,7 +67,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAccounts() {
     const context = useContext(AccountContext);
-    if (context === null) {
+    if (context === undefined) {
         throw new Error("useAccounts must be used within an AccountProvider");
     }
     return context;

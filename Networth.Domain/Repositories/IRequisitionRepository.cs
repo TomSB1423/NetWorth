@@ -43,4 +43,14 @@ public interface IRequisitionRepository : IBaseRepository<Requisition, string>
         string institutionId,
         string userId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Gets the institution IDs that a user has linked (has requisitions with Linked status and accounts).
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A collection of institution IDs that are linked for the user.</returns>
+    Task<IEnumerable<string>> GetLinkedInstitutionIdsForUserAsync(
+        string userId,
+        CancellationToken cancellationToken = default);
 }

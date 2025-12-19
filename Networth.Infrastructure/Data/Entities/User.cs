@@ -16,6 +16,11 @@ public class User
     public required string Name { get; set; }
 
     /// <summary>
+    ///     Gets or sets a value indicating whether the user has completed onboarding.
+    /// </summary>
+    public bool HasCompletedOnboarding { get; set; }
+
+    /// <summary>
     ///     Gets or sets the accounts owned by this user.
     /// </summary>
     public ICollection<Account> Accounts { get; set; } = [];

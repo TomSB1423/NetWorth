@@ -29,6 +29,20 @@ public interface ITransactionRepository
     Task<IEnumerable<Transaction>> GetByAccountIdAsync(string accountId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    ///     Gets paginated transactions for a specific account.
+    /// </summary>
+    /// <param name="accountId">The account ID.</param>
+    /// <param name="page">The page number (1-based).</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A paginated result containing transactions for the account.</returns>
+    Task<(IEnumerable<Transaction> Items, int TotalCount)> GetByAccountIdPagedAsync(
+        string accountId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     ///     Calculates and updates running balances for all transactions of an account.
     /// </summary>
     /// <param name="accountId">The account ID.</param>

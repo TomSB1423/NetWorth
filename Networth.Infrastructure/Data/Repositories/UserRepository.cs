@@ -25,6 +25,7 @@ public class UserRepository(NetworthDbContext dbContext) : IUserRepository
         {
             Id = user.Id,
             Name = user.Name,
+            HasCompletedOnboarding = user.HasCompletedOnboarding,
         };
     }
 
@@ -36,18 +37,64 @@ public class UserRepository(NetworthDbContext dbContext) : IUserRepository
 
         if (existingUser != null)
         {
-            return (new UserInfo { Id = existingUser.Id, Name = existingUser.Name }, false);
+            return (new UserInfo
+            {
+                Id = existingUser.Id,
+                Name = existingUser.Name,
+                HasCompletedOnboarding = existingUser.HasCompletedOnboarding,
+            }, false);
         }
 
         var newUser = new User
         {
             Id = userId,
             Name = name,
+            HasCompletedOnboarding = false,
         };
 
         dbContext.Users.Add(newUser);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return (new UserInfo { Id = newUser.Id, Name = newUser.Name }, true);
+        return (new UserInfo
+        {
+            Id = newUser.Id,
+            Name = newUser.Name,
+            HasCompletedOnboarding = newUser.HasCompletedOnboarding,
+        }, true);
+    }
+
+    /// <inheritdoc />
+    public async Task<UserInfo?> UpdateUserAsync(
+        string userId,
+        string? name,
+        bool? hasCompletedOnboarding,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await dbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user == null)
+        {
+            return null;
+        }
+
+        if (name != null)
+        {
+            user.Name = name;
+        }
+
+        if (hasCompletedOnboarding.HasValue)
+        {
+            user.HasCompletedOnboarding = hasCompletedOnboarding.Value;
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new UserInfo
+        {
+            Id = user.Id,
+            Name = user.Name,
+            HasCompletedOnboarding = user.HasCompletedOnboarding,
+        };
     }
 }

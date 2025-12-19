@@ -19,4 +19,9 @@ public class CreateUserResponse
     ///     Gets or sets a value indicating whether this is a newly created user.
     /// </summary>
     public bool IsNewUser { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether the user has completed onboarding.
+    /// </summary>
+    public bool HasCompletedOnboarding { get; set; }
 }

@@ -1,3 +1,5 @@
+using Networth.Domain.Enums;
+
 namespace Networth.Functions.Models.Responses;
 
 /// <summary>
@@ -26,9 +28,29 @@ public record UserAccountResponse
     public required string InstitutionId { get; init; }
 
     /// <summary>
-    ///     Gets the name of the account.
+    ///     Gets the institution name.
+    /// </summary>
+    public string? InstitutionName { get; init; }
+
+    /// <summary>
+    ///     Gets the institution logo URL.
+    /// </summary>
+    public string? InstitutionLogo { get; init; }
+
+    /// <summary>
+    ///     Gets the name of the account from the bank.
     /// </summary>
     public required string Name { get; init; }
+
+    /// <summary>
+    ///     Gets the user-defined display name for the account.
+    /// </summary>
+    public string? DisplayName { get; init; }
+
+    /// <summary>
+    ///     Gets the user-specified category for the account.
+    /// </summary>
+    public AccountCategory? Category { get; init; }
 
     /// <summary>
     ///     Gets the IBAN of the account.
@@ -41,7 +63,12 @@ public record UserAccountResponse
     public required string Currency { get; init; }
 
     /// <summary>
-    ///     Gets the product name/type.
+    ///     Gets the product name/type from the bank.
     /// </summary>
     public string? Product { get; init; }
+
+    /// <summary>
+    ///     Gets when this account was last synced.
+    /// </summary>
+    public DateTime? LastSynced { get; init; }
 }

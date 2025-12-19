@@ -10,20 +10,74 @@ vi.mock("./services/api", () => ({
         getAccountBalances: vi.fn(),
         syncInstitution: vi.fn(),
         getNetWorthHistory: vi.fn(),
+        getUser: vi.fn(),
     },
 }));
 
+// Mock MSAL browser with proper class
+vi.mock("@azure/msal-browser", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@azure/msal-browser")>();
+    return {
+        ...actual,
+        PublicClientApplication: class MockPublicClientApplication {
+            initialize = vi.fn().mockResolvedValue(undefined);
+            getAllAccounts = vi.fn().mockReturnValue([]);
+            getActiveAccount = vi.fn().mockReturnValue(null);
+            setActiveAccount = vi.fn();
+            acquireTokenSilent = vi
+                .fn()
+                .mockResolvedValue({ accessToken: "test-token" });
+            loginPopup = vi.fn().mockResolvedValue({});
+            logoutPopup = vi.fn().mockResolvedValue(undefined);
+            addEventCallback = vi.fn();
+            removeEventCallback = vi.fn();
+        },
+    };
+});
+
+vi.mock("@azure/msal-react", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@azure/msal-react")>();
+    return {
+        ...actual,
+        MsalProvider: ({ children }: { children: React.ReactNode }) => (
+            <>{children}</>
+        ),
+        useMsal: () => ({
+            instance: {
+                getAllAccounts: vi.fn().mockReturnValue([]),
+                getActiveAccount: vi.fn().mockReturnValue(null),
+                setActiveAccount: vi.fn(),
+                acquireTokenSilent: vi
+                    .fn()
+                    .mockResolvedValue({ accessToken: "test-token" }),
+                loginPopup: vi.fn().mockResolvedValue({}),
+                logoutPopup: vi.fn().mockResolvedValue(undefined),
+                addEventCallback: vi.fn(),
+                removeEventCallback: vi.fn(),
+            },
+            accounts: [],
+            inProgress: "none",
+        }),
+        useIsAuthenticated: () => false,
+        useAccount: () => null,
+    };
+});
+
 // Mock the page components to simplify testing
-vi.mock("./pages/Index", () => ({
-    default: () => <div data-testid="dashboard-page">Dashboard Page</div>,
+vi.mock("./pages/Landing", () => ({
+    default: ({ onGetStarted }: { onGetStarted: () => void }) => (
+        <div data-testid="landing-page">
+            <button onClick={onGetStarted}>Get Started</button>
+        </div>
+    ),
 }));
-vi.mock("./pages/Onboarding", () => ({
+vi.mock("./pages/onboarding/OnboardingTutorial", () => ({
     default: () => <div data-testid="onboarding-page">Onboarding Page</div>,
 }));
-vi.mock("./pages/SelectBank", () => ({
+vi.mock("./pages/onboarding/SelectBank", () => ({
     default: () => <div>Select Bank Page</div>,
 }));
-vi.mock("./pages/NameAccount", () => ({
+vi.mock("./pages/onboarding/NameAccount", () => ({
     default: () => <div>Name Account Page</div>,
 }));
 vi.mock("./pages/Transactions", () => ({
@@ -31,6 +85,12 @@ vi.mock("./pages/Transactions", () => ({
 }));
 vi.mock("./pages/NotFound", () => ({
     default: () => <div>Not Found Page</div>,
+}));
+vi.mock("./pages/dashboard/Overview", () => ({
+    default: () => <div data-testid="dashboard-page">Dashboard Page</div>,
+}));
+vi.mock("./pages/dashboard/Accounts", () => ({
+    default: () => <div>Accounts Page</div>,
 }));
 
 describe("App", () => {
@@ -43,45 +103,24 @@ describe("App", () => {
         (api.getAccounts as Mock).mockResolvedValue([]);
         (api.getAccountBalances as Mock).mockResolvedValue([]);
         (api.syncInstitution as Mock).mockResolvedValue({});
-    });
-
-    it("renders without crashing", async () => {
-        render(<App />);
-        // Should eventually show onboarding if no accounts
-        await waitFor(() => {
-            expect(screen.getByTestId("onboarding-page")).toBeInTheDocument();
+        (api.getUser as Mock).mockResolvedValue({
+            id: "test-user",
+            isNewUser: false,
+            hasCompletedOnboarding: true,
         });
     });
 
-    it("triggers sync when institutionId is present in URL", async () => {
-        // Set URL with query param
-        window.history.pushState(
-            {},
-            "Callback",
-            "/?institutionId=test-inst-id"
-        );
-
+    it("renders landing page when not authenticated", async () => {
         render(<App />);
 
-        // Should show loading indicator
-        expect(screen.getByText(/Loading.../i)).toBeInTheDocument();
-
-        // Should call syncInstitution
+        // Should show landing page for unauthenticated users
         await waitFor(() => {
-            expect(api.syncInstitution).toHaveBeenCalledWith("test-inst-id");
-        });
-
-        // Should redirect to dashboard (remove query param)
-        await waitFor(() => {
-            expect(window.location.search).toBe("");
+            expect(screen.getByTestId("landing-page")).toBeInTheDocument();
         });
     });
 
-    it("redirects to dashboard if accounts exist", async () => {
-        (api.getAccounts as Mock).mockResolvedValue([
-            { id: "1", name: "Test Account" },
-        ]);
-
-        render(<App />);
+    it("renders without crashing", () => {
+        // Simple smoke test
+        expect(() => render(<App />)).not.toThrow();
     });
 });

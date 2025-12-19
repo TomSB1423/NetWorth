@@ -70,8 +70,14 @@ The documentation includes:
 Set the following user secrets in the AppHost project using the .NET CLI:
 
 ```shell
+# GoCardless API Configuration
 dotnet user-secrets set "Gocardless:SecretId" "YOUR_SECRET_ID" --project Networth.AppHost
 dotnet user-secrets set "Gocardless:SecretKey" "YOUR_SECRET_KEY" --project Networth.AppHost
+
+# Azure Entra ID Configuration
+dotnet user-secrets set "entra-client-id" "YOUR_CLIENT_ID" --project Networth.AppHost
+dotnet user-secrets set "entra-tenant-id" "YOUR_TENANT_ID" --project Networth.AppHost
+dotnet user-secrets set "entra-api-client-id" "YOUR_API_CLIENT_ID" --project Networth.AppHost
 ```
 
 The PostgreSQL password is configured in `appsettings.json`:

@@ -64,12 +64,13 @@ builder.Services
 
 IHost host = builder.Build();
 
-// In development, apply migrations and seed mock user automatically
+// In development, apply migrations and seed mock data automatically
 IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
 if (environment.IsDevelopment())
 {
     await host.Services.ApplyMigrationsAsync();
     await host.Services.EnsureMockUserAsync();
+    await host.Services.EnsureSandboxInstitutionAsync();
 }
 
 await host.RunAsync();

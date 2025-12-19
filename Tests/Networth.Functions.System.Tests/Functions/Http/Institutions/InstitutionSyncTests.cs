@@ -95,6 +95,7 @@ public class InstitutionSyncTests(ITestOutputHelper testOutput)
         LinkInstitutionResponse linkResult = await Client.LinkInstitutionAsync(Constants.SandboxInstitutionId);
 
         Assert.NotNull(linkResult);
+        Assert.NotNull(linkResult.AuthorizationLink);
         Assert.NotEmpty(linkResult.AuthorizationLink);
         Assert.Equal(AccountLinkStatus.Pending, linkResult.Status);
 

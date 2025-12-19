@@ -1,5 +1,8 @@
+using System.Text.Json.Serialization;
+
 namespace Networth.Domain.Enums;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AccessScope
 {
     /// <summary>
