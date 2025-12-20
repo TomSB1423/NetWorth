@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = useCallback(async () => {
         try {
-            await instance.loginPopup(loginRequest);
+            await instance.loginRedirect(loginRequest);
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
@@ -63,15 +63,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = useCallback(async () => {
         try {
-            await instance.logoutPopup({
+            // Get the active account to avoid account picker prompt
+            const activeAccount = instance.getActiveAccount() || accounts[0];
+            
+            await instance.logoutRedirect({
+                account: activeAccount,
                 postLogoutRedirectUri: window.location.origin,
-                mainWindowRedirectUri: window.location.origin,
             });
         } catch (error) {
             console.error("Logout failed:", error);
             throw error;
         }
-    }, [instance]);
+    }, [instance, accounts]);
 
     const getAccessToken = useCallback(async (): Promise<string> => {
         if (!account) {
@@ -86,10 +89,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
             return response.accessToken;
         } catch {
-            // If silent acquisition fails, try interactive
-            console.warn("Silent token acquisition failed, trying interactive");
-            const response = await instance.acquireTokenPopup(tokenRequest);
-            return response.accessToken;
+            // If silent acquisition fails, redirect to login
+            console.warn("Silent token acquisition failed, redirecting to login");
+            await instance.acquireTokenRedirect(tokenRequest);
+            // This line won't be reached due to redirect
+            throw new Error("Redirecting to acquire token");
         }
     }, [instance, account]);
 

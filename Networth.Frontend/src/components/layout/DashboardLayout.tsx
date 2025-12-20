@@ -1,20 +1,13 @@
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { LogOut, User } from "lucide-react";
+import { Outlet } from "react-router-dom";
+import { User } from "lucide-react";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { Button } from "../ui/button";
+import { SignOutButton } from "../ui/SignOutButton";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { useAuth } from "../../contexts/AuthContext";
 
 export function DashboardLayout() {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-    const { logout } = useAuth();
-    const navigate = useNavigate();
-
-    const handleSignOut = async () => {
-        await logout();
-        navigate("/");
-    };
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
@@ -33,14 +26,7 @@ export function DashboardLayout() {
                 <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800">
                     <div className="px-8 py-4 flex items-center justify-end">
                         <div className="flex items-center gap-3">
-                            <Button
-                                variant="ghost"
-                                onClick={handleSignOut}
-                                className="flex items-center gap-2"
-                            >
-                                <LogOut size={18} />
-                                <span>Sign Out</span>
-                            </Button>
+                            <SignOutButton />
                             <Button
                                 variant="ghost"
                                 className="relative h-10 w-10 rounded-full p-0"

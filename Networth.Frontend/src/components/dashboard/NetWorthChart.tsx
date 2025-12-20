@@ -10,8 +10,8 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { api } from "../../services/api";
-import { Loader2, TrendingUp } from "lucide-react";
-import { NetWorthDataPoint } from "../../types";
+import { Loader2, TrendingUp, Clock } from "lucide-react";
+import { NetWorthDataPoint, NetWorthHistoryResponse } from "../../types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 
@@ -46,20 +46,57 @@ export function NetWorthChart({
         return spanDays >= 365 ? "1Y" : "All";
     };
 
+    // Determine if we should poll for updates
+    const shouldPoll = (status: string | undefined): boolean => {
+        return status === "NotCalculated" || status === "Calculating";
+    };
+
     const {
-        data: history = [],
+        data: historyResponse,
         isLoading,
         error,
-    } = useQuery<NetWorthDataPoint[]>({
+        isFetched,
+    } = useQuery<NetWorthHistoryResponse>({
         queryKey: ["netWorthHistory"],
         queryFn: api.getNetWorthHistory,
+        // Poll every 3 seconds when not yet calculated
+        refetchInterval: (query) => {
+            const currentStatus = query.state.data?.status;
+            return shouldPoll(currentStatus) ? 3000 : false;
+        },
     });
+
+    // Only derive status after data has been fetched to avoid race conditions
+    const history = historyResponse?.dataPoints ?? [];
+    const status = historyResponse?.status;
+    const lastCalculated = historyResponse?.lastCalculated;
 
     const data = useMemo(() => {
         return [...history].sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
     }, [history]);
+
+    const formatLastCalculated = (dateString: string | null | undefined): string => {
+        if (!dateString) return "Never";
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffMins < 1) return "Just now";
+        if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? "" : "s"} ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+        if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+        
+        return date.toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+    };
 
     const [selectedPeriod, setSelectedPeriod] = useState(() =>
         getInitialPeriod(history)
@@ -117,7 +154,12 @@ export function NetWorthChart({
         }).format(value);
     };
 
-    const showLoading = isLoading || (isSyncing && data.length === 0);
+    // Show loading when:
+    // 1. Initial fetch is in progress
+    // 2. Syncing with no existing data to show
+    // 3. Backend reports data is not yet calculated or calculation is in progress
+    const isCalculationPending = status === "NotCalculated" || status === "Calculating";
+    const showLoading = isLoading || !isFetched || (isSyncing && data.length === 0) || isCalculationPending;
 
     if (showLoading) {
         return (
@@ -125,7 +167,9 @@ export function NetWorthChart({
                 <CardContent className="h-[400px] flex items-center justify-center text-gray-400">
                     <Loader2 className="w-8 h-8 animate-spin" />
                     <span className="ml-2">
-                        {isSyncing
+                        {isCalculationPending
+                            ? "Calculating net worth..."
+                            : isSyncing
                             ? "Syncing account data..."
                             : "Loading data..."}
                     </span>
@@ -177,9 +221,15 @@ export function NetWorthChart({
                     </div>
                     <div>
                         <CardTitle>Net Worth Trajectory</CardTitle>
-                        <p className="text-sm text-gray-400 mt-1">
-                            Growth over time
-                        </p>
+                        <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
+                            <span>Growth over time</span>
+                            {lastCalculated && (
+                                <span className="flex items-center gap-1 text-xs text-gray-500">
+                                    <Clock size={12} />
+                                    Updated {formatLastCalculated(lastCalculated)}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <div className="flex gap-2 p-1 rounded-xl bg-slate-800">

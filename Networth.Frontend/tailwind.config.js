@@ -11,6 +11,7 @@ export default {
                 'spin-reverse': 'spin-reverse 4s linear infinite',
                 'bounce-gentle': 'bounce-gentle 2s ease-in-out infinite',
                 'float': 'float 4s ease-in-out infinite',
+                'fade-in': 'fade-in 0.5s ease-out forwards',
             },
             keyframes: {
                 'spin-reverse': {
@@ -24,6 +25,10 @@ export default {
                 'float': {
                     '0%, 100%': { transform: 'translateY(0) opacity(0.4)' },
                     '50%': { transform: 'translateY(-20px) opacity(1)' },
+                },
+                'fade-in': {
+                    '0%': { opacity: '0', transform: 'translateY(5px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
                 },
             },
         },

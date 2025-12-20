@@ -1,4 +1,4 @@
-import { Configuration, LogLevel, PopupRequest } from "@azure/msal-browser";
+import { Configuration, LogLevel, RedirectRequest } from "@azure/msal-browser";
 
 // Environment variables for auth configuration
 const getEnvVar = (key: string, defaultValue?: string): string => {
@@ -10,15 +10,19 @@ const getEnvVar = (key: string, defaultValue?: string): string => {
     return value;
 };
 
+// Get the instance URL and extract the domain for knownAuthorities
+const instance = getEnvVar("VITE_ENTRA_INSTANCE");
+const knownAuthority = new URL(instance).hostname;
+
 // MSAL configuration
 export const msalConfig: Configuration = {
     auth: {
         clientId: getEnvVar("VITE_ENTRA_CLIENT_ID"),
-        authority: `https://login.microsoftonline.com/${getEnvVar(
-            "VITE_ENTRA_TENANT_ID"
-        )}`,
+        authority: `${instance}${getEnvVar("VITE_ENTRA_TENANT_ID")}`,
         redirectUri: window.location.origin + "/",
         postLogoutRedirectUri: window.location.origin + "/",
+        // Required for CIAM - tells MSAL to trust this authority
+        knownAuthorities: [knownAuthority],
     },
     cache: {
         cacheLocation: "sessionStorage",
@@ -49,12 +53,12 @@ export const msalConfig: Configuration = {
 };
 
 // API scope for the backend
-export const apiScope = `api://${getEnvVar(
-    "VITE_ENTRA_API_CLIENT_ID"
-)}/user_impersonation`;
+// In CIAM, we use the API's client_id with .default scope since custom scopes are not supported
+// This requests all permissions granted to the SPA for this API
+export const apiScope = `${getEnvVar("VITE_ENTRA_API_CLIENT_ID")}/.default`;
 
 // Login request configuration
-export const loginRequest: PopupRequest = {
+export const loginRequest: RedirectRequest = {
     scopes: [apiScope],
 };
 

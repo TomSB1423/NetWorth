@@ -14,6 +14,7 @@ IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("
 IResourceBuilder<ParameterResource> entraClientId = builder.AddParameter("entra-client-id");
 IResourceBuilder<ParameterResource> entraTenantId = builder.AddParameter("entra-tenant-id");
 IResourceBuilder<ParameterResource> entraApiClientId = builder.AddParameter("entra-api-client-id");
+IResourceBuilder<ParameterResource> entraInstance = builder.AddParameter("entra-instance");
 
 var postgres = builder
     .AddPostgres(ResourceNames.Postgres)
@@ -48,10 +49,14 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .WithEnvironment("AzureWebJobsStorage", blobs.Resource.ConnectionStringExpression)
     .WithHttpHealthCheck("/api/health");
 
-// Configure GoCardless
+// Configure GoCardless and Azure AD
 functions
     .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
-    .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey);
+    .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
+    .WithEnvironment("AzureAd__Instance", entraInstance)
+    .WithEnvironment("AzureAd__TenantId", entraTenantId)
+    .WithEnvironment("AzureAd__ClientId", entraApiClientId)
+    .WithEnvironment("AzureAd__Audience", entraApiClientId); // In CIAM, Audience = API Client ID
 
 var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "dev")
     .WithReference(functions)
@@ -60,6 +65,7 @@ var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "d
     .WithEnvironment("VITE_ENTRA_CLIENT_ID", entraClientId)
     .WithEnvironment("VITE_ENTRA_TENANT_ID", entraTenantId)
     .WithEnvironment("VITE_ENTRA_API_CLIENT_ID", entraApiClientId)
+    .WithEnvironment("VITE_ENTRA_INSTANCE", entraInstance)
     .WithHttpEndpoint(env: "PORT", port: 3000)
     .WithExternalHttpEndpoints();
 

@@ -125,7 +125,7 @@ export function LoadingScreen({
         : funnySteps[currentStep].icon;
     const currentText = showWelcome
         ? `Welcome, ${userName}!`
-        : message || funnySteps[currentStep].text;
+        : funnySteps[currentStep].text;
     const currentColor = showWelcome
         ? "text-yellow-400"
         : funnySteps[currentStep].color;
@@ -261,18 +261,30 @@ export function LoadingScreen({
                 </div>
 
                 {/* Dynamic step indicator */}
-                <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
-                    <div
-                        className={`${currentColor} transition-colors duration-500`}
-                    >
-                        <CurrentIcon
-                            size={18}
-                            className="animate-bounce-gentle"
-                        />
+                <div className="flex flex-col items-center gap-3">
+                    <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-800 backdrop-blur-sm min-w-[280px] justify-center">
+                        <div
+                            key={`icon-${currentStep}-${showWelcome}`}
+                            className={`${currentColor} transition-colors duration-500 animate-fade-in`}
+                        >
+                            <CurrentIcon
+                                size={18}
+                                className="animate-bounce-gentle"
+                            />
+                        </div>
+                        <span
+                            key={`text-${currentStep}-${showWelcome}`}
+                            className="text-sm font-medium text-slate-300 transition-all duration-500 animate-fade-in"
+                        >
+                            {currentText}
+                        </span>
                     </div>
-                    <span className="text-sm font-medium text-slate-300 transition-all duration-500">
-                        {currentText}
-                    </span>
+
+                    {message && !showWelcome && (
+                        <p className="text-sm text-slate-400 animate-pulse">
+                            {message}
+                        </p>
+                    )}
                 </div>
 
                 {/* Floating particles */}

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
 using DomainInstitutionMetadata = Networth.Domain.Entities.InstitutionMetadata;
@@ -13,14 +14,17 @@ namespace Networth.Infrastructure.Data.Repositories;
 public class InstitutionMetadataRepository : IInstitutionMetadataRepository
 {
     private readonly NetworthDbContext _context;
+    private readonly ILogger<InstitutionMetadataRepository> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="InstitutionMetadataRepository"/> class.
     /// </summary>
     /// <param name="context">The database context.</param>
-    public InstitutionMetadataRepository(NetworthDbContext context)
+    /// <param name="logger">The logger.</param>
+    public InstitutionMetadataRepository(NetworthDbContext context, ILogger<InstitutionMetadataRepository> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc />
@@ -64,10 +68,15 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
             }
         }
 
-        // Delete any remaining entities that were not in the incoming list
+        // Warn about institutions in database that weren't returned by the API
         if (existingEntities.Count > 0)
         {
-            _context.Institutions.RemoveRange(existingEntities.Values);
+            var missingIds = string.Join(", ", existingEntities.Keys);
+            _logger.LogWarning(
+                "Found {Count} institution(s) in database for country {CountryCode} that were not returned by API: {InstitutionIds}",
+                existingEntities.Count,
+                countryCode,
+                missingIds);
         }
 
         await _context.SaveChangesAsync(cancellationToken);

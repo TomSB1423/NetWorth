@@ -21,6 +21,7 @@ import { AccountProvider, useAccounts } from "./contexts/AccountContext";
 import { api } from "./services/api";
 
 import Landing from "./pages/Landing";
+import Login from "./pages/Login";
 import OnboardingTutorial from "./pages/onboarding/OnboardingTutorial";
 import SelectBank from "./pages/onboarding/SelectBank";
 import NameAccount from "./pages/onboarding/NameAccount";
@@ -36,6 +37,19 @@ import AccountsPage from "./pages/dashboard/Accounts";
 // Create MSAL instance
 const msalInstance = new PublicClientApplication(msalConfig);
 
+// Handle redirect promise on app load - this MUST be called before any other MSAL methods
+// It processes the auth response when returning from a redirect
+msalInstance.initialize().then(() => {
+    msalInstance.handleRedirectPromise().then((response) => {
+        if (response) {
+            // If we have a response, set the active account
+            msalInstance.setActiveAccount(response.account);
+        }
+    }).catch((error) => {
+        console.error("Error handling redirect:", error);
+    });
+});
+
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -48,24 +62,13 @@ const queryClient = new QueryClient({
 // Landing page wrapper with navigation
 function LandingWrapper() {
     const navigate = useNavigate();
-    const { login } = useAuth();
 
-    const handleGetStarted = async () => {
-        try {
-            await login();
-            navigate("/dashboard");
-        } catch (error) {
-            console.error("Login error:", error);
-        }
+    const handleGetStarted = () => {
+        navigate("/login");
     };
 
-    const handleSignIn = async () => {
-        try {
-            await login();
-            navigate("/dashboard");
-        } catch (error) {
-            console.error("Login error:", error);
-        }
+    const handleSignIn = () => {
+        navigate("/login");
     };
 
     return <Landing onGetStarted={handleGetStarted} onSignIn={handleSignIn} />;
@@ -222,6 +225,7 @@ function AppRoutes() {
         return (
             <Routes>
                 <Route path="/" element={<LandingWrapper />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         );
@@ -252,6 +256,7 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login" element={<Navigate to="/dashboard" replace />} />
 
             {/* Dashboard with nested routes */}
             <Route
@@ -269,6 +274,7 @@ function AppRoutes() {
                 <Route index element={<Overview />} />
                 <Route path="transactions" element={<Transactions />} />
                 <Route path="accounts" element={<AccountsPage />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
 
             <Route

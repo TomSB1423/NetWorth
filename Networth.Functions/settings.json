@@ -3,12 +3,6 @@
     "Values": {
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
     },
-    "AzureAd": {
-        "Instance": "https://login.microsoftonline.com/",
-        "TenantId": "",
-        "ClientId": "",
-        "Audience": ""
-    },
     "Gocardless": {
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2"
     },

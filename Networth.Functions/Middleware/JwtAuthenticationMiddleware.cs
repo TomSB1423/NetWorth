@@ -18,31 +18,35 @@ namespace Networth.Functions.Middleware;
 /// </summary>
 public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
 {
-    private readonly IConfiguration _configuration;
     private readonly ILogger<JwtAuthenticationMiddleware> _logger;
-    private readonly ConfigurationManager<OpenIdConnectConfiguration> _configManager;
-    private readonly TokenValidationParameters _tokenValidationParameters;
+    private readonly ConfigurationManager<OpenIdConnectConfiguration>? _configManager;
+    private readonly TokenValidationParameters? _tokenValidationParameters;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="JwtAuthenticationMiddleware"/> class.
     /// </summary>
     public JwtAuthenticationMiddleware(IConfiguration configuration, ILogger<JwtAuthenticationMiddleware> logger)
     {
-        _configuration = configuration;
         _logger = logger;
 
-        var tenantId = _configuration["AzureAd:TenantId"];
-        var clientId = _configuration["AzureAd:ClientId"];
-        var audience = _configuration["AzureAd:Audience"] ?? clientId;
-        var instance = _configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
+        var azureAdSection = configuration.GetSection("AzureAd");
+        if (!azureAdSection.Exists())
+        {
+            _logger.LogWarning("AzureAd configuration section is missing. JWT authentication will be skipped");
+            return;
+        }
+
+        var tenantId = azureAdSection.GetValue<string>("TenantId");
+        var clientId = azureAdSection.GetValue<string>("ClientId");
 
         if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(clientId))
         {
-            _logger.LogWarning("AzureAd configuration is missing. JWT authentication will be skipped.");
-            _configManager = null!;
-            _tokenValidationParameters = null!;
+            _logger.LogWarning("AzureAd TenantId or ClientId is missing. JWT authentication will be skipped");
             return;
         }
+
+        var audience = azureAdSection.GetValue<string>("Audience") ?? clientId;
+        var instance = azureAdSection.GetValue<string>("Instance") ?? "https://login.microsoftonline.com/";
 
         var metadataAddress = $"{instance}{tenantId}/v2.0/.well-known/openid-configuration";
         _configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
@@ -53,7 +57,6 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
         _tokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = $"{instance}{tenantId}/v2.0",
             ValidateAudience = true,
             ValidAudiences = [audience, $"api://{clientId}"],
             ValidateLifetime = true,
@@ -61,34 +64,30 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
             ClockSkew = TimeSpan.FromMinutes(5)
         };
 
-        _logger.LogInformation(
-            "JWT Authentication middleware initialized for tenant {TenantId}, audience {Audience}",
-            tenantId,
-            audience);
+        _logger.LogInformation("JWT Authentication middleware initialized");
     }
 
     /// <inheritdoc />
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        // Skip authentication if not configured
-        if (_configManager == null)
+        if (_configManager is null || _tokenValidationParameters is null)
         {
             await next(context);
             return;
         }
 
         var httpContext = context.GetHttpContext();
-        if (httpContext == null)
+        if (httpContext is null)
         {
-            // Not an HTTP trigger, skip authentication
             await next(context);
             return;
         }
 
-        var authHeader = httpContext.Request.Headers.Authorization.FirstOrDefault();
-        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        if (!httpContext.Request.Headers.TryGetValue("Authorization", out var authHeaderValues)
+            || authHeaderValues.FirstOrDefault() is not { } authHeader
+            || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         {
-            _logger.LogWarning("No Bearer token found in request");
+            _logger.LogDebug("Missing or invalid Authorization header");
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return;
         }
@@ -100,41 +99,34 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
             var openIdConfig = await _configManager.GetConfigurationAsync(CancellationToken.None);
             var validationParams = _tokenValidationParameters.Clone();
             validationParams.IssuerSigningKeys = openIdConfig.SigningKeys;
+            validationParams.ValidIssuer = openIdConfig.Issuer;
 
             var handler = new JwtSecurityTokenHandler();
             var result = await handler.ValidateTokenAsync(token, validationParams);
 
-            if (result.IsValid && result.ClaimsIdentity != null)
+            if (result.IsValid && result.ClaimsIdentity is not null)
             {
                 var principal = new ClaimsPrincipal(result.ClaimsIdentity);
-
-                // Set the authenticated user on HttpContext
                 httpContext.User = principal;
-
-                // Also store in FunctionContext.Items for access by scoped services
-                // This is necessary because IHttpContextAccessor may not reflect middleware changes
                 context.Items["User"] = principal;
 
-                var userId = result.ClaimsIdentity.FindFirst("oid")?.Value
-                             ?? result.ClaimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                _logger.LogDebug("Successfully authenticated user {UserId}", userId);
-
+                _logger.LogDebug("User authenticated successfully");
                 await next(context);
             }
             else
             {
-                _logger.LogWarning("Token validation failed: {Error}", result.Exception?.Message);
+                _logger.LogDebug("Token validation failed");
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
             }
         }
-        catch (SecurityTokenValidationException ex)
+        catch (SecurityTokenValidationException)
         {
-            _logger.LogWarning(ex, "Token validation failed: {Message}", ex.Message);
+            _logger.LogDebug("Token validation failed");
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error during token validation");
+            _logger.LogError(ex, "Unexpected error during authentication");
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
         }
     }

@@ -161,10 +161,13 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         await dbContext.SaveChangesAsync();
 
         // Act
-        var historyList = await Client.GetNetWorthHistoryAsync();
+        var historyResponse = await Client.GetNetWorthHistoryAsync();
 
         // Assert
-        Assert.NotNull(historyList);
+        Assert.NotNull(historyResponse);
+        var historyList = historyResponse.DataPoints.ToList();
+        Assert.Equal(Networth.Domain.Enums.NetWorthCalculationStatus.Calculated, historyResponse.Status);
+        Assert.NotNull(historyResponse.LastCalculated);
 
         // Expected:
         // Day 1: Acc1(100) + Acc2(50) = 150
@@ -296,9 +299,11 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        IEnumerable<NetWorthPoint>? history = await response.Content.ReadFromJsonAsync<IEnumerable<NetWorthPoint>>();
-        Assert.NotNull(history);
-        var historyList = history.ToList();
+        var historyResponse = await response.Content.ReadFromJsonAsync<Networth.Functions.Models.Responses.NetWorthHistoryResponse>();
+        Assert.NotNull(historyResponse);
+        var historyList = historyResponse.DataPoints.ToList();
+        Assert.Equal(Networth.Domain.Enums.NetWorthCalculationStatus.Calculated, historyResponse.Status);
+        Assert.NotNull(historyResponse.LastCalculated);
 
         var p1 = historyList.FirstOrDefault(p => p.Date.Date == day1);
         var p2 = historyList.FirstOrDefault(p => p.Date.Date == day2);

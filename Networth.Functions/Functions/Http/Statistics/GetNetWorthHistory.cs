@@ -6,8 +6,8 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
-using Networth.Domain.Entities;
 using Networth.Functions.Authentication;
+using Networth.Functions.Models.Responses;
 
 namespace Networth.Functions.Functions.Http.Statistics;
 
@@ -22,7 +22,7 @@ public class GetNetWorthHistory(
     /// <summary>
     ///     Gets the net worth history for the current authenticated user.
     /// </summary>
-    /// <returns>A collection of net worth data points.</returns>
+    /// <returns>A collection of net worth data points with status and last calculated timestamp.</returns>
     [Function("GetNetWorthHistory")]
     [OpenApiOperation(
         "GetNetWorthHistory",
@@ -32,7 +32,7 @@ public class GetNetWorthHistory(
     [OpenApiResponseWithBody(
         HttpStatusCode.OK,
         "application/json",
-        typeof(IEnumerable<NetWorthPoint>),
+        typeof(NetWorthHistoryResponse),
         Description = "Successfully retrieved net worth history")]
     [OpenApiResponseWithoutBody(
         HttpStatusCode.Unauthorized,
@@ -52,6 +52,17 @@ public class GetNetWorthHistory(
         var query = new GetNetWorthHistoryQuery(userId);
         var result = await mediator.Send<GetNetWorthHistoryQuery, GetNetWorthHistoryQueryResult>(query);
 
-        return new OkObjectResult(result.DataPoints);
+        var response = new NetWorthHistoryResponse
+        {
+            DataPoints = result.DataPoints.Select(p => new NetWorthPointResponse
+            {
+                Date = p.Date,
+                Amount = p.Amount
+            }),
+            Status = result.Status,
+            LastCalculated = result.LastCalculated
+        };
+
+        return new OkObjectResult(response);
     }
 }

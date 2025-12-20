@@ -76,6 +76,12 @@ export interface NetWorthDataPoint {
     amount: number;
 }
 
+export interface NetWorthHistoryResponse {
+    dataPoints: NetWorthDataPoint[];
+    status: "NotCalculated" | "Calculating" | "Calculated";
+    lastCalculated: string | null;
+}
+
 export interface User {
     userId: string;
     name: string;

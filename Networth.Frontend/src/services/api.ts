@@ -4,7 +4,7 @@ import {
     Balance,
     Institution,
     Transaction,
-    NetWorthDataPoint,
+    NetWorthHistoryResponse,
     User,
     LinkInstitutionResponse,
     PagedResponse,
@@ -117,7 +117,7 @@ export const api = {
         return response.json();
     },
 
-    getNetWorthHistory: async (): Promise<NetWorthDataPoint[]> => {
+    getNetWorthHistory: async (): Promise<NetWorthHistoryResponse> => {
         const headers = await getAuthHeaders();
         const response = await fetch(`${API_BASE_URL}/statistics/net-worth`, {
             headers,
