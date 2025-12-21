@@ -72,13 +72,15 @@ public static class DatabaseExtensions
     /// <param name="dbContext">The database context.</param>
     public static async Task EnsureMockUserExistsAsync(this NetworthDbContext dbContext)
     {
-        const string mockUserId = "mock-user-123";
-        if (!await dbContext.Users.AnyAsync(u => u.Id == mockUserId))
+        const string mockFirebaseUid = "mock-user-123";
+        if (!await dbContext.Users.AnyAsync(u => u.FirebaseUid == mockFirebaseUid))
         {
             dbContext.Users.Add(new User
             {
-                Id = mockUserId,
+                Id = Guid.NewGuid(),
+                FirebaseUid = mockFirebaseUid,
                 Name = "Mock Development User",
+                CreatedAt = DateTime.UtcNow,
             });
             await dbContext.SaveChangesAsync();
         }
@@ -89,16 +91,18 @@ public static class DatabaseExtensions
     /// This is called on first authenticated request to auto-provision the user record.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
-    /// <param name="userId">The user ID from the authentication token.</param>
+    /// <param name="firebaseUid">The Firebase UID from the authentication token.</param>
     /// <param name="userName">The user name from the authentication token (optional).</param>
-    public static async Task EnsureUserExistsAsync(this NetworthDbContext dbContext, string userId, string? userName)
+    public static async Task EnsureUserExistsAsync(this NetworthDbContext dbContext, string firebaseUid, string? userName)
     {
-        if (!await dbContext.Users.AnyAsync(u => u.Id == userId))
+        if (!await dbContext.Users.AnyAsync(u => u.FirebaseUid == firebaseUid))
         {
             dbContext.Users.Add(new User
             {
-                Id = userId,
+                Id = Guid.NewGuid(),
+                FirebaseUid = firebaseUid,
                 Name = userName ?? "Unknown User",
+                CreatedAt = DateTime.UtcNow,
             });
             await dbContext.SaveChangesAsync();
         }

@@ -13,7 +13,7 @@ public interface IAccountRepository
     /// <param name="userId">The user ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A collection of user accounts with institution information.</returns>
-    Task<IEnumerable<UserAccount>> GetAccountsByUserIdAsync(string userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<UserAccount>> GetAccountsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Upserts an account to the database.
@@ -27,7 +27,7 @@ public interface IAccountRepository
     /// <returns>A task representing the async operation.</returns>
     Task UpsertAccountAsync(
         string accountId,
-        string userId,
+        Guid userId,
         string requisitionId,
         string institutionId,
         AccountDetail accountDetails,
@@ -53,7 +53,7 @@ public interface IAccountRepository
     /// <returns>The updated account, or null if not found.</returns>
     Task<UserAccount?> UpdateAccountAsync(
         string accountId,
-        string userId,
+        Guid userId,
         string? displayName,
         Enums.AccountCategory? category,
         CancellationToken cancellationToken = default);

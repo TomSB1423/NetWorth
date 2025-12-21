@@ -40,11 +40,11 @@ public class CalculateRunningBalanceTests(MockoonTestFixture mockoonTestFixture,
 
         // Seed Data
         var accountId = Guid.NewGuid().ToString();
-        var userId = "test-user";
+        var userId = Guid.NewGuid();
 
         var user = new User
         {
-            Id = userId, Name = "Test User",
+            Id = userId, Name = "Test User", FirebaseUid = "test-firebase-uid",
         };
         dbContext.Users.Add(user);
 

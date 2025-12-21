@@ -44,10 +44,16 @@ public class GetInstitutions(
     {
         logger.LogInformation("Received request to get institutions");
 
+        Guid? userId = null;
+        if (currentUserService.IsAuthenticated)
+        {
+            userId = await currentUserService.GetInternalUserIdAsync();
+        }
+
         var query = new GetInstitutionsQuery
         {
             CountryCode = "GB",
-            UserId = currentUserService.UserId,
+            UserId = userId,
             ExcludeLinked = true,
         };
         var result = await mediator.Send<GetInstitutionsQuery, GetInstitutionsQueryResult>(query);

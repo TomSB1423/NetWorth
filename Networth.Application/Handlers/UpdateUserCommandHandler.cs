@@ -24,15 +24,16 @@ public class UpdateUserCommandHandler(
 
         if (updatedUser == null)
         {
-            logger.LogWarning("User {UserId} not found for update", command.UserId);
-            throw new InvalidOperationException($"User {command.UserId} not found");
+            logger.LogWarning("User with ID {UserId} not found for update", command.UserId);
+            throw new InvalidOperationException($"User with ID {command.UserId} not found");
         }
 
-        logger.LogInformation("Updated user {UserId}", command.UserId);
+        logger.LogInformation("Updated user {UserId}", updatedUser.Id);
 
         return new UpdateUserCommandResult
         {
             UserId = updatedUser.Id,
+            FirebaseUid = updatedUser.FirebaseUid,
             Name = updatedUser.Name,
             HasCompletedOnboarding = updatedUser.HasCompletedOnboarding,
         };

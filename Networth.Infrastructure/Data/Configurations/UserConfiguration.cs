@@ -17,22 +17,35 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Id)
-            .HasMaxLength(255)
+            .ValueGeneratedOnAdd();
+
+        builder.Property(u => u.FirebaseUid)
+            .HasMaxLength(128)
             .IsRequired();
 
         builder.Property(u => u.Name)
             .HasMaxLength(200)
             .IsRequired();
 
+        builder.Property(u => u.Email)
+            .HasMaxLength(320);
+
+        builder.Property(u => u.CreatedAt)
+            .IsRequired();
+
+        // Unique index on FirebaseUid for fast lookups and to prevent duplicates
+        builder.HasIndex(u => u.FirebaseUid)
+            .IsUnique();
+
         // Relationships
         builder.HasMany(u => u.Accounts)
             .WithOne()
-            .HasForeignKey("UserId")
+            .HasForeignKey(a => a.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(u => u.Transactions)
             .WithOne()
-            .HasForeignKey("UserId")
+            .HasForeignKey(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

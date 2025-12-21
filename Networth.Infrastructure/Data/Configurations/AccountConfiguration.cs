@@ -21,7 +21,6 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .IsRequired();
 
         builder.Property(a => a.UserId)
-            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(a => a.RequisitionId)

@@ -4,21 +4,33 @@ import {
     useCallback,
     useMemo,
     useEffect,
-    useSyncExternalStore,
+    useState,
     ReactNode,
 } from "react";
-import { useMsal, useIsAuthenticated, useAccount } from "@azure/msal-react";
-import { InteractionStatus, AccountInfo } from "@azure/msal-browser";
-import { loginRequest, tokenRequest } from "../config/authConfig";
+import {
+    User,
+    onAuthStateChanged,
+    signInWithPopup,
+    signOut,
+    GoogleAuthProvider,
+} from "firebase/auth";
+import { auth } from "../config/firebaseConfig";
 import { setTokenGetter } from "../services/api";
 import { config } from "../config/config";
-import { MockAuthContext } from "./MockAuthContext";
+
+// User info type that matches what we need for display
+export interface FirebaseUserInfo {
+    uid: string;
+    email: string | null;
+    displayName: string | null;
+    photoURL: string | null;
+}
 
 interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     isReady: boolean; // True when auth is complete AND token getter is set
-    user: AccountInfo | null;
+    user: FirebaseUserInfo | null;
     login: () => Promise<void>;
     logout: () => Promise<void>;
     getAccessToken: () => Promise<string>;
@@ -26,104 +38,106 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// External store for token getter configuration status
-let tokenGetterConfigured = false;
-const tokenGetterListeners = new Set<() => void>();
-
-const subscribeToTokenGetter = (callback: () => void): (() => void) => {
-    tokenGetterListeners.add(callback);
-    return () => tokenGetterListeners.delete(callback);
-};
-
-const getTokenGetterSnapshot = (): boolean => tokenGetterConfigured;
-
-const setTokenGetterStatus = (value: boolean): void => {
-    tokenGetterConfigured = value;
-    tokenGetterListeners.forEach((listener) => listener());
-};
+// Google Auth Provider - configured once
+const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope("email");
+googleProvider.addScope("profile");
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const { instance, accounts, inProgress } = useMsal();
-    const isAuthenticated = useIsAuthenticated();
-    const account = useAccount(accounts[0] || {});
-    const isLoading = inProgress !== InteractionStatus.None;
+    const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isTokenGetterConfigured, setIsTokenGetterConfigured] =
+        useState(false);
 
-    // Use external store to avoid setState in effect
-    const isTokenGetterConfigured = useSyncExternalStore(
-        subscribeToTokenGetter,
-        getTokenGetterSnapshot
-    );
+    // Listen to auth state changes
+    useEffect(() => {
+        if (!auth) {
+            setIsLoading(false);
+            return;
+        }
+
+        const unsubscribe = onAuthStateChanged(
+            auth,
+            (firebaseUser: User | null) => {
+                setUser(firebaseUser);
+                setIsLoading(false);
+
+                if (firebaseUser) {
+                    // Set up token getter for API calls
+                    const tokenGetter = async () => {
+                        const token = await firebaseUser.getIdToken();
+                        return token;
+                    };
+                    setTokenGetter(tokenGetter);
+                    setIsTokenGetterConfigured(true);
+                } else {
+                    setIsTokenGetterConfigured(false);
+                }
+            }
+        );
+
+        return () => unsubscribe();
+    }, []);
 
     const login = useCallback(async () => {
+        if (!auth) {
+            throw new Error("Firebase auth not initialized");
+        }
         try {
-            await instance.loginRedirect(loginRequest);
+            await signInWithPopup(auth, googleProvider);
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
         }
-    }, [instance]);
+    }, []);
 
     const logout = useCallback(async () => {
+        if (!auth) {
+            throw new Error("Firebase auth not initialized");
+        }
         try {
             // Clear session storage flags
             sessionStorage.removeItem("welcome_shown");
-
-            // Get the active account to avoid account picker prompt
-            const activeAccount = instance.getActiveAccount() || accounts[0];
-            
-            await instance.logoutRedirect({
-                account: activeAccount,
-                postLogoutRedirectUri: window.location.origin,
-            });
+            await signOut(auth);
         } catch (error) {
             console.error("Logout failed:", error);
             throw error;
         }
-    }, [instance, accounts]);
+    }, []);
 
     const getAccessToken = useCallback(async (): Promise<string> => {
-        if (!account) {
-            throw new Error("No active account");
+        if (!user) {
+            throw new Error("No authenticated user");
         }
-
         try {
-            // Try to acquire token silently first
-            const response = await instance.acquireTokenSilent({
-                ...tokenRequest,
-                account: account,
-            });
-            return response.accessToken;
-        } catch {
-            // If silent acquisition fails, redirect to login
-            console.warn("Silent token acquisition failed, redirecting to login");
-            await instance.acquireTokenRedirect(tokenRequest);
-            // This line won't be reached due to redirect
-            throw new Error("Redirecting to acquire token");
+            return await user.getIdToken();
+        } catch (error) {
+            console.error("Failed to get token:", error);
+            throw error;
         }
-    }, [instance, account]);
+    }, [user]);
 
-    // Set up the token getter for API calls - synchronize with external MSAL system
-    useEffect(() => {
-        if (isAuthenticated && account) {
-            console.log("Auth ready - setting token getter");
-            setTokenGetter(getAccessToken);
-            setTokenGetterStatus(true);
-        }
-        return () => {
-            setTokenGetterStatus(false);
-        };
-    }, [isAuthenticated, account, getAccessToken]);
+    const isAuthenticated = user !== null;
 
-    // Derive isReady from state rather than setting it in an effect
-    const isReady =
-        isAuthenticated && account != null && isTokenGetterConfigured;
+    // Derive isReady from state
+    const isReady = isAuthenticated && isTokenGetterConfigured;
+
+    // Convert Firebase User to our UserInfo type
+    const userInfo: FirebaseUserInfo | null = user
+        ? {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName,
+              photoURL: user.photoURL,
+          }
+        : null;
 
     const value = useMemo(
         () => ({
             isAuthenticated,
             isLoading,
             isReady,
-            user: account,
+            user: userInfo,
             login,
             logout,
             getAccessToken,
@@ -132,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isAuthenticated,
             isLoading,
             isReady,
-            account,
+            userInfo,
             login,
             logout,
             getAccessToken,
@@ -160,3 +174,9 @@ export function useAuth() {
     }
     return realContext;
 }
+
+// Export the context for MockAuthContext to use
+export { AuthContext };
+
+// Import MockAuthContext at the end to avoid circular dependency
+import { MockAuthContext } from "./MockAuthContext";

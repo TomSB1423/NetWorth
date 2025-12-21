@@ -42,8 +42,9 @@ public class GetCurrentUser
 
         CurrentUserResponse response = new()
         {
-            UserId = _currentUserService.UserId,
+            FirebaseUid = _currentUserService.FirebaseUid,
             Name = _currentUserService.Name,
+            Email = _currentUserService.Email,
             IsAuthenticated = _currentUserService.IsAuthenticated,
         };
 

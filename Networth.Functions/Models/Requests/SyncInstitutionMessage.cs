@@ -11,7 +11,7 @@ public class SyncInstitutionMessage
     public required string InstitutionId { get; set; }
 
     /// <summary>
-    ///     Gets or sets the user ID who owns the accounts.
+    ///     Gets or sets the internal user ID who owns the accounts.
     /// </summary>
-    public required string UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

@@ -17,13 +17,14 @@ public class CreateUserCommandHandler(
     public async Task<CreateUserCommandResult> HandleAsync(CreateUserCommand command, CancellationToken cancellationToken)
     {
         var (user, isNew) = await userRepository.CreateOrGetUserAsync(
-            command.UserId,
+            command.FirebaseUid,
             command.Name ?? "Unknown User",
+            command.Email,
             cancellationToken);
 
         if (isNew)
         {
-            logger.LogInformation("Created new user {UserId} with name {Name}", user.Id, user.Name);
+            logger.LogInformation("Created new user {UserId} with Firebase UID {FirebaseUid}", user.Id, user.FirebaseUid);
         }
         else
         {
@@ -33,6 +34,7 @@ public class CreateUserCommandHandler(
         return new CreateUserCommandResult
         {
             UserId = user.Id,
+            FirebaseUid = user.FirebaseUid,
             Name = user.Name,
             IsNewUser = isNew,
             HasCompletedOnboarding = user.HasCompletedOnboarding,

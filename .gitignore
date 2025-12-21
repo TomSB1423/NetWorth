@@ -456,3 +456,11 @@ Networth.Docs/.docusaurus/
 Networth.Docs/build/
 Networth.Docs/node_modules/
 Networth.Docs/.cache/
+
+# Firebase service account credentials
+**/*-firebase-*.json
+
+# Development settings
+appsettings.Development.json
+settings.local.json
+local.settings.json

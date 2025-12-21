@@ -43,9 +43,9 @@ public class GetInstitutionsQueryHandler(
         }
 
         // Filter out linked institutions if requested
-        if (query.ExcludeLinked && !string.IsNullOrEmpty(query.UserId))
+        if (query.ExcludeLinked && query.UserId.HasValue)
         {
-            result = await FilterOutLinkedInstitutionsAsync(result, query.UserId, cancellationToken);
+            result = await FilterOutLinkedInstitutionsAsync(result, query.UserId.Value, cancellationToken);
         }
 
         return result;
@@ -53,7 +53,7 @@ public class GetInstitutionsQueryHandler(
 
     private async Task<GetInstitutionsQueryResult> FilterOutLinkedInstitutionsAsync(
         GetInstitutionsQueryResult result,
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken)
     {
         // Get all linked institution IDs for this user

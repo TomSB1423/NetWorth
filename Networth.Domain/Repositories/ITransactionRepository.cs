@@ -16,7 +16,7 @@ public interface ITransactionRepository
     /// <param name="cancellationToken">Cancellation token.</param>
     Task UpsertTransactionsAsync(
         string accountId,
-        string userId,
+        Guid userId,
         IEnumerable<Transaction> transactions,
         CancellationToken cancellationToken = default);
 
@@ -56,5 +56,5 @@ public interface ITransactionRepository
     /// <param name="userId">The user ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A collection of net worth points.</returns>
-    Task<IEnumerable<NetWorthPoint>> GetNetWorthHistoryAsync(string userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<NetWorthPoint>> GetNetWorthHistoryAsync(Guid userId, CancellationToken cancellationToken = default);
 }

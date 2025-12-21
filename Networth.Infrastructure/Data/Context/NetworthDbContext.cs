@@ -80,8 +80,10 @@ public class NetworthDbContext : DbContext
         // Seed mock user for development/testing
         modelBuilder.Entity<User>().HasData(new User
         {
-            Id = "mock-user-123",
+            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+            FirebaseUid = "mock-user-123",
             Name = "Mock Development User",
+            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
         });
     }
 }

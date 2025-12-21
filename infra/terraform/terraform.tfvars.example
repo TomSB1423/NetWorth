@@ -1,35 +1,23 @@
-# =============================================================================
-# Networth Terraform Variables Example
-# =============================================================================
-# Copy this file to terraform.tfvars and fill in your actual values.
-# Never commit terraform.tfvars to source control!
-# =============================================================================
+# Networth Terraform Variables
+# Copy to terraform.tfvars and fill in values. Never commit terraform.tfvars!
 
-# -----------------------------------------------------------------------------
-# General Settings
-# -----------------------------------------------------------------------------
+# General
 location     = "uksouth"
 environment  = "dev"
 project_name = "networth"
 
-# -----------------------------------------------------------------------------
-# Database Credentials
-# -----------------------------------------------------------------------------
+# Database
 postgres_admin_password = "ChangeMe123!"
 
-# -----------------------------------------------------------------------------
-# GoCardless API Credentials
-# Get these from https://bankaccountdata.gocardless.com/
-# -----------------------------------------------------------------------------
+# GoCardless (https://bankaccountdata.gocardless.com/)
 gocardless_secret_id  = "your-secret-id"
 gocardless_secret_key = "your-secret-key"
 
-# -----------------------------------------------------------------------------
-# CIAM / Entra External ID Configuration
-# Get these values from the terraform-ciam deployment outputs
-# Run: cd ../terraform-ciam && terraform output
-# -----------------------------------------------------------------------------
-ciam_tenant_domain = "yourname"                             # e.g., "networth" for networth.ciamlogin.com
-ciam_tenant_id     = "00000000-0000-0000-0000-000000000000" # CIAM tenant ID (different from main Azure tenant)
-ciam_api_client_id = "00000000-0000-0000-0000-000000000000" # API app registration client ID from CIAM
-ciam_spa_client_id = "00000000-0000-0000-0000-000000000000" # SPA app registration client ID from CIAM
+# Firebase (https://console.firebase.google.com/)
+firebase_project_id           = "your-project-id"
+firebase_api_key              = "AIzaSy..."  # sensitive (for frontend only)
+firebase_auth_domain          = "your-project.firebaseapp.com"
+firebase_storage_bucket       = "your-project.appspot.com"
+firebase_messaging_sender_id  = "123456789"
+firebase_app_id               = "1:123456789:web:abc123"
+# Note: Service account is NOT required - backend validates JWTs using Google's public keys

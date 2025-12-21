@@ -21,7 +21,6 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             .IsRequired();
 
         builder.Property(t => t.UserId)
-            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(t => t.AccountId)

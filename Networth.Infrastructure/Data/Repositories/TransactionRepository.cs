@@ -17,7 +17,7 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
     /// <inheritdoc />
     public async Task UpsertTransactionsAsync(
         string accountId,
-        string userId,
+        Guid userId,
         IEnumerable<DomainTransaction> transactions,
         CancellationToken cancellationToken = default)
     {
@@ -262,7 +262,7 @@ public class TransactionRepository(NetworthDbContext context, ILogger<Transactio
 
     /// <inheritdoc />
     public async Task<IEnumerable<Networth.Domain.Entities.NetWorthPoint>> GetNetWorthHistoryAsync(
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         var sql = NetWorthHistoryQuery.GetFullQuery("{0}");

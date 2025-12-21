@@ -83,10 +83,12 @@ public class UpdateAccount(
             return new BadRequestObjectResult("Request body is required");
         }
 
+        var userId = await currentUserService.GetInternalUserIdAsync();
+
         var command = new UpdateAccountCommand
         {
             AccountId = accountId,
-            UserId = currentUserService.UserId,
+            UserId = userId,
             DisplayName = request.DisplayName,
             Category = request.Category,
         };

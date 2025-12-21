@@ -13,9 +13,9 @@ public class UpdateAccountCommand
     public required string AccountId { get; set; }
 
     /// <summary>
-    ///     Gets or sets the user ID.
+    ///     Gets or sets the internal user ID.
     /// </summary>
-    public required string UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     ///     Gets or sets the user-defined display name for the account.

@@ -6,9 +6,14 @@ namespace Networth.Functions.Models.Responses;
 public class UpdateUserResponse
 {
     /// <summary>
-    ///     Gets or sets the user ID.
+    ///     Gets or sets the internal user ID.
     /// </summary>
-    public required string UserId { get; set; }
+    public required Guid UserId { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the Firebase UID.
+    /// </summary>
+    public required string FirebaseUid { get; set; }
 
     /// <summary>
     ///     Gets or sets the user's display name.

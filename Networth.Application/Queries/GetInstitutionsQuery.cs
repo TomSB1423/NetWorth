@@ -13,9 +13,9 @@ public class GetInstitutionsQuery : IRequest<GetInstitutionsQueryResult>
     public required string CountryCode { get; init; }
 
     /// <summary>
-    ///     Gets the user ID to filter out already linked institutions.
+    ///     Gets the internal user ID to filter out already linked institutions.
     /// </summary>
-    public string? UserId { get; init; }
+    public Guid? UserId { get; init; }
 
     /// <summary>
     ///     Gets a value indicating whether to exclude institutions the user has already linked.

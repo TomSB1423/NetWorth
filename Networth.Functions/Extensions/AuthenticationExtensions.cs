@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Identity.Web;
 using Networth.Functions.Authentication;
 
 namespace Networth.Functions.Extensions;
@@ -14,7 +13,7 @@ public static class AuthenticationExtensions
 {
     /// <summary>
     ///     Configures authentication for the application.
-    ///     Uses JWT Bearer token validation in production and registers a mock user in development.
+    ///     Uses Firebase token validation in production and registers a mock user in development.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">The configuration.</param>
@@ -31,20 +30,19 @@ public static class AuthenticationExtensions
         // Add FunctionContextAccessor for accessing the FunctionContext from scoped services
         services.AddSingleton<IFunctionContextAccessor, FunctionContextAccessor>();
 
-        // Configure JWT Bearer authentication using Microsoft Identity Web
-        // This validates tokens issued by Entra ID for our API app registration
-        services.AddAuthentication()
-            .AddMicrosoftIdentityWebApi(configuration, "AzureAd");
-
-        // Register mock user only in development when AzureAd is not configured
-        if (environment.IsDevelopment() && string.IsNullOrEmpty(configuration["AzureAd:ClientId"]))
+        // Register mock user only in development when Firebase is not configured
+        if (environment.IsDevelopment() && string.IsNullOrEmpty(configuration["Firebase:ProjectId"]))
         {
             services.AddScoped<ClaimsPrincipal>(_ =>
             {
                 ClaimsIdentity identity = new(
                     [
                         new Claim(ClaimTypes.NameIdentifier, "mock-user-123"),
+                        new Claim("sub", "mock-user-123"),
                         new Claim(ClaimTypes.Name, "Mock Development User"),
+                        new Claim("name", "Mock Development User"),
+                        new Claim(ClaimTypes.Email, "mock@example.com"),
+                        new Claim("email", "mock@example.com"),
                         new Claim("IsActive", "true"),
                     ],
                     "MockAuthentication");

@@ -1,17 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { useMsal } from "@azure/msal-react";
-import {
-    LayoutDashboard,
-    Wallet,
-    Receipt,
-    User,
-} from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
+import { LayoutDashboard, Wallet, Receipt, User } from "lucide-react";
 import { SignOutButton } from "../ui/SignOutButton";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export function DashboardSidebar() {
-    const { accounts } = useMsal();
-    const user = accounts[0];
+    const { user } = useAuth();
 
     const menuItems = [
         {
@@ -39,7 +33,11 @@ export function DashboardSidebar() {
             {/* Logo */}
             <div className="h-16 flex items-center px-6 border-b border-slate-800/50">
                 <div className="flex items-center gap-3">
-                    <img src="/networth-icon.svg" alt="NetWorth" className="w-8 h-8" />
+                    <img
+                        src="/networth-icon.svg"
+                        alt="NetWorth"
+                        className="w-8 h-8"
+                    />
                     <span className="text-lg font-semibold text-white tracking-tight">
                         NetWorth
                     </span>
@@ -72,21 +70,27 @@ export function DashboardSidebar() {
                     );
                 })}
             </nav>
-            
+
             {/* User Profile */}
             <div className="p-4 border-t border-slate-800/50">
                 <div className="flex items-center gap-3 px-2 mb-3">
                     <Avatar className="h-9 w-9 border border-slate-700">
+                        {user?.photoURL && (
+                            <AvatarImage
+                                src={user.photoURL}
+                                alt={user.displayName || ""}
+                            />
+                        )}
                         <AvatarFallback className="bg-slate-800 text-slate-400">
                             <User size={16} />
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-slate-200 truncate">
-                            {user?.name || "User Account"}
+                            {user?.displayName || "User Account"}
                         </p>
                         <p className="text-xs text-slate-500 truncate">
-                            {user?.username || ""}
+                            {user?.email || ""}
                         </p>
                     </div>
                 </div>

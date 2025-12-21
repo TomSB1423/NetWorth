@@ -46,7 +46,7 @@ public class LinkInstitutionCommandHandler(
     }
 
     private async Task<LinkInstitutionCommandResult?> CheckExistingLinkAsync(
-        string userId,
+        Guid userId,
         string institutionId,
         CancellationToken cancellationToken)
     {

@@ -5,72 +5,66 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Networth.Functions.Middleware;
 
 /// <summary>
-///     Middleware that validates JWT Bearer tokens from Entra ID.
-///     This middleware runs before Azure Functions and populates HttpContext.User
-///     with the claims from the validated token.
+/// Validates Firebase ID tokens using standard JWT validation.
+/// No service account required - uses Google's public signing keys.
 /// </summary>
 public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
 {
     private readonly ILogger<JwtAuthenticationMiddleware> _logger;
-    private readonly ConfigurationManager<OpenIdConnectConfiguration>? _configManager;
     private readonly TokenValidationParameters? _tokenValidationParameters;
+    private readonly JwtSecurityTokenHandler _tokenHandler = new();
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="JwtAuthenticationMiddleware"/> class.
+    /// Initializes a new instance of the <see cref="JwtAuthenticationMiddleware"/> class.
     /// </summary>
+    /// <param name="configuration">The application configuration.</param>
+    /// <param name="logger">The logger.</param>
     public JwtAuthenticationMiddleware(IConfiguration configuration, ILogger<JwtAuthenticationMiddleware> logger)
     {
         _logger = logger;
 
-        var azureAdSection = configuration.GetSection("AzureAd");
-        if (!azureAdSection.Exists())
+        var projectId = configuration.GetValue<string>("Firebase:ProjectId");
+
+        if (string.IsNullOrEmpty(projectId))
         {
-            _logger.LogWarning("AzureAd configuration section is missing. JWT authentication will be skipped");
+            _logger.LogWarning("Firebase:ProjectId is missing. JWT authentication will be skipped");
             return;
         }
 
-        var tenantId = azureAdSection.GetValue<string>("TenantId");
-        var clientId = azureAdSection.GetValue<string>("ClientId");
-
-        if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(clientId))
+        try
         {
-            _logger.LogWarning("AzureAd TenantId or ClientId is missing. JWT authentication will be skipped");
-            return;
+#pragma warning disable VSTHRD002 // Avoid synchronous waits - Required for constructor initialization
+            var signingKeys = FetchGoogleSigningKeysAsync().GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
+
+            _tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = $"https://securetoken.google.com/{projectId}",
+                ValidateAudience = true,
+                ValidAudience = projectId,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKeys = signingKeys
+            };
+
+            _logger.LogInformation("Firebase JWT authentication initialized for project: {ProjectId}", projectId);
         }
-
-        var audience = azureAdSection.GetValue<string>("Audience") ?? clientId;
-        var instance = azureAdSection.GetValue<string>("Instance") ?? "https://login.microsoftonline.com/";
-
-        var metadataAddress = $"{instance}{tenantId}/v2.0/.well-known/openid-configuration";
-        _configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-            metadataAddress,
-            new OpenIdConnectConfigurationRetriever(),
-            new HttpDocumentRetriever());
-
-        _tokenValidationParameters = new TokenValidationParameters
+        catch (Exception ex)
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidAudiences = [audience, $"api://{clientId}"],
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ClockSkew = TimeSpan.FromMinutes(5)
-        };
-
-        _logger.LogInformation("JWT Authentication middleware initialized");
+            _logger.LogError(ex, "Failed to initialize Firebase JWT authentication");
+        }
     }
 
     /// <inheritdoc />
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        if (_configManager is null || _tokenValidationParameters is null)
+        if (_tokenValidationParameters is null)
         {
             await next(context);
             return;
@@ -83,11 +77,18 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
             return;
         }
 
+        // Skip authentication for OPTIONS preflight requests (CORS)
+        if (httpContext.Request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+        {
+            await next(context);
+            return;
+        }
+
         if (!httpContext.Request.Headers.TryGetValue("Authorization", out var authHeaderValues)
             || authHeaderValues.FirstOrDefault() is not { } authHeader
             || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         {
-            _logger.LogDebug("Missing or invalid Authorization header");
+            _logger.LogWarning("Unauthenticated request to {Function}", context.FunctionDefinition.Name);
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return;
         }
@@ -96,38 +97,68 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
 
         try
         {
-            var openIdConfig = await _configManager.GetConfigurationAsync(CancellationToken.None);
-            var validationParams = _tokenValidationParameters.Clone();
-            validationParams.IssuerSigningKeys = openIdConfig.SigningKeys;
-            validationParams.ValidIssuer = openIdConfig.Issuer;
+            var result = await _tokenHandler.ValidateTokenAsync(token, _tokenValidationParameters);
 
-            var handler = new JwtSecurityTokenHandler();
-            var result = await handler.ValidateTokenAsync(token, validationParams);
-
-            if (result.IsValid && result.ClaimsIdentity is not null)
+            if (!result.IsValid || result.SecurityToken is not JwtSecurityToken jwt)
             {
-                var principal = new ClaimsPrincipal(result.ClaimsIdentity);
-                httpContext.User = principal;
-                context.Items["User"] = principal;
-
-                _logger.LogDebug("User authenticated successfully");
-                await next(context);
-            }
-            else
-            {
-                _logger.LogDebug("Token validation failed");
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return;
             }
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, jwt.Subject),
+                new("sub", jwt.Subject)
+            };
+
+            AddClaimIfPresent(jwt, claims, "email", ClaimTypes.Email);
+            AddClaimIfPresent(jwt, claims, "name", ClaimTypes.Name);
+            AddClaimIfPresent(jwt, claims, "picture");
+            AddClaimIfPresent(jwt, claims, "email_verified");
+            AddClaimIfPresent(jwt, claims, "user_id");
+
+            var identity = new ClaimsIdentity(claims, "Firebase");
+            httpContext.User = new ClaimsPrincipal(identity);
+            context.Items["User"] = httpContext.User;
+
+            _logger.LogDebug("Authenticated user: {UserId}", jwt.Subject);
+            await next(context);
         }
-        catch (SecurityTokenValidationException)
+        catch (SecurityTokenException ex)
         {
-            _logger.LogDebug("Token validation failed");
+            _logger.LogDebug("Token validation failed: {Message}", ex.Message);
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error during authentication");
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        }
+    }
+
+#pragma warning disable VSTHRD002 // Avoid synchronous waits - Required for constructor initialization
+    private static async Task<IEnumerable<SecurityKey>> FetchGoogleSigningKeysAsync()
+    {
+        using var client = new HttpClient();
+
+        var jwkJson = await client
+            .GetStringAsync("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com")
+            .ConfigureAwait(false);
+
+        return new JsonWebKeySet(jwkJson).GetSigningKeys();
+    }
+#pragma warning restore VSTHRD002
+
+    private static void AddClaimIfPresent(JwtSecurityToken jwt, List<Claim> claims, string claimType, string? mappedType = null)
+    {
+        var claim = jwt.Claims.FirstOrDefault(c => c.Type == claimType);
+        if (claim is not null)
+        {
+            claims.Add(new Claim(claimType, claim.Value));
+            if (mappedType is not null)
+            {
+                claims.Add(new Claim(mappedType, claim.Value));
+            }
         }
     }
 }

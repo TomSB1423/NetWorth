@@ -13,9 +13,6 @@ import {
     QueryClientProvider,
     useQueryClient,
 } from "@tanstack/react-query";
-import { PublicClientApplication } from "@azure/msal-browser";
-import { MsalProvider } from "@azure/msal-react";
-import { msalConfig } from "./config/authConfig";
 import { config } from "./config/config";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MockAuthProvider } from "./contexts/MockAuthContext";
@@ -36,26 +33,6 @@ import { LoadingScreen } from "./components/ui/LoadingScreen";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
 import AccountsPage from "./pages/dashboard/Accounts";
-
-// Create MSAL instance - only needed in non-mock mode
-let msalInstance: PublicClientApplication | null = null;
-
-if (!config.useMockData) {
-    msalInstance = new PublicClientApplication(msalConfig);
-
-    // Handle redirect promise on app load - this MUST be called before any other MSAL methods
-    // It processes the auth response when returning from a redirect
-    msalInstance.initialize().then(() => {
-        msalInstance!.handleRedirectPromise().then((response) => {
-            if (response) {
-                // If we have a response, set the active account
-                msalInstance!.setActiveAccount(response.account);
-            }
-        }).catch((error) => {
-            console.error("Error handling redirect:", error);
-        });
-    });
-}
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -113,12 +90,12 @@ function AppRoutes() {
 
     // Determine if we should show the "funny" loading screen (onboarding/syncing)
     const isOnboardingOrSyncing =
-        (isLoading && !hasCompletedOnboarding) ||
-        institutionId ||
-        isSyncing;
+        (isLoading && !hasCompletedOnboarding) || institutionId || isSyncing;
 
     // State to handle the exit animation of the funny loading screen
-    const [showFunnyLoading, setShowFunnyLoading] = useState(!!isOnboardingOrSyncing);
+    const [showFunnyLoading, setShowFunnyLoading] = useState(
+        !!isOnboardingOrSyncing
+    );
 
     useEffect(() => {
         if (isOnboardingOrSyncing) {
@@ -250,7 +227,7 @@ function AppRoutes() {
         return (
             <LoadingScreen
                 message={message}
-                userName={user?.name}
+                userName={user?.displayName}
                 isFinished={!isOnboardingOrSyncing}
                 onComplete={() => setShowFunnyLoading(false)}
             />
@@ -277,7 +254,10 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+            <Route
+                path="/login"
+                element={<Navigate to="/dashboard" replace />}
+            />
 
             {/* Dashboard with nested routes */}
             <Route
@@ -295,7 +275,10 @@ function AppRoutes() {
                 <Route index element={<Overview />} />
                 <Route path="transactions" element={<Transactions />} />
                 <Route path="accounts" element={<AccountsPage />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                <Route
+                    path="*"
+                    element={<Navigate to="/dashboard" replace />}
+                />
             </Route>
 
             <Route
@@ -332,7 +315,7 @@ function AppRoutes() {
 }
 
 function App() {
-    // In mock mode, use simplified providers without MSAL
+    // In mock mode, use simplified providers without Firebase
     if (config.useMockData) {
         return (
             <MockAuthProvider>
@@ -349,21 +332,19 @@ function App() {
         );
     }
 
-    // Real mode with full MSAL authentication
+    // Real mode with Firebase authentication
     return (
-        <MsalProvider instance={msalInstance!}>
-            <AuthProvider>
-                <QueryClientProvider client={queryClient}>
-                    <UserProvider>
-                        <AccountProvider>
-                            <BrowserRouter>
-                                <AppRoutes />
-                            </BrowserRouter>
-                        </AccountProvider>
-                    </UserProvider>
-                </QueryClientProvider>
-            </AuthProvider>
-        </MsalProvider>
+        <AuthProvider>
+            <QueryClientProvider client={queryClient}>
+                <UserProvider>
+                    <AccountProvider>
+                        <BrowserRouter>
+                            <AppRoutes />
+                        </BrowserRouter>
+                    </AccountProvider>
+                </UserProvider>
+            </QueryClientProvider>
+        </AuthProvider>
     );
 }
 

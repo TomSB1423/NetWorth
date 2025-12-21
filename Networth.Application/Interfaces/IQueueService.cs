@@ -13,7 +13,7 @@ public interface IQueueService
     /// <param name="cancellationToken">Cancellation token.</param>
     Task EnqueueAccountSyncAsync(
         string accountId,
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -24,7 +24,7 @@ public interface IQueueService
     /// <param name="cancellationToken">Cancellation token.</param>
     Task EnqueueInstitutionSyncAsync(
         string institutionId,
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>

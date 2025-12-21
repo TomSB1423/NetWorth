@@ -40,13 +40,13 @@ public class GetNetWorthHistory(
     public async Task<IActionResult> RunAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "statistics/net-worth")] HttpRequest unused)
     {
-        var userId = currentUserService.UserId;
-        if (string.IsNullOrEmpty(userId))
+        if (!currentUserService.IsAuthenticated)
         {
             logger.LogWarning("Unauthorized access attempt to GetNetWorthHistory");
             return new UnauthorizedResult();
         }
 
+        var userId = await currentUserService.GetInternalUserIdAsync();
         logger.LogInformation("Retrieving net worth history for user {UserId}", userId);
 
         var query = new GetNetWorthHistoryQuery(userId);

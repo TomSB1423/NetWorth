@@ -59,12 +59,14 @@ public class SyncInstitution(
             return new UnauthorizedResult();
         }
 
+        var userId = await currentUserService.GetInternalUserIdAsync();
+
         logger.LogInformation(
             "Received request to sync institution {InstitutionId} for user {UserId}",
             institutionId,
-            currentUserService.UserId);
+            userId);
 
-        await queueService.EnqueueInstitutionSyncAsync(institutionId, currentUserService.UserId);
+        await queueService.EnqueueInstitutionSyncAsync(institutionId, userId);
 
         logger.LogInformation(
             "Successfully enqueued institution sync for institution {InstitutionId}",

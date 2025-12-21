@@ -50,9 +50,11 @@ public class LinkInstitution(IMediator mediator, ICurrentUserService currentUser
         HttpRequest req,
         string institutionId)
     {
+        var userId = await currentUserService.GetInternalUserIdAsync();
+
         var command = new LinkInstitutionCommand
         {
-            UserId = currentUserService.UserId,
+            UserId = userId,
             InstitutionId = institutionId,
         };
         var result = await mediator.Send<LinkInstitutionCommand, LinkInstitutionCommandResult>(command);

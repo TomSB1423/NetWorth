@@ -1,24 +1,11 @@
-# =============================================================================
-# Outputs
-# =============================================================================
-# These outputs provide important values needed for:
-# - CI/CD deployment pipelines
-# - Local development configuration
-# - Application configuration
-# =============================================================================
-
-# -----------------------------------------------------------------------------
 # Resource Group
-# -----------------------------------------------------------------------------
 
 output "resource_group_name" {
   value       = azurerm_resource_group.rg.name
   description = "The name of the resource group"
 }
 
-# -----------------------------------------------------------------------------
 # Container App
-# -----------------------------------------------------------------------------
 
 output "container_app_name" {
   value       = azurerm_container_app.functions.name
@@ -30,9 +17,7 @@ output "container_app_url" {
   description = "The public URL of the Container App (API)"
 }
 
-# -----------------------------------------------------------------------------
 # Container Registry
-# -----------------------------------------------------------------------------
 
 output "acr_login_server" {
   value       = azurerm_container_registry.acr.login_server
@@ -44,9 +29,7 @@ output "acr_name" {
   description = "The name of the Azure Container Registry"
 }
 
-# -----------------------------------------------------------------------------
 # Frontend
-# -----------------------------------------------------------------------------
 
 output "frontend_swa_name" {
   value       = azurerm_static_web_app.frontend.name
@@ -58,9 +41,7 @@ output "frontend_swa_url" {
   description = "The public URL of the frontend Static Web App"
 }
 
-# -----------------------------------------------------------------------------
 # Database
-# -----------------------------------------------------------------------------
 
 output "postgres_server_name" {
   value       = azurerm_postgresql_flexible_server.psql.name
@@ -72,9 +53,7 @@ output "postgres_fqdn" {
   description = "The FQDN of the PostgreSQL server"
 }
 
-# -----------------------------------------------------------------------------
 # Key Vault
-# -----------------------------------------------------------------------------
 
 output "key_vault_name" {
   value       = azurerm_key_vault.kv.name
@@ -86,33 +65,20 @@ output "key_vault_uri" {
   description = "The URI of the Key Vault"
 }
 
-# -----------------------------------------------------------------------------
-# CIAM / Authentication (values passed through from variables)
-# -----------------------------------------------------------------------------
+# Firebase
 
-output "ciam_authority" {
-  value       = "https://${var.ciam_tenant_domain}.ciamlogin.com/${var.ciam_tenant_id}"
-  description = "MSAL Authority URL for CIAM"
+output "firebase_project_id" {
+  value       = var.firebase_project_id
+  description = "Firebase Project ID"
 }
 
-output "ciam_api_client_id" {
-  value       = var.ciam_api_client_id
-  description = "API Application (Client) ID from CIAM"
+output "firebase_auth_domain" {
+  value       = var.firebase_auth_domain
+  description = "Firebase Auth Domain (for frontend)"
 }
 
-output "ciam_spa_client_id" {
-  value       = var.ciam_spa_client_id
-  description = "SPA Application (Client) ID from CIAM"
-}
-
-output "ciam_tenant_id" {
-  value       = var.ciam_tenant_id
-  description = "CIAM Tenant ID"
-}
-
-# -----------------------------------------------------------------------------
-# Configuration Summary
-# -----------------------------------------------------------------------------
+# Sensitive values stored in Key Vault:
+#   az keyvault secret show --vault-name <key_vault_name> --name <secret-name>
 
 output "configuration_summary" {
   value       = <<-EOT
@@ -130,16 +96,17 @@ output "configuration_summary" {
     ║ Database:                                                                 ║
     ║   PostgreSQL: ${azurerm_postgresql_flexible_server.psql.fqdn}
     ╠═══════════════════════════════════════════════════════════════════════════╣
-    ║ CIAM Authentication:                                                      ║
-    ║   Authority: https://${var.ciam_tenant_domain}.ciamlogin.com/
-    ║   API Client: ${var.ciam_api_client_id}
-    ║   SPA Client: ${var.ciam_spa_client_id}
+    ║ Firebase Authentication:                                                  ║
+    ║   Project: ${var.firebase_project_id}
+    ║   Auth Domain: ${var.firebase_auth_domain}
+    ║   API Key: Stored in Key Vault (firebase-api-key)
+    ║   Service Account: Stored in Key Vault (firebase-service-account)
     ╚═══════════════════════════════════════════════════════════════════════════╝
 
     NEXT STEPS:
-    1. Update CIAM redirect URIs with the frontend URL
+    1. Configure Firebase authorized domains with the frontend URL
     2. Push Docker image to ACR: ${azurerm_container_registry.acr.login_server}/networth-functions:latest
-    3. Deploy frontend to Static Web App
+    3. Deploy frontend to Static Web App with Firebase env vars
 
   EOT
   description = "Summary of deployed resources and next steps"

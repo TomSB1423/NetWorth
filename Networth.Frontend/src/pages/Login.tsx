@@ -1,30 +1,16 @@
-import { Mail, Chrome } from "lucide-react";
-import { useMsal } from "@azure/msal-react";
-import { loginRequest } from "../config/authConfig";
+import { Chrome } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
-    const { instance } = useMsal();
+    const { login } = useAuth();
 
-    // Base auth request shared by all login methods
-    const baseAuthRequest = {
-        ...loginRequest,
-    };
-
-    // Email/password login - uses the default provider selection in the user flow
-    const loginWithEmail = () => {
-        instance.loginRedirect({
-            ...baseAuthRequest,
-        });
-    };
-
-    // Google login - deep-links directly to Google IdP, skipping provider picker
-    const loginWithGoogle = () => {
-        instance.loginRedirect({
-            ...baseAuthRequest,
-            extraQueryParameters: {
-                idp: "google.com",
-            },
-        });
+    // Google login via Firebase
+    const loginWithGoogle = async () => {
+        try {
+            await login();
+        } catch (error) {
+            console.error("Login failed:", error);
+        }
     };
 
     return (
@@ -35,7 +21,11 @@ export default function Login() {
 
             {/* Logo */}
             <div className="flex items-center gap-2 mb-6">
-                <img src="/networth-icon.svg" alt="NetWorth" className="w-8 h-8" />
+                <img
+                    src="/networth-icon.svg"
+                    alt="NetWorth"
+                    className="w-8 h-8"
+                />
                 <span className="text-xl font-bold tracking-tight text-white">
                     NetWorth
                 </span>
@@ -60,24 +50,6 @@ export default function Login() {
                     >
                         <Chrome size={18} />
                         Continue with Google
-                    </button>
-
-                    {/* Divider */}
-                    <div className="flex items-center gap-3 my-4">
-                        <div className="flex-1 h-px bg-slate-700"></div>
-                        <span className="text-xs text-slate-500 font-medium">
-                            OR
-                        </span>
-                        <div className="flex-1 h-px bg-slate-700"></div>
-                    </div>
-
-                    {/* Email Login */}
-                    <button
-                        onClick={loginWithEmail}
-                        className="w-full h-10 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium text-sm flex items-center justify-center gap-2.5 transition-all border border-slate-700"
-                    >
-                        <Mail size={18} />
-                        Continue with Email
                     </button>
                 </div>
 

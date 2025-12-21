@@ -1,19 +1,7 @@
-# =============================================================================
-# Azure Key Vault
-# =============================================================================
-# This file creates the Key Vault for storing sensitive configuration:
-# - Database credentials
-# - GoCardless API keys
-# - Other secrets
-#
-# The Container App has access to read secrets via its managed identity.
-# =============================================================================
+# Key Vault for storing sensitive configuration.
+# Container App reads secrets via managed identity.
 
 data "azurerm_client_config" "current" {}
-
-# -----------------------------------------------------------------------------
-# Key Vault
-# -----------------------------------------------------------------------------
 
 resource "azurerm_key_vault" "kv" {
   name                       = "kv-${var.project_name}-${random_string.suffix.result}"
@@ -27,11 +15,7 @@ resource "azurerm_key_vault" "kv" {
   tags = local.common_tags
 }
 
-# -----------------------------------------------------------------------------
-# Access Policies
-# -----------------------------------------------------------------------------
-
-# Access policy for the deployer (current user/service principal)
+# Access policy for deployer (current user/service principal)
 resource "azurerm_key_vault_access_policy" "deployer" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -47,7 +31,7 @@ resource "azurerm_key_vault_access_policy" "deployer" {
   ]
 }
 
-# Access policy for the Container App (read-only)
+# Container App (read-only)
 resource "azurerm_key_vault_access_policy" "container_app" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -59,9 +43,7 @@ resource "azurerm_key_vault_access_policy" "container_app" {
   ]
 }
 
-# -----------------------------------------------------------------------------
 # Secrets
-# -----------------------------------------------------------------------------
 
 resource "azurerm_key_vault_secret" "postgres_password" {
   name         = "postgres-admin-password"
@@ -82,6 +64,14 @@ resource "azurerm_key_vault_secret" "gocardless_secret_id" {
 resource "azurerm_key_vault_secret" "gocardless_secret_key" {
   name         = "gocardless-secret-key"
   value        = var.gocardless_secret_key
+  key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on = [azurerm_key_vault_access_policy.deployer]
+}
+
+resource "azurerm_key_vault_secret" "firebase_api_key" {
+  name         = "firebase-api-key"
+  value        = var.firebase_api_key
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [azurerm_key_vault_access_policy.deployer]

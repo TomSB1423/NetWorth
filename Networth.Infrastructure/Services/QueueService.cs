@@ -24,7 +24,7 @@ public class QueueService : IQueueService
     /// <inheritdoc />
     public async Task EnqueueAccountSyncAsync(
         string accountId,
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation(
@@ -58,7 +58,7 @@ public class QueueService : IQueueService
     /// <inheritdoc />
     public async Task EnqueueInstitutionSyncAsync(
         string institutionId,
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation(

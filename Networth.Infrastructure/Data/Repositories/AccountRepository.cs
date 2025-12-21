@@ -17,7 +17,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
 {
     /// <inheritdoc />
     public async Task<IEnumerable<UserAccount>> GetAccountsByUserIdAsync(
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Retrieving accounts for user {UserId}", userId);
@@ -59,7 +59,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
     /// <inheritdoc />
     public async Task UpsertAccountAsync(
         string accountId,
-        string userId,
+        Guid userId,
         string requisitionId,
         string institutionId,
         AccountDetail accountDetails,
@@ -190,7 +190,7 @@ public class AccountRepository(NetworthDbContext context, ILogger<AccountReposit
     /// <inheritdoc />
     public async Task<UserAccount?> UpdateAccountAsync(
         string accountId,
-        string userId,
+        Guid userId,
         string? displayName,
         Domain.Enums.AccountCategory? category,
         CancellationToken cancellationToken = default)

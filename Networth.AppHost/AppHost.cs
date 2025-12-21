@@ -11,10 +11,13 @@ IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("pos
 IResourceBuilder<ParameterResource> gocardlessSecretId = builder.AddParameter("gocardless-secret-id", secret: true);
 IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("gocardless-secret-key", secret: true);
 
-IResourceBuilder<ParameterResource> entraClientId = builder.AddParameter("entra-client-id");
-IResourceBuilder<ParameterResource> entraTenantId = builder.AddParameter("entra-tenant-id");
-IResourceBuilder<ParameterResource> entraApiClientId = builder.AddParameter("entra-api-client-id");
-IResourceBuilder<ParameterResource> entraInstance = builder.AddParameter("entra-instance");
+// Firebase configuration
+IResourceBuilder<ParameterResource> firebaseApiKey = builder.AddParameter("firebase-api-key");
+IResourceBuilder<ParameterResource> firebaseAuthDomain = builder.AddParameter("firebase-auth-domain");
+IResourceBuilder<ParameterResource> firebaseProjectId = builder.AddParameter("firebase-project-id");
+IResourceBuilder<ParameterResource> firebaseStorageBucket = builder.AddParameter("firebase-storage-bucket");
+IResourceBuilder<ParameterResource> firebaseMessagingSenderId = builder.AddParameter("firebase-messaging-sender-id");
+IResourceBuilder<ParameterResource> firebaseAppId = builder.AddParameter("firebase-app-id");
 
 var postgres = builder
     .AddPostgres(ResourceNames.Postgres)
@@ -49,23 +52,22 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .WithEnvironment("AzureWebJobsStorage", blobs.Resource.ConnectionStringExpression)
     .WithHttpHealthCheck("/api/health");
 
-// Configure GoCardless and Azure AD
+// Configure GoCardless and Firebase
 functions
     .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
     .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
-    .WithEnvironment("AzureAd__Instance", entraInstance)
-    .WithEnvironment("AzureAd__TenantId", entraTenantId)
-    .WithEnvironment("AzureAd__ClientId", entraApiClientId)
-    .WithEnvironment("AzureAd__Audience", entraApiClientId); // In CIAM, Audience = API Client ID
+    .WithEnvironment("Firebase__ProjectId", firebaseProjectId);
 
 var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "dev")
     .WithReference(functions)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
     .WithEnvironment("VITE_API_URL", functions.GetEndpoint("http"))
-    .WithEnvironment("VITE_ENTRA_CLIENT_ID", entraClientId)
-    .WithEnvironment("VITE_ENTRA_TENANT_ID", entraTenantId)
-    .WithEnvironment("VITE_ENTRA_API_CLIENT_ID", entraApiClientId)
-    .WithEnvironment("VITE_ENTRA_INSTANCE", entraInstance)
+    .WithEnvironment("VITE_FIREBASE_API_KEY", firebaseApiKey)
+    .WithEnvironment("VITE_FIREBASE_AUTH_DOMAIN", firebaseAuthDomain)
+    .WithEnvironment("VITE_FIREBASE_PROJECT_ID", firebaseProjectId)
+    .WithEnvironment("VITE_FIREBASE_STORAGE_BUCKET", firebaseStorageBucket)
+    .WithEnvironment("VITE_FIREBASE_MESSAGING_SENDER_ID", firebaseMessagingSenderId)
+    .WithEnvironment("VITE_FIREBASE_APP_ID", firebaseAppId)
     .WithHttpEndpoint(env: "PORT", port: 3000)
     .WithExternalHttpEndpoints();
 

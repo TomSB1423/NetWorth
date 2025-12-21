@@ -15,7 +15,7 @@ public class UserAccount
     /// <summary>
     ///     Gets the user ID.
     /// </summary>
-    public required string UserId { get; init; }
+    public required Guid UserId { get; init; }
 
     /// <summary>
     ///     Gets the requisition ID.

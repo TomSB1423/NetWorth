@@ -13,9 +13,9 @@ public record UserAccountResponse
     public required string Id { get; init; }
 
     /// <summary>
-    ///     Gets the user ID.
+    ///     Gets the internal user ID.
     /// </summary>
-    public required string UserId { get; init; }
+    public required Guid UserId { get; init; }
 
     /// <summary>
     ///     Gets the requisition ID.

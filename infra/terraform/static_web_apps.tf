@@ -1,12 +1,5 @@
-# =============================================================================
-# Azure Static Web Apps
-# =============================================================================
-# This file creates the Azure Static Web App for hosting the React frontend.
-# The frontend is built with Vite + React + TanStack Query + Tailwind CSS.
-#
-# Note: Static Web Apps require deployment via GitHub Actions or Azure DevOps.
-# The Terraform resource creates the hosting infrastructure only.
-# =============================================================================
+# Frontend Static Web App (Vite + React + TanStack Query + Tailwind)
+# Deploy via GitHub Actions or Azure DevOps.
 
 resource "azurerm_static_web_app" "frontend" {
   name                = "stapp-frontend-${var.project_name}-${local.resource_suffix}"
@@ -19,18 +12,16 @@ resource "azurerm_static_web_app" "frontend" {
   tags = local.common_tags
 }
 
-# -----------------------------------------------------------------------------
-# Notes on Frontend Configuration
-# -----------------------------------------------------------------------------
-# The frontend requires the following environment variables at build time:
+# Frontend environment variables (set in GitHub Actions or Azure Portal):
 #
-# VITE_API_URL            = <container_app_url>
-# VITE_ENTRA_CLIENT_ID    = <ciam_spa_client_id>
-# VITE_ENTRA_TENANT_ID    = <ciam_tenant_id>
-# VITE_ENTRA_INSTANCE     = https://<ciam_tenant_domain>.ciamlogin.com/
-# VITE_ENTRA_API_CLIENT_ID = <ciam_api_client_id>
-# VITE_ENTRA_SCOPES       = <ciam_api_client_id>/.default
+#   VITE_API_URL                      = <container_app_url>
+#   VITE_FIREBASE_API_KEY             = <firebase_api_key>
+#   VITE_FIREBASE_AUTH_DOMAIN         = <firebase_auth_domain>
+#   VITE_FIREBASE_PROJECT_ID          = <firebase_project_id>
+#   VITE_FIREBASE_STORAGE_BUCKET      = <firebase_storage_bucket>
+#   VITE_FIREBASE_MESSAGING_SENDER_ID = <firebase_messaging_sender_id>
+#   VITE_FIREBASE_APP_ID              = <firebase_app_id>
 #
-# These should be configured in the GitHub Actions workflow or via the
-# Azure Portal Static Web Apps configuration.
+# Get firebase_api_key from Key Vault:
+#   az keyvault secret show --vault-name <kv_name> --name firebase-api-key
 

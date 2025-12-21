@@ -1,10 +1,4 @@
-# =============================================================================
-# Variables
-# =============================================================================
-
-# -----------------------------------------------------------------------------
-# General Settings
-# -----------------------------------------------------------------------------
+# General
 
 variable "location" {
   description = "The Azure region to deploy resources into"
@@ -29,9 +23,7 @@ variable "project_name" {
   default     = "networth"
 }
 
-# -----------------------------------------------------------------------------
-# Database Credentials
-# -----------------------------------------------------------------------------
+# Database
 
 variable "postgres_admin_password" {
   description = "The password for the PostgreSQL admin user"
@@ -39,9 +31,7 @@ variable "postgres_admin_password" {
   sensitive   = true
 }
 
-# -----------------------------------------------------------------------------
-# GoCardless API Credentials
-# -----------------------------------------------------------------------------
+# GoCardless (https://bankaccountdata.gocardless.com/)
 
 variable "gocardless_secret_id" {
   description = "The GoCardless Secret ID for bank account aggregation"
@@ -55,27 +45,35 @@ variable "gocardless_secret_key" {
   sensitive   = true
 }
 
-# -----------------------------------------------------------------------------
-# CIAM / Entra External ID Configuration
-# These values come from the terraform-ciam deployment
-# -----------------------------------------------------------------------------
+# Firebase Authentication (https://console.firebase.google.com/)
 
-variable "ciam_tenant_domain" {
-  description = "The CIAM tenant domain (e.g., 'yourname' for yourname.ciamlogin.com)"
+variable "firebase_project_id" {
+  description = "The Firebase project ID"
   type        = string
 }
 
-variable "ciam_tenant_id" {
-  description = "The CIAM (External ID) Tenant ID"
+variable "firebase_api_key" {
+  description = "The Firebase Web API Key (for frontend)"
+  type        = string
+  sensitive   = true
+}
+
+variable "firebase_auth_domain" {
+  description = "The Firebase Auth domain (e.g., 'project-id.firebaseapp.com')"
   type        = string
 }
 
-variable "ciam_api_client_id" {
-  description = "The API Application (Client) ID from CIAM - used for AzureAd:ClientId and AzureAd:Audience"
+variable "firebase_storage_bucket" {
+  description = "The Firebase Storage bucket (e.g., 'project-id.appspot.com')"
   type        = string
 }
 
-variable "ciam_spa_client_id" {
-  description = "The SPA Application (Client) ID from CIAM - passed to frontend"
+variable "firebase_messaging_sender_id" {
+  description = "The Firebase Cloud Messaging sender ID"
+  type        = string
+}
+
+variable "firebase_app_id" {
+  description = "The Firebase App ID"
   type        = string
 }

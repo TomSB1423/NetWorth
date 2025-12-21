@@ -58,7 +58,7 @@ public class SyncInstitutionCommandHandler(
         };
     }
 
-    private async Task<Requisition?> GetRequisitionAsync(string institutionId, string userId, CancellationToken cancellationToken)
+    private async Task<Requisition?> GetRequisitionAsync(string institutionId, Guid userId, CancellationToken cancellationToken)
     {
         var requisitions = await requisitionRepository.GetRequisitionsByInstitutionAndUserAsync(
             institutionId,

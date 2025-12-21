@@ -11,61 +11,57 @@ namespace Networth.Infrastructure.Data.Repositories;
 public class UserRepository(NetworthDbContext dbContext) : IUserRepository
 {
     /// <inheritdoc />
-    public async Task<UserInfo?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<UserInfo?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await dbContext.Users
             .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
 
-        if (user == null)
-        {
-            return null;
-        }
-
-        return new UserInfo
-        {
-            Id = user.Id,
-            Name = user.Name,
-            HasCompletedOnboarding = user.HasCompletedOnboarding,
-        };
+        return user is null ? null : MapToUserInfo(user);
     }
 
     /// <inheritdoc />
-    public async Task<(UserInfo User, bool IsNew)> CreateOrGetUserAsync(string userId, string name, CancellationToken cancellationToken = default)
+    public async Task<UserInfo?> GetUserByFirebaseUidAsync(string firebaseUid, CancellationToken cancellationToken = default)
+    {
+        var user = await dbContext.Users
+            .FirstOrDefaultAsync(u => u.FirebaseUid == firebaseUid, cancellationToken);
+
+        return user is null ? null : MapToUserInfo(user);
+    }
+
+    /// <inheritdoc />
+    public async Task<(UserInfo User, bool IsNew)> CreateOrGetUserAsync(
+        string firebaseUid,
+        string name,
+        string? email,
+        CancellationToken cancellationToken = default)
     {
         var existingUser = await dbContext.Users
-            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+            .FirstOrDefaultAsync(u => u.FirebaseUid == firebaseUid, cancellationToken);
 
         if (existingUser != null)
         {
-            return (new UserInfo
-            {
-                Id = existingUser.Id,
-                Name = existingUser.Name,
-                HasCompletedOnboarding = existingUser.HasCompletedOnboarding,
-            }, false);
+            return (MapToUserInfo(existingUser), false);
         }
 
         var newUser = new User
         {
-            Id = userId,
+            Id = Guid.NewGuid(),
+            FirebaseUid = firebaseUid,
             Name = name,
+            Email = email,
             HasCompletedOnboarding = false,
+            CreatedAt = DateTime.UtcNow,
         };
 
         dbContext.Users.Add(newUser);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return (new UserInfo
-        {
-            Id = newUser.Id,
-            Name = newUser.Name,
-            HasCompletedOnboarding = newUser.HasCompletedOnboarding,
-        }, true);
+        return (MapToUserInfo(newUser), true);
     }
 
     /// <inheritdoc />
     public async Task<UserInfo?> UpdateUserAsync(
-        string userId,
+        Guid userId,
         string? name,
         bool? hasCompletedOnboarding,
         CancellationToken cancellationToken = default)
@@ -90,10 +86,17 @@ public class UserRepository(NetworthDbContext dbContext) : IUserRepository
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        return MapToUserInfo(user);
+    }
+
+    private static UserInfo MapToUserInfo(User user)
+    {
         return new UserInfo
         {
             Id = user.Id,
+            FirebaseUid = user.FirebaseUid,
             Name = user.Name,
+            Email = user.Email,
             HasCompletedOnboarding = user.HasCompletedOnboarding,
         };
     }

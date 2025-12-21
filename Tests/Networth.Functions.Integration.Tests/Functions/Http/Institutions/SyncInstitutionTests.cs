@@ -31,13 +31,13 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var institutionId = "inst-1";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User" };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid };
             dbContext.Users.Add(user);
         }
 
@@ -117,13 +117,13 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var institutionId = "inst-1";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User" };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid };
             dbContext.Users.Add(user);
         }
 
@@ -190,13 +190,13 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var institutionId = "inst-1";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User" };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid };
             dbContext.Users.Add(user);
         }
 

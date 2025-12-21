@@ -13,7 +13,7 @@ public class Transaction
     /// <summary>
     ///     Gets or sets the owner user ID.
     /// </summary>
-    public required string UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     ///     Gets or sets the account ID.

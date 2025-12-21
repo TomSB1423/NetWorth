@@ -1,10 +1,7 @@
-import { useMsal } from "@azure/msal-react";
-import { loginRequest } from "../../config/authConfig";
+import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "./button";
 
 interface SignInButtonProps {
-    /** The identity provider to use - if not specified, uses default flow */
-    provider?: "email" | "google";
     /** Button variant */
     variant?: "default" | "secondary" | "ghost" | "outline";
     /** Additional CSS classes */
@@ -14,50 +11,23 @@ interface SignInButtonProps {
 }
 
 export function SignInButton({
-    provider,
     variant = "default",
     className,
     children,
 }: SignInButtonProps) {
-    const { instance } = useMsal();
+    const { login } = useAuth();
 
-    const handleSignIn = () => {
-        const request = {
-            ...loginRequest,
-            ...(provider &&
-                provider !== "email" && {
-                    extraQueryParameters: {
-                        idp: getIdpHint(provider),
-                    },
-                }),
-        };
-
-        instance.loginRedirect(request);
+    const handleSignIn = async () => {
+        try {
+            await login();
+        } catch (error) {
+            console.error("Sign in failed:", error);
+        }
     };
 
     return (
         <Button variant={variant} onClick={handleSignIn} className={className}>
-            {children || getDefaultLabel(provider)}
+            {children || "Sign In with Google"}
         </Button>
     );
-}
-
-function getIdpHint(provider: string): string {
-    switch (provider) {
-        case "google":
-            return "google.com";
-        default:
-            return "";
-    }
-}
-
-function getDefaultLabel(provider?: string): string {
-    switch (provider) {
-        case "google":
-            return "Continue with Google";
-        case "email":
-            return "Continue with Email";
-        default:
-            return "Sign In";
-    }
 }

@@ -1,19 +1,22 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Networth.Domain.Repositories;
 
 namespace Networth.Functions.Authentication;
 
 /// <summary>
 ///     Implementation of <see cref="ICurrentUserService"/> for Azure Functions.
-///     Supports JWT Bearer token authentication via custom middleware
+///     Supports Firebase token authentication via custom middleware
 ///     and falls back to mock users in development.
 /// </summary>
 public class CurrentUserService(
     IHttpContextAccessor httpContextAccessor,
     IFunctionContextAccessor functionContextAccessor,
+    IUserRepository userRepository,
     IEnumerable<ClaimsPrincipal> principals) : ICurrentUserService
 {
     private readonly ClaimsPrincipal? _injectedPrincipal = principals.FirstOrDefault();
+    private Guid? _cachedInternalUserId;
 
     /// <inheritdoc />
     public ClaimsPrincipal? User
@@ -45,10 +48,9 @@ public class CurrentUserService(
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 
     /// <inheritdoc />
-    public string UserId =>
-        // JWT tokens from Entra ID use 'oid' (object ID) or 'sub' (subject) for user identification
-        User?.FindFirst("oid")?.Value
-        ?? User?.FindFirst("sub")?.Value
+    public string FirebaseUid =>
+        // Firebase tokens use 'sub' claim for user identification (Firebase UID)
+        User?.FindFirst("sub")?.Value
         ?? User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
         ?? throw new InvalidOperationException("User is not authenticated");
 
@@ -56,5 +58,29 @@ public class CurrentUserService(
     public string? Name =>
         User?.FindFirst("name")?.Value
         ?? User?.FindFirst(ClaimTypes.Name)?.Value;
+
+    /// <inheritdoc />
+    public string? Email =>
+        User?.FindFirst("email")?.Value
+        ?? User?.FindFirst(ClaimTypes.Email)?.Value;
+
+    /// <inheritdoc />
+    public async Task<Guid> GetInternalUserIdAsync(CancellationToken cancellationToken = default)
+    {
+        // Return cached value if available
+        if (_cachedInternalUserId.HasValue)
+        {
+            return _cachedInternalUserId.Value;
+        }
+
+        var user = await userRepository.GetUserByFirebaseUidAsync(FirebaseUid, cancellationToken);
+        if (user is null)
+        {
+            throw new InvalidOperationException($"User with Firebase UID '{FirebaseUid}' not found in database. Ensure the user is created first.");
+        }
+
+        _cachedInternalUserId = user.Id;
+        return user.Id;
+    }
 }
 

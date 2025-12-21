@@ -15,7 +15,7 @@ public class Requisition
     /// <summary>
     ///     Gets or sets the user ID who owns this requisition.
     /// </summary>
-    public required string UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     ///     Gets or sets the redirect URL after completion.

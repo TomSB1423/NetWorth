@@ -51,9 +51,11 @@ public class GetAccounts(
             return new UnauthorizedResult();
         }
 
+        var userId = await currentUserService.GetInternalUserIdAsync();
+
         var query = new GetAccountsQuery
         {
-            UserId = currentUserService.UserId,
+            UserId = userId,
         };
 
         var result = await mediator.Send<GetAccountsQuery, GetAccountsQueryResult>(query);

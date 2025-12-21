@@ -40,14 +40,14 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data for Constants.MockUserId (used by MockAuthenticationMiddleware)
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var accountId1 = "acc-1";
         var accountId2 = "acc-2";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User" };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid };
             dbContext.Users.Add(user);
         }
 
@@ -210,13 +210,13 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var accountId = "acc-single";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User Single" };
+            user = new User { Id = userId, Name = "Mock User Single", FirebaseUid = Constants.MockFirebaseUid };
             dbContext.Users.Add(user);
         }
 
@@ -333,7 +333,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
 
         await dbContext.Database.EnsureCreatedAsync();
 
-        string userId = "sparse-user";
+        Guid userId = Guid.NewGuid();
         string accountId = "sparse-acc";
         string institutionId = "inst-1";
         string agreementId = "agree-1";
@@ -342,7 +342,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         // Seed User, Institution, Agreement, Requisition, Account
         dbContext.Users.Add(new User
         {
-            Id = userId, Name = "Sparse User",
+            Id = userId, Name = "Sparse User", FirebaseUid = "sparse-firebase-uid",
         });
 
         dbContext.Institutions.Add(new InstitutionMetadata
