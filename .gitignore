@@ -464,3 +464,4 @@ Networth.Docs/.cache/
 appsettings.Development.json
 settings.local.json
 local.settings.json
+**/appsettings.Development.json
