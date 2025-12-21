@@ -11,13 +11,10 @@ IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("pos
 IResourceBuilder<ParameterResource> gocardlessSecretId = builder.AddParameter("gocardless-secret-id", secret: true);
 IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("gocardless-secret-key", secret: true);
 
-// Firebase configuration
+// Firebase authentication configuration
 IResourceBuilder<ParameterResource> firebaseApiKey = builder.AddParameter("firebase-api-key");
 IResourceBuilder<ParameterResource> firebaseAuthDomain = builder.AddParameter("firebase-auth-domain");
 IResourceBuilder<ParameterResource> firebaseProjectId = builder.AddParameter("firebase-project-id");
-IResourceBuilder<ParameterResource> firebaseStorageBucket = builder.AddParameter("firebase-storage-bucket");
-IResourceBuilder<ParameterResource> firebaseMessagingSenderId = builder.AddParameter("firebase-messaging-sender-id");
-IResourceBuilder<ParameterResource> firebaseAppId = builder.AddParameter("firebase-app-id");
 
 var postgres = builder
     .AddPostgres(ResourceNames.Postgres)
@@ -65,9 +62,6 @@ var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "d
     .WithEnvironment("VITE_FIREBASE_API_KEY", firebaseApiKey)
     .WithEnvironment("VITE_FIREBASE_AUTH_DOMAIN", firebaseAuthDomain)
     .WithEnvironment("VITE_FIREBASE_PROJECT_ID", firebaseProjectId)
-    .WithEnvironment("VITE_FIREBASE_STORAGE_BUCKET", firebaseStorageBucket)
-    .WithEnvironment("VITE_FIREBASE_MESSAGING_SENDER_ID", firebaseMessagingSenderId)
-    .WithEnvironment("VITE_FIREBASE_APP_ID", firebaseAppId)
     .WithHttpEndpoint(env: "PORT", port: 3000)
     .WithExternalHttpEndpoints();
 
