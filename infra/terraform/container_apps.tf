@@ -1,3 +1,19 @@
+# =============================================================================
+# Container Apps Infrastructure
+# =============================================================================
+# This file creates the Azure Container Apps environment for hosting the
+# Networth Functions API. Includes:
+# - Container Registry for Docker images
+# - Log Analytics Workspace for monitoring
+# - Application Insights for APM
+# - Container App Environment
+# - Container App for the Functions API
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Container Registry
+# -----------------------------------------------------------------------------
+
 resource "azurerm_container_registry" "acr" {
   name                = "acr${replace(var.project_name, "-", "")}${var.environment}${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.rg.name
@@ -7,6 +23,10 @@ resource "azurerm_container_registry" "acr" {
 
   tags = local.common_tags
 }
+
+# -----------------------------------------------------------------------------
+# Monitoring
+# -----------------------------------------------------------------------------
 
 resource "azurerm_log_analytics_workspace" "law" {
   name                = "law-${var.project_name}-${local.resource_suffix}"
@@ -28,6 +48,10 @@ resource "azurerm_application_insights" "appinsights" {
   tags = local.common_tags
 }
 
+# -----------------------------------------------------------------------------
+# Container App Environment
+# -----------------------------------------------------------------------------
+
 resource "azurerm_container_app_environment" "cae" {
   name                       = "cae-${var.project_name}-${local.resource_suffix}"
   location                   = azurerm_resource_group.rg.location
@@ -36,6 +60,10 @@ resource "azurerm_container_app_environment" "cae" {
 
   tags = local.common_tags
 }
+
+# -----------------------------------------------------------------------------
+# Container App - Functions API
+# -----------------------------------------------------------------------------
 
 resource "azurerm_container_app" "functions" {
   name                         = "ca-${var.project_name}-${local.resource_suffix}"
@@ -53,6 +81,7 @@ resource "azurerm_container_app" "functions" {
     password_secret_name = "acr-password"
   }
 
+  # Secrets
   secret {
     name  = "acr-password"
     value = azurerm_container_registry.acr.admin_password
@@ -77,6 +106,8 @@ resource "azurerm_container_app" "functions" {
     name  = "storage-connection-string"
     value = azurerm_storage_account.st.primary_connection_string
   }
+
+  # Ingress configuration
   ingress {
     allow_insecure_connections = false
     external_enabled           = true
@@ -89,12 +120,6 @@ resource "azurerm_container_app" "functions" {
     }
   }
 
-  # Note: CORS is configured via Azure CLI after apply:
-  # az containerapp ingress cors update --name <name> --resource-group <rg> \
-  #   --allowed-origins "https://<frontend-url>" "http://localhost:5173" \
-  #   --allowed-methods "GET" "POST" "PUT" "DELETE" "OPTIONS" \
-  #   --allowed-headers "*" --allow-credentials true
-
   template {
     min_replicas = 0
     max_replicas = 3
@@ -105,6 +130,7 @@ resource "azurerm_container_app" "functions" {
       cpu    = 0.25
       memory = "0.5Gi"
 
+      # Azure Functions configuration
       env {
         name        = "AzureWebJobsStorage"
         secret_name = "storage-connection-string"
@@ -120,6 +146,7 @@ resource "azurerm_container_app" "functions" {
         value = "Host=${azurerm_postgresql_flexible_server.psql.fqdn};Database=networth-db;Username=networthadmin;Password=${var.postgres_admin_password}"
       }
 
+      # GoCardless API credentials
       env {
         name        = "Gocardless__SecretId"
         secret_name = "gocardless-secret-id"
@@ -130,16 +157,19 @@ resource "azurerm_container_app" "functions" {
         secret_name = "gocardless-secret-key"
       }
 
+      # Frontend URL for CORS
       env {
         name  = "Frontend__Url"
         value = "https://${azurerm_static_web_app.frontend.default_host_name}"
       }
 
+      # Application Insights
       env {
         name  = "APPLICATIONINSIGHTS_CONNECTION_STRING"
         value = azurerm_application_insights.appinsights.connection_string
       }
 
+      # Azure Functions runtime
       env {
         name  = "FUNCTIONS_WORKER_RUNTIME"
         value = "dotnet-isolated"
@@ -150,28 +180,59 @@ resource "azurerm_container_app" "functions" {
         value = "true"
       }
 
-      # Azure AD JWT Bearer authentication configuration
+      # CIAM / Entra External ID JWT Bearer authentication
+      # Uses the CIAM tenant for authentication (separate from main Azure tenant)
       env {
         name  = "AzureAd__Instance"
-        value = "https://login.microsoftonline.com/"
+        value = "https://${var.ciam_tenant_domain}.ciamlogin.com/"
       }
 
       env {
         name  = "AzureAd__TenantId"
-        value = data.azurerm_client_config.current.tenant_id
+        value = var.ciam_tenant_id
       }
 
       env {
         name  = "AzureAd__ClientId"
-        value = azuread_application.api.client_id
+        value = var.ciam_api_client_id
       }
 
       env {
         name  = "AzureAd__Audience"
-        value = azuread_application.api.client_id
+        value = var.ciam_api_client_id
       }
     }
   }
 
   tags = local.common_tags
+}
+
+# -----------------------------------------------------------------------------
+# CORS Configuration
+# -----------------------------------------------------------------------------
+# CORS is configured via Azure CLI after the Container App is created
+# This allows the frontend and localhost to make cross-origin requests
+
+resource "terraform_data" "container_app_cors" {
+  triggers_replace = [
+    azurerm_container_app.functions.id,
+    azurerm_static_web_app.frontend.default_host_name
+  ]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      az containerapp ingress cors update \
+        --name ${azurerm_container_app.functions.name} \
+        --resource-group ${azurerm_resource_group.rg.name} \
+        --allowed-origins "https://${azurerm_static_web_app.frontend.default_host_name}" "http://localhost:5173" \
+        --allowed-methods "GET" "POST" "PUT" "DELETE" "OPTIONS" \
+        --allowed-headers "*" \
+        --allow-credentials true
+    EOT
+  }
+
+  depends_on = [
+    azurerm_container_app.functions,
+    azurerm_static_web_app.frontend
+  ]
 }

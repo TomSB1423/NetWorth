@@ -3,10 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import {
     ArrowUpRight,
     ArrowDownLeft,
-    Tag,
     TrendingUp,
     TrendingDown,
     Clock,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { api } from "../services/api";
 import { Transaction } from "../types";
@@ -20,36 +21,43 @@ export default function Transactions() {
 
     // Filter state
     const [selectedType, setSelectedType] = useState<TransactionType>("all");
+    const [page, setPage] = useState(1);
+    const pageSize = 20;
 
     // Fetch transactions for all accounts
     const {
-        data: transactions = [],
+        data,
         isLoading,
         error,
     } = useQuery({
-        queryKey: ["transactions", accounts.map((a) => a.id).join(",")],
+        queryKey: ["transactions", accounts.map((a) => a.id).join(","), page],
         queryFn: async () => {
-            if (accounts.length === 0) return [];
+            if (accounts.length === 0) return { items: [], totalPages: 0 };
 
             const promises = accounts.map((account) =>
                 api
-                    .getTransactions(account.id, 1, 100)
-                    .then((res) => res.items)
-                    .catch(() => [])
+                    .getTransactions(account.id, page, pageSize)
+                    .catch(() => ({ items: [], totalPages: 0, totalCount: 0, page: 1, pageSize, hasNextPage: false, hasPreviousPage: false }))
             );
 
             const results = await Promise.all(promises);
-            const allTransactions = results.flat();
+            const allTransactions = results.flatMap(r => r.items);
+            const maxPages = Math.max(...results.map(r => r.totalPages));
 
             // Sort by date descending
-            return allTransactions.sort(
+            const sortedTransactions = allTransactions.sort(
                 (a, b) =>
                     new Date(b.bookingDate ?? 0).getTime() -
                     new Date(a.bookingDate ?? 0).getTime()
             );
+
+            return { items: sortedTransactions, totalPages: maxPages };
         },
         enabled: accounts.length > 0,
     });
+
+    const transactions = data?.items ?? [];
+    const totalPages = data?.totalPages ?? 0;
 
     // Calculate most recent sync time
     const lastSynced = useMemo(() => {
@@ -126,21 +134,6 @@ export default function Transactions() {
         return { income, expense, net: income - expense };
     }, [filteredTransactions]);
 
-    // Get unique categories from transactions
-    const categories = useMemo(() => {
-        const cats = new Set<string>();
-        transactions.forEach((tx) => {
-            const desc =
-                tx.remittanceInformationUnstructured ??
-                tx.creditorName ??
-                tx.debtorName ??
-                "";
-            // Extract potential category from description (simplified)
-            if (desc) cats.add(desc.split(" ")[0]);
-        });
-        return Array.from(cats).slice(0, 10);
-    }, [transactions]);
-
     const formatCurrency = (amount: number, currency: string = "GBP") => {
         return new Intl.NumberFormat("en-GB", {
             style: "currency",
@@ -180,20 +173,25 @@ export default function Transactions() {
         );
     };
 
+    const getAccountName = (accountId: string) => {
+        const account = accounts.find((a) => a.id === accountId);
+        return account?.displayName || account?.name || "Unknown Account";
+    };
+
     const maxChartValue = Math.max(
         ...monthlyChartData.flatMap((d) => [d.income, d.expense]),
         1
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-white">
                         Transactions
                     </h1>
-                    <div className="flex items-center gap-2 mt-1 text-sm text-gray-400">
+                    <div className="flex items-center gap-2 mt-0.5 text-sm text-gray-400">
                         <Clock size={14} />
                         <span>Last synced: {formatLastSynced(lastSynced)}</span>
                         <span className="text-gray-600">•</span>
@@ -203,11 +201,11 @@ export default function Transactions() {
             </div>
 
             {/* Rolling Year Chart */}
-            <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
-                <h3 className="text-sm font-medium text-gray-400 mb-4">
+            <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800">
+                <h3 className="text-sm font-medium text-gray-400 mb-3">
                     Income vs Expenses (Rolling Year)
                 </h3>
-                <div className="h-48 flex items-end gap-4">
+                <div className="h-40 flex items-end gap-3">
                     {monthlyChartData.map((data) => {
                         const incomeHeight =
                             maxChartValue > 0
@@ -221,11 +219,11 @@ export default function Transactions() {
                         return (
                             <div
                                 key={data.monthKey}
-                                className="flex-1 flex flex-col items-center gap-2"
+                                className="flex-1 flex flex-col items-center gap-1.5"
                             >
                                 <div
                                     className="w-full flex gap-1 items-end"
-                                    style={{ height: "160px" }}
+                                    style={{ height: "130px" }}
                                 >
                                     <div
                                         className="flex-1 bg-emerald-500/80 rounded-t transition-all hover:bg-emerald-500"
@@ -321,35 +319,6 @@ export default function Transactions() {
                         </Button>
                     </div>
                 </div>
-
-                {categories.length > 0 && (
-                    <>
-                        <div className="w-px h-6 bg-slate-700" />
-
-                        {/* Categories */}
-                        <div className="flex items-center gap-2">
-                            <Tag size={16} className="text-gray-400" />
-                            <span className="text-sm text-gray-400">
-                                Categories:
-                            </span>
-                            <div className="flex gap-1 flex-wrap">
-                                {categories.slice(0, 5).map((cat) => (
-                                    <span
-                                        key={cat}
-                                        className="px-2 py-1 text-xs rounded-full bg-slate-800 text-gray-300"
-                                    >
-                                        {cat}
-                                    </span>
-                                ))}
-                                {categories.length > 5 && (
-                                    <span className="px-2 py-1 text-xs rounded-full bg-slate-800 text-gray-400">
-                                        +{categories.length - 5} more
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    </>
-                )}
             </div>
 
             {/* Summary Stats */}
@@ -386,7 +355,7 @@ export default function Transactions() {
             </div>
 
             {/* Transaction List */}
-            <div className="space-y-2">
+            <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/20">
                 {isLoading ? (
                     <div className="text-center text-gray-400 py-12">
                         Loading transactions...
@@ -407,35 +376,41 @@ export default function Transactions() {
                     filteredTransactions.map((tx: Transaction) => (
                         <div
                             key={tx.transactionId}
-                            className="bg-slate-900/50 rounded-xl p-4 flex items-center justify-between hover:bg-slate-900 transition-colors border border-slate-800/50"
+                            className="flex items-center justify-between p-3 hover:bg-slate-800/30 transition-colors border-b border-slate-800 last:border-0"
                         >
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                                 <div
-                                    className={`p-2 rounded-full ${
+                                    className={`p-1.5 rounded-full ${
                                         parseFloat(tx.amount) > 0
                                             ? "bg-green-500/10 text-green-500"
                                             : "bg-white/5 text-white"
                                     }`}
                                 >
                                     {parseFloat(tx.amount) > 0 ? (
-                                        <ArrowDownLeft size={20} />
+                                        <ArrowDownLeft size={16} />
                                     ) : (
-                                        <ArrowUpRight size={20} />
+                                        <ArrowUpRight size={16} />
                                     )}
                                 </div>
                                 <div>
-                                    <div className="font-medium text-white">
+                                    <div className="font-medium text-white text-sm">
                                         {getTransactionDescription(tx)}
                                     </div>
-                                    <div className="text-sm text-gray-400">
-                                        {tx.bookingDate
-                                            ? formatDate(tx.bookingDate)
-                                            : "Pending"}
+                                    <div className="flex items-center text-xs text-gray-400">
+                                        <span>
+                                            {tx.bookingDate
+                                                ? formatDate(tx.bookingDate)
+                                                : "Pending"}
+                                        </span>
+                                        <span className="mx-1.5 text-slate-600">•</span>
+                                        <span className="text-slate-500">
+                                            {getAccountName(tx.accountId)}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                             <div
-                                className={`font-semibold ${
+                                className={`font-semibold text-sm ${
                                     parseFloat(tx.amount) > 0
                                         ? "text-green-400"
                                         : "text-white"
@@ -450,6 +425,33 @@ export default function Transactions() {
                     ))
                 )}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 py-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page === 1 || isLoading}
+                        className="h-8 w-8 p-0"
+                    >
+                        <ChevronLeft size={16} />
+                    </Button>
+                    <span className="text-sm text-gray-400">
+                        Page {page} of {totalPages}
+                    </span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages || isLoading}
+                        className="h-8 w-8 p-0"
+                    >
+                        <ChevronRight size={16} />
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }

@@ -31,10 +31,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [hasProvisioned, setHasProvisioned] = useState(false);
+    
+    // Initialize from session storage to prevent loading flash on reload
+    const [hasProvisioned, setHasProvisioned] = useState(() => {
+        return sessionStorage.getItem("user_provisioned") === "true";
+    });
+    
+    const [cachedOnboardingStatus, setCachedOnboardingStatus] = useState<boolean>(() => {
+        return sessionStorage.getItem("user_onboarding_complete") === "true";
+    });
 
     const provisionUser = useCallback(async () => {
-        if (!isReady || hasProvisioned) return;
+        if (!isReady || (hasProvisioned && user)) return;
 
         setIsLoading(true);
         setError(null);
@@ -46,6 +54,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
             console.log("User provisioned:", createdUser);
             setUser(createdUser);
             setHasProvisioned(true);
+            sessionStorage.setItem("user_provisioned", "true");
+            
+            if (createdUser.hasCompletedOnboarding) {
+                setCachedOnboardingStatus(true);
+                sessionStorage.setItem("user_onboarding_complete", "true");
+            }
         } catch (err) {
             console.error("Failed to provision user:", err);
             setError(
@@ -54,7 +68,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } finally {
             setIsLoading(false);
         }
-    }, [isReady, hasProvisioned]);
+    }, [isReady, hasProvisioned, user]);
 
     const refetchUser = useCallback(async () => {
         if (!isReady) return;
@@ -65,6 +79,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         try {
             const userData = await api.getUser();
             setUser(userData);
+            if (userData.hasCompletedOnboarding) {
+                setCachedOnboardingStatus(true);
+                sessionStorage.setItem("user_onboarding_complete", "true");
+            }
         } catch (err) {
             console.error("Failed to fetch user:", err);
             setError(
@@ -77,18 +95,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     // Provision user when auth is fully ready
     useEffect(() => {
-        if (isReady && !hasProvisioned) {
-            console.log("Auth is ready, provisioning user...");
-            provisionUser();
+        if (isReady) {
+            if (!hasProvisioned) {
+                console.log("Auth is ready, provisioning user...");
+                provisionUser();
+            } else if (!user) {
+                // If we have provisioned flag but no user data (e.g. reload), fetch user
+                console.log("Restoring user data...");
+                refetchUser();
+            }
         }
-    }, [isReady, hasProvisioned, provisionUser]);
+    }, [isReady, hasProvisioned, user, provisionUser, refetchUser]);
 
     // Reset state on logout
     useEffect(() => {
         if (!isAuthenticated && !isAuthLoading) {
             setUser(null);
             setHasProvisioned(false);
+            setCachedOnboardingStatus(false);
             setError(null);
+            sessionStorage.removeItem("user_provisioned");
+            sessionStorage.removeItem("user_onboarding_complete");
         }
     }, [isAuthenticated, isAuthLoading]);
 
@@ -99,6 +126,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         try {
             const updatedUser = await api.updateUser(updates);
             setUser(updatedUser);
+            if (updatedUser.hasCompletedOnboarding) {
+                setCachedOnboardingStatus(true);
+                sessionStorage.setItem("user_onboarding_complete", "true");
+            }
         } catch (err) {
             console.error("Failed to update user:", err);
             throw err;
@@ -113,7 +144,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 isAuthLoading ||
                 (isAuthenticated && !hasProvisioned),
             isProvisioned: hasProvisioned,
-            hasCompletedOnboarding: user?.hasCompletedOnboarding ?? false,
+            hasCompletedOnboarding: user?.hasCompletedOnboarding ?? cachedOnboardingStatus,
             error,
             refetchUser,
             updateUser,
@@ -124,6 +155,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             isAuthLoading,
             isAuthenticated,
             hasProvisioned,
+            cachedOnboardingStatus,
             error,
             refetchUser,
         ]

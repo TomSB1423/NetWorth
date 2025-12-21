@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/button";
 import { NetWorthChart } from "../../components/dashboard/NetWorthChart";
 import { AssetAllocationChart } from "../../components/dashboard/AssetAllocationChart";
 import { TopAccounts } from "../../components/dashboard/TopAccounts";
+import { GoalsSection } from "../../components/dashboard/GoalsSection";
 import { useAccounts } from "../../contexts/AccountContext";
 import { Account, AccountBalances, Balance } from "../../types";
 
@@ -42,9 +43,9 @@ function MetricCard({
             <div
                 className={`absolute inset-0 bg-gradient-to-br ${gradients[accentColor]} opacity-50`}
             />
-            <CardContent className="p-6 relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                    <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase">
+            <CardContent className="p-4 relative z-10">
+                <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-semibold text-gray-400 tracking-wider uppercase">
                         {label}
                     </p>
                     {changeType !== "neutral" && (
@@ -64,11 +65,11 @@ function MetricCard({
                     )}
                 </div>
                 <h3
-                    className={`text-3xl font-black mb-2 ${accentColors[accentColor]} tracking-tight`}
+                    className={`text-xl font-bold mb-1 ${accentColors[accentColor]} tracking-tight`}
                 >
                     {value}
                 </h3>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                     <span
                         className={`text-sm font-medium ${
                             changeType === "positive"
@@ -147,10 +148,10 @@ export default function Overview() {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-5">
             {/* Syncing Banner */}
             {isSyncing && (
-                <div className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white py-3 px-4 rounded-xl">
+                <div className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white py-2 px-3 rounded-lg">
                     <div className="flex items-center justify-center gap-3">
                         <RefreshCw className="w-5 h-5 animate-spin" />
                         <span className="font-medium">
@@ -167,24 +168,23 @@ export default function Overview() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight text-white mb-2">
+                    <h1 className="text-2xl font-bold tracking-tight text-white">
                         Financial Overview
                     </h1>
-                    <p className="text-gray-400 text-lg font-medium">
+                    <p className="text-gray-400 text-sm">
                         Real-time snapshot of your wealth
                     </p>
                 </div>
-                <Button
-                    onClick={() => navigate("/select-bank")}
-                    className="h-12 px-6"
-                >
-                    <Plus size={20} className="mr-2" />
-                    Add Account
-                </Button>
+            </div>
+
+            {/* Charts Row */}
+            <div className="grid lg:grid-cols-2 gap-5">
+                <NetWorthChart hasAccounts={accounts.length > 0} />
+                <AssetAllocationChart />
             </div>
 
             {/* Metric Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard
                     label="NET WORTH"
                     value={
@@ -233,15 +233,13 @@ export default function Overview() {
                 />
             </div>
 
-            {/* Net Worth Chart */}
-            <NetWorthChart hasAccounts={accounts.length > 0} />
-
-            {/* Two Column Layout */}
-            <div className="grid lg:grid-cols-2 gap-8">
+            {/* Accounts & Goals Row */}
+            <div className="grid lg:grid-cols-2 gap-5">
                 <TopAccounts
                     onViewAll={() => navigate("/dashboard/accounts")}
+                    onAddAccount={() => navigate("/select-bank")}
                 />
-                <AssetAllocationChart />
+                <GoalsSection />
             </div>
         </div>
     );

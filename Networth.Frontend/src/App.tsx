@@ -7,6 +7,7 @@ import {
     useSearchParams,
     useNavigate,
 } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import {
     QueryClient,
     QueryClientProvider,
@@ -15,7 +16,9 @@ import {
 import { PublicClientApplication } from "@azure/msal-browser";
 import { MsalProvider } from "@azure/msal-react";
 import { msalConfig } from "./config/authConfig";
+import { config } from "./config/config";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { MockAuthProvider } from "./contexts/MockAuthContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { AccountProvider, useAccounts } from "./contexts/AccountContext";
 import { api } from "./services/api";
@@ -34,21 +37,25 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
 import AccountsPage from "./pages/dashboard/Accounts";
 
-// Create MSAL instance
-const msalInstance = new PublicClientApplication(msalConfig);
+// Create MSAL instance - only needed in non-mock mode
+let msalInstance: PublicClientApplication | null = null;
 
-// Handle redirect promise on app load - this MUST be called before any other MSAL methods
-// It processes the auth response when returning from a redirect
-msalInstance.initialize().then(() => {
-    msalInstance.handleRedirectPromise().then((response) => {
-        if (response) {
-            // If we have a response, set the active account
-            msalInstance.setActiveAccount(response.account);
-        }
-    }).catch((error) => {
-        console.error("Error handling redirect:", error);
+if (!config.useMockData) {
+    msalInstance = new PublicClientApplication(msalConfig);
+
+    // Handle redirect promise on app load - this MUST be called before any other MSAL methods
+    // It processes the auth response when returning from a redirect
+    msalInstance.initialize().then(() => {
+        msalInstance!.handleRedirectPromise().then((response) => {
+            if (response) {
+                // If we have a response, set the active account
+                msalInstance!.setActiveAccount(response.account);
+            }
+        }).catch((error) => {
+            console.error("Error handling redirect:", error);
+        });
     });
-});
+}
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -104,19 +111,20 @@ function AppRoutes() {
     const institutionId = searchParams.get("institutionId");
     const [isSyncing, setIsSyncing] = useState(false);
 
-    // Wait for user provisioning before showing main app
-    const isAppLoading =
-        !isProvisioned || isLoading || institutionId || isSyncing;
-    const [showLoading, setShowLoading] = useState(true);
+    // Determine if we should show the "funny" loading screen (onboarding/syncing)
+    const isOnboardingOrSyncing =
+        (isLoading && !hasCompletedOnboarding) ||
+        institutionId ||
+        isSyncing;
 
-    // When we enter a loading state, ensure the loading screen is visible.
-    // When loading completes, the LoadingScreen itself will call onComplete
-    // to hide, so we don't toggle showLoading off here to avoid flicker.
+    // State to handle the exit animation of the funny loading screen
+    const [showFunnyLoading, setShowFunnyLoading] = useState(!!isOnboardingOrSyncing);
+
     useEffect(() => {
-        if (isAppLoading) {
-            setShowLoading(true);
+        if (isOnboardingOrSyncing) {
+            setShowFunnyLoading(true);
         }
-    }, [isAppLoading]);
+    }, [isOnboardingOrSyncing]);
 
     // Wait for auth to be ready AND user to be provisioned before syncing
     const canSync = isReady && isProvisioned;
@@ -231,20 +239,33 @@ function AppRoutes() {
         );
     }
 
-    if (showLoading) {
-        const message = !isProvisioned
-            ? "Setting up your account..."
-            : institutionId || isSyncing
-            ? "Connecting to your bank..."
-            : undefined;
+    if (showFunnyLoading) {
+        const message =
+            institutionId || isSyncing
+                ? "Connecting to your bank..."
+                : !isProvisioned
+                ? "Setting up your account..."
+                : undefined;
 
         return (
             <LoadingScreen
                 message={message}
                 userName={user?.name}
-                isFinished={!isAppLoading}
-                onComplete={() => setShowLoading(false)}
+                isFinished={!isOnboardingOrSyncing}
+                onComplete={() => setShowFunnyLoading(false)}
             />
+        );
+    }
+
+    // Simple loading state for initial user fetch (if not syncing/onboarding)
+    if (!isProvisioned && !isOnboardingOrSyncing) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                    <p>Loading your profile...</p>
+                </div>
+            </div>
         );
     }
 
@@ -311,8 +332,26 @@ function AppRoutes() {
 }
 
 function App() {
+    // In mock mode, use simplified providers without MSAL
+    if (config.useMockData) {
+        return (
+            <MockAuthProvider>
+                <QueryClientProvider client={queryClient}>
+                    <UserProvider>
+                        <AccountProvider>
+                            <BrowserRouter>
+                                <AppRoutes />
+                            </BrowserRouter>
+                        </AccountProvider>
+                    </UserProvider>
+                </QueryClientProvider>
+            </MockAuthProvider>
+        );
+    }
+
+    // Real mode with full MSAL authentication
     return (
-        <MsalProvider instance={msalInstance}>
+        <MsalProvider instance={msalInstance!}>
             <AuthProvider>
                 <QueryClientProvider client={queryClient}>
                     <UserProvider>

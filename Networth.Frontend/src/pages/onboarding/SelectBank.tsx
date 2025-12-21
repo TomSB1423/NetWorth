@@ -5,7 +5,6 @@ import {
     Search,
     ChevronLeft,
     Building2,
-    LineChart,
     LogOut,
 } from "lucide-react";
 import { api } from "../../services/api";
@@ -86,19 +85,17 @@ export default function SelectBank() {
     return (
         <div className="min-h-screen bg-slate-950">
             <header className="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-10">
-                <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => navigate(-1)}
-                            className="p-2 hover:bg-slate-800 rounded-full text-gray-400 hover:text-white transition-colors"
+                            className="p-1.5 hover:bg-slate-800 rounded-full text-gray-400 hover:text-white transition-colors"
                         >
-                            <ChevronLeft size={24} />
+                            <ChevronLeft size={20} />
                         </button>
                         <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 via-blue-500 to-emerald-500 flex items-center justify-center">
-                                <LineChart size={16} className="text-white" />
-                            </div>
-                            <h1 className="text-lg font-semibold text-white">
+                            <img src="/networth-icon.svg" alt="NetWorth" className="w-6 h-6" />
+                            <h1 className="text-base font-semibold text-white">
                                 Select your bank
                             </h1>
                         </div>
@@ -113,39 +110,39 @@ export default function SelectBank() {
                 </div>
             </header>
 
-            <main className="max-w-2xl mx-auto px-4 py-8">
-                <div className="relative mb-8">
+            <main className="max-w-2xl mx-auto px-4 py-5">
+                <div className="relative mb-5">
                     <Search
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={20}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={18}
                     />
                     <input
                         type="text"
                         placeholder="Search for your bank..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
                     />
                 </div>
 
                 {isLoading ? (
-                    <div className="text-center text-gray-400 py-12">
+                    <div className="text-center text-gray-400 py-8 text-sm">
                         Loading institutions...
                     </div>
                 ) : error ? (
-                    <div className="text-center text-red-400 py-12">
+                    <div className="text-center text-red-400 py-8 text-sm">
                         Failed to load institutions. Please try again.
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 gap-1">
                         {filteredInstitutions.map((inst: Institution) => (
                             <button
                                 key={inst.id}
                                 onClick={() => handleSelectInstitution(inst)}
                                 disabled={isLinking}
-                                className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-900 transition-colors text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-900 transition-colors text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <div className="w-12 h-12 rounded-full bg-white p-2 flex items-center justify-center overflow-hidden">
+                                <div className="w-10 h-10 rounded-full bg-white p-1.5 flex items-center justify-center overflow-hidden">
                                     {inst.logoUrl ? (
                                         <img
                                             src={inst.logoUrl}
@@ -153,11 +150,14 @@ export default function SelectBank() {
                                             className="w-full h-full object-contain"
                                         />
                                     ) : (
-                                        <Building2 className="text-slate-900" />
+                                        <Building2
+                                            className="text-slate-900"
+                                            size={18}
+                                        />
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-medium text-white group-hover:text-blue-400 transition-colors">
+                                    <h3 className="font-medium text-white text-sm group-hover:text-blue-400 transition-colors">
                                         {inst.name}
                                     </h3>
                                 </div>

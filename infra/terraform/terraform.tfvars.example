@@ -1,6 +1,35 @@
-location                = "uksouth"
-environment             = "dev"
-project_name            = "networth"
+# =============================================================================
+# Networth Terraform Variables Example
+# =============================================================================
+# Copy this file to terraform.tfvars and fill in your actual values.
+# Never commit terraform.tfvars to source control!
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# General Settings
+# -----------------------------------------------------------------------------
+location     = "uksouth"
+environment  = "dev"
+project_name = "networth"
+
+# -----------------------------------------------------------------------------
+# Database Credentials
+# -----------------------------------------------------------------------------
 postgres_admin_password = "ChangeMe123!"
-gocardless_secret_id    = "your-secret-id"
-gocardless_secret_key   = "your-secret-key"
+
+# -----------------------------------------------------------------------------
+# GoCardless API Credentials
+# Get these from https://bankaccountdata.gocardless.com/
+# -----------------------------------------------------------------------------
+gocardless_secret_id  = "your-secret-id"
+gocardless_secret_key = "your-secret-key"
+
+# -----------------------------------------------------------------------------
+# CIAM / Entra External ID Configuration
+# Get these values from the terraform-ciam deployment outputs
+# Run: cd ../terraform-ciam && terraform output
+# -----------------------------------------------------------------------------
+ciam_tenant_domain = "yourname"                             # e.g., "networth" for networth.ciamlogin.com
+ciam_tenant_id     = "00000000-0000-0000-0000-000000000000" # CIAM tenant ID (different from main Azure tenant)
+ciam_api_client_id = "00000000-0000-0000-0000-000000000000" # API app registration client ID from CIAM
+ciam_spa_client_id = "00000000-0000-0000-0000-000000000000" # SPA app registration client ID from CIAM

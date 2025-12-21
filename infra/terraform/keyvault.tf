@@ -1,4 +1,19 @@
+# =============================================================================
+# Azure Key Vault
+# =============================================================================
+# This file creates the Key Vault for storing sensitive configuration:
+# - Database credentials
+# - GoCardless API keys
+# - Other secrets
+#
+# The Container App has access to read secrets via its managed identity.
+# =============================================================================
+
 data "azurerm_client_config" "current" {}
+
+# -----------------------------------------------------------------------------
+# Key Vault
+# -----------------------------------------------------------------------------
 
 resource "azurerm_key_vault" "kv" {
   name                       = "kv-${var.project_name}-${random_string.suffix.result}"
@@ -7,12 +22,16 @@ resource "azurerm_key_vault" "kv" {
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
-  purge_protection_enabled   = false
+  purge_protection_enabled   = false # Set to true for production
 
   tags = local.common_tags
 }
 
-# Access policy for the current user (deployer)
+# -----------------------------------------------------------------------------
+# Access Policies
+# -----------------------------------------------------------------------------
+
+# Access policy for the deployer (current user/service principal)
 resource "azurerm_key_vault_access_policy" "deployer" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -28,7 +47,7 @@ resource "azurerm_key_vault_access_policy" "deployer" {
   ]
 }
 
-# Access policy for the Container App
+# Access policy for the Container App (read-only)
 resource "azurerm_key_vault_access_policy" "container_app" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -40,7 +59,10 @@ resource "azurerm_key_vault_access_policy" "container_app" {
   ]
 }
 
+# -----------------------------------------------------------------------------
 # Secrets
+# -----------------------------------------------------------------------------
+
 resource "azurerm_key_vault_secret" "postgres_password" {
   name         = "postgres-admin-password"
   value        = var.postgres_admin_password

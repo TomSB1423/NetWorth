@@ -9,9 +9,9 @@ import {
 import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useAccounts } from "../../contexts/AccountContext";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
-const COLORS = ["#10B981", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444"];
+const COLORS = ["#10B981", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#EC4899", "#6366F1"];
 
 interface AssetAllocationChartProps {
     isSyncing?: boolean;
@@ -19,10 +19,11 @@ interface AssetAllocationChartProps {
 
 export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
     const { accounts, balances, isLoading } = useAccounts();
+    const [groupBy, setGroupBy] = useState<"type" | "account">("type");
 
-    // Group accounts by institution and calculate totals
+    // Group accounts by type or name and calculate totals
     const chartData = useMemo(() => {
-        const institutionTotals: Record<string, number> = {};
+        const totals: Record<string, number> = {};
 
         accounts.forEach((account) => {
             const accountBalance = balances.find(
@@ -35,18 +36,27 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
                     ) ?? accountBalance.balances[0];
                 const amount = parseFloat(balance.amount);
                 if (amount > 0) {
-                    const institution = account.institutionId || "Unknown";
-                    institutionTotals[institution] =
-                        (institutionTotals[institution] || 0) + amount;
+                    let key = "Unknown";
+                    if (groupBy === "type") {
+                        // Capitalize first letter of product/type
+                        const type = account.product || "Other";
+                        key = type.charAt(0).toUpperCase() + type.slice(1);
+                    } else {
+                        key = account.displayName || account.name || "Unnamed Account";
+                    }
+                    
+                    totals[key] = (totals[key] || 0) + amount;
                 }
             }
         });
 
-        return Object.entries(institutionTotals).map(([name, value]) => ({
-            name,
-            value,
-        }));
-    }, [accounts, balances]);
+        return Object.entries(totals)
+            .map(([name, value]) => ({
+                name,
+                value,
+            }))
+            .sort((a, b) => b.value - a.value); // Sort by value descending
+    }, [accounts, balances, groupBy]);
 
     if (isLoading || isSyncing) {
         return (
@@ -63,8 +73,30 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
 
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle>Asset Allocation</CardTitle>
+                <div className="flex bg-slate-800/50 rounded-lg p-1">
+                    <button
+                        onClick={() => setGroupBy("type")}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                            groupBy === "type"
+                                ? "bg-slate-600 text-white shadow-sm"
+                                : "text-slate-400 hover:text-slate-200"
+                        }`}
+                    >
+                        Type
+                    </button>
+                    <button
+                        onClick={() => setGroupBy("account")}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                            groupBy === "account"
+                                ? "bg-slate-600 text-white shadow-sm"
+                                : "text-slate-400 hover:text-slate-200"
+                        }`}
+                    >
+                        Account
+                    </button>
+                </div>
             </CardHeader>
             <CardContent>
                 <div className="h-[280px] w-full relative">

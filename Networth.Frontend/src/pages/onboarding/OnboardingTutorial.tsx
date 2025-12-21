@@ -104,46 +104,45 @@ export default function OnboardingTutorial() {
         <div className="min-h-screen bg-slate-950 flex flex-col">
             {/* Header */}
             <header className="border-b border-slate-800 sticky top-0 z-50 bg-slate-950/95 backdrop-blur">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 via-blue-500 to-emerald-500 flex items-center justify-center">
-                            <LineChart size={18} className="text-white" />
-                        </div>
-                        <span className="text-xl font-bold text-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                        <img src="/networth-icon.svg" alt="NetWorth" className="w-7 h-7" />
+                        <span className="text-lg font-bold text-white">
                             NetWorth
                         </span>
                     </div>
                     <button
                         onClick={() => logout()}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors text-sm"
                     >
-                        <LogOut size={18} />
-                        <span className="text-sm">Sign Out</span>
+                        <LogOut size={16} />
+                        <span>Sign Out</span>
                     </button>
                 </div>
             </header>
 
             <div className="flex-1 flex items-center justify-center p-4">
-                <div className="max-w-lg w-full">
+                <div className="max-w-md w-full">
                     {/* Slide Content */}
-                    <div className="text-center space-y-6 mb-12">
+                    <div className="text-center space-y-4 mb-8">
                         <div
-                            className={`w-24 h-24 ${slide.iconBg} rounded-2xl mx-auto flex items-center justify-center transition-all duration-300`}
+                            className={`w-18 h-18 ${slide.iconBg} rounded-xl mx-auto flex items-center justify-center transition-all duration-300`}
+                            style={{ width: "72px", height: "72px" }}
                         >
                             {slide.icon}
                         </div>
-                        <div className="space-y-3">
-                            <h1 className="text-3xl font-bold text-white tracking-tight">
+                        <div className="space-y-2">
+                            <h1 className="text-2xl font-bold text-white tracking-tight">
                                 {slide.title}
                             </h1>
-                            <p className="text-gray-400 text-lg leading-relaxed">
+                            <p className="text-gray-400 text-base leading-relaxed">
                                 {slide.description}
                             </p>
                         </div>
                     </div>
 
                     {/* Slide Indicators */}
-                    <div className="flex items-center justify-center gap-2 mb-8">
+                    <div className="flex items-center justify-center gap-1.5 mb-6">
                         {slides.map((_, index) => (
                             <button
                                 key={index}
@@ -162,33 +161,33 @@ export default function OnboardingTutorial() {
                         <button
                             onClick={handlePrev}
                             disabled={currentSlide === 0}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all ${
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg border transition-all text-sm ${
                                 currentSlide === 0
                                     ? "border-slate-800 text-slate-600 cursor-not-allowed"
                                     : "border-slate-700 text-gray-300 hover:text-white hover:border-slate-600"
                             }`}
                         >
-                            <ArrowLeft className="w-5 h-5" />
+                            <ArrowLeft className="w-4 h-4" />
                             Back
                         </button>
 
                         {!isLastSlide ? (
                             <button
                                 onClick={handleSkip}
-                                className="text-gray-400 hover:text-white transition-colors"
+                                className="text-gray-400 hover:text-white transition-colors text-sm"
                             >
                                 Skip tutorial
                             </button>
                         ) : (
-                            <div className="w-[110px]" />
+                            <div className="w-[100px]" />
                         )}
 
                         <button
                             onClick={handleNext}
-                            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-[1.02]"
+                            className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition-all text-sm"
                         >
                             {isLastSlide ? "Add Your First Account" : "Next"}
-                            <ArrowRight className="w-5 h-5" />
+                            <ArrowRight className="w-4 h-4" />
                         </button>
                     </div>
                 </div>

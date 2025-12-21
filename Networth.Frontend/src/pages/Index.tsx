@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, LogOut, LineChart, RefreshCw } from "lucide-react";
+import { Plus, LogOut, RefreshCw } from "lucide-react";
 import { MetricCard } from "../components/dashboard/MetricCard";
 import { NetWorthChart } from "../components/dashboard/NetWorthChart";
 import { AssetAllocationChart } from "../components/dashboard/AssetAllocationChart";
@@ -124,45 +124,41 @@ export default function Index() {
 
             {/* Header */}
             <header className="border-b border-slate-800 sticky top-0 z-50 bg-slate-950/95 backdrop-blur">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 via-blue-500 to-emerald-500 flex items-center justify-center">
-                            <LineChart size={18} className="text-white" />
-                        </div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                        <img src="/networth-icon.svg" alt="NetWorth" className="w-7 h-7" />
                         <div>
-                            <h1 className="text-xl font-bold text-white">
+                            <h1 className="text-lg font-bold text-white">
                                 NetWorth
                             </h1>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-[11px] text-gray-400">
                                 Real-time portfolio overview
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <button
                             onClick={() => navigate("/select-bank")}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition-colors text-sm"
                         >
-                            <Plus size={18} />
-                            <span className="text-sm font-medium">
-                                Add Account
-                            </span>
+                            <Plus size={16} />
+                            <span className="font-medium">Add Account</span>
                         </button>
                         <button
                             onClick={() => logout()}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors text-sm"
                         >
-                            <LogOut size={18} />
-                            <span className="text-sm">Sign Out</span>
+                            <LogOut size={16} />
+                            <span>Sign Out</span>
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                 {/* Top Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
                     <MetricCard
                         label="NET WORTH"
                         value={
@@ -219,14 +215,14 @@ export default function Index() {
                 </div>
 
                 {/* Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
                     {/* Left Column - Charts */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-5">
                         {/* Net Worth Trend */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
-                            <div className="flex items-center justify-between mb-6">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
+                            <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white">
+                                    <h3 className="text-base font-semibold text-white">
                                         Net Worth Trend
                                     </h3>
                                 </div>
@@ -238,33 +234,33 @@ export default function Index() {
                         </div>
 
                         {/* Top Accounts */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
                             <TopAccounts isSyncing={isSyncing} />
                         </div>
 
                         {/* Performance Metrics */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
                             <PerformanceMetrics />
                         </div>
                     </div>
 
                     {/* Right Column - Side Panels */}
-                    <div className="space-y-8">
+                    <div className="space-y-5">
                         {/* Asset Allocation */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
-                            <h3 className="text-lg font-semibold text-white mb-6">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
+                            <h3 className="text-base font-semibold text-white mb-4">
                                 Asset Allocation
                             </h3>
                             <AssetAllocationChart isSyncing={isSyncing} />
                         </div>
 
                         {/* Goals */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
                             <GoalsSection />
                         </div>
 
                         {/* Financial Health */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
                             <FinancialHealthMetrics />
                         </div>
                     </div>

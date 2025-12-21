@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-    LineChart,
     Wallet,
     TrendingUp,
     Beer,
@@ -73,14 +72,23 @@ export function LoadingScreen({
         hasCompletedRef.current = true;
         setProgress(100);
 
+        const hasShownWelcome = sessionStorage.getItem("welcome_shown");
+
         // If we have a username, show welcome message
         if (userName) {
-            setShowWelcome(true);
-            // Give time to read the welcome message
-            const timer = setTimeout(() => {
+            if (!hasShownWelcome) {
+                setShowWelcome(true);
+                sessionStorage.setItem("welcome_shown", "true");
+                // Give time to read the welcome message
+                const timer = setTimeout(() => {
+                    onCompleteRef.current?.();
+                }, 2500);
+                return () => clearTimeout(timer);
+            } else {
+                // Already shown welcome in this session, finish immediately
                 onCompleteRef.current?.();
-            }, 2500);
-            return () => clearTimeout(timer);
+                return;
+            }
         }
 
         // No username, just finish quickly
@@ -237,10 +245,7 @@ export function LoadingScreen({
                     {/* Center logo */}
                     <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-500 p-[2px] shadow-2xl shadow-emerald-500/20">
                         <div className="w-full h-full rounded-2xl bg-slate-950 flex items-center justify-center">
-                            <LineChart
-                                size={40}
-                                className="text-white animate-pulse"
-                            />
+                            <img src="/networth-icon.svg" alt="NetWorth" className="w-12 h-12 animate-pulse" />
                         </div>
                     </div>
                 </div>

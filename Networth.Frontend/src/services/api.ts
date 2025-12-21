@@ -1,4 +1,4 @@
-import {
+import type {
     Account,
     AccountCategory,
     Balance,
@@ -10,6 +10,7 @@ import {
     PagedResponse,
 } from "../types";
 import { config } from "../config/config";
+import { mockApi } from "./mockApi";
 
 const API_BASE_URL = `${config.api.baseUrl}/api`;
 
@@ -38,7 +39,10 @@ const getAuthHeaders = async (): Promise<Record<string, string>> => {
     }
 };
 
-export const api = {
+/**
+ * Real API implementation that calls the backend.
+ */
+const realApi = {
     getAccounts: async (): Promise<Account[]> => {
         const headers = await getAuthHeaders();
         console.log(
@@ -182,3 +186,17 @@ export const api = {
         return response.json();
     },
 };
+
+/**
+ * Export the appropriate API based on configuration.
+ * When VITE_USE_MOCK_DATA=true, uses mock data instead of real API calls.
+ */
+export const api = config.useMockData ? mockApi : realApi;
+
+// Log which API mode is active
+if (config.useMockData) {
+    console.log(
+        "%c[API] Mock mode enabled - using local mock data",
+        "color: #f59e0b; font-weight: bold"
+    );
+}

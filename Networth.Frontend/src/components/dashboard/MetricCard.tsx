@@ -34,17 +34,17 @@ export function MetricCard({
     return (
         <div
             className={cn(
-                "rounded-lg border p-6 backdrop-blur-sm",
+                "rounded-lg border p-4 backdrop-blur-sm",
                 colorClasses[accentColor]
             )}
         >
-            <div className="flex items-start justify-between mb-4">
-                <div className="text-sm text-gray-400 font-medium">{label}</div>
-                {icon && <div className="text-xl">{icon}</div>}
+            <div className="flex items-start justify-between mb-2">
+                <div className="text-xs text-gray-400 font-medium">{label}</div>
+                {icon && <div className="text-lg">{icon}</div>}
             </div>
-            <div className="space-y-2">
-                <div className="text-3xl font-bold text-white">{value}</div>
-                <div className={cn("text-sm", changeColorClasses[changeType])}>
+            <div className="space-y-1">
+                <div className="text-xl font-bold text-white">{value}</div>
+                <div className={cn("text-xs", changeColorClasses[changeType])}>
                     {change}
                 </div>
             </div>

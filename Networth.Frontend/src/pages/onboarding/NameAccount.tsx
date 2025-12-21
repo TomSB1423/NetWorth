@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { LineChart, LogOut, ChevronLeft, Save, Loader2 } from "lucide-react";
+import { LogOut, ChevronLeft, Save, Loader2 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAccounts } from "../../contexts/AccountContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -128,9 +128,7 @@ export default function NameAccount() {
                             <ChevronLeft size={24} />
                         </button>
                         <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 via-blue-500 to-emerald-500 flex items-center justify-center">
-                                <LineChart size={16} className="text-white" />
-                            </div>
+                            <img src="/networth-icon.svg" alt="NetWorth" className="w-7 h-7" />
                             <h1 className="text-lg font-semibold text-white">
                                 Customize Account
                             </h1>

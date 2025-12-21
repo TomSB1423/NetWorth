@@ -78,20 +78,20 @@ export default function AccountsPage() {
 
     if (accounts.length === 0) {
         return (
-            <div className="space-y-8">
+            <div className="space-y-5">
                 {/* Page Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight text-white mb-2">
+                        <h1 className="text-2xl font-bold tracking-tight text-white">
                             Accounts
                         </h1>
-                        <p className="text-gray-400 text-lg font-medium">
+                        <p className="text-gray-400 text-sm">
                             Manage your connected financial accounts
                         </p>
                     </div>
                 </div>
 
-                <Card className="p-12">
+                <Card className="p-8">
                     <div className="text-center">
                         <h3 className="text-xl font-semibold text-white mb-2">
                             No Accounts Connected
@@ -111,22 +111,19 @@ export default function AccountsPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight text-white mb-2">
+                    <h1 className="text-2xl font-bold tracking-tight text-white">
                         Accounts
                     </h1>
-                    <p className="text-gray-400 text-lg font-medium">
+                    <p className="text-gray-400 text-sm">
                         Manage your connected financial accounts
                     </p>
                 </div>
-                <Button
-                    onClick={() => navigate("/select-bank")}
-                    className="h-12 px-6"
-                >
-                    <Plus size={20} className="mr-2" />
+                <Button onClick={() => navigate("/select-bank")} size="sm">
+                    <Plus size={16} className="mr-1.5" />
                     Add Account
                 </Button>
             </div>

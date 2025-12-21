@@ -11,6 +11,8 @@ import { useMsal, useIsAuthenticated, useAccount } from "@azure/msal-react";
 import { InteractionStatus, AccountInfo } from "@azure/msal-browser";
 import { loginRequest, tokenRequest } from "../config/authConfig";
 import { setTokenGetter } from "../services/api";
+import { config } from "../config/config";
+import { MockAuthContext } from "./MockAuthContext";
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -63,6 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = useCallback(async () => {
         try {
+            // Clear session storage flags
+            sessionStorage.removeItem("welcome_shown");
+
             // Get the active account to avoid account picker prompt
             const activeAccount = instance.getActiveAccount() || accounts[0];
             
@@ -140,9 +145,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
+    // In mock mode, use the MockAuthContext
+    const mockContext = useContext(MockAuthContext);
+    const realContext = useContext(AuthContext);
+
+    // If we're in mock mode and have a mock context, use it
+    if (config.useMockData && mockContext !== undefined) {
+        return mockContext;
+    }
+
+    // Otherwise use the real auth context
+    if (realContext === undefined) {
         throw new Error("useAuth must be used within an AuthProvider");
     }
-    return context;
+    return realContext;
 }

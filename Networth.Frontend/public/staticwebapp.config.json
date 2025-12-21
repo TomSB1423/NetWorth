@@ -1,0 +1,23 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "*.{css,js,png,jpg,jpeg,gif,ico,svg,woff,woff2,ttf,eot}"]
+  },
+  "routes": [
+    {
+      "route": "/login",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/callback",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/logout",
+      "rewrite": "/index.html"
+    }
+  ],
+  "mimeTypes": {
+    ".json": "application/json"
+  }
+}

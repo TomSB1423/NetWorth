@@ -1,3 +1,18 @@
+# =============================================================================
+# PostgreSQL Flexible Server
+# =============================================================================
+# This file creates the PostgreSQL Flexible Server for storing:
+# - User accounts and preferences
+# - Bank account data (accounts, transactions, balances)
+# - GoCardless requisitions and agreements
+#
+# Database name matches ResourceNames.NetworthDb in Networth.ServiceDefaults
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# PostgreSQL Flexible Server
+# -----------------------------------------------------------------------------
+
 resource "azurerm_postgresql_flexible_server" "psql" {
   name                   = "psql-${var.project_name}-${local.resource_suffix}"
   resource_group_name    = azurerm_resource_group.rg.name
@@ -12,12 +27,21 @@ resource "azurerm_postgresql_flexible_server" "psql" {
   tags = local.common_tags
 }
 
+# -----------------------------------------------------------------------------
+# Database
+# -----------------------------------------------------------------------------
+
 resource "azurerm_postgresql_flexible_server_database" "db" {
   name      = "networth-db"
   server_id = azurerm_postgresql_flexible_server.psql.id
   collation = "en_US.utf8"
   charset   = "utf8"
 }
+
+# -----------------------------------------------------------------------------
+# Firewall Rules
+# -----------------------------------------------------------------------------
+# Allow Azure services to connect (required for Container Apps)
 
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_services" {
   name             = "AllowAzureServices"
@@ -26,9 +50,7 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_service
   end_ip_address   = "0.0.0.0"
 }
 
-resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_all" {
-  name             = "AllowAll"
-  server_id        = azurerm_postgresql_flexible_server.psql.id
-  start_ip_address = "0.0.0.0"
-  end_ip_address   = "255.255.255.255"
-}
+# Note: For production, consider using:
+# - Private endpoints instead of public access
+# - VNet integration with the Container App Environment
+# - More restrictive firewall rules

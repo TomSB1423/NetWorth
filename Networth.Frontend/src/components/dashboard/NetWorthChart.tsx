@@ -77,7 +77,9 @@ export function NetWorthChart({
         );
     }, [history]);
 
-    const formatLastCalculated = (dateString: string | null | undefined): string => {
+    const formatLastCalculated = (
+        dateString: string | null | undefined
+    ): string => {
         if (!dateString) return "Never";
         const date = new Date(dateString);
         const now = new Date();
@@ -87,10 +89,13 @@ export function NetWorthChart({
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
         if (diffMins < 1) return "Just now";
-        if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? "" : "s"} ago`;
-        if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
-        if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
-        
+        if (diffMins < 60)
+            return `${diffMins} minute${diffMins === 1 ? "" : "s"} ago`;
+        if (diffHours < 24)
+            return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+        if (diffDays < 7)
+            return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+
         return date.toLocaleDateString("en-GB", {
             day: "numeric",
             month: "short",
@@ -158,15 +163,20 @@ export function NetWorthChart({
     // 1. Initial fetch is in progress
     // 2. Syncing with no existing data to show
     // 3. Backend reports data is not yet calculated or calculation is in progress
-    const isCalculationPending = status === "NotCalculated" || status === "Calculating";
-    const showLoading = isLoading || !isFetched || (isSyncing && data.length === 0) || isCalculationPending;
+    const isCalculationPending =
+        status === "NotCalculated" || status === "Calculating";
+    const showLoading =
+        isLoading ||
+        !isFetched ||
+        (isSyncing && data.length === 0) ||
+        isCalculationPending;
 
     if (showLoading) {
         return (
             <Card>
-                <CardContent className="h-[400px] flex items-center justify-center text-gray-400">
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                    <span className="ml-2">
+                <CardContent className="h-[280px] flex items-center justify-center text-gray-400">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="ml-2 text-sm">
                         {isCalculationPending
                             ? "Calculating net worth..."
                             : isSyncing
@@ -181,7 +191,7 @@ export function NetWorthChart({
     if (error) {
         return (
             <Card>
-                <CardContent className="h-[400px] flex items-center justify-center text-red-500">
+                <CardContent className="h-[280px] flex items-center justify-center text-red-500 text-sm">
                     {(error as Error).message || "Failed to load data"}
                 </CardContent>
             </Card>
@@ -191,20 +201,22 @@ export function NetWorthChart({
     if (!hasAccounts) {
         return (
             <Card>
-                <CardHeader className="flex flex-row items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
-                        <TrendingUp size={24} className="text-emerald-400" />
+                <CardHeader className="flex flex-row items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                        <TrendingUp size={18} className="text-emerald-400" />
                     </div>
                     <div>
-                        <CardTitle>Net Worth Trajectory</CardTitle>
-                        <p className="text-sm text-gray-400 mt-1">
+                        <CardTitle className="text-base">
+                            Net Worth Trajectory
+                        </CardTitle>
+                        <p className="text-xs text-gray-400">
                             Growth over time
                         </p>
                     </div>
                 </CardHeader>
-                <CardContent className="h-[350px] flex flex-col items-center justify-center text-gray-400">
-                    <p className="text-lg">Please add an account</p>
-                    <p className="text-sm mt-2">
+                <CardContent className="h-[240px] flex flex-col items-center justify-center text-gray-400">
+                    <p className="text-sm">Please add an account</p>
+                    <p className="text-xs mt-1">
                         Link a bank account to see your net worth over time
                     </p>
                 </CardContent>
@@ -215,31 +227,34 @@ export function NetWorthChart({
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
-                        <TrendingUp size={24} className="text-emerald-400" />
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                        <TrendingUp size={18} className="text-emerald-400" />
                     </div>
                     <div>
-                        <CardTitle>Net Worth Trajectory</CardTitle>
-                        <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
+                        <CardTitle className="text-base">
+                            Net Worth Trajectory
+                        </CardTitle>
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
                             <span>Growth over time</span>
                             {lastCalculated && (
-                                <span className="flex items-center gap-1 text-xs text-gray-500">
-                                    <Clock size={12} />
-                                    Updated {formatLastCalculated(lastCalculated)}
+                                <span className="flex items-center gap-1 text-[11px] text-gray-500">
+                                    <Clock size={10} />
+                                    Updated{" "}
+                                    {formatLastCalculated(lastCalculated)}
                                 </span>
                             )}
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-2 p-1 rounded-xl bg-slate-800">
+                <div className="flex gap-1 p-0.5 rounded-lg bg-slate-800">
                     {availablePeriods.map((period) => (
                         <Button
                             key={period.label}
                             variant="ghost"
                             size="sm"
                             onClick={() => setSelectedPeriod(period.label)}
-                            className={`min-w-[50px] h-9 rounded-lg font-semibold ${
+                            className={`min-w-[40px] h-7 rounded-md font-medium text-xs ${
                                 validSelectedPeriod === period.label
                                     ? "bg-emerald-500 text-white hover:bg-emerald-600"
                                     : "text-gray-400 hover:text-white hover:bg-slate-700"
@@ -251,7 +266,7 @@ export function NetWorthChart({
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="h-[350px]">
+                <div className="h-[260px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart
                             data={filteredData}
@@ -298,6 +313,7 @@ export function NetWorthChart({
                                 tickFormatter={formatCurrency}
                             />
                             <Tooltip
+                                cursor={false}
                                 contentStyle={{
                                     backgroundColor: "#1F2937",
                                     borderColor: "#374151",

@@ -21,21 +21,22 @@ builder.AddServiceDefaults();
 builder.UseMiddleware<FunctionContextMiddleware>();
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
-// Use conditional middleware to enforce authentication on all HTTP endpoints except Health
+// Use conditional middleware to enforce authentication on all HTTP endpoints except Health and OpenAPI
 builder.UseWhen<JwtAuthenticationMiddleware>(context =>
 {
     // We want to use this middleware only for http trigger invocations.
     var isHttpTrigger = context.FunctionDefinition.InputBindings.Values
         .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
 
-    // Exclude the Health endpoint
-    return isHttpTrigger && context.FunctionDefinition.Name != "GetHealth";
+    // Exclude the Health and OpenAPI/Swagger endpoints
+    string[] excludedFunctions = ["GetHealth", "RenderSwaggerDocument", "RenderSwaggerUI", "RenderOpenApiDocument"];
+    return isHttpTrigger && !excludedFunctions.Contains(context.FunctionDefinition.Name);
 });
 
 // Configure additional app settings
 builder.Configuration
     .AddJsonFile("settings.json", false, true)
-    .AddJsonFile("local.settings.json", true, true)
+    .AddJsonFile("settings.local.json", true, true)
     .AddEnvironmentVariables()
     .AddUserSecrets<Program>();
 
