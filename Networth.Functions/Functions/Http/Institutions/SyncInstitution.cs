@@ -59,7 +59,7 @@ public class SyncInstitution(
             return new UnauthorizedResult();
         }
 
-        var userId = await currentUserService.GetInternalUserIdAsync();
+        var userId = currentUserService.InternalUserId!.Value;
 
         logger.LogInformation(
             "Received request to sync institution {InstitutionId} for user {UserId}",

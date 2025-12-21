@@ -16,7 +16,9 @@ public class CurrentUserService(
     IEnumerable<ClaimsPrincipal> principals) : ICurrentUserService
 {
     private readonly ClaimsPrincipal? _injectedPrincipal = principals.FirstOrDefault();
-    private Guid? _cachedInternalUserId;
+
+    /// <inheritdoc />
+    public Guid? InternalUserId { get; private set; }
 
     /// <inheritdoc />
     public ClaimsPrincipal? User
@@ -65,12 +67,18 @@ public class CurrentUserService(
         ?? User?.FindFirst(ClaimTypes.Email)?.Value;
 
     /// <inheritdoc />
+    public void SetInternalUserId(Guid userId)
+    {
+        InternalUserId = userId;
+    }
+
+    /// <inheritdoc />
     public async Task<Guid> GetInternalUserIdAsync(CancellationToken cancellationToken = default)
     {
-        // Return cached value if available
-        if (_cachedInternalUserId.HasValue)
+        // Return cached value if available (set by middleware or previous call)
+        if (InternalUserId.HasValue)
         {
-            return _cachedInternalUserId.Value;
+            return InternalUserId.Value;
         }
 
         var user = await userRepository.GetUserByFirebaseUidAsync(FirebaseUid, cancellationToken);
@@ -79,7 +87,7 @@ public class CurrentUserService(
             throw new InvalidOperationException($"User with Firebase UID '{FirebaseUid}' not found in database. Ensure the user is created first.");
         }
 
-        _cachedInternalUserId = user.Id;
+        InternalUserId = user.Id;
         return user.Id;
     }
 }

@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Networth.Infrastructure.Data.Migrations
+namespace Networth.Infrastructure.Migrations
 {
     [DbContext(typeof(NetworthDbContext))]
-    [Migration("20251221110152_UserIdRefactoring")]
-    partial class UserIdRefactoring
+    [Migration("20251221122433_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

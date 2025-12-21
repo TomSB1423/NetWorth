@@ -6,6 +6,11 @@ namespace Networth.Functions.Models.Responses;
 public class CurrentUserResponse
 {
     /// <summary>
+    ///     Gets or sets the internal user ID.
+    /// </summary>
+    public required Guid UserId { get; set; }
+
+    /// <summary>
     ///     Gets or sets the Firebase UID from the authentication token.
     /// </summary>
     public required string FirebaseUid { get; set; }
@@ -21,7 +26,7 @@ public class CurrentUserResponse
     public string? Email { get; set; }
 
     /// <summary>
-    ///     Gets or sets a value indicating whether the user is authenticated.
+    ///     Gets or sets a value indicating whether the user has completed onboarding.
     /// </summary>
-    public bool IsAuthenticated { get; set; }
+    public bool HasCompletedOnboarding { get; set; }
 }

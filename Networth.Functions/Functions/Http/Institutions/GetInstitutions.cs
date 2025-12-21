@@ -44,11 +44,8 @@ public class GetInstitutions(
     {
         logger.LogInformation("Received request to get institutions");
 
-        Guid? userId = null;
-        if (currentUserService.IsAuthenticated)
-        {
-            userId = await currentUserService.GetInternalUserIdAsync();
-        }
+        // InternalUserId is resolved by middleware; null if user not created yet
+        var userId = currentUserService.InternalUserId;
 
         var query = new GetInstitutionsQuery
         {

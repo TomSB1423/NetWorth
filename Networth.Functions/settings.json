@@ -6,11 +6,6 @@
     "Gocardless": {
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2"
     },
-    "Host": {
-        "CORS": "*",
-        "LocalHttpPort": 7071,
-        "CORSCredentials": false
-    },
     "Firebase": {
         "ProjectId": "networth-f66b5"
     },

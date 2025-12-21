@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Networth.Infrastructure.Data.Migrations
+namespace Networth.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -46,9 +46,12 @@ namespace Networth.Infrastructure.Data.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FirebaseUid = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    HasCompletedOnboarding = table.Column<bool>(type: "boolean", nullable: false)
+                    Email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: true),
+                    HasCompletedOnboarding = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,7 +63,7 @@ namespace Networth.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    UserId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstitutionId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     MaxHistoricalDays = table.Column<int>(type: "integer", nullable: true),
                     AccessValidForDays = table.Column<int>(type: "integer", nullable: true),
@@ -85,7 +88,7 @@ namespace Networth.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    UserId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Redirect = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     InstitutionId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
@@ -121,7 +124,7 @@ namespace Networth.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    UserId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     RequisitionId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     InstitutionId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
@@ -181,7 +184,7 @@ namespace Networth.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    UserId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     AccountId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     TransactionId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     DebtorName = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
@@ -215,8 +218,8 @@ namespace Networth.Infrastructure.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "HasCompletedOnboarding", "Name" },
-                values: new object[] { "mock-user-123", false, "Mock Development User" });
+                columns: new[] { "Id", "CreatedAt", "Email", "FirebaseUid", "HasCompletedOnboarding", "Name" },
+                values: new object[] { new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "mock-user-123", false, "Mock Development User" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AccountBalances_AccountId",
@@ -337,6 +340,12 @@ namespace Networth.Infrastructure.Data.Migrations
                 name: "IX_Transactions_ValueDate",
                 table: "Transactions",
                 column: "ValueDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_FirebaseUid",
+                table: "Users",
+                column: "FirebaseUid",
+                unique: true);
         }
 
         /// <inheritdoc />

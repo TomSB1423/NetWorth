@@ -13,6 +13,12 @@ public interface ICurrentUserService
     string FirebaseUid { get; }
 
     /// <summary>
+    ///     Gets the current user's internal database ID.
+    ///     Returns null if user hasn't been created yet or ID hasn't been resolved.
+    /// </summary>
+    Guid? InternalUserId { get; }
+
+    /// <summary>
     ///     Gets the current user's display name.
     /// </summary>
     string? Name { get; }
@@ -33,7 +39,13 @@ public interface ICurrentUserService
     ClaimsPrincipal? User { get; }
 
     /// <summary>
-    ///     Gets the current user's internal database ID.
+    ///     Sets the internal user ID. Called by middleware after resolving the user.
+    /// </summary>
+    /// <param name="userId">The internal user ID.</param>
+    void SetInternalUserId(Guid userId);
+
+    /// <summary>
+    ///     Gets the current user's internal database ID, resolving it if not already cached.
     ///     This requires the user to exist in the database.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>

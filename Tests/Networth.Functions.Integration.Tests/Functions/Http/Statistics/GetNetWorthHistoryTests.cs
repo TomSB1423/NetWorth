@@ -342,7 +342,9 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         // Seed User, Institution, Agreement, Requisition, Account
         dbContext.Users.Add(new User
         {
-            Id = userId, Name = "Sparse User", FirebaseUid = "sparse-firebase-uid",
+            Id = userId,
+            Name = "Sparse User",
+            FirebaseUid = "sparse-firebase-uid",
         });
 
         dbContext.Institutions.Add(new InstitutionMetadata

@@ -16,8 +16,8 @@
         "clsx": "^2.1.1",
         "firebase": "^11.1.0",
         "lucide-react": "^0.555.0",
-        "react": "^19.2.0",
-        "react-dom": "^19.2.0",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3",
         "react-router-dom": "^7.10.0",
         "recharts": "^3.5.1",
         "tailwind-merge": "^3.4.0"

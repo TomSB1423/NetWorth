@@ -2,21 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Networth.Infrastructure.Data.Context;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Networth.Infrastructure.Data.Migrations
+namespace Networth.Infrastructure.Migrations
 {
     [DbContext(typeof(NetworthDbContext))]
-    [Migration("20251219234304_InitialCreate")]
-    partial class InitialCreate
+    partial class NetworthDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,10 +81,8 @@ namespace Networth.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -174,10 +169,8 @@ namespace Networth.Infrastructure.Data.Migrations
                     b.Property<bool>("Reconfirmation")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -317,10 +310,8 @@ namespace Networth.Infrastructure.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("UserLanguage")
                         .HasMaxLength(10)
@@ -396,10 +387,8 @@ namespace Networth.Infrastructure.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ValueDate")
                         .HasColumnType("timestamp with time zone");
@@ -423,9 +412,21 @@ namespace Networth.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Networth.Infrastructure.Data.Entities.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<string>("FirebaseUid")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<bool>("HasCompletedOnboarding")
                         .HasColumnType("boolean");
@@ -437,12 +438,17 @@ namespace Networth.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FirebaseUid")
+                        .IsUnique();
+
                     b.ToTable("Users", (string)null);
 
                     b.HasData(
                         new
                         {
-                            Id = "mock-user-123",
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirebaseUid = "mock-user-123",
                             HasCompletedOnboarding = false,
                             Name = "Mock Development User"
                         });

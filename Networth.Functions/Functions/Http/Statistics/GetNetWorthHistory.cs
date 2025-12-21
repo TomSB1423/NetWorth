@@ -46,7 +46,7 @@ public class GetNetWorthHistory(
             return new UnauthorizedResult();
         }
 
-        var userId = await currentUserService.GetInternalUserIdAsync();
+        var userId = currentUserService.InternalUserId!.Value;
         logger.LogInformation("Retrieving net worth history for user {UserId}", userId);
 
         var query = new GetNetWorthHistoryQuery(userId);

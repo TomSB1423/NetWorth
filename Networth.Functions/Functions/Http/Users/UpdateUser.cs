@@ -71,12 +71,9 @@ public class UpdateUser(
             return new BadRequestObjectResult("Request body is required");
         }
 
-        // Resolve internal user ID from Firebase UID
-        var userId = await currentUserService.GetInternalUserIdAsync();
-
         var command = new UpdateUserCommand
         {
-            UserId = userId,
+            UserId = currentUserService.InternalUserId!.Value,
             Name = request.Name,
             HasCompletedOnboarding = request.HasCompletedOnboarding,
         };

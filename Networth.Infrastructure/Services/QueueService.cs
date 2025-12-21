@@ -39,7 +39,8 @@ public class QueueService : IQueueService
 
         var message = new
         {
-            AccountId = accountId, UserId = userId,
+            AccountId = accountId,
+            UserId = userId,
         };
 
         var messageJson = JsonSerializer.Serialize(message);
@@ -73,7 +74,8 @@ public class QueueService : IQueueService
 
         var message = new
         {
-            InstitutionId = institutionId, UserId = userId,
+            InstitutionId = institutionId,
+            UserId = userId,
         };
 
         var messageJson = JsonSerializer.Serialize(message);
