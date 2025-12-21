@@ -39,7 +39,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
 
         await dbContext.Database.EnsureCreatedAsync();
 
-        // Seed Data for Constants.MockUserId (used by MockAuthenticationMiddleware)
+        // Seed Data for Constants.MockUserId
         Guid userId = Constants.MockUserId;
         var accountId1 = "acc-1";
         var accountId2 = "acc-2";

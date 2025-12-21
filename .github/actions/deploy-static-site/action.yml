@@ -18,6 +18,18 @@ inputs:
     description: "Backend API URL (optional, sets VITE_API_URL for React builds)"
     required: false
     default: ""
+  firebase-api-key:
+    description: "Firebase API Key (optional, sets VITE_FIREBASE_API_KEY)"
+    required: false
+    default: ""
+  firebase-auth-domain:
+    description: "Firebase Auth Domain (optional, sets VITE_FIREBASE_AUTH_DOMAIN)"
+    required: false
+    default: ""
+  firebase-project-id:
+    description: "Firebase Project ID (optional, sets VITE_FIREBASE_PROJECT_ID)"
+    required: false
+    default: ""
   azure-client-id:
     description: "Azure Client ID"
     required: true
@@ -41,6 +53,9 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       env:
         VITE_API_URL: ${{ inputs.api-url }}
+        VITE_FIREBASE_API_KEY: ${{ inputs.firebase-api-key }}
+        VITE_FIREBASE_AUTH_DOMAIN: ${{ inputs.firebase-auth-domain }}
+        VITE_FIREBASE_PROJECT_ID: ${{ inputs.firebase-project-id }}
       run: |
         npm ci
         npm run build
