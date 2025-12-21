@@ -7,7 +7,7 @@
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2"
     },
     "Firebase": {
-        "ProjectId": "networth-f66b5"
+        "ProjectId": ""
     },
     "Serilog": {
         "Using": ["Serilog.Sinks.Console"],
@@ -28,3 +28,4 @@
         ]
     }
 }
+

@@ -460,8 +460,8 @@ Networth.Docs/.cache/
 # Firebase service account credentials
 **/*-firebase-*.json
 
-# Development settings
-appsettings.Development.json
-settings.local.json
-local.settings.json
-**/appsettings.Development.json
+# Development and local settings
+appsettings*.json
+*settings*.json
+.env
+.env.*
