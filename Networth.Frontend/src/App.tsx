@@ -48,7 +48,7 @@ function LandingWrapper() {
     const navigate = useNavigate();
 
     const handleGetStarted = () => {
-        navigate("/login");
+        navigate("/signup");
     };
 
     const handleSignIn = () => {
@@ -211,6 +211,7 @@ function AppRoutes() {
             <Routes>
                 <Route path="/" element={<LandingWrapper />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Login />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         );
@@ -256,6 +257,10 @@ function AppRoutes() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
                 path="/login"
+                element={<Navigate to="/dashboard" replace />}
+            />
+            <Route
+                path="/signup"
                 element={<Navigate to="/dashboard" replace />}
             />
 

@@ -461,7 +461,9 @@ Networth.Docs/.cache/
 **/*-firebase-*.json
 
 # Development and local settings
-appsettings*.json
-*settings*.json
+appsettings.Development.json
+appsettings.Local.json
+settings.local.json
+local.settings.json
 .env
 .env.*

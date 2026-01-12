@@ -112,7 +112,10 @@ export default function OnboardingTutorial() {
                         </span>
                     </div>
                     <button
-                        onClick={() => logout()}
+                        onClick={async () => {
+                            await logout();
+                            navigate("/", { replace: true });
+                        }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors text-sm"
                     >
                         <LogOut size={16} />

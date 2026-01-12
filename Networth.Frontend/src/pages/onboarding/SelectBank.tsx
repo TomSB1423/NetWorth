@@ -101,7 +101,10 @@ export default function SelectBank() {
                         </div>
                     </div>
                     <button
-                        onClick={() => logout()}
+                        onClick={async () => {
+                            await logout();
+                            navigate("/", { replace: true });
+                        }}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors"
                     >
                         <LogOut size={16} />

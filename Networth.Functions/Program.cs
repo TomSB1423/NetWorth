@@ -59,7 +59,6 @@ builder.UseWhen<UserResolutionMiddleware>(context =>
 // Configure additional app settings
 builder.Configuration
     .AddJsonFile("settings.json", false, true)
-    .AddJsonFile("settings.local.json", true, true)
     .AddEnvironmentVariables()
     .AddUserSecrets<Program>();
 

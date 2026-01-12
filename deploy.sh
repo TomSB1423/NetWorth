@@ -95,6 +95,7 @@ ACR_NAME=$(terraform output -raw acr_name)
 ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
 FRONTEND_SWA_NAME=$(terraform output -raw frontend_swa_name)
 FRONTEND_URL=$(terraform output -raw frontend_swa_url)
+API_URL=$(terraform output -raw container_app_url)
 cd "$SCRIPT_DIR"
 
 echo -e "${GREEN}Configuration:${NC}"
@@ -103,6 +104,7 @@ echo "  Container App: $ACA_NAME"
 echo "  ACR: $ACR_LOGIN_SERVER"
 echo "  Frontend SWA: $FRONTEND_SWA_NAME"
 echo "  Frontend URL: $FRONTEND_URL"
+echo "  API URL: $API_URL"
 
 # 2. Deploy Backend (Container App)
 if [ "$SKIP_BACKEND" = false ]; then
@@ -141,12 +143,41 @@ fi
 # 3. Deploy Frontend
 if [ "$SKIP_FRONTEND" = false ]; then
     echo -e "${BLUE}Step 3: Deploying Frontend...${NC}"
+
+    # Get Firebase config from Terraform (required for production builds)
+    cd "$SCRIPT_DIR/infra/terraform"
+    FIREBASE_API_KEY=$(terraform output -raw firebase_api_key)
+    FIREBASE_AUTH_DOMAIN=$(terraform output -raw firebase_auth_domain)
+    FIREBASE_PROJECT_ID=$(terraform output -raw firebase_project_id)
+    FIREBASE_STORAGE_BUCKET=$(terraform output -raw firebase_storage_bucket)
+    FIREBASE_MESSAGING_SENDER_ID=$(terraform output -raw firebase_messaging_sender_id)
+    FIREBASE_APP_ID=$(terraform output -raw firebase_app_id)
+
+    # Validate required config
+    if [ -z "$FIREBASE_API_KEY" ] || [ -z "$FIREBASE_PROJECT_ID" ]; then
+        echo -e "${RED}Error: Firebase configuration is missing. Ensure terraform has been applied with Firebase variables.${NC}"
+        exit 1
+    fi
+
+    if [ -z "$API_URL" ]; then
+        echo -e "${RED}Error: API_URL is missing. Ensure terraform outputs container_app_url.${NC}"
+        exit 1
+    fi
+
     cd "$SCRIPT_DIR/Networth.Frontend"
 
     echo "Installing dependencies..."
     npm install --silent
 
-    echo "Building frontend..."
+    echo "Building frontend with API_URL=$API_URL..."
+    VITE_API_URL="$API_URL" \
+    VITE_USE_MOCK_DATA="false" \
+    VITE_FIREBASE_API_KEY="$FIREBASE_API_KEY" \
+    VITE_FIREBASE_AUTH_DOMAIN="$FIREBASE_AUTH_DOMAIN" \
+    VITE_FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID" \
+    VITE_FIREBASE_STORAGE_BUCKET="$FIREBASE_STORAGE_BUCKET" \
+    VITE_FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" \
+    VITE_FIREBASE_APP_ID="$FIREBASE_APP_ID" \
     npm run build
 
     echo "Deploying to Static Web App..."
@@ -163,9 +194,6 @@ else
 fi
 
 echo ""
-echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║              DEPLOYMENT COMPLETE!                              ║${NC}"
-echo -e "${GREEN}╠═══════════════════════════════════════════════════════════════╣${NC}"
-echo -e "${GREEN}║${NC} Frontend: ${BLUE}$FRONTEND_URL${NC}"
-echo -e "${GREEN}║${NC} API:      ${BLUE}https://$ACA_NAME.*.azurecontainerapps.io${NC}"
-echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+echo -e "${GREEN}Deployment complete!${NC}"
+echo "  Frontend: $FRONTEND_URL"
+echo "  API:      $API_URL"

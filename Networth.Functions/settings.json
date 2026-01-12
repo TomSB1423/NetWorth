@@ -6,9 +6,6 @@
     "Gocardless": {
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2"
     },
-    "Firebase": {
-        "ProjectId": ""
-    },
     "Serilog": {
         "Using": ["Serilog.Sinks.Console"],
         "MinimumLevel": {

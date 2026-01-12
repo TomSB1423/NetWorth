@@ -67,27 +67,33 @@ The documentation includes:
 
 ### Local Development
 
-Set the following user secrets in the AppHost project using the .NET CLI:
+**1. Create Local Configuration**
+
+Copy the base configuration and create your local development overrides:
 
 ```shell
-# GoCardless API Configuration
+cp Networth.AppHost/appsettings.json Networth.AppHost/appsettings.Development.json
+```
+
+Edit `appsettings.Development.json` and fill in the required values:
+
+- `postgres-password`: Any password for local PostgreSQL (e.g., `LocalDevPassword123!`)
+- `firebase-api-key`: Your Firebase Web API key
+- `firebase-auth-domain`: Your Firebase auth domain (e.g., `your-project.firebaseapp.com`)
+- `firebase-project-id`: Your Firebase project ID
+
+**2. GoCardless Secrets (Required for Bank Sync)**
+
+GoCardless credentials are sensitive and must be stored in user secrets:
+
+```shell
 dotnet user-secrets set "Parameters:gocardless-secret-id" "YOUR_SECRET_ID" --project Networth.AppHost
 dotnet user-secrets set "Parameters:gocardless-secret-key" "YOUR_SECRET_KEY" --project Networth.AppHost
-
-# Azure Entra ID Configuration
-dotnet user-secrets set "Parameters:entra-instance" "https://networthauth.ciamlogin.com/" --project Networth.AppHost
-dotnet user-secrets set "Parameters:entra-tenant-id" "YOUR_TENANT_ID" --project Networth.AppHost
-dotnet user-secrets set "Parameters:entra-client-id" "YOUR_CLIENT_ID" --project Networth.AppHost
-dotnet user-secrets set "Parameters:entra-api-client-id" "YOUR_API_CLIENT_ID" --project Networth.AppHost
 ```
 
-The PostgreSQL password is configured in `appsettings.json`:
+### Standalone Functions Execution
 
-```json
-"Parameters": {
-    "postgres-password": "LocalDevPassword123!"
-}
-```
+If running the Azure Functions project strictly standalone (without Aspire), configure settings in `Networth.Functions/local.settings.json`.
 
 ## Testing
 

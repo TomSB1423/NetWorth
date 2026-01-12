@@ -77,38 +77,24 @@ output "firebase_auth_domain" {
   description = "Firebase Auth Domain (for frontend)"
 }
 
-# Sensitive values stored in Key Vault:
-#   az keyvault secret show --vault-name <key_vault_name> --name <secret-name>
+output "firebase_api_key" {
+  value       = var.firebase_api_key
+  description = "Firebase API Key (for frontend)"
+  sensitive   = true
+}
 
-output "configuration_summary" {
-  value       = <<-EOT
+output "firebase_storage_bucket" {
+  value       = var.firebase_storage_bucket
+  description = "Firebase Storage Bucket (for frontend)"
+}
 
-    ╔═══════════════════════════════════════════════════════════════════════════╗
-    ║                   DEPLOYMENT CONFIGURATION SUMMARY                        ║
-    ╠═══════════════════════════════════════════════════════════════════════════╣
-    ║ API Container App:                                                        ║
-    ║   URL: https://${azurerm_container_app.functions.ingress[0].fqdn}
-    ║   ACR: ${azurerm_container_registry.acr.login_server}
-    ╠═══════════════════════════════════════════════════════════════════════════╣
-    ║ Frontend Static Web App:                                                  ║
-    ║   URL: https://${azurerm_static_web_app.frontend.default_host_name}
-    ╠═══════════════════════════════════════════════════════════════════════════╣
-    ║ Database:                                                                 ║
-    ║   PostgreSQL: ${azurerm_postgresql_flexible_server.psql.fqdn}
-    ╠═══════════════════════════════════════════════════════════════════════════╣
-    ║ Firebase Authentication:                                                  ║
-    ║   Project: ${var.firebase_project_id}
-    ║   Auth Domain: ${var.firebase_auth_domain}
-    ║   API Key: Stored in Key Vault (firebase-api-key)
-    ║   Service Account: Stored in Key Vault (firebase-service-account)
-    ╚═══════════════════════════════════════════════════════════════════════════╝
+output "firebase_messaging_sender_id" {
+  value       = var.firebase_messaging_sender_id
+  description = "Firebase Messaging Sender ID (for frontend)"
+}
 
-    NEXT STEPS:
-    1. Configure Firebase authorized domains with the frontend URL
-    2. Push Docker image to ACR: ${azurerm_container_registry.acr.login_server}/networth-functions:latest
-    3. Deploy frontend to Static Web App with Firebase env vars
-
-  EOT
-  description = "Summary of deployed resources and next steps"
+output "firebase_app_id" {
+  value       = var.firebase_app_id
+  description = "Firebase App ID (for frontend)"
 }
 

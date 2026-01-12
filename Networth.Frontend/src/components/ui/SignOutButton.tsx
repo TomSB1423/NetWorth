@@ -1,4 +1,5 @@
 import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "./button";
 
@@ -14,10 +15,13 @@ export function SignOutButton({
     className,
 }: SignOutButtonProps) {
     const { logout } = useAuth();
+    const navigate = useNavigate();
 
     const handleSignOut = async () => {
         try {
             await logout();
+            // Navigate to landing page after logout
+            navigate("/", { replace: true });
         } catch (error) {
             console.error("Logout failed:", error);
         }

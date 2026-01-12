@@ -24,9 +24,7 @@ import type {
     AccountCategory,
 } from "../types";
 
-// ============================================================================
 // Constants
-// ============================================================================
 
 const MOCK_USER_ID = "mock-user-001";
 const CURRENCY = "GBP";
@@ -37,62 +35,70 @@ const END_DATE = new Date();
 const CURRENT_ACCOUNT_ID = "acc-current-001";
 const SAVINGS_ACCOUNT_ID = "acc-savings-001";
 const ISA_ACCOUNT_ID = "acc-isa-001";
+const CREDIT_CARD_ID = "acc-credit-001";
 
 // Institution IDs
 const MONZO_ID = "MONZO_MONZGB2L";
-const STARLING_ID = "STARLING_SRLGGB2L";
+const STARLING_ID = "STARLING_SRLGGB3L";
 const NATIONWIDE_ID = "NATIONWIDE_NAIAGB21";
+const AMEX_ID = "AMERICAN_EXPRESS_AESUGB21";
 
-// ============================================================================
 // Mock Institutions
-// ============================================================================
 
 export const mockInstitutions: Institution[] = [
     {
         id: MONZO_ID,
-        name: "Monzo Bank",
-        logoUrl: "https://cdn.nordigen.com/ais/MONZO_MONZGB2L.png",
+        name: "Monzo",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/monzo.png",
     },
     {
         id: STARLING_ID,
-        name: "Starling Bank",
-        logoUrl: "https://cdn.nordigen.com/ais/STARLING_SRLGGB2L.png",
+        name: "Starling",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/starling.png",
     },
     {
         id: NATIONWIDE_ID,
-        name: "Nationwide Building Society",
-        logoUrl: "https://cdn.nordigen.com/ais/NATIONWIDE_NAIAGB21.png",
+        name: "Nationwide",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/nationwide.png",
     },
     {
         id: "HSBC_HBUKGB4B",
-        name: "HSBC UK",
-        logoUrl: "https://cdn.nordigen.com/ais/HSBC_HBUKGB4B.png",
+        name: "HSBC Personal",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/hsbcpersonal.png",
     },
     {
-        id: "BARCLAYS_BARCGB22",
-        name: "Barclays",
-        logoUrl: "https://cdn.nordigen.com/ais/BARCLAYS_BARCGB22.png",
+        id: "BARCLAYS_BUKBGB22",
+        name: "Barclays Personal",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/barclayspersonal.png",
     },
     {
         id: "LLOYDS_LOYDGB2L",
-        name: "Lloyds Bank",
-        logoUrl: "https://cdn.nordigen.com/ais/LLOYDS_LOYDGB2L.png",
+        name: "Lloyds Personal",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/lloyds.png",
     },
     {
-        id: "SANTANDER_ABBYGB2L",
-        name: "Santander UK",
-        logoUrl: "https://cdn.nordigen.com/ais/SANTANDER_ABBYGB2L.png",
+        id: "SANTANDER_GB_ABBYGB2L",
+        name: "Santander",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/santander.png",
     },
     {
         id: "NATWEST_NWBKGB2L",
-        name: "NatWest",
-        logoUrl: "https://cdn.nordigen.com/ais/NATWEST_NWBKGB2L.png",
+        name: "Natwest",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/natwest.png",
+    },
+    {
+        id: "REVOLUT_REVOGB21",
+        name: "Revolut",
+        logoUrl: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/revolut.png",
+    },
+    {
+        id: "AMERICAN_EXPRESS_AESUGB21",
+        name: "American Express",
+        logoUrl: "https://cdn-logos.gocardless.com/ais/AMERICAN_EXPRESS_AESUGB21.png",
     },
 ];
 
-// ============================================================================
 // Mock User
-// ============================================================================
 
 export const mockUser: User = {
     userId: MOCK_USER_ID,
@@ -101,9 +107,7 @@ export const mockUser: User = {
     hasCompletedOnboarding: true,
 };
 
-// ============================================================================
 // Mock Accounts
-// ============================================================================
 
 export const mockAccounts: Account[] = [
     {
@@ -111,8 +115,8 @@ export const mockAccounts: Account[] = [
         userId: MOCK_USER_ID,
         requisitionId: "req-001",
         institutionId: MONZO_ID,
-        institutionName: "Monzo Bank",
-        institutionLogo: "https://cdn.nordigen.com/ais/MONZO_MONZGB2L.png",
+        institutionName: "Monzo",
+        institutionLogo: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/monzo.png",
         name: "Personal Current Account",
         displayName: "Main Spending",
         category: "Spending" as AccountCategory,
@@ -126,8 +130,8 @@ export const mockAccounts: Account[] = [
         userId: MOCK_USER_ID,
         requisitionId: "req-002",
         institutionId: STARLING_ID,
-        institutionName: "Starling Bank",
-        institutionLogo: "https://cdn.nordigen.com/ais/STARLING_SRLGGB2L.png",
+        institutionName: "Starling",
+        institutionLogo: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/starling.png",
         name: "Easy Access Savings",
         displayName: "Emergency Fund",
         category: "Savings" as AccountCategory,
@@ -141,8 +145,8 @@ export const mockAccounts: Account[] = [
         userId: MOCK_USER_ID,
         requisitionId: "req-003",
         institutionId: NATIONWIDE_ID,
-        institutionName: "Nationwide Building Society",
-        institutionLogo: "https://cdn.nordigen.com/ais/NATIONWIDE_NAIAGB21.png",
+        institutionName: "Nationwide",
+        institutionLogo: "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/nationwide.png",
         name: "Cash ISA",
         displayName: "ISA Savings",
         category: "Investment" as AccountCategory,
@@ -151,11 +155,24 @@ export const mockAccounts: Account[] = [
         product: "Cash ISA",
         lastSynced: new Date().toISOString(),
     },
+    {
+        id: CREDIT_CARD_ID,
+        userId: MOCK_USER_ID,
+        requisitionId: "req-004",
+        institutionId: AMEX_ID,
+        institutionName: "American Express",
+        institutionLogo: "https://cdn-logos.gocardless.com/ais/AMERICAN_EXPRESS_AESUGB21.png",
+        name: "Platinum Card",
+        displayName: "Amex Platinum",
+        category: "Credit" as AccountCategory,
+        iban: "",
+        currency: CURRENCY,
+        product: "Credit Card",
+        lastSynced: new Date().toISOString(),
+    },
 ];
 
-// ============================================================================
 // Transaction Generation Helpers
-// ============================================================================
 
 interface TransactionTemplate {
     creditorName?: string;
@@ -351,9 +368,7 @@ const GIFTS_RECEIVED: TransactionTemplate = {
     isCredit: true,
 };
 
-// ============================================================================
 // Random Helpers
-// ============================================================================
 
 function randomBetween(min: number, max: number): number {
     return Math.round((Math.random() * (max - min) + min) * 100) / 100;
@@ -377,9 +392,7 @@ function generateTransactionId(): string {
     return `txn-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
-// ============================================================================
 // Transaction Generation
-// ============================================================================
 
 function createTransaction(
     accountId: string,
@@ -699,55 +712,56 @@ function generateSavingsAccountTransactions(): Transaction[] {
     });
 }
 
-function generateISATransactions(): Transaction[] {
+function generateISATransactions(initialBalance: number): Transaction[] {
     const transactions: Transaction[] = [];
+    let currentBalance = initialBalance;
     const currentDate = new Date(START_DATE);
+    const annualInterestRate = 0.07; // 7% annual return for investments
+    const monthlyInterestRate = annualInterestRate / 12;
 
     // ISA typically has less frequent but larger deposits
     while (currentDate <= END_DATE) {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
 
-        // Monthly ISA contribution (every 2-3 months)
-        if (month % 2 === 0) {
-            const depositDate = new Date(year, month, 15);
-            if (depositDate >= START_DATE && depositDate <= END_DATE) {
-                const amount = randomBetween(150, 400);
-                const txnId = generateTransactionId();
-                transactions.push({
-                    id: `${ISA_ACCOUNT_ID}_${txnId}`,
-                    accountId: ISA_ACCOUNT_ID,
-                    transactionId: txnId,
-                    bookingDate: formatDate(depositDate),
-                    valueDate: formatDate(depositDate),
-                    amount: amount.toFixed(2),
-                    currency: CURRENCY,
-                    debtorName: "BANK TRANSFER",
-                    remittanceInformationUnstructured: "ISA DEPOSIT",
-                    isPending: false,
-                });
-            }
+        // Monthly ISA contribution
+        const depositDate = new Date(year, month, 15);
+        if (depositDate >= START_DATE && depositDate <= END_DATE) {
+            const amount = randomBetween(800, 1500);
+            const txnId = generateTransactionId();
+            transactions.push({
+                id: `${ISA_ACCOUNT_ID}_${txnId}`,
+                accountId: ISA_ACCOUNT_ID,
+                transactionId: txnId,
+                bookingDate: formatDate(depositDate),
+                valueDate: formatDate(depositDate),
+                amount: amount.toFixed(2),
+                currency: CURRENCY,
+                debtorName: "BANK TRANSFER",
+                remittanceInformationUnstructured: "ISA DEPOSIT",
+                isPending: false,
+            });
+            currentBalance += amount;
         }
 
-        // Annual interest payment in April
-        if (month === 3) {
-            const interestDate = new Date(year, month, 5);
-            if (interestDate >= START_DATE && interestDate <= END_DATE) {
-                const interest = randomBetween(35, 80);
-                const txnId = generateTransactionId();
-                transactions.push({
-                    id: `${ISA_ACCOUNT_ID}_${txnId}`,
-                    accountId: ISA_ACCOUNT_ID,
-                    transactionId: txnId,
-                    bookingDate: formatDate(interestDate),
-                    valueDate: formatDate(interestDate),
-                    amount: interest.toFixed(2),
-                    currency: CURRENCY,
-                    debtorName: "NATIONWIDE BS",
-                    remittanceInformationUnstructured: "ANNUAL INTEREST",
-                    isPending: false,
-                });
-            }
+        // Monthly compound interest / investment growth
+        const interestDate = new Date(year, month, 28);
+        if (interestDate >= START_DATE && interestDate <= END_DATE) {
+            const interest = currentBalance * monthlyInterestRate;
+            const txnId = generateTransactionId();
+            transactions.push({
+                id: `${ISA_ACCOUNT_ID}_${txnId}`,
+                accountId: ISA_ACCOUNT_ID,
+                transactionId: txnId,
+                bookingDate: formatDate(interestDate),
+                valueDate: formatDate(interestDate),
+                amount: interest.toFixed(2),
+                currency: CURRENCY,
+                debtorName: "NATIONWIDE BS",
+                remittanceInformationUnstructured: "INVESTMENT GROWTH",
+                isPending: false,
+            });
+            currentBalance += interest;
         }
 
         currentDate.setMonth(currentDate.getMonth() + 1);
@@ -760,9 +774,7 @@ function generateISATransactions(): Transaction[] {
     });
 }
 
-// ============================================================================
 // Generate All Transactions
-// ============================================================================
 
 let cachedTransactions: Map<string, Transaction[]> | null = null;
 
@@ -771,18 +783,22 @@ function getAllTransactions(): Map<string, Transaction[]> {
         cachedTransactions = new Map([
             [CURRENT_ACCOUNT_ID, generateCurrentAccountTransactions()],
             [SAVINGS_ACCOUNT_ID, generateSavingsAccountTransactions()],
-            [ISA_ACCOUNT_ID, generateISATransactions()],
+            [ISA_ACCOUNT_ID, generateISATransactions(25000)],
+            [CREDIT_CARD_ID, []], // Credit card with no transactions - balance set separately
         ]);
 
         // Calculate running balances
         cachedTransactions.forEach((transactions, accountId) => {
             // Get initial balance based on account type
+            // Credit card balance is negative (liability)
             let balance =
                 accountId === CURRENT_ACCOUNT_ID
                     ? 1500
                     : accountId === SAVINGS_ACCOUNT_ID
                       ? 3000
-                      : 2000;
+                      : accountId === CREDIT_CARD_ID
+                        ? -200 // £200 owed on credit card
+                        : 25000;
 
             // Process from oldest to newest
             const sorted = [...transactions].sort((a, b) => {
@@ -801,13 +817,17 @@ function getAllTransactions(): Map<string, Transaction[]> {
     return cachedTransactions;
 }
 
-// ============================================================================
 // Balance Calculation
-// ============================================================================
 
 function calculateCurrentBalance(accountId: string): number {
     const transactions = getAllTransactions().get(accountId) || [];
-    if (transactions.length === 0) return 0;
+    
+    // For accounts with no transactions, return initial balance
+    if (transactions.length === 0) {
+        // Credit card has a negative balance (liability)
+        if (accountId === CREDIT_CARD_ID) return -200;
+        return 0;
+    }
 
     // Get the most recent transaction's balance
     const sortedByDate = [...transactions].sort((a, b) => {
@@ -838,9 +858,7 @@ export function getMockBalances(accountId: string): Balance[] {
     ];
 }
 
-// ============================================================================
 // Net Worth History
-// ============================================================================
 
 export function getMockNetWorthHistory(): NetWorthHistoryResponse {
     const allTransactions = getAllTransactions();
@@ -850,7 +868,7 @@ export function getMockNetWorthHistory(): NetWorthHistoryResponse {
     const initialBalances = new Map<string, number>([
         [CURRENT_ACCOUNT_ID, 1500],
         [SAVINGS_ACCOUNT_ID, 3000],
-        [ISA_ACCOUNT_ID, 2000],
+        [ISA_ACCOUNT_ID, 25000],
     ]);
 
     // Get all unique dates
@@ -898,9 +916,7 @@ export function getMockNetWorthHistory(): NetWorthHistoryResponse {
     };
 }
 
-// ============================================================================
 // Paginated Transactions
-// ============================================================================
 
 export function getMockTransactions(
     accountId: string,
@@ -927,9 +943,7 @@ export function getMockTransactions(
     };
 }
 
-// ============================================================================
 // Link Institution Response
-// ============================================================================
 
 export function getMockLinkInstitutionResponse(
     institutionId: string

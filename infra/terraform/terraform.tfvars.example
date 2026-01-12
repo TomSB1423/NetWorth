@@ -20,4 +20,3 @@ firebase_auth_domain          = "your-project.firebaseapp.com"
 firebase_storage_bucket       = "your-project.appspot.com"
 firebase_messaging_sender_id  = "123456789"
 firebase_app_id               = "1:123456789:web:abc123"
-# Note: Service account is NOT required - backend validates JWTs using Google's public keys

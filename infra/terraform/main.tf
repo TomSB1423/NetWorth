@@ -1,6 +1,4 @@
-# =============================================================================
 # Networth Infrastructure - Main Configuration
-# =============================================================================
 # This Terraform configuration deploys the Azure infrastructure for the
 # Networth personal finance application. The infrastructure includes:
 # - Azure Container Apps for the Functions API
@@ -9,10 +7,6 @@
 # - Azure Static Web Apps for the React frontend
 # - Key Vault for secrets management
 # - Application Insights for monitoring
-#
-# Authentication is handled via Entra External ID (CIAM) which is deployed
-# separately in the terraform-ciam folder.
-# =============================================================================
 
 resource "random_string" "suffix" {
   length  = 6
@@ -38,9 +32,7 @@ locals {
   }
 }
 
-# -----------------------------------------------------------------------------
 # Resource Group
-# -----------------------------------------------------------------------------
 
 resource "azurerm_resource_group" "rg" {
   name     = "rg-${var.project_name}-${local.resource_suffix}"

@@ -29,6 +29,9 @@ outputs:
   frontend_swa_name:
     description: "The frontend SWA name"
     value: ${{ steps.tf-output.outputs.frontend_swa_name }}
+  frontend_swa_url:
+    description: "The frontend SWA URL"
+    value: ${{ steps.tf-output.outputs.frontend_swa_url }}
 
 runs:
   using: "composite"
@@ -62,3 +65,4 @@ runs:
         echo "acr_name=$(terraform output -raw acr_name)" >> $GITHUB_OUTPUT
         echo "acr_login_server=$(terraform output -raw acr_login_server)" >> $GITHUB_OUTPUT
         echo "frontend_swa_name=$(terraform output -raw frontend_swa_name)" >> $GITHUB_OUTPUT
+        echo "frontend_swa_url=$(terraform output -raw frontend_swa_url)" >> $GITHUB_OUTPUT

@@ -1,17 +1,12 @@
-# =============================================================================
 # PostgreSQL Flexible Server
-# =============================================================================
 # This file creates the PostgreSQL Flexible Server for storing:
 # - User accounts and preferences
 # - Bank account data (accounts, transactions, balances)
 # - GoCardless requisitions and agreements
 #
 # Database name matches ResourceNames.NetworthDb in Networth.ServiceDefaults
-# =============================================================================
 
-# -----------------------------------------------------------------------------
 # PostgreSQL Flexible Server
-# -----------------------------------------------------------------------------
 
 resource "azurerm_postgresql_flexible_server" "psql" {
   name                   = "psql-${var.project_name}-${local.resource_suffix}"
@@ -27,9 +22,7 @@ resource "azurerm_postgresql_flexible_server" "psql" {
   tags = local.common_tags
 }
 
-# -----------------------------------------------------------------------------
 # Database
-# -----------------------------------------------------------------------------
 
 resource "azurerm_postgresql_flexible_server_database" "db" {
   name      = "networth-db"
@@ -38,9 +31,7 @@ resource "azurerm_postgresql_flexible_server_database" "db" {
   charset   = "utf8"
 }
 
-# -----------------------------------------------------------------------------
 # Firewall Rules
-# -----------------------------------------------------------------------------
 # Allow Azure services to connect (required for Container Apps)
 
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_services" {

@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useAccounts } from "../../contexts/AccountContext";
 import { useMemo, useState } from "react";
 
-const COLORS = ["#10B981", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#EC4899", "#6366F1"];
+const ASSET_COLORS = ["#10B981", "#3B82F6", "#8B5CF6", "#F59E0B", "#EC4899", "#6366F1"];
 
 interface AssetAllocationChartProps {
     isSyncing?: boolean;
@@ -21,9 +21,9 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
     const { accounts, balances, isLoading } = useAccounts();
     const [groupBy, setGroupBy] = useState<"type" | "account">("type");
 
-    // Group accounts by type or name and calculate totals
+    // Group accounts by type or name and calculate totals (including liabilities)
     const chartData = useMemo(() => {
-        const totals: Record<string, number> = {};
+        const totals: Record<string, { value: number; isLiability: boolean }> = {};
 
         accounts.forEach((account) => {
             const accountBalance = balances.find(
@@ -35,8 +35,11 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
                         (b) => b.balanceType === "interimAvailable"
                     ) ?? accountBalance.balances[0];
                 const amount = parseFloat(balance.amount);
-                if (amount > 0) {
+                
+                if (amount !== 0) {
                     let key = "Unknown";
+                    const isLiability = amount < 0;
+                    
                     if (groupBy === "type") {
                         // Capitalize first letter of product/type
                         const type = account.product || "Other";
@@ -45,17 +48,21 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
                         key = account.displayName || account.name || "Unnamed Account";
                     }
                     
-                    totals[key] = (totals[key] || 0) + amount;
+                    if (!totals[key]) {
+                        totals[key] = { value: 0, isLiability };
+                    }
+                    totals[key].value += Math.abs(amount);
                 }
             }
         });
 
         return Object.entries(totals)
-            .map(([name, value]) => ({
-                name,
-                value,
+            .map(([name, data]) => ({
+                name: name,
+                value: data.value,
+                isLiability: data.isLiability,
             }))
-            .sort((a, b) => b.value - a.value); // Sort by value descending
+            .sort((a, b) => b.value - a.value);
     }, [accounts, balances, groupBy]);
 
     if (isLoading || isSyncing) {
@@ -113,10 +120,10 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
                                     paddingAngle={3}
                                     dataKey="value"
                                 >
-                                    {chartData.map((_, index) => (
+                                    {chartData.map((entry, index) => (
                                         <Cell
                                             key={`cell-${index}`}
-                                            fill={COLORS[index % COLORS.length]}
+                                            fill={ASSET_COLORS[index % ASSET_COLORS.length]}
                                         />
                                     ))}
                                 </Pie>
@@ -128,27 +135,22 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
                                         borderRadius: "8px",
                                     }}
                                     itemStyle={{ color: "#F1F5F9" }}
-                                    formatter={(value: number) =>
-                                        new Intl.NumberFormat("en-GB", {
+                                    formatter={(value: number, name: string, item: any) => {
+                                        const isLiability = item.payload.isLiability;
+                                        const formatted = new Intl.NumberFormat("en-GB", {
                                             style: "currency",
                                             currency: "GBP",
-                                        }).format(value)
-                                    }
+                                        }).format(value);
+                                        return [isLiability ? `-${formatted}` : formatted, name];
+                                    }}
                                 />
-                                <Legend
-                                    wrapperStyle={{ color: "#94A3B8" }}
-                                    formatter={(value) => (
-                                        <span className="text-gray-300">
-                                            {value}
-                                        </span>
-                                    )}
-                                />
+                                <Legend wrapperStyle={{ color: "#94A3B8" }} />
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
                         <div className="h-full flex items-center justify-center">
                             <p className="text-gray-400">
-                                No assets to display
+                                No data to display
                             </p>
                         </div>
                     )}

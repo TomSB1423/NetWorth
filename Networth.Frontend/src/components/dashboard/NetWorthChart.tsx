@@ -143,11 +143,73 @@ export function NetWorthChart({
         return data.filter((d) => new Date(d.date) >= cutoffDate);
     }, [data, validSelectedPeriod]);
 
-    const formatXAxis = (tickItem: string) => {
+    const filteredDataSpanDays = useMemo(() => {
+        if (filteredData.length < 2) return 0;
+        const firstDate = new Date(filteredData[0].date);
+        const lastDate = new Date(filteredData[filteredData.length - 1].date);
+        return Math.ceil(
+            (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+    }, [filteredData]);
+
+    const chartData = useMemo(() => {
+        return filteredData.map((d) => ({
+            ...d,
+            timestamp: new Date(d.date).getTime(),
+        }));
+    }, [filteredData]);
+
+    const xTicks = useMemo(() => {
+        if (chartData.length < 2) return undefined;
+
+        const min = chartData[0].timestamp;
+        const max = chartData[chartData.length - 1].timestamp;
+
+        // For short periods (<= 60 days), let Recharts auto-generate ticks
+        if (filteredDataSpanDays <= 60) return undefined;
+
+        // Calculate optimal number of ticks based on data span
+        // Aim for roughly one tick per month, but evenly spaced
+        const monthsInSpan = filteredDataSpanDays / 30;
+        const targetTicks = Math.min(Math.max(Math.round(monthsInSpan), 4), 12);
+
+        // Generate evenly spaced ticks across the data range
+        const ticks: number[] = [];
+        const step = (max - min) / (targetTicks - 1);
+
+        for (let i = 0; i < targetTicks; i++) {
+            ticks.push(Math.round(min + step * i));
+        }
+
+        return ticks;
+    }, [chartData, filteredDataSpanDays]);
+
+    // Track the first year displayed to show year on first tick
+    const firstDataYear = useMemo(() => {
+        if (chartData.length === 0) return null;
+        return new Date(chartData[0].timestamp).getFullYear();
+    }, [chartData]);
+
+    const formatXAxis = (tickItem: number) => {
         const date = new Date(tickItem);
+        const tickYear = date.getFullYear();
+        const isJanuary = date.getMonth() === 0;
+
+        if (filteredDataSpanDays <= 60) {
+            // Short period: show "15 Jan" or "15 Jan '25" for January/first year
+            const dayMonth = date.toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+            });
+            const showYear = isJanuary || tickYear === firstDataYear;
+            return showYear ? `${dayMonth} '${String(tickYear).slice(-2)}` : dayMonth;
+        }
+
+        // Longer periods: show "Jan '25" format for all ticks
+        // This provides clear context since ticks are evenly spaced, not on month boundaries
         return date.toLocaleDateString("en-GB", {
             month: "short",
-            day: "numeric",
+            year: "2-digit",
         });
     };
 
@@ -269,7 +331,7 @@ export function NetWorthChart({
                 <div className="h-[260px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart
-                            data={filteredData}
+                            data={chartData}
                             margin={{
                                 top: 10,
                                 right: 30,
@@ -303,14 +365,24 @@ export function NetWorthChart({
                                 vertical={false}
                             />
                             <XAxis
-                                dataKey="date"
+                                dataKey="timestamp"
+                                type="number"
+                                domain={["dataMin", "dataMax"]}
+                                ticks={xTicks}
                                 stroke="#9CA3AF"
                                 tickFormatter={formatXAxis}
-                                minTickGap={30}
+                                tick={{ fontSize: 12 }}
+                                tickMargin={8}
                             />
                             <YAxis
                                 stroke="#9CA3AF"
                                 tickFormatter={formatCurrency}
+                                width={65}
+                                domain={[
+                                    (dataMin: number) => Math.floor(dataMin * 0.95),
+                                    (dataMax: number) => Math.ceil(dataMax * 1.02),
+                                ]}
+                                tickCount={5}
                             />
                             <Tooltip
                                 cursor={false}

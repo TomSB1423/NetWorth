@@ -2,7 +2,7 @@
  * Category for classifying bank accounts.
  * Must match backend Networth.Domain.Enums.AccountCategory
  */
-export type AccountCategory = "Spending" | "Savings" | "Investment";
+export type AccountCategory = "Spending" | "Savings" | "Investment" | "Credit";
 
 /**
  * Represents a user's bank account.
