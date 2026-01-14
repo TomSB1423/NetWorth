@@ -43,6 +43,12 @@ public static class DistributedApplicationTestFactory
                 appOptions.AllowUnsecuredTransport = enableDashboard;
             });
 
+        // Provide default values for all required parameters to avoid resolution failures
+        builder.Configuration["Parameters:firebase-api-key"] = "test-api-key";
+        builder.Configuration["Parameters:firebase-auth-domain"] = "test.firebaseapp.com";
+        builder.Configuration["Parameters:firebase-project-id"] = "test-project";
+        builder.Configuration["Parameters:mock-authentication"] = "true";
+
         // Apply standard integration test setup
         // Random volume names ensure each test run gets fresh database state
         builder.WithRandomVolumeNames();

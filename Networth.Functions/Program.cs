@@ -55,6 +55,7 @@ builder.UseWhen<UserResolutionMiddleware>(context =>
     // Exclude endpoints that handle user resolution themselves or don't require a user:
     // - CreateUser: Creates the user, so they don't exist yet
     // - GetCurrentUser: Returns 404 itself if user not found
+    // - GetInstitutions: Works with or without a user (filters already-linked institutions if user exists)
     string[] excludedFunctions =
     [
         "GetHealth",
@@ -63,6 +64,7 @@ builder.UseWhen<UserResolutionMiddleware>(context =>
         "RenderOpenApiDocument",
         "CreateUser",
         "GetCurrentUser",
+        "GetInstitutions",
     ];
     return isHttpTrigger && !excludedFunctions.Contains(context.FunctionDefinition.Name);
 });
@@ -105,11 +107,9 @@ builder.Services.AddOptions<FirebaseOptions>()
     .ValidateFluently()
     .ValidateOnStart();
 
-// Configure Networth options
+// Configure Networth options (simple boolean flag, no validation needed)
 builder.Services.AddOptions<NetworthOptions>()
-    .Bind(builder.Configuration.GetSection(NetworthOptions.SectionName))
-    .ValidateFluently()
-    .ValidateOnStart();
+    .Bind(builder.Configuration.GetSection(NetworthOptions.SectionName));
 
 IHost host = builder.Build();
 

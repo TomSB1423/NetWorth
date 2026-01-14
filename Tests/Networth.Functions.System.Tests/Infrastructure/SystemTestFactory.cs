@@ -41,6 +41,25 @@ public static class SystemTestFactory
         // Ensure user secrets are loaded from the AppHost assembly
         builder.Configuration.AddUserSecrets<Networth_AppHost>();
 
+        // Provide default values for Firebase parameters to avoid resolution failures
+        // These will be overridden by user secrets if available
+        if (string.IsNullOrEmpty(builder.Configuration["Parameters:firebase-api-key"]))
+        {
+            builder.Configuration["Parameters:firebase-api-key"] = "test-api-key";
+        }
+
+        if (string.IsNullOrEmpty(builder.Configuration["Parameters:firebase-auth-domain"]))
+        {
+            builder.Configuration["Parameters:firebase-auth-domain"] = "test.firebaseapp.com";
+        }
+
+        if (string.IsNullOrEmpty(builder.Configuration["Parameters:firebase-project-id"]))
+        {
+            builder.Configuration["Parameters:firebase-project-id"] = "test-project";
+        }
+
+        builder.Configuration["Parameters:mock-authentication"] = "true";
+
         // Override the environment variable on the Functions resource directly
         // This bypasses the parameter resolution which seems to fail in test context
         var functionsResource = builder.Resources.FirstOrDefault(r => r.Name == ResourceNames.Functions);

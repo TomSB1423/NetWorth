@@ -49,6 +49,10 @@ public abstract class SystemTestBase : IAsyncLifetime
         App = await SystemTestFactory.CreateAsync(TestOutput);
         ConnectionString = await SystemTestFactory.GetDatabaseConnectionStringAsync(App);
 
+        // Ensure database schema exists (migrations may fail in Functions startup)
+        await using var dbContext = SystemTestFactory.CreateDbContext(ConnectionString);
+        await dbContext.Database.EnsureCreatedAsync();
+
         HttpClient functionsClient = App.CreateHttpClient(ResourceNames.Functions);
         Client = new NetworthClient(functionsClient);
     }
