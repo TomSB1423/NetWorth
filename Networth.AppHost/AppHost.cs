@@ -15,6 +15,7 @@ IResourceBuilder<ParameterResource> gocardlessSecretKey = builder.AddParameter("
 IResourceBuilder<ParameterResource> firebaseApiKey = builder.AddParameter("firebase-api-key");
 IResourceBuilder<ParameterResource> firebaseAuthDomain = builder.AddParameter("firebase-auth-domain");
 IResourceBuilder<ParameterResource> firebaseProjectId = builder.AddParameter("firebase-project-id");
+IResourceBuilder<ParameterResource> mockAuthentication = builder.AddParameter("mock-authentication");
 
 var postgres = builder
     .AddPostgres(ResourceNames.Postgres)
@@ -53,11 +54,11 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
 functions
     .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
     .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
-    .WithEnvironment("Firebase__ProjectId", firebaseProjectId);
+    .WithEnvironment("Firebase__ProjectId", firebaseProjectId)
+    .WithEnvironment("Networth__MockAuthentication", mockAuthentication);
 
 var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "dev")
     .WithReference(functions)
-    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
     .WithEnvironment("VITE_API_URL", functions.GetEndpoint("http"))
     .WithEnvironment("VITE_FIREBASE_API_KEY", firebaseApiKey)
     .WithEnvironment("VITE_FIREBASE_AUTH_DOMAIN", firebaseAuthDomain)

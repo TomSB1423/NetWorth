@@ -49,9 +49,6 @@ public abstract class SystemTestBase : IAsyncLifetime
         App = await SystemTestFactory.CreateAsync(TestOutput);
         ConnectionString = await SystemTestFactory.GetDatabaseConnectionStringAsync(App);
 
-        // Ensure clean database before each test
-        await SystemTestFactory.ResetDatabaseAsync(ConnectionString);
-
         HttpClient functionsClient = App.CreateHttpClient(ResourceNames.Functions);
         Client = new NetworthClient(functionsClient);
     }

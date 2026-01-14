@@ -1,22 +1,17 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Networth.Domain.Repositories;
 
 namespace Networth.Functions.Authentication;
 
 /// <summary>
 ///     Implementation of <see cref="ICurrentUserService"/> for Azure Functions.
-///     Supports Firebase token authentication via custom middleware
-///     and falls back to mock users in development.
+///     Supports Firebase token authentication via JwtAuthenticationMiddleware
+///     and mock users via MockUserMiddleware in development.
 /// </summary>
 public class CurrentUserService(
-    IHttpContextAccessor httpContextAccessor,
     IFunctionContextAccessor functionContextAccessor,
-    IUserRepository userRepository,
-    IEnumerable<ClaimsPrincipal> principals) : ICurrentUserService
+    IUserRepository userRepository) : ICurrentUserService
 {
-    private readonly ClaimsPrincipal? _injectedPrincipal = principals.FirstOrDefault();
-
     /// <inheritdoc />
     public Guid? InternalUserId { get; private set; }
 
@@ -25,8 +20,7 @@ public class CurrentUserService(
     {
         get
         {
-            // First, try to get the user from FunctionContext.Items
-            // This is set by the JwtAuthenticationMiddleware after token validation
+            // User is set by either MockUserMiddleware or JwtAuthenticationMiddleware
             if (functionContextAccessor.FunctionContext?.Items.TryGetValue("User", out var contextUser) == true
                 && contextUser is ClaimsPrincipal principal
                 && principal.Identity?.IsAuthenticated == true)
@@ -34,15 +28,7 @@ public class CurrentUserService(
                 return principal;
             }
 
-            // Fall back to HttpContext.User
-            var httpUser = httpContextAccessor.HttpContext?.User;
-            if (httpUser?.Identity?.IsAuthenticated == true)
-            {
-                return httpUser;
-            }
-
-            // Fall back to injected mock user (development only)
-            return _injectedPrincipal ?? httpUser;
+            return null;
         }
     }
 

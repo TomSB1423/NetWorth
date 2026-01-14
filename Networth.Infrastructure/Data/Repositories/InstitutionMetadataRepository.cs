@@ -57,7 +57,6 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
                 entity.Countries = JsonSerializer.Serialize(domainInst.Countries);
                 entity.LastUpdated = DateTime.UtcNow;
 
-                // Remove from dictionary so we know it was processed
                 existingEntities.Remove(domainInst.Id);
             }
             else
@@ -68,15 +67,16 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
             }
         }
 
-        // Warn about institutions in database that weren't returned by the API
+        // Institutions removed from API are logged and deleted
         if (existingEntities.Count > 0)
         {
-            var missingIds = string.Join(", ", existingEntities.Keys);
             _logger.LogWarning(
-                "Found {Count} institution(s) in database for country {CountryCode} that were not returned by API: {InstitutionIds}",
+                "{Count} institution(s) for country {CountryCode} no longer in API response: {InstitutionIds}. Deleting.",
                 existingEntities.Count,
                 countryCode,
-                missingIds);
+                string.Join(", ", existingEntities.Keys));
+
+            _context.Institutions.RemoveRange(existingEntities.Values);
         }
 
         await _context.SaveChangesAsync(cancellationToken);

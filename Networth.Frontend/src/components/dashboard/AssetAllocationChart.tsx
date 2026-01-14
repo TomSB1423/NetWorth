@@ -135,7 +135,7 @@ export function AssetAllocationChart({ isSyncing }: AssetAllocationChartProps) {
                                         borderRadius: "8px",
                                     }}
                                     itemStyle={{ color: "#F1F5F9" }}
-                                    formatter={(value: number, name: string, item: any) => {
+                                    formatter={(value: number, name: string, item: { payload: { isLiability: boolean } }) => {
                                         const isLiability = item.payload.isLiability;
                                         const formatted = new Intl.NumberFormat("en-GB", {
                                             style: "currency",

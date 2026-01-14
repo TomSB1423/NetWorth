@@ -6,6 +6,9 @@
     "Gocardless": {
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2"
     },
+    "Institutions": {
+        "UseSandbox": true
+    },
     "Serilog": {
         "Using": ["Serilog.Sinks.Console"],
         "MinimumLevel": {

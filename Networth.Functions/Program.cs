@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FluentValidation;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Networth.Application.Extensions;
 using Networth.Functions.Extensions;
 using Networth.Functions.Middleware;
+using Networth.Functions.Options;
 using Networth.Infrastructure.Extensions;
 using Networth.ServiceDefaults;
 using Serilog;
@@ -21,17 +23,28 @@ builder.AddServiceDefaults();
 builder.UseMiddleware<FunctionContextMiddleware>();
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
-// Use conditional middleware to enforce authentication on all HTTP endpoints except Health and OpenAPI
-builder.UseWhen<JwtAuthenticationMiddleware>(context =>
-{
-    // We want to use this middleware only for http trigger invocations.
-    var isHttpTrigger = context.FunctionDefinition.InputBindings.Values
-        .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
+// Read mock authentication setting early to decide which auth middleware to use
+var networthOptions = new NetworthOptions();
+builder.Configuration.GetSection(NetworthOptions.SectionName).Bind(networthOptions);
 
-    // Exclude the Health and OpenAPI/Swagger endpoints
-    string[] excludedFunctions = ["GetHealth", "RenderSwaggerDocument", "RenderSwaggerUI", "RenderOpenApiDocument"];
-    return isHttpTrigger && !excludedFunctions.Contains(context.FunctionDefinition.Name);
-});
+// Use mock auth in development when enabled, otherwise use real JWT auth
+if (builder.Environment.IsDevelopment() && networthOptions.MockAuthentication)
+{
+    // Mock user middleware injects a default mock user for all requests
+    builder.UseMiddleware<MockUserMiddleware>();
+}
+else
+{
+    // JWT authentication for production and when testing with real Firebase tokens
+    builder.UseWhen<JwtAuthenticationMiddleware>(context =>
+    {
+        var isHttpTrigger = context.FunctionDefinition.InputBindings.Values
+            .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
+
+        string[] excludedFunctions = ["GetHealth", "RenderSwaggerDocument", "RenderSwaggerUI", "RenderOpenApiDocument"];
+        return isHttpTrigger && !excludedFunctions.Contains(context.FunctionDefinition.Name);
+    });
+}
 
 // Resolve internal user ID after JWT authentication (for endpoints that require an existing user)
 builder.UseWhen<UserResolutionMiddleware>(context =>
@@ -42,7 +55,6 @@ builder.UseWhen<UserResolutionMiddleware>(context =>
     // Exclude endpoints that handle user resolution themselves or don't require a user:
     // - CreateUser: Creates the user, so they don't exist yet
     // - GetCurrentUser: Returns 404 itself if user not found
-    // - GetInstitutions: Works for both authenticated and unauthenticated users
     string[] excludedFunctions =
     [
         "GetHealth",
@@ -51,7 +63,6 @@ builder.UseWhen<UserResolutionMiddleware>(context =>
         "RenderOpenApiDocument",
         "CreateUser",
         "GetCurrentUser",
-        "GetInstitutions",
     ];
     return isHttpTrigger && !excludedFunctions.Contains(context.FunctionDefinition.Name);
 });
@@ -81,27 +92,40 @@ builder.AddAzureQueueServiceClient(ResourceNames.Queues);
 builder.Services
     .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })
     .AddApplicationInsightsTelemetryWorkerService()
-    .AddAppAuthentication(builder.Configuration, builder.Environment)
+    .AddAppAuthentication(builder.Configuration)
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructure(builder.Configuration);
 
+// Register validators from the Functions assembly
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// Configure Firebase options
+builder.Services.AddOptions<FirebaseOptions>()
+    .Bind(builder.Configuration.GetSection(FirebaseOptions.SectionName))
+    .ValidateFluently()
+    .ValidateOnStart();
+
+// Configure Networth options
+builder.Services.AddOptions<NetworthOptions>()
+    .Bind(builder.Configuration.GetSection(NetworthOptions.SectionName))
+    .ValidateFluently()
+    .ValidateOnStart();
+
 IHost host = builder.Build();
 
-// In development, apply migrations and seed mock data automatically
+// In development, apply migrations automatically
 IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
 if (environment.IsDevelopment())
 {
     try
     {
         await host.Services.ApplyMigrationsAsync();
-        await host.Services.EnsureMockUserAsync();
-        await host.Services.EnsureSandboxInstitutionAsync();
     }
     catch (Exception ex)
     {
         // Ignore errors during development startup (e.g. when migrations haven't been applied yet)
         // This allows dotnet ef migrations add to succeed even if the DB is in a bad state
-        Log.Warning(ex, "Failed to apply migrations or seed data during startup");
+        Log.Warning(ex, "Failed to apply migrations during startup");
     }
 }
 

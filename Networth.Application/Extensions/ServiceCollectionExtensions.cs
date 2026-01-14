@@ -33,6 +33,12 @@ public static class ServiceCollectionExtensions
             .ValidateFluently()
             .ValidateOnStart();
 
+        // Configure Institutions options
+        services.AddOptions<InstitutionsOptions>()
+            .Bind(configuration.GetSection(InstitutionsOptions.SectionName))
+            .ValidateFluently()
+            .ValidateOnStart();
+
         // Register simple mediator
         services.AddScoped<IMediator, Mediator>();
 

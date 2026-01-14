@@ -1,3 +1,4 @@
+using Aspire.Hosting.ApplicationModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,14 @@ public static class SystemTestFactory
 
         // Ensure user secrets are loaded from the AppHost assembly
         builder.Configuration.AddUserSecrets<Networth_AppHost>();
+
+        // Override the environment variable on the Functions resource directly
+        // This bypasses the parameter resolution which seems to fail in test context
+        var functionsResource = builder.Resources.FirstOrDefault(r => r.Name == ResourceNames.Functions);
+        functionsResource?.Annotations.Add(new EnvironmentCallbackAnnotation(context =>
+        {
+            context.EnvironmentVariables["Networth__MockAuthentication"] = "true";
+        }));
 
         // Apply standard system test setup
         // Random volume names ensure test isolation from development environment
@@ -90,18 +99,6 @@ public static class SystemTestFactory
         }
 
         return connectionString;
-    }
-
-    /// <summary>
-    ///     Ensures the database is created and ready for testing.
-    ///     Note: Since we use random volume names, we start with a fresh DB for each test,
-    ///     so we don't need to delete/recreate it.
-    /// </summary>
-    public static async Task ResetDatabaseAsync(string connectionString)
-    {
-        await using var dbContext = CreateDbContext(connectionString);
-
-        await dbContext.Database.EnsureCreatedAsync();
     }
 
     /// <summary>

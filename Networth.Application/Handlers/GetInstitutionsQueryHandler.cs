@@ -1,8 +1,9 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Networth.Application.Interfaces;
+using Networth.Application.Options;
 using Networth.Application.Queries;
 using Networth.Domain.Entities;
-using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 
 namespace Networth.Application.Handlers;
@@ -15,6 +16,7 @@ public class GetInstitutionsQueryHandler(
     ICacheMetadataRepository cacheMetadataRepository,
     IInstitutionMetadataRepository institutionMetadataRepository,
     IRequisitionRepository requisitionRepository,
+    IOptions<InstitutionsOptions> institutionsOptions,
     ILogger<GetInstitutionsQueryHandler> logger)
     : IRequestHandler<GetInstitutionsQuery, GetInstitutionsQueryResult>
 {
@@ -26,6 +28,13 @@ public class GetInstitutionsQueryHandler(
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Retrieving institutions for country {CountryCode}", query.CountryCode);
+
+        // In sandbox mode, skip API sync entirely - just return from sandbox table
+        if (institutionsOptions.Value.UseSandbox)
+        {
+            logger.LogInformation("Sandbox mode enabled - returning institutions from sandbox table");
+            return await GetCachedInstitutionsAsync(query, cancellationToken);
+        }
 
         string cacheKey = $"institutions_{query.CountryCode}";
 
@@ -105,17 +114,21 @@ public class GetInstitutionsQueryHandler(
         var institutions = await financialProvider.GetInstitutionsAsync(query.CountryCode, cancellationToken);
         var institutionsList = institutions.ToList();
 
-        // Save to database
+        // Save API results to database
         await institutionMetadataRepository.SaveInstitutionsAsync(query.CountryCode, institutionsList, cancellationToken);
 
-        // Update cache metadata
-        await cacheMetadataRepository.UpsertAsync(cacheKey, institutionsList.Count, cancellationToken);
+        // Query DB to get complete list
+        var allInstitutions = await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
+        var allInstitutionsList = allInstitutions.ToList();
 
-        logger.LogInformation("Successfully refreshed cache for country {CountryCode} with {Count} institutions", query.CountryCode, institutionsList.Count);
+        // Update cache metadata
+        await cacheMetadataRepository.UpsertAsync(cacheKey, allInstitutionsList.Count, cancellationToken);
+
+        logger.LogInformation("Successfully refreshed cache for country {CountryCode} with {Count} institutions", query.CountryCode, allInstitutionsList.Count);
 
         return new GetInstitutionsQueryResult
         {
-            Institutions = institutionsList,
+            Institutions = allInstitutionsList,
         };
     }
 }

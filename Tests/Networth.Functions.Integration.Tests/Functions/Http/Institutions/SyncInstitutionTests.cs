@@ -94,7 +94,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
 
         await Client.SyncInstitutionAsync(institutionId);
 
-        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, "123");
+        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, institutionId);
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
 
         await Client.SyncInstitutionAsync(institutionId);
 
-        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, "123");
+        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, institutionId);
     }
 
     [Fact]
@@ -227,6 +227,6 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
 
         await Client.SyncInstitutionAsync(institutionId);
 
-        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, "123");
+        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, institutionId);
     }
 }

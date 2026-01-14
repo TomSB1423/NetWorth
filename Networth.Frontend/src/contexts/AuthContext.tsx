@@ -52,8 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen to auth state changes
     useEffect(() => {
         if (!auth) {
-            setIsLoading(false);
-            return;
+            const timer = setTimeout(() => setIsLoading(false), 0);
+            return () => clearTimeout(timer);
         }
 
         const unsubscribe = onAuthStateChanged(

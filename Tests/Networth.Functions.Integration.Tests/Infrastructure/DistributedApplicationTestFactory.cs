@@ -43,10 +43,6 @@ public static class DistributedApplicationTestFactory
                 appOptions.AllowUnsecuredTransport = enableDashboard;
             });
 
-        // Provide dummy values for required parameters (will be overridden by Mockoon config)
-        builder.Configuration["Parameters:gocardless-secret-id"] = "test-secret-id";
-        builder.Configuration["Parameters:gocardless-secret-key"] = "test-secret-key";
-
         // Apply standard integration test setup
         // Random volume names ensure each test run gets fresh database state
         builder.WithRandomVolumeNames();
@@ -72,6 +68,13 @@ public static class DistributedApplicationTestFactory
         ProjectResource functionsResource = builder.Resources
             .OfType<ProjectResource>()
             .First(r => r.Name == ResourceNames.Functions);
+
+        // Force enable mock authentication for integration tests
+        functionsResource.Annotations.Add(new EnvironmentCallbackAnnotation(env =>
+        {
+            env.EnvironmentVariables["Networth__MockAuthentication"] = "true";
+            env.EnvironmentVariables["Firebase__ProjectId"] = "disabled";
+        }));
 
         // Configure Mockoon for Functions resource if requested
         if (configureMockoon && mockoonBaseUrl is not null)

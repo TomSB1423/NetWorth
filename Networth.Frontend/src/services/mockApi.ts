@@ -143,11 +143,4 @@ export const mockApi = {
     },
 };
 
-/**
- * Reset mock data to initial state.
- * Useful for testing scenarios.
- */
-export function resetMockData(): void {
-    mutableAccounts = [...mockAccounts];
-    mutableUser = { ...mockUser };
-}
+

@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import {
-    Search,
-    ChevronLeft,
-    Building2,
-    LogOut,
-} from "lucide-react";
+import { Search, ChevronLeft, Building2, LogOut } from "lucide-react";
 import { api } from "../../services/api";
 import { Institution } from "../../types";
 import { useUser } from "../../contexts/UserContext";
@@ -44,6 +39,9 @@ export default function SelectBank() {
 
             if (result.authorizationLink) {
                 window.location.assign(result.authorizationLink);
+            } else if (result.isAlreadyLinked) {
+                // Institution already linked, redirect to dashboard
+                navigate("/dashboard");
             } else {
                 console.error("No authorization link returned");
                 alert("Failed to start linking process. Please try again.");
@@ -94,7 +92,11 @@ export default function SelectBank() {
                             <ChevronLeft size={20} />
                         </button>
                         <div className="flex items-center gap-2">
-                            <img src="/networth-icon.svg" alt="NetWorth" className="w-6 h-6" />
+                            <img
+                                src="/networth-icon.svg"
+                                alt="NetWorth"
+                                className="w-6 h-6"
+                            />
                             <h1 className="text-base font-semibold text-white">
                                 Select your bank
                             </h1>

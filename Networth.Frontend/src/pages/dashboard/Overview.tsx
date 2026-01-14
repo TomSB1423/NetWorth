@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
 import { NetWorthChart } from "../../components/dashboard/NetWorthChart";
 import { AssetAllocationChart } from "../../components/dashboard/AssetAllocationChart";
 import { TopAccounts } from "../../components/dashboard/TopAccounts";

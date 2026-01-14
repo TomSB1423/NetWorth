@@ -70,14 +70,14 @@ export function LoadingScreen({
         }
 
         hasCompletedRef.current = true;
-        setProgress(100);
+        setTimeout(() => setProgress(100), 0);
 
         const hasShownWelcome = sessionStorage.getItem("welcome_shown");
 
         // If we have a username, show welcome message
         if (userName) {
             if (!hasShownWelcome) {
-                setShowWelcome(true);
+                setTimeout(() => setShowWelcome(true), 0);
                 sessionStorage.setItem("welcome_shown", "true");
                 // Give time to read the welcome message
                 const timer = setTimeout(() => {

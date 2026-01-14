@@ -18,12 +18,12 @@ env:
   TF_VAR_postgres_admin_password: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD }}
   TF_VAR_gocardless_secret_id: ${{ secrets.TF_VAR_GOCARDLESS_SECRET_ID }}
   TF_VAR_gocardless_secret_key: ${{ secrets.TF_VAR_GOCARDLESS_SECRET_KEY }}
-  TF_VAR_firebase_project_id: ${{ secrets.TF_VAR_FIREBASE_PROJECT_ID }}
+  TF_VAR_firebase_project_id: ${{ vars.TF_VAR_FIREBASE_PROJECT_ID }}
   TF_VAR_firebase_api_key: ${{ secrets.TF_VAR_FIREBASE_API_KEY }}
-  TF_VAR_firebase_auth_domain: ${{ secrets.TF_VAR_FIREBASE_AUTH_DOMAIN }}
-  TF_VAR_firebase_storage_bucket: ${{ secrets.TF_VAR_FIREBASE_STORAGE_BUCKET }}
-  TF_VAR_firebase_messaging_sender_id: ${{ secrets.TF_VAR_FIREBASE_MESSAGING_SENDER_ID }}
-  TF_VAR_firebase_app_id: ${{ secrets.TF_VAR_FIREBASE_APP_ID }}
+  TF_VAR_firebase_auth_domain: ${{ vars.TF_VAR_FIREBASE_AUTH_DOMAIN }}
+  TF_VAR_firebase_storage_bucket: ${{ vars.TF_VAR_FIREBASE_STORAGE_BUCKET }}
+  TF_VAR_firebase_messaging_sender_id: ${{ vars.TF_VAR_FIREBASE_MESSAGING_SENDER_ID }}
+  TF_VAR_firebase_app_id: ${{ vars.TF_VAR_FIREBASE_APP_ID }}
 
 jobs:
   terraform:
@@ -83,11 +83,11 @@ jobs:
           build-output: dist
           api-url: ${{ needs.terraform.outputs.container_app_url }}
           firebase-api-key: ${{ secrets.TF_VAR_FIREBASE_API_KEY }}
-          firebase-auth-domain: ${{ secrets.TF_VAR_FIREBASE_AUTH_DOMAIN }}
-          firebase-project-id: ${{ secrets.TF_VAR_FIREBASE_PROJECT_ID }}
-          firebase-storage-bucket: ${{ secrets.TF_VAR_FIREBASE_STORAGE_BUCKET }}
-          firebase-messaging-sender-id: ${{ secrets.TF_VAR_FIREBASE_MESSAGING_SENDER_ID }}
-          firebase-app-id: ${{ secrets.TF_VAR_FIREBASE_APP_ID }}
+          firebase-auth-domain: ${{ vars.TF_VAR_FIREBASE_AUTH_DOMAIN }}
+          firebase-project-id: ${{ vars.TF_VAR_FIREBASE_PROJECT_ID }}
+          firebase-storage-bucket: ${{ vars.TF_VAR_FIREBASE_STORAGE_BUCKET }}
+          firebase-messaging-sender-id: ${{ vars.TF_VAR_FIREBASE_MESSAGING_SENDER_ID }}
+          firebase-app-id: ${{ vars.TF_VAR_FIREBASE_APP_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

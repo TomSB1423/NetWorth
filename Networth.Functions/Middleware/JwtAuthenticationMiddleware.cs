@@ -3,9 +3,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Networth.Functions.Options;
 
 namespace Networth.Functions.Middleware;
 
@@ -22,19 +23,13 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
     /// <summary>
     /// Initializes a new instance of the <see cref="JwtAuthenticationMiddleware"/> class.
     /// </summary>
-    /// <param name="configuration">The application configuration.</param>
+    /// <param name="firebaseOptions">The firebase options.</param>
     /// <param name="logger">The logger.</param>
-    public JwtAuthenticationMiddleware(IConfiguration configuration, ILogger<JwtAuthenticationMiddleware> logger)
+    public JwtAuthenticationMiddleware(
+        IOptions<FirebaseOptions> firebaseOptions,
+        ILogger<JwtAuthenticationMiddleware> logger)
     {
         _logger = logger;
-
-        var projectId = configuration.GetValue<string>("Firebase:ProjectId");
-
-        if (string.IsNullOrEmpty(projectId))
-        {
-            _logger.LogWarning("Firebase:ProjectId is missing. JWT authentication will be skipped");
-            return;
-        }
 
         try
         {
@@ -42,6 +37,7 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
             var signingKeys = FetchGoogleSigningKeysAsync().GetAwaiter().GetResult();
 #pragma warning restore VSTHRD002
 
+            var projectId = firebaseOptions.Value.ProjectId;
             _tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
