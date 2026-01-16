@@ -29,26 +29,22 @@ public class GetInstitutionsQueryHandler(
     {
         logger.LogInformation("Retrieving institutions for country {CountryCode}", query.CountryCode);
 
-        // In sandbox mode, skip API sync entirely - just return from sandbox table
+        GetInstitutionsQueryResult result;
+
         if (institutionsOptions.Value.UseSandbox)
         {
-            logger.LogInformation("Sandbox mode enabled - returning institutions from sandbox table");
-            return await GetCachedInstitutionsAsync(query, cancellationToken);
-        }
-
-        string cacheKey = $"institutions_{query.CountryCode}";
-
-        // Check if cache is fresh (less than 30 days old)
-        bool isCacheFresh = await cacheMetadataRepository.IsCacheFreshAsync(cacheKey, CacheMaxAgeDays, cancellationToken);
-
-        GetInstitutionsQueryResult result;
-        if (isCacheFresh)
-        {
-            result = await GetCachedInstitutionsAsync(query, cancellationToken);
+            // Sandbox mode: read directly from sandbox table
+            var institutions = await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
+            result = new GetInstitutionsQueryResult { Institutions = institutions.ToList() };
         }
         else
         {
-            result = await FetchAndCacheInstitutionsAsync(query, cacheKey, cancellationToken);
+            string cacheKey = $"institutions_{query.CountryCode}";
+            bool isCacheFresh = await cacheMetadataRepository.IsCacheFreshAsync(cacheKey, CacheMaxAgeDays, cancellationToken);
+
+            result = isCacheFresh
+                ? await GetCachedInstitutionsAsync(query, cancellationToken)
+                : await FetchAndCacheInstitutionsAsync(query, cacheKey, cancellationToken);
         }
 
         // Filter out linked institutions if requested
