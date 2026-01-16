@@ -104,7 +104,7 @@ resource "azurerm_container_app" "functions" {
 
     container {
       name   = "functions"
-      image  = "${azurerm_container_registry.acr.login_server}/networth-functions:latest"
+      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
       cpu    = 0.25
       memory = "0.5Gi"
 
