@@ -21,6 +21,11 @@ public class CreateUserCommandResult
     public required string Name { get; set; }
 
     /// <summary>
+    ///     Gets or sets the user's email address.
+    /// </summary>
+    public required string Email { get; set; }
+
+    /// <summary>
     ///     Gets or sets a value indicating whether the user was newly created (true) or already existed (false).
     /// </summary>
     public bool IsNewUser { get; set; }

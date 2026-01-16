@@ -36,6 +36,7 @@ public class CreateUserCommandHandler(
             UserId = user.Id,
             FirebaseUid = user.FirebaseUid,
             Name = user.Name,
+            Email = user.Email,
             IsNewUser = isNew,
             HasCompletedOnboarding = user.HasCompletedOnboarding,
         };

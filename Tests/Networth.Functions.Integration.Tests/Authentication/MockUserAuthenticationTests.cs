@@ -1,10 +1,8 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.Json;
 using Networth.Functions.Tests.Integration.Fixtures;
 using Networth.Functions.Tests.Integration.Infrastructure;
 using Networth.ServiceDefaults;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Networth.Functions.Tests.Integration.Authentication;
@@ -13,42 +11,38 @@ namespace Networth.Functions.Tests.Integration.Authentication;
 ///     Integration tests for mock user authentication configuration.
 ///     Verifies that when UseAuthentication=false, the mock user is injected correctly.
 /// </summary>
-public class MockUserAuthenticationTests : IAsyncLifetime, IClassFixture<MockoonTestFixture>
+public class MockUserAuthenticationTests : IntegrationTestBase
 {
-    private readonly ITestOutputHelper _testOutput;
-    private readonly MockoonTestFixture _mockoonFixture;
-    private DistributedApplication _app = null!;
     private HttpClient _httpClient = null!;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MockUserAuthenticationTests"/> class.
     /// </summary>
     public MockUserAuthenticationTests(MockoonTestFixture mockoonFixture, ITestOutputHelper testOutput)
+        : base(mockoonFixture, testOutput)
     {
-        _mockoonFixture = mockoonFixture;
-        _testOutput = testOutput;
     }
 
     /// <inheritdoc />
-    public async Task InitializeAsync()
+    public override async Task InitializeAsync()
     {
-        _app = await DistributedApplicationTestFactory.CreateAsync(_testOutput, _mockoonFixture.MockoonBaseUrl);
-        _httpClient = _app.CreateHttpClient(ResourceNames.Functions);
-    }
+        await base.InitializeAsync();
+        _httpClient = App.CreateHttpClient(ResourceNames.Functions);
 
-    /// <inheritdoc />
-    public async Task DisposeAsync() => await _app.DisposeAsync();
+        // Ensure database schema is created
+        await EnsureDatabaseMigratedAsync();
+    }
 
     [Fact]
-    public async Task GetCurrentUser_WithMockAuthentication_ReturnsUnauthorizedWhenUserNotCreated()
+    public async Task GetCurrentUser_WithMockAuthentication_ReturnsSeededMockUser()
     {
         // Arrange & Act
-        // The mock user is injected but the user doesn't exist in the database yet
+        // The mock user is seeded in the database by the InitialCreate migration
         var response = await _httpClient.GetAsync("/api/users/me");
 
         // Assert
-        // User is authenticated (mock user injected) but not found in database
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        // User is authenticated (mock user injected) and found in database (seeded)
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
@@ -64,7 +58,6 @@ public class MockUserAuthenticationTests : IAsyncLifetime, IClassFixture<Mockoon
         using var jsonDoc = JsonDocument.Parse(content);
 
         // Verify the mock user details from settings.json are used
-        Assert.Equal("mock-user-123", jsonDoc.RootElement.GetProperty("firebaseUid").GetString());
         Assert.Equal("Mock Development User", jsonDoc.RootElement.GetProperty("name").GetString());
         Assert.Equal("mock@example.com", jsonDoc.RootElement.GetProperty("email").GetString());
     }
@@ -86,7 +79,6 @@ public class MockUserAuthenticationTests : IAsyncLifetime, IClassFixture<Mockoon
         using var jsonDoc = JsonDocument.Parse(content);
 
         // Verify the mock user details match the configured values
-        Assert.Equal("mock-user-123", jsonDoc.RootElement.GetProperty("firebaseUid").GetString());
         Assert.Equal("Mock Development User", jsonDoc.RootElement.GetProperty("name").GetString());
         Assert.Equal("mock@example.com", jsonDoc.RootElement.GetProperty("email").GetString());
     }
@@ -124,14 +116,14 @@ public class MockUserAuthenticationTests : IAsyncLifetime, IClassFixture<Mockoon
         using var jsonDoc1 = JsonDocument.Parse(content1);
         using var jsonDoc2 = JsonDocument.Parse(content2);
 
-        // Same Firebase UID across requests
-        Assert.Equal(
-            jsonDoc1.RootElement.GetProperty("firebaseUid").GetString(),
-            jsonDoc2.RootElement.GetProperty("firebaseUid").GetString());
-
         // Same internal user ID across requests
         Assert.Equal(
-            jsonDoc1.RootElement.GetProperty("userId").GetInt32(),
-            jsonDoc2.RootElement.GetProperty("userId").GetInt32());
+            jsonDoc1.RootElement.GetProperty("userId").GetGuid(),
+            jsonDoc2.RootElement.GetProperty("userId").GetGuid());
+
+        // Same email across requests
+        Assert.Equal(
+            jsonDoc1.RootElement.GetProperty("email").GetString(),
+            jsonDoc2.RootElement.GetProperty("email").GetString());
     }
 }

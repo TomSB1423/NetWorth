@@ -1,7 +1,10 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Networth.Functions.Tests.Integration.Infrastructure;
+using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Gocardless.Options;
 using Networth.ServiceDefaults;
 using Projects;
@@ -37,6 +40,9 @@ public class CustomMockUserConfigurationTests : IAsyncLifetime
     {
         _app = await CreateAppWithCustomMockUserAsync();
         _httpClient = _app.CreateHttpClient(ResourceNames.Functions);
+
+        // Ensure database schema is created
+        await EnsureDatabaseMigratedAsync();
     }
 
     /// <inheritdoc />
@@ -149,5 +155,23 @@ public class CustomMockUserConfigurationTests : IAsyncLifetime
             cts.Token);
 
         return app;
+    }
+
+    private async Task EnsureDatabaseMigratedAsync()
+    {
+        string? dbConnectionString = await _app.GetConnectionStringAsync(ResourceNames.NetworthDb);
+
+        ServiceCollection services = new();
+        services.AddDbContext<NetworthDbContext>(options =>
+        {
+            options.UseNpgsql(dbConnectionString);
+            options.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+        });
+        ServiceProvider serviceProvider = services.BuildServiceProvider();
+        using IServiceScope scope = serviceProvider.CreateScope();
+        NetworthDbContext dbContext = scope.ServiceProvider.GetRequiredService<NetworthDbContext>();
+
+        await dbContext.Database.MigrateAsync();
     }
 }

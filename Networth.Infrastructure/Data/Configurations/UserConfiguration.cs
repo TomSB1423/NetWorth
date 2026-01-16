@@ -28,7 +28,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         builder.Property(u => u.Email)
-            .HasMaxLength(320);
+            .HasMaxLength(320)
+            .IsRequired();
 
         builder.Property(u => u.CreatedAt)
             .IsRequired();

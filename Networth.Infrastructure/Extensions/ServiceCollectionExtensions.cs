@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -108,6 +109,10 @@ public static class ServiceCollectionExtensions
             {
                 npgsqlOptions.CommandTimeout(30);
             });
+
+            // Suppress warning about pending model changes as migrations are managed separately
+            dbContextOptionsBuilder.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
         services.AddScoped<IDbConnection>(sp =>

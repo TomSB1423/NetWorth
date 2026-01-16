@@ -16,6 +16,11 @@ public class CreateUserResponse
     public required string Name { get; set; }
 
     /// <summary>
+    ///     Gets or sets the user's email address.
+    /// </summary>
+    public required string Email { get; set; }
+
+    /// <summary>
     ///     Gets or sets a value indicating whether this is a newly created user.
     /// </summary>
     public bool IsNewUser { get; set; }

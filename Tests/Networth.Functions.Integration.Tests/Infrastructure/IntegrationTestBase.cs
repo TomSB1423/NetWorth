@@ -2,7 +2,10 @@ using System.Text;
 using Azure;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Networth.Functions.Tests.Integration.Fixtures;
+using Networth.Infrastructure.Data.Context;
 using Networth.ServiceDefaults;
 using Xunit.Abstractions;
 
@@ -38,7 +41,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IClassFixture<Mockoo
     /// <summary>
     ///     Gets the test output helper.
     /// </summary>
-    private ITestOutputHelper TestOutput { get; }
+    protected ITestOutputHelper TestOutput { get; }
 
     /// <summary>
     ///     Gets the Mockoon fixture.
@@ -55,6 +58,31 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IClassFixture<Mockoo
 
     /// <inheritdoc />
     public virtual async Task DisposeAsync() => await App.DisposeAsync();
+
+    /// <summary>
+    ///     Ensures the database is migrated and ready for tests.
+    ///     Call this in test InitializeAsync when database operations are needed.
+    /// </summary>
+    protected async Task EnsureDatabaseMigratedAsync()
+    {
+        string? dbConnectionString = await App.GetConnectionStringAsync(ResourceNames.NetworthDb);
+        TestOutput.WriteLine($"Database connection string: {dbConnectionString}");
+
+        ServiceCollection services = new();
+        services.AddDbContext<NetworthDbContext>(options =>
+        {
+            options.UseNpgsql(dbConnectionString);
+            options.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+        });
+        await using ServiceProvider serviceProvider = services.BuildServiceProvider();
+        using IServiceScope scope = serviceProvider.CreateScope();
+        NetworthDbContext dbContext = scope.ServiceProvider.GetRequiredService<NetworthDbContext>();
+
+        TestOutput.WriteLine("Starting database migration...");
+        await dbContext.Database.MigrateAsync();
+        TestOutput.WriteLine("Database migration completed.");
+    }
 
     /// <summary>
     ///     Polls the specified queue for a message containing the expected text.
