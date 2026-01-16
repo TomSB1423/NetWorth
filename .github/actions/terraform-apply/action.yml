@@ -9,6 +9,15 @@ inputs:
     description: "Terraform working directory"
     required: false
     default: "infra/terraform"
+  azure-client-id:
+    description: "Azure Client ID for OIDC authentication"
+    required: true
+  azure-tenant-id:
+    description: "Azure Tenant ID"
+    required: true
+  azure-subscription-id:
+    description: "Azure Subscription ID"
+    required: true
 
 outputs:
   resource_group_name:
@@ -32,10 +41,23 @@ outputs:
   frontend_swa_url:
     description: "The frontend SWA URL"
     value: ${{ steps.tf-output.outputs.frontend_swa_url }}
+  postgres_fqdn:
+    description: "The PostgreSQL FQDN"
+    value: ${{ steps.tf-output.outputs.postgres_fqdn }}
+  key_vault_name:
+    description: "The Key Vault name"
+    value: ${{ steps.tf-output.outputs.key_vault_name }}
 
 runs:
   using: "composite"
   steps:
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
@@ -66,3 +88,5 @@ runs:
         echo "acr_login_server=$(terraform output -raw acr_login_server)" >> $GITHUB_OUTPUT
         echo "frontend_swa_name=$(terraform output -raw frontend_swa_name)" >> $GITHUB_OUTPUT
         echo "frontend_swa_url=$(terraform output -raw frontend_swa_url)" >> $GITHUB_OUTPUT
+        echo "postgres_fqdn=$(terraform output -raw postgres_fqdn)" >> $GITHUB_OUTPUT
+        echo "key_vault_name=$(terraform output -raw key_vault_name)" >> $GITHUB_OUTPUT
