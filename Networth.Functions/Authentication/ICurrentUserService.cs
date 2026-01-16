@@ -21,12 +21,14 @@ public interface ICurrentUserService
     /// <summary>
     ///     Gets the current user's display name.
     /// </summary>
-    string? Name { get; }
+    /// <exception cref="InvalidOperationException">Thrown when user is not authenticated.</exception>
+    string Name { get; }
 
     /// <summary>
     ///     Gets the current user's email address.
     /// </summary>
-    string? Email { get; }
+    /// <exception cref="InvalidOperationException">Thrown when user is not authenticated.</exception>
+    string Email { get; }
 
     /// <summary>
     ///     Gets a value indicating whether the user is authenticated.

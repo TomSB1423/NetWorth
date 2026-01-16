@@ -43,14 +43,16 @@ public class CurrentUserService(
         ?? throw new InvalidOperationException("User is not authenticated");
 
     /// <inheritdoc />
-    public string? Name =>
+    public string Name =>
         User?.FindFirst("name")?.Value
-        ?? User?.FindFirst(ClaimTypes.Name)?.Value;
+        ?? User?.FindFirst(ClaimTypes.Name)?.Value
+        ?? throw new InvalidOperationException("User is not authenticated or name claim is missing");
 
     /// <inheritdoc />
-    public string? Email =>
+    public string Email =>
         User?.FindFirst("email")?.Value
-        ?? User?.FindFirst(ClaimTypes.Email)?.Value;
+        ?? User?.FindFirst(ClaimTypes.Email)?.Value
+        ?? throw new InvalidOperationException("User is not authenticated or email claim is missing");
 
     /// <inheritdoc />
     public void SetInternalUserId(Guid userId)

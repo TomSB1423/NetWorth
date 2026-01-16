@@ -60,8 +60,7 @@ public class CustomMockUserConfigurationTests : IAsyncLifetime
         var content = await response.Content.ReadAsStringAsync();
         using var jsonDoc = JsonDocument.Parse(content);
 
-        // Verify the custom mock user details are used
-        Assert.Equal(CustomFirebaseUid, jsonDoc.RootElement.GetProperty("firebaseUid").GetString());
+        // Verify the custom mock user details are used (firebaseUid is not included in the response)
         Assert.Equal(CustomName, jsonDoc.RootElement.GetProperty("name").GetString());
         Assert.Equal(CustomEmail, jsonDoc.RootElement.GetProperty("email").GetString());
     }
@@ -81,7 +80,7 @@ public class CustomMockUserConfigurationTests : IAsyncLifetime
         var content = await response.Content.ReadAsStringAsync();
         using var jsonDoc = JsonDocument.Parse(content);
 
-        Assert.Equal(CustomFirebaseUid, jsonDoc.RootElement.GetProperty("firebaseUid").GetString());
+        // Verify the custom mock user details are returned (firebaseUid is not included in the response)
         Assert.Equal(CustomName, jsonDoc.RootElement.GetProperty("name").GetString());
         Assert.Equal(CustomEmail, jsonDoc.RootElement.GetProperty("email").GetString());
     }

@@ -95,6 +95,34 @@ dotnet user-secrets set "Parameters:gocardless-secret-key" "YOUR_SECRET_KEY" --p
 
 If running the Azure Functions project strictly standalone (without Aspire), configure settings in `Networth.Functions/local.settings.json`.
 
+## Database Migrations
+
+Database migrations are managed explicitly and are **not** automatically applied at application startup.
+
+### Local Development
+
+For local development, apply migrations manually using the EF Core CLI:
+
+```shell
+dotnet ef database update --project Networth.Infrastructure
+```
+
+### Production Deployment
+
+Migrations are automatically applied during CI/CD deployment (see `.github/workflows/deploy-dev.yml`). The deployment pipeline:
+
+1. Provisions infrastructure via Terraform
+2. Applies database migrations before deploying the application
+3. Deploys the Functions API and Frontend
+
+For manual migration against a deployed environment, use the migration script:
+
+```shell
+./infra/migrate.sh
+```
+
+This script retrieves connection details from Terraform outputs and Key Vault automatically.
+
 ## Testing
 
 ### System Tests (Playwright)

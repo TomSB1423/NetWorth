@@ -113,20 +113,4 @@ builder.Services.AddOptions<NetworthOptions>()
 
 IHost host = builder.Build();
 
-// In development, apply migrations automatically
-IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
-if (environment.IsDevelopment())
-{
-    try
-    {
-        await host.Services.ApplyMigrationsAsync();
-    }
-    catch (Exception ex)
-    {
-        // Ignore errors during development startup (e.g. when migrations haven't been applied yet)
-        // This allows dotnet ef migrations add to succeed even if the DB is in a bad state
-        Log.Warning(ex, "Failed to apply migrations during startup");
-    }
-}
-
 await host.RunAsync();

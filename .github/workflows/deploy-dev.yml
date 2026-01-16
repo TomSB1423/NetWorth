@@ -38,6 +38,8 @@ jobs:
       acr_login_server: ${{ steps.terraform.outputs.acr_login_server }}
       frontend_swa_name: ${{ steps.terraform.outputs.frontend_swa_name }}
       frontend_swa_url: ${{ steps.terraform.outputs.frontend_swa_url }}
+      postgres_fqdn: ${{ steps.terraform.outputs.postgres_fqdn }}
+      key_vault_name: ${{ steps.terraform.outputs.key_vault_name }}
 
     steps:
       - uses: actions/checkout@v4
@@ -48,8 +50,46 @@ jobs:
         with:
           environment: dev
 
-  deploy-functions:
+  migrate-database:
+    name: "Apply Migrations"
     needs: terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Database Password from Key Vault
+        id: get-password
+        run: |
+          PASSWORD=$(az keyvault secret show --name postgres-admin-password --vault-name "${{ needs.terraform.outputs.key_vault_name }}" --query value -o tsv)
+          echo "::add-mask::$PASSWORD"
+          echo "db-password=$PASSWORD" >> $GITHUB_OUTPUT
+
+      - name: Apply Database Migrations
+        run: |
+          CONNECTION_STRING="Host=${{ needs.terraform.outputs.postgres_fqdn }};Database=networth-db;Username=networthadmin;Password=${{ steps.get-password.outputs.db-password }};SSL Mode=Require;Trust Server Certificate=true"
+          dotnet ef database update \
+            --project Networth.Infrastructure/Networth.Infrastructure.csproj \
+            --connection "$CONNECTION_STRING" \
+            --verbose
+
+  deploy-functions:
+    needs: [terraform, migrate-database]
     runs-on: ubuntu-latest
     environment: dev
     steps:
