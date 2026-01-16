@@ -18,7 +18,7 @@ public class CreateUserCommandHandler(
     {
         var (user, isNew) = await userRepository.CreateOrGetUserAsync(
             command.FirebaseUid,
-            command.Name ?? "Unknown User",
+            command.Name,
             command.Email,
             cancellationToken);
 

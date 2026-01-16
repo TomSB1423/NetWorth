@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
+using Networth.Domain.Entities;
 using Networth.Domain.Repositories;
 
 namespace Networth.Application.Handlers;
@@ -11,10 +12,10 @@ namespace Networth.Application.Handlers;
 /// </summary>
 public class UpdateAccountCommandHandler(
     IAccountRepository accountRepository,
-    ILogger<UpdateAccountCommandHandler> logger) : IRequestHandler<UpdateAccountCommand, UpdateAccountCommandResult>
+    ILogger<UpdateAccountCommandHandler> logger) : IRequestHandler<UpdateAccountCommand, UserAccount>
 {
     /// <inheritdoc />
-    public async Task<UpdateAccountCommandResult> HandleAsync(UpdateAccountCommand command, CancellationToken cancellationToken)
+    public async Task<UserAccount> HandleAsync(UpdateAccountCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation(
             "Updating account {AccountId} for user {UserId}",
@@ -36,18 +37,6 @@ public class UpdateAccountCommandHandler(
 
         logger.LogInformation("Updated account {AccountId}", command.AccountId);
 
-        return new UpdateAccountCommandResult
-        {
-            Id = updatedAccount.Id,
-            UserId = updatedAccount.UserId,
-            InstitutionId = updatedAccount.InstitutionId,
-            InstitutionName = updatedAccount.InstitutionName,
-            InstitutionLogo = updatedAccount.InstitutionLogo,
-            Name = updatedAccount.Name,
-            DisplayName = updatedAccount.DisplayName,
-            Category = updatedAccount.Category,
-            Currency = updatedAccount.Currency,
-            Product = updatedAccount.Product,
-        };
+        return updatedAccount;
     }
 }

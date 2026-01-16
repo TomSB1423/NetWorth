@@ -23,7 +23,7 @@ public class UserInfo
     /// <summary>
     ///     Gets or sets the user's email address.
     /// </summary>
-    public string? Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
     ///     Gets or sets a value indicating whether the user has completed onboarding.

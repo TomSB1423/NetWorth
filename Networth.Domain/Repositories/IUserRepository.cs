@@ -32,7 +32,7 @@ public interface IUserRepository
     Task<(UserInfo User, bool IsNew)> CreateOrGetUserAsync(
         string firebaseUid,
         string name,
-        string? email,
+        string email,
         CancellationToken cancellationToken = default);
 
     /// <summary>

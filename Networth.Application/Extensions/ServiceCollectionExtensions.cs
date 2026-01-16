@@ -8,6 +8,8 @@ using Networth.Application.Options;
 using Networth.Application.Queries;
 using Networth.Application.Services;
 using Networth.Application.Validators;
+using Networth.Domain.Entities;
+using Networth.Domain.Repositories;
 
 namespace Networth.Application.Extensions;
 
@@ -42,8 +44,8 @@ public static class ServiceCollectionExtensions
 
         // Register command handlers
         services.AddScoped<IRequestHandler<CreateUserCommand, CreateUserCommandResult>, CreateUserCommandHandler>();
-        services.AddScoped<IRequestHandler<UpdateUserCommand, UpdateUserCommandResult>, UpdateUserCommandHandler>();
-        services.AddScoped<IRequestHandler<UpdateAccountCommand, UpdateAccountCommandResult>, UpdateAccountCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateUserCommand, UserInfo>, UpdateUserCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateAccountCommand, UserAccount>, UpdateAccountCommandHandler>();
         services.AddScoped<IRequestHandler<LinkInstitutionCommand, LinkInstitutionCommandResult>, LinkInstitutionCommandHandler>();
         services.AddScoped<IRequestHandler<SyncAccountCommand, SyncAccountCommandResult>, SyncAccountCommandHandler>();
         services.AddScoped<IRequestHandler<SyncInstitutionCommand, SyncInstitutionCommandResult>, SyncInstitutionCommandHandler>();

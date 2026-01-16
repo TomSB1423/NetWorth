@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
+using Networth.Domain.Entities;
 using Networth.Functions.Authentication;
 using Networth.Functions.Models.Requests;
 using Networth.Functions.Models.Responses;
@@ -93,13 +94,13 @@ public class UpdateAccount(
 
         try
         {
-            var result = await mediator.Send<UpdateAccountCommand, UpdateAccountCommandResult>(command);
+            var result = await mediator.Send<UpdateAccountCommand, UserAccount>(command);
 
             return new OkObjectResult(new UserAccountResponse
             {
                 Id = result.Id,
                 UserId = result.UserId,
-                RequisitionId = string.Empty, // Not returned from update
+                RequisitionId = result.RequisitionId,
                 InstitutionId = result.InstitutionId,
                 InstitutionName = result.InstitutionName,
                 InstitutionLogo = result.InstitutionLogo,

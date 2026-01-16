@@ -6,6 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Networth.Application.Commands;
 using Networth.Application.Interfaces;
+using Networth.Domain.Repositories;
 using Networth.Functions.Authentication;
 using Networth.Functions.Models.Requests;
 using Networth.Functions.Models.Responses;
@@ -80,11 +81,11 @@ public class UpdateUser(
 
         try
         {
-            var result = await mediator.Send<UpdateUserCommand, UpdateUserCommandResult>(command);
+            var result = await mediator.Send<UpdateUserCommand, UserInfo>(command);
 
             return new OkObjectResult(new UpdateUserResponse
             {
-                UserId = result.UserId,
+                UserId = result.Id,
                 FirebaseUid = result.FirebaseUid,
                 Name = result.Name,
                 HasCompletedOnboarding = result.HasCompletedOnboarding,

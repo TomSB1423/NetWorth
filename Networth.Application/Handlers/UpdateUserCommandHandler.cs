@@ -11,10 +11,10 @@ namespace Networth.Application.Handlers;
 /// </summary>
 public class UpdateUserCommandHandler(
     IUserRepository userRepository,
-    ILogger<UpdateUserCommandHandler> logger) : IRequestHandler<UpdateUserCommand, UpdateUserCommandResult>
+    ILogger<UpdateUserCommandHandler> logger) : IRequestHandler<UpdateUserCommand, UserInfo>
 {
     /// <inheritdoc />
-    public async Task<UpdateUserCommandResult> HandleAsync(UpdateUserCommand command, CancellationToken cancellationToken)
+    public async Task<UserInfo> HandleAsync(UpdateUserCommand command, CancellationToken cancellationToken)
     {
         var updatedUser = await userRepository.UpdateUserAsync(
             command.UserId,
@@ -30,12 +30,6 @@ public class UpdateUserCommandHandler(
 
         logger.LogInformation("Updated user {UserId}", updatedUser.Id);
 
-        return new UpdateUserCommandResult
-        {
-            UserId = updatedUser.Id,
-            FirebaseUid = updatedUser.FirebaseUid,
-            Name = updatedUser.Name,
-            HasCompletedOnboarding = updatedUser.HasCompletedOnboarding,
-        };
+        return updatedUser;
     }
 }

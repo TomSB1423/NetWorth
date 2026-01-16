@@ -14,13 +14,13 @@ namespace Networth.SystemTests.Infrastructure;
 
 /// <summary>
 ///     Factory for creating configured distributed applications for system testing.
-///     System tests use real external services (GoCardless sandbox API) rather than mocks.
+///     System tests use the real GoCardless API (not mocks) with proper database migrations.
 /// </summary>
 public static class SystemTestFactory
 {
     /// <summary>
     ///     Creates and starts a distributed application configured for system testing.
-    ///     Uses GoCardless sandbox credentials from user secrets.
+    ///     Uses real GoCardless credentials from user secrets with production-like configuration.
     /// </summary>
     /// <param name="testOutput">Optional test output helper for capturing logs.</param>
     /// <param name="enableDashboard">Whether to enable the Aspire dashboard.</param>
@@ -60,12 +60,14 @@ public static class SystemTestFactory
 
         builder.Configuration["Parameters:mock-authentication"] = "true";
 
-        // Override the environment variable on the Functions resource directly
+        // Override the environment variables on the Functions resource directly
         // This bypasses the parameter resolution which seems to fail in test context
         var functionsResource = builder.Resources.FirstOrDefault(r => r.Name == ResourceNames.Functions);
         functionsResource?.Annotations.Add(new EnvironmentCallbackAnnotation(context =>
         {
             context.EnvironmentVariables["Networth__MockAuthentication"] = "true";
+            // Disable sandbox mode for system tests - use real Institutions table with API sync
+            context.EnvironmentVariables["Institutions__UseSandbox"] = "false";
         }));
 
         // Apply standard system test setup

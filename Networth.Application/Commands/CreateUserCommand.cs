@@ -13,11 +13,11 @@ public class CreateUserCommand
     /// <summary>
     ///     Gets or sets the user's display name.
     /// </summary>
-    public string? Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     ///     Gets or sets the user's email address.
     /// </summary>
-    public string? Email { get; set; }
+    public required string Email { get; set; }
 }
 

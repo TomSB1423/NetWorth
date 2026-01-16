@@ -32,7 +32,7 @@ public class UserRepository(NetworthDbContext dbContext) : IUserRepository
     public async Task<(UserInfo User, bool IsNew)> CreateOrGetUserAsync(
         string firebaseUid,
         string name,
-        string? email,
+        string email,
         CancellationToken cancellationToken = default)
     {
         var existingUser = await dbContext.Users

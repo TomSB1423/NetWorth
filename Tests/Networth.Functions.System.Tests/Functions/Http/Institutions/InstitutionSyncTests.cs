@@ -16,10 +16,11 @@ public class InstitutionSyncTests(ITestOutputHelper testOutput)
     ///     System test that verifies the complete sync workflow for SANDBOXFINANCE institution.
     ///     This test:
     ///     1. Starts the full Aspire application with PostgreSQL and Azure Storage
-    ///     2. Calls the sync institution endpoint using real GoCardless sandbox API
-    ///     3. Waits for queue processing to complete
-    ///     4. Verifies accounts and requisitions are saved to the database
-    ///     Note: This requires valid GoCardless sandbox credentials to be configured.
+    ///     2. Links and authorizes the GoCardless sandbox test institution
+    ///     3. Syncs the institution to fetch account details
+    ///     4. Waits for queue processing to complete
+    ///     5. Verifies accounts and requisitions are saved to the database
+    ///     Note: Uses the GoCardless sandbox institution for testing with real API credentials.
     /// </summary>
     [Fact]
     public async Task SyncInstitution_WithSandboxFinance_EnqueuesAccountsForSync()
@@ -65,29 +66,36 @@ public class InstitutionSyncTests(ITestOutputHelper testOutput)
     }
 
     /// <summary>
-    ///     Helper test to verify we can retrieve institutions from the GoCardless sandbox API.
+    ///     System test to verify we can retrieve institutions from the GoCardless API.
     ///     This ensures the application is properly configured and can communicate with GoCardless.
     /// </summary>
     [Fact]
-    public async Task GetInstitutions_ReturnsInstitutionsFromGoCardlessSandbox()
+    public async Task GetInstitutions_ReturnsInstitutionsFromGoCardless()
     {
         // Act
         List<InstitutionResponse> institutions = await Client.GetInstitutionsAsync();
 
-        // Assert
+        // Assert - Verify we got a list of real UK institutions
         Assert.NotEmpty(institutions);
-        Assert.Contains(institutions, i => i.Id == Constants.SandboxInstitutionId);
+        Assert.True(institutions.Count > 10, "Expected at least 10 institutions from GoCardless");
+
+        // Verify institutions have required properties
+        foreach (var institution in institutions.Take(5))
+        {
+            Assert.NotNull(institution.Id);
+            Assert.NotNull(institution.Name);
+        }
     }
 
     /// <summary>
-    ///     System test that verifies the complete flow of linking a sandbox account and then syncing it.
+    ///     System test that verifies the complete flow of linking a bank account and then syncing it.
     ///     This test:
-    ///     1. Links a bank account to SANDBOXFINANCE institution
+    ///     1. Links a bank account to the GoCardless sandbox institution
     ///     2. Verifies the requisition is created in the database
     ///     3. Authorizes the requisition via GoCardless OAuth flow (using Playwright)
     ///     4. Syncs the institution to fetch account details
     ///     5. Verifies accounts are created and enqueued for transaction sync
-    ///     Note: This requires valid GoCardless sandbox credentials to be configured.
+    ///     Note: Uses real GoCardless API credentials with their sandbox test institution.
     /// </summary>
     [Fact]
     public async Task LinkAccount_ThenSyncInstitution_CreatesAccountsInDatabase()

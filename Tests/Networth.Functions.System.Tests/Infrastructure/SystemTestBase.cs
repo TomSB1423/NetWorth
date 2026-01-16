@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Testing;
 using Networth.Infrastructure.Data.Context;
@@ -49,9 +50,10 @@ public abstract class SystemTestBase : IAsyncLifetime
         App = await SystemTestFactory.CreateAsync(TestOutput);
         ConnectionString = await SystemTestFactory.GetDatabaseConnectionStringAsync(App);
 
-        // Ensure database schema exists (migrations may fail in Functions startup)
+        // Apply migrations to ensure database schema is up to date
+        // This is the same approach used by the Functions app in development mode
         await using var dbContext = SystemTestFactory.CreateDbContext(ConnectionString);
-        await dbContext.Database.EnsureCreatedAsync();
+        await dbContext.Database.MigrateAsync();
 
         HttpClient functionsClient = App.CreateHttpClient(ResourceNames.Functions);
         Client = new NetworthClient(functionsClient);
