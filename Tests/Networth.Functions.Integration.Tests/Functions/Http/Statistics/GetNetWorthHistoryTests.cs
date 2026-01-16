@@ -47,7 +47,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -216,7 +216,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User Single", FirebaseUid = Constants.MockFirebaseUid };
+            user = new User { Id = userId, Name = "Mock User Single", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -345,6 +345,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
             Id = userId,
             Name = "Sparse User",
             FirebaseUid = "sparse-firebase-uid",
+            Email = "sparse@example.com",
         });
 
         dbContext.Institutions.Add(new InstitutionMetadata

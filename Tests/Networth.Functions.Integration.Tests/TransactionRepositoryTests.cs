@@ -35,7 +35,7 @@ public class TransactionRepositoryTests(MockoonTestFixture mockoonTestFixture, I
         var accountId = "test-account";
 
         // Seed parent entities to satisfy foreign keys
-        dbContext.Users.Add(new User { Id = userId, Name = "Test User", FirebaseUid = "test-firebase-uid" });
+        dbContext.Users.Add(new User { Id = userId, Name = "Test User", FirebaseUid = "test-firebase-uid", Email = "test@example.com" });
         dbContext.Accounts.Add(new Account
         {
             Id = accountId,

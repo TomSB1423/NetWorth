@@ -86,7 +86,6 @@ public class UpdateUser(
             return new OkObjectResult(new UpdateUserResponse
             {
                 UserId = result.Id,
-                FirebaseUid = result.FirebaseUid,
                 Name = result.Name,
                 HasCompletedOnboarding = result.HasCompletedOnboarding,
             });

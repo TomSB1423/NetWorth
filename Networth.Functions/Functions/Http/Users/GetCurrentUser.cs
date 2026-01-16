@@ -44,7 +44,6 @@ public class GetCurrentUser(
         return new OkObjectResult(new CurrentUserResponse
         {
             UserId = user.Id,
-            FirebaseUid = user.FirebaseUid,
             Name = user.Name,
             Email = user.Email,
             HasCompletedOnboarding = user.HasCompletedOnboarding,

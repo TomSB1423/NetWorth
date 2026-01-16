@@ -3,6 +3,14 @@
     "Values": {
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
     },
+    "Networth": {
+        "UseAuthentication": false,
+        "MockUser": {
+            "FirebaseUid": "mock-user-123",
+            "Name": "Mock Development User",
+            "Email": "mock@example.com"
+        }
+    },
     "Gocardless": {
         "BankAccountDataBaseUrl": "https://bankaccountdata.gocardless.com/api/v2"
     },

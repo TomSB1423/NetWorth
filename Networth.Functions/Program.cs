@@ -23,12 +23,12 @@ builder.AddServiceDefaults();
 builder.UseMiddleware<FunctionContextMiddleware>();
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
-// Read mock authentication setting early to decide which auth middleware to use
+// Read authentication setting early to decide which auth middleware to use
 var networthOptions = new NetworthOptions();
 builder.Configuration.GetSection(NetworthOptions.SectionName).Bind(networthOptions);
 
-// Use mock auth in development when enabled, otherwise use real JWT auth
-if (builder.Environment.IsDevelopment() && networthOptions.MockAuthentication)
+// Use mock auth in development when UseAuthentication is disabled, otherwise use real JWT auth
+if (builder.Environment.IsDevelopment() && !networthOptions.UseAuthentication)
 {
     // Mock user middleware injects a default mock user for all requests
     builder.UseMiddleware<MockUserMiddleware>();

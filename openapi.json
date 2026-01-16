@@ -515,6 +515,7 @@
             "type": "object",
             "properties": {
                 "userId": {
+                    "format": "uuid",
                     "type": "string"
                 },
                 "name": {
@@ -532,12 +533,16 @@
             "type": "object",
             "properties": {
                 "userId": {
+                    "format": "uuid",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "isAuthenticated": {
+                "email": {
+                    "type": "string"
+                },
+                "hasCompletedOnboarding": {
                     "type": "boolean"
                 }
             }
@@ -779,6 +784,7 @@
             "type": "object",
             "properties": {
                 "userId": {
+                    "format": "uuid",
                     "type": "string"
                 },
                 "name": {

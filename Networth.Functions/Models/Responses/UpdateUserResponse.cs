@@ -11,11 +11,6 @@ public class UpdateUserResponse
     public required Guid UserId { get; set; }
 
     /// <summary>
-    ///     Gets or sets the Firebase UID.
-    /// </summary>
-    public required string FirebaseUid { get; set; }
-
-    /// <summary>
     ///     Gets or sets the user's display name.
     /// </summary>
     public required string Name { get; set; }

@@ -52,8 +52,8 @@ public class CreateUser(
         var command = new CreateUserCommand
         {
             FirebaseUid = currentUserService.FirebaseUid,
-            Name = currentUserService.Name,
-            Email = currentUserService.Email,
+            Name = currentUserService.Name!,
+            Email = currentUserService.Email!,
         };
 
         var result = await mediator.Send<CreateUserCommand, CreateUserCommandResult>(command);
@@ -61,7 +61,6 @@ public class CreateUser(
         return new OkObjectResult(new CreateUserResponse
         {
             UserId = result.UserId,
-            FirebaseUid = result.FirebaseUid,
             Name = result.Name,
             IsNewUser = result.IsNewUser,
             HasCompletedOnboarding = result.HasCompletedOnboarding,

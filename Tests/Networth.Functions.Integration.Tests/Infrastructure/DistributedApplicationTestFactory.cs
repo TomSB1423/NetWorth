@@ -75,10 +75,10 @@ public static class DistributedApplicationTestFactory
             .OfType<ProjectResource>()
             .First(r => r.Name == ResourceNames.Functions);
 
-        // Force enable mock authentication for integration tests
+        // Disable real authentication for integration tests (use mock user)
         functionsResource.Annotations.Add(new EnvironmentCallbackAnnotation(env =>
         {
-            env.EnvironmentVariables["Networth__MockAuthentication"] = "true";
+            env.EnvironmentVariables["Networth__UseAuthentication"] = "false";
             env.EnvironmentVariables["Firebase__ProjectId"] = "disabled";
         }));
 

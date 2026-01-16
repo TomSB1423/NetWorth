@@ -27,8 +27,9 @@ public static class DatabaseExtensions
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="firebaseUid">The Firebase UID from the authentication token.</param>
-    /// <param name="userName">The user name from the authentication token (optional).</param>
-    public static async Task EnsureUserExistsAsync(this NetworthDbContext dbContext, string firebaseUid, string? userName)
+    /// <param name="userName">The user name from the authentication token.</param>
+    /// <param name="email">The user email from the authentication token.</param>
+    public static async Task EnsureUserExistsAsync(this NetworthDbContext dbContext, string firebaseUid, string userName, string email)
     {
         if (!await dbContext.Users.AnyAsync(u => u.FirebaseUid == firebaseUid))
         {
@@ -36,7 +37,8 @@ public static class DatabaseExtensions
             {
                 Id = Guid.NewGuid(),
                 FirebaseUid = firebaseUid,
-                Name = userName ?? "Unknown User",
+                Name = userName,
+                Email = email,
                 CreatedAt = DateTime.UtcNow,
             });
             await dbContext.SaveChangesAsync();

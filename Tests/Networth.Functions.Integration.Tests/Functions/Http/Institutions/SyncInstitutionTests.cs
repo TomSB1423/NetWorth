@@ -37,7 +37,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -123,7 +123,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -196,7 +196,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 

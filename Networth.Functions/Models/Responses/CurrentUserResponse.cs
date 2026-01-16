@@ -11,11 +11,6 @@ public class CurrentUserResponse
     public required Guid UserId { get; set; }
 
     /// <summary>
-    ///     Gets or sets the Firebase UID from the authentication token.
-    /// </summary>
-    public required string FirebaseUid { get; set; }
-
-    /// <summary>
     ///     Gets or sets the user's name.
     /// </summary>
     public string? Name { get; set; }

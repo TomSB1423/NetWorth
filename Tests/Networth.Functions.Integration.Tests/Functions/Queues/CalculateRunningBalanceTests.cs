@@ -47,6 +47,7 @@ public class CalculateRunningBalanceTests(MockoonTestFixture mockoonTestFixture,
             Id = userId,
             Name = "Test User",
             FirebaseUid = "test-firebase-uid",
+            Email = "test@example.com",
         };
         dbContext.Users.Add(user);
 
