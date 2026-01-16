@@ -76,11 +76,18 @@ runs:
         tenant-id: ${{ inputs.azure-tenant-id }}
         subscription-id: ${{ inputs.azure-subscription-id }}
 
-    - name: Deploy to Static Web App
+    - name: Get SWA Deployment Token
+      id: get-token
       shell: bash
       run: |
-        az staticwebapp deploy \
-          --name ${{ inputs.swa-name }} \
-          --resource-group ${{ inputs.resource-group }} \
-          --source ./${{ inputs.working-directory }}/${{ inputs.build-output }} \
-          --env production
+        TOKEN=$(az staticwebapp secrets list --name ${{ inputs.swa-name }} --resource-group ${{ inputs.resource-group }} --query "properties.apiKey" -o tsv)
+        echo "::add-mask::$TOKEN"
+        echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+    - name: Deploy to Static Web App
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ steps.get-token.outputs.token }}
+        action: "upload"
+        app_location: "./${{ inputs.working-directory }}/${{ inputs.build-output }}"
+        skip_app_build: true
