@@ -18,6 +18,14 @@ terraform {
     }
   }
   required_version = ">= 1.5.0"
+
+  backend "azurerm" {
+    resource_group_name  = "rg-networth-tfstate"
+    storage_account_name = "stnetworthtfstate"
+    container_name       = "tfstate"
+    key                  = "networth.tfstate"
+    use_oidc             = true
+  }
 }
 
 provider "azurerm" {
