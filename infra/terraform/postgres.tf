@@ -41,6 +41,15 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_service
   end_ip_address   = "0.0.0.0"
 }
 
+# Allow all IPs for GitHub Actions migrations (dev only - restrict in production)
+resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_all" {
+  count            = var.environment == "dev" ? 1 : 0
+  name             = "AllowAll"
+  server_id        = azurerm_postgresql_flexible_server.psql.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "255.255.255.255"
+}
+
 # Note: For production, consider using:
 # - Private endpoints instead of public access
 # - VNet integration with the Container App Environment
