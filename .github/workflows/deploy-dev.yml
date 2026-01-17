@@ -89,9 +89,11 @@ jobs:
       - name: Apply Database Migrations
         run: |
           CONNECTION_STRING="Host=${{ needs.terraform.outputs.postgres_fqdn }};Database=networth-db;Username=networthadmin;Password=${{ steps.get-password.outputs.db-password }};SSL Mode=Require;Trust Server Certificate=true"
+          dotnet build Networth.Infrastructure/Networth.Infrastructure.csproj --no-restore
           dotnet ef database update \
             --project Networth.Infrastructure/Networth.Infrastructure.csproj \
             --connection "$CONNECTION_STRING" \
+            --no-build \
             --verbose
 
   deploy-functions:
