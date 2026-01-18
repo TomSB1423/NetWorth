@@ -24,8 +24,7 @@ export const setTokenGetter = (fn: () => Promise<string>) => {
 
 const getAuthHeaders = async (): Promise<Record<string, string>> => {
     if (!getAccessTokenFn) {
-        console.warn("Token getter not set, skipping auth header");
-        return {};
+        throw new Error("Token getter not set - auth not ready");
     }
     try {
         const token = await getAccessTokenFn();
