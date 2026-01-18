@@ -104,7 +104,7 @@ resource "azurerm_container_app" "functions" {
 
     container {
       name   = "functions"
-      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      image  = "${azurerm_container_registry.acr.login_server}/networth-functions:latest"
       cpu    = 0.25
       memory = "0.5Gi"
 
@@ -161,6 +161,11 @@ resource "azurerm_container_app" "functions" {
   }
 
   tags = local.common_tags
+
+  # Image is managed by deploy-functions job after initial creation
+  lifecycle {
+    ignore_changes = [template[0].container[0].image]
+  }
 }
 
 # CORS via Azure CLI (frontend + localhost)
