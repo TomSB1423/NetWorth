@@ -97,6 +97,8 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
 
             if (!result.IsValid || result.SecurityToken is not JwtSecurityToken jwt)
             {
+                _logger.LogWarning("Token validation failed. IsValid: {IsValid}, Exception: {Exception}", 
+                    result.IsValid, result.Exception?.Message);
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return;
             }
@@ -117,12 +119,12 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
             httpContext.User = new ClaimsPrincipal(identity);
             context.Items["User"] = httpContext.User;
 
-            _logger.LogDebug("Authenticated user: {UserId}", jwt.Subject);
+            _logger.LogInformation("Authenticated user: {UserId}", jwt.Subject);
             await next(context);
         }
         catch (SecurityTokenException ex)
         {
-            _logger.LogDebug("Token validation failed: {Message}", ex.Message);
+            _logger.LogWarning("Token validation failed: {Message}", ex.Message);
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
         }
         catch (Exception ex)
