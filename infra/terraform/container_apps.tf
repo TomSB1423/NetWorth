@@ -157,6 +157,11 @@ resource "azurerm_container_app" "functions" {
         name  = "Firebase__ProjectId"
         value = var.firebase_project_id
       }
+
+      env {
+        name  = "Institutions__UseSandbox"
+        value = "false"
+      }
     }
   }
 

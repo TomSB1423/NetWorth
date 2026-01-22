@@ -127,11 +127,6 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
             _logger.LogWarning("Token validation failed: {Message}", ex.Message);
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Unexpected error during authentication");
-            httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        }
     }
 
 #pragma warning disable VSTHRD002 // Avoid synchronous waits - Required for constructor initialization
