@@ -94,6 +94,26 @@ const CATEGORY_CONFIG = {
     netWorth: { label: "Net Worth", color: "#F59E0B" },
 };
 
+// Bank logos for the scrolling carousel - using Google Favicon API for reliability
+const BANK_LOGOS = [
+    { name: "HSBC", logo: "https://www.google.com/s2/favicons?domain=hsbc.com&sz=128" },
+    { name: "Barclays", logo: "https://www.google.com/s2/favicons?domain=barclays.co.uk&sz=128" },
+    { name: "Lloyds", logo: "https://www.google.com/s2/favicons?domain=lloydsbank.com&sz=128" },
+    { name: "NatWest", logo: "https://www.google.com/s2/favicons?domain=natwest.com&sz=128" },
+    { name: "Santander", logo: "https://www.google.com/s2/favicons?domain=santander.co.uk&sz=128" },
+    { name: "Nationwide", logo: "https://www.google.com/s2/favicons?domain=nationwide.co.uk&sz=128" },
+    { name: "Monzo", logo: "https://www.google.com/s2/favicons?domain=monzo.com&sz=128" },
+    { name: "Starling", logo: "https://www.google.com/s2/favicons?domain=starlingbank.com&sz=128" },
+    { name: "Revolut", logo: "https://www.google.com/s2/favicons?domain=revolut.com&sz=128" },
+    { name: "Chase", logo: "https://www.google.com/s2/favicons?domain=chase.com&sz=128" },
+    { name: "Metro Bank", logo: "https://www.google.com/s2/favicons?domain=metrobankonline.co.uk&sz=128" },
+    { name: "TSB", logo: "https://www.google.com/s2/favicons?domain=tsb.co.uk&sz=128" },
+    { name: "Halifax", logo: "https://www.google.com/s2/favicons?domain=halifax.co.uk&sz=128" },
+    { name: "First Direct", logo: "https://www.google.com/s2/favicons?domain=firstdirect.com&sz=128" },
+    { name: "Co-op Bank", logo: "https://www.google.com/s2/favicons?domain=co-operativebank.co.uk&sz=128" },
+    { name: "Virgin Money", logo: "https://www.google.com/s2/favicons?domain=virginmoney.com&sz=128" },
+];
+
 // Format currency for display
 function formatCurrency(value: number): string {
     const absValue = Math.abs(value);
@@ -719,6 +739,63 @@ const FeatureSlideshow = memo(function FeatureSlideshow() {
     );
 });
 
+// Infinite scrolling bank logo carousel
+const BankLogoCarousel = memo(function BankLogoCarousel() {
+    // Duplicate the logos for seamless infinite scroll
+    const duplicatedLogos = [...BANK_LOGOS, ...BANK_LOGOS];
+    
+    return (
+        <div className="relative overflow-hidden py-8">
+            {/* Gradient fade edges */}
+            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-slate-950 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-950 to-transparent z-10 pointer-events-none" />
+            
+            {/* Scrolling container */}
+            <div 
+                className="flex gap-12 animate-scroll"
+                style={{
+                    width: "fit-content",
+                }}
+            >
+                {duplicatedLogos.map((bank, index) => (
+                    <div 
+                        key={`${bank.name}-${index}`}
+                        className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-4 opacity-70 hover:opacity-100 transition-all duration-300"
+                    >
+                        <img 
+                            src={bank.logo}
+                            alt={bank.name}
+                            className="h-10 w-10 object-contain"
+                            loading="lazy"
+                            onError={(e) => {
+                                // Hide image if it fails to load
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                            }}
+                        />
+                        <span className="text-slate-400 font-semibold text-xs whitespace-nowrap">{bank.name}</span>
+                    </div>
+                ))}
+            </div>
+            
+            {/* CSS for infinite scroll animation */}
+            <style>{`
+                @keyframes scroll {
+                    0% {
+                        transform: translateX(0);
+                    }
+                    100% {
+                        transform: translateX(-50%);
+                    }
+                }
+                .animate-scroll {
+                    animation: scroll 60s linear infinite;
+                }
+            `}</style>
+        </div>
+    );
+});
+
 export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
     // Scenario state
     const [scenarios, setScenarios] = useState<Scenario[]>([
@@ -911,53 +988,6 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                 </div>
             </section>
 
-            {/* Trusted By / Stats Section */}
-            <section className="py-16 px-6 border-t border-slate-800/50">
-                <div className="max-w-[1280px] mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                        <div>
-                            <div className="text-3xl md:text-4xl font-bold text-white mb-1">
-                                2,500+
-                            </div>
-                            <div className="text-sm text-slate-500">
-                                Banks supported
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-3xl md:text-4xl font-bold text-white mb-1">
-                                256-bit
-                            </div>
-                            <div className="text-sm text-slate-500">
-                                Encryption
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-3xl md:text-4xl font-bold text-white mb-1">
-                                £847
-                            </div>
-                            <div className="text-sm text-slate-500">
-                                Avg. annual savings
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-3xl md:text-4xl font-bold text-white mb-1">
-                                3.2x
-                            </div>
-                            <div className="text-sm text-slate-500">
-                                More likely to hit goals
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Feature Slideshow - GitHub Style */}
-            <section className="py-24 px-6">
-                <div className="max-w-[1280px] mx-auto">
-                    <FeatureSlideshow />
-                </div>
-            </section>
-
             {/* Why Track Section - Card Grid */}
             <section className="py-24 px-6 border-t border-slate-800/50">
                 <div className="max-w-[1280px] mx-auto">
@@ -1039,40 +1069,204 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* Bank Logos Carousel */}
+            <section className="py-16 px-6 bg-gradient-to-b from-slate-900/50 to-transparent">
+                <div className="max-w-[1280px] mx-auto">
+                    {/* Banner */}
+                    <div className="text-center mb-8">
+                        <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                            Connect with 2,500+ banks
+                        </h3>
+                        <p className="text-slate-400 text-base max-w-lg mx-auto">
+                            Securely link all your accounts with read-only access. From high-street banks to digital challengers.
+                        </p>
+                    </div>
+                    <BankLogoCarousel />
+                </div>
+            </section>
+
+            {/* Feature Slideshow - GitHub Style */}
             <section className="py-24 px-6">
                 <div className="max-w-[1280px] mx-auto">
-                    <div className="relative rounded-2xl overflow-hidden">
-                        {/* Background */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-slate-900 to-blue-500/20"></div>
-                        <div className="absolute inset-0 bg-slate-900/80"></div>
+                    <FeatureSlideshow />
+                </div>
+            </section>
 
-                        <div className="relative px-8 py-16 md:py-24 text-center">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
-                                <Sparkles size={14} className="text-emerald-400" />
-                                <span className="text-xs font-medium text-emerald-400">Free forever for personal use</span>
+            {/* Trusted By / Stats Section */}
+            <section className="py-16 px-6 border-t border-slate-800/50">
+                <div className="max-w-[1280px] mx-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                        <div>
+                            <div className="text-3xl md:text-4xl font-bold text-white mb-1">
+                                2,500+
                             </div>
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-white">
-                                Start tracking your wealth today
-                            </h2>
-                            <p className="text-lg text-slate-400 mb-8 max-w-xl mx-auto">
-                                Join thousands who've taken control of their
-                                finances. Free to start, powerful enough to grow
-                                with you.
-                            </p>
-                            <button
-                                onClick={onGetStarted}
-                                className="group h-12 px-8 text-base font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-all hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-emerald-500/25"
-                            >
-                                <span className="flex items-center gap-2">
-                                    Get started
-                                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            <div className="text-sm text-slate-500">
+                                Banks supported
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-3xl md:text-4xl font-bold text-white mb-1">
+                                256-bit
+                            </div>
+                            <div className="text-sm text-slate-500">
+                                Encryption
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-3xl md:text-4xl font-bold text-white mb-1">
+                                £847
+                            </div>
+                            <div className="text-sm text-slate-500">
+                                Avg. annual savings
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-3xl md:text-4xl font-bold text-white mb-1">
+                                3.2x
+                            </div>
+                            <div className="text-sm text-slate-500">
+                                More likely to hit goals
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-24 px-6 relative overflow-hidden">
+                {/* Animated background elements */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-3xl" />
+                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-3xl" />
+                </div>
+
+                <div className="max-w-[1280px] mx-auto relative">
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        {/* Left side - Content */}
+                        <div className="text-center lg:text-left">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+                                <Sparkles size={16} className="text-emerald-400" />
+                                <span className="text-sm font-medium text-emerald-400">Free forever for personal use</span>
+                            </div>
+                            
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 text-white leading-tight">
+                                Your wealth journey
+                                <br />
+                                <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                                    starts here
                                 </span>
-                            </button>
-                            <p className="text-sm text-slate-500 mt-4">
-                                No credit card required • Bank-grade security •
-                                Cancel anytime
+                            </h2>
+                            
+                            <p className="text-lg text-slate-400 mb-8 max-w-lg">
+                                Join thousands who've taken control of their finances. 
+                                Connect your accounts in minutes and see your complete financial picture.
                             </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+                                <button
+                                    onClick={onGetStarted}
+                                    className="group h-14 px-8 text-base font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all hover:scale-105 active:scale-95 hover:shadow-xl hover:shadow-emerald-500/25"
+                                >
+                                    <span className="flex items-center justify-center gap-2">
+                                        Create free account
+                                        <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={onSignIn}
+                                    className="h-14 px-8 text-base font-semibold text-slate-300 hover:text-white border border-slate-700 hover:border-slate-600 rounded-xl transition-all hover:bg-slate-800/50"
+                                >
+                                    Sign in
+                                </button>
+                            </div>
+
+                            <div className="flex flex-wrap gap-6 justify-center lg:justify-start text-sm text-slate-500">
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                    <span>No credit card</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                    <span>Bank-grade security</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                    <span>Read-only access</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right side - Visual element */}
+                        <div className="hidden lg:block relative">
+                            <div className="relative">
+                                {/* Mock dashboard card */}
+                                <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-2xl p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <p className="text-sm text-slate-400">Total Net Worth</p>
+                                            <p className="text-3xl font-bold text-white">£247,832</p>
+                                        </div>
+                                        <div className="flex items-center gap-1 text-emerald-400 text-sm font-medium">
+                                            <TrendingUp size={16} />
+                                            <span>+12.4%</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Mini chart visualization */}
+                                    <div className="h-24 flex items-end gap-1">
+                                        {[35, 42, 38, 55, 48, 62, 58, 70, 65, 78, 72, 85].map((height, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex-1 bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t opacity-80"
+                                                style={{ height: `${height}%` }}
+                                            />
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="mt-6 grid grid-cols-3 gap-4">
+                                        <div className="text-center p-3 bg-slate-900/50 rounded-lg">
+                                            <p className="text-xs text-slate-500 mb-1">Cash</p>
+                                            <p className="text-sm font-semibold text-white">£18,420</p>
+                                        </div>
+                                        <div className="text-center p-3 bg-slate-900/50 rounded-lg">
+                                            <p className="text-xs text-slate-500 mb-1">Investments</p>
+                                            <p className="text-sm font-semibold text-white">£89,412</p>
+                                        </div>
+                                        <div className="text-center p-3 bg-slate-900/50 rounded-lg">
+                                            <p className="text-xs text-slate-500 mb-1">Property</p>
+                                            <p className="text-sm font-semibold text-white">£140,000</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Floating account cards */}
+                                <div className="absolute -top-4 -left-8 bg-slate-800 border border-slate-700 rounded-xl p-3 shadow-xl transform -rotate-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">B</div>
+                                        <div>
+                                            <p className="text-xs text-slate-400">Barclays</p>
+                                            <p className="text-sm font-semibold text-white">£4,230</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="absolute -bottom-4 -right-4 bg-slate-800 border border-slate-700 rounded-xl p-3 shadow-xl transform rotate-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">M</div>
+                                        <div>
+                                            <p className="text-xs text-slate-400">Monzo</p>
+                                            <p className="text-sm font-semibold text-white">£1,847</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
