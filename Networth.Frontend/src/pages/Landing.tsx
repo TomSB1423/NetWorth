@@ -1,140 +1,773 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, memo, useEffect } from "react";
 import {
     TrendingUp,
     Eye,
     Target,
-    ArrowRight,
-    CreditCard,
-    Landmark,
-    PiggyBank,
-    ChevronDown,
-    Pause,
-    Link2,
-    Shield,
+    Home,
+    Baby,
+    Briefcase,
     BarChart3,
-    RefreshCw,
-    Bell,
-    Lock,
+    Pause,
+    Play,
+    ChevronRight,
+    Menu,
+    X,
+    Sparkles,
 } from "lucide-react";
+import { Switch } from "../components/ui/switch";
+import {
+    ResponsiveContainer,
+    ComposedChart,
+    Area,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ReferenceLine,
+} from "recharts";
 
 interface LandingPageProps {
     onGetStarted: () => void;
     onSignIn: () => void;
 }
 
-// Feature tabs configuration
-const featureTabs = [
+// Scenario configuration
+interface Scenario {
+    id: string;
+    label: string;
+    icon: typeof Home;
+    color: string;
+    enabled: boolean;
+    age: number;
+    minAge: number;
+    maxAge: number;
+    description: string;
+}
+
+interface ProjectionPoint {
+    age: number;
+    cash: number;
+    investments: number;
+    pension: number;
+    property: number;
+    liabilities: number;
+    netWorth: number;
+    events: string[];
+}
+
+// Feature tabs configuration for slideshow
+const FEATURE_TABS = [
     {
         id: "track",
         label: "Track",
-        description:
-            "See your complete financial picture in real-time. All accounts, all balances, one dashboard.",
+        description: "See your complete financial picture in real-time. All accounts, all balances, one dashboard.",
         image: "/dashboard-preview.png",
     },
     {
         id: "connect",
         label: "Connect",
-        description:
-            "Link your bank accounts securely with read-only access. Automatic sync keeps everything up to date.",
+        description: "Link your bank accounts securely with read-only access. Automatic sync keeps everything up to date.",
         image: "/accounts-preview.png",
     },
     {
         id: "analyze",
         label: "Analyze",
-        description:
-            "Understand your spending patterns and track your wealth trajectory over time.",
+        description: "Understand your spending patterns and track your wealth trajectory over time.",
         image: "/transactions-preview.png",
     },
     {
         id: "grow",
         label: "Grow",
-        description:
-            "Set financial goals, track milestones, and watch your net worth grow.",
+        description: "Set financial goals, track milestones, and watch your net worth grow.",
         image: "/dashboard-preview.png",
     },
-];
+] as const;
 
-// Accordion features configuration
-const accordionFeatures = [
-    {
-        id: "aggregation",
-        icon: Link2,
-        title: "Aggregate all your accounts",
-        description:
-            "Connect checking, savings, credit cards, and loans from 2,500+ banks. One view of your entire financial life.",
-        link: "#",
-        linkText: "Learn about bank connections",
-    },
-    {
-        id: "realtime",
-        icon: RefreshCw,
-        title: "Real-time balance updates",
-        description:
-            "Your balances sync automatically throughout the day. Always know exactly where you stand.",
-        link: "#",
-        linkText: "See how sync works",
-    },
-    {
-        id: "alerts",
-        icon: Bell,
-        title: "Smart notifications",
-        description:
-            "Get notified about large transactions, balance changes, and when you hit your wealth milestones.",
-        link: "#",
-        linkText: "Explore notifications",
-    },
-    {
-        id: "security",
-        icon: Lock,
-        title: "Bank-grade security",
-        description:
-            "256-bit encryption, read-only access, and SOC 2 compliance. Your data is never sold or shared.",
-        link: "#",
-        linkText: "Review our security",
-    },
-];
+// Chart category configuration
+const CATEGORY_CONFIG = {
+    pension: { label: "Pension", color: "#8B5CF6" },
+    investments: { label: "Investments", color: "#06B6D4" },
+    property: { label: "Property", color: "#3B82F6" },
+    cash: { label: "Cash", color: "#10B981" },
+    liabilities: { label: "Liabilities", color: "#EF4444" },
+    netWorth: { label: "Net Worth", color: "#F59E0B" },
+};
 
-export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
+// Format currency for display
+function formatCurrency(value: number): string {
+    const absValue = Math.abs(value);
+    if (absValue >= 1000000) {
+        return `£${(value / 1000000).toFixed(1)}M`;
+    }
+    if (absValue >= 1000) {
+        return `£${(value / 1000).toFixed(0)}k`;
+    }
+    return `£${value.toFixed(0)}`;
+}
+
+// Generate projection data based on scenarios
+function generateProjection(scenarios: Scenario[]): ProjectionPoint[] {
+    const startAge = 25;
+    const endAge = 70;
+    const data: ProjectionPoint[] = [];
+
+    // Base assumptions (mock data)
+    const annualSalary = 45000;
+    const savingsRate = 0.15;
+    const investmentReturn = 0.06;
+    const pensionContribution = 0.08;
+    const pensionReturn = 0.05;
+    const propertyAppreciation = 0.03;
+    const mortgageRate = 0.045;
+    const mortgageTerm = 25;
+
+    let cash = 8000;
+    let investments = 15000;
+    let pension = 12000;
+    let property = 0;
+    let mortgageBalance = 0;
+    let otherLiabilities = 5000; // Student loan etc
+
+    const buyHouse = scenarios.find((s) => s.id === "buyHouse");
+    const haveKids = scenarios.find((s) => s.id === "haveKids");
+    const careerBreak = scenarios.find((s) => s.id === "careerBreak");
+
+    for (let age = startAge; age <= endAge; age++) {
+        const events: string[] = [];
+        let monthlySavings = (annualSalary * savingsRate) / 12;
+        let monthlyPensionContrib = (annualSalary * pensionContribution) / 12;
+
+        // Buy house scenario
+        if (buyHouse?.enabled && age === buyHouse.age) {
+            property = 350000;
+            mortgageBalance = 280000;
+            cash -= 70000; // Deposit
+            if (cash < 0) {
+                investments += cash;
+                cash = 2000;
+            }
+            events.push("🏠 Buy house");
+        }
+
+        // Have kids scenario - ongoing impact
+        if (haveKids?.enabled && age >= haveKids.age && age < haveKids.age + 18) {
+            const kidsImpact = 1200; // Monthly cost
+            monthlySavings -= kidsImpact / 12;
+            if (age === haveKids.age) {
+                events.push("👶 Have children");
+            }
+        }
+
+        // Career break scenario
+        if (careerBreak?.enabled && age >= careerBreak.age && age < careerBreak.age + 1) {
+            monthlySavings = -2000; // Spending savings
+            monthlyPensionContrib = 0;
+            if (age === careerBreak.age) {
+                events.push("✈️ Career break");
+            }
+        }
+
+        // Apply annual changes
+        cash += monthlySavings * 12;
+        cash = Math.max(cash, 1000);
+
+        investments *= 1 + investmentReturn;
+        investments += Math.max(0, monthlySavings * 6);
+
+        pension *= 1 + pensionReturn;
+        pension += monthlyPensionContrib * 12;
+
+        if (property > 0) {
+            property *= 1 + propertyAppreciation;
+            // Pay down mortgage
+            const monthlyMortgage =
+                (mortgageBalance * (mortgageRate / 12)) /
+                (1 - Math.pow(1 + mortgageRate / 12, -mortgageTerm * 12));
+            mortgageBalance = Math.max(0, mortgageBalance - monthlyMortgage * 3);
+        }
+
+        // Reduce other liabilities over time
+        otherLiabilities = Math.max(0, otherLiabilities - 1500);
+
+        const totalLiabilities = mortgageBalance + otherLiabilities;
+        const totalAssets = cash + investments + pension + property;
+
+        data.push({
+            age,
+            cash: Math.round(cash),
+            investments: Math.round(investments),
+            pension: Math.round(pension),
+            property: Math.round(property),
+            liabilities: -Math.round(totalLiabilities),
+            netWorth: Math.round(totalAssets - totalLiabilities),
+            events,
+        });
+    }
+
+    return data;
+}
+
+// Fixed Y-axis domain - defined outside component to prevent recreation
+const Y_DOMAIN: [number, number] = [-500000, 2500000];
+
+// Chart gradient definitions - extracted to avoid recreation
+const CHART_GRADIENTS = (
+    <defs>
+        <linearGradient id="cashGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={CATEGORY_CONFIG.cash.color} stopOpacity={0.8} />
+            <stop offset="95%" stopColor={CATEGORY_CONFIG.cash.color} stopOpacity={0.3} />
+        </linearGradient>
+        <linearGradient id="investmentsGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={CATEGORY_CONFIG.investments.color} stopOpacity={0.8} />
+            <stop offset="95%" stopColor={CATEGORY_CONFIG.investments.color} stopOpacity={0.3} />
+        </linearGradient>
+        <linearGradient id="propertyGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={CATEGORY_CONFIG.property.color} stopOpacity={0.8} />
+            <stop offset="95%" stopColor={CATEGORY_CONFIG.property.color} stopOpacity={0.3} />
+        </linearGradient>
+        <linearGradient id="pensionGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={CATEGORY_CONFIG.pension.color} stopOpacity={0.8} />
+            <stop offset="95%" stopColor={CATEGORY_CONFIG.pension.color} stopOpacity={0.3} />
+        </linearGradient>
+        <linearGradient id="liabilitiesGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={CATEGORY_CONFIG.liabilities.color} stopOpacity={0.6} />
+            <stop offset="95%" stopColor={CATEGORY_CONFIG.liabilities.color} stopOpacity={0.2} />
+        </linearGradient>
+    </defs>
+);
+
+// Memoized scenario card component
+const ScenarioCard = memo(function ScenarioCard({
+    scenario,
+    onToggle,
+    onAgeChange,
+}: {
+    scenario: Scenario;
+    onToggle: () => void;
+    onAgeChange: (age: number) => void;
+}) {
+    const Icon = scenario.icon;
+    const [localAge, setLocalAge] = useState(scenario.age);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+    // Sync local age with prop changes (e.g., reset)
+    useEffect(() => {
+        setLocalAge(scenario.age);
+    }, [scenario.age]);
+
+    // Cleanup debounce on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, []);
+
+    const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const newAge = parseInt(e.target.value);
+        setLocalAge(newAge);
+        
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => onAgeChange(newAge), 50);
+    }, [onAgeChange]);
+
+    const sliderProgress = ((localAge - scenario.minAge) / (scenario.maxAge - scenario.minAge)) * 100;
+
+    return (
+        <div
+            className={`relative p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
+                scenario.enabled
+                    ? "bg-slate-800/80 border-slate-600"
+                    : "bg-slate-900/50 border-slate-800"
+            }`}
+            onClick={onToggle}
+        >
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                    <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{
+                            backgroundColor: scenario.enabled
+                                ? `${scenario.color}20`
+                                : "rgb(30 41 59)",
+                        }}
+                    >
+                        <Icon
+                            size={20}
+                            style={{
+                                color: scenario.enabled ? scenario.color : "#64748b",
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-white text-sm">
+                            {scenario.label}
+                        </h4>
+                        <p className="text-xs text-slate-500">
+                            {scenario.description}
+                        </p>
+                    </div>
+                </div>
+                <Switch
+                    checked={scenario.enabled}
+                    onCheckedChange={onToggle}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`Toggle ${scenario.label}`}
+                />
+            </div>
+
+            <div 
+                className={`space-y-2 transition-opacity duration-300 ${scenario.enabled ? "" : "opacity-40 pointer-events-none"}`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Age</span>
+                    <span
+                        className="font-medium"
+                        style={{ color: scenario.enabled ? scenario.color : "#64748b" }}
+                    >
+                        {localAge}
+                    </span>
+                </div>
+                <input
+                    type="range"
+                    min={scenario.minAge}
+                    max={scenario.maxAge}
+                    value={localAge}
+                    onChange={handleSliderChange}
+                    disabled={!scenario.enabled}
+                    className={`w-full h-1.5 rounded-lg appearance-none ${scenario.enabled ? "cursor-pointer" : "cursor-not-allowed"}`}
+                    style={{
+                        background: scenario.enabled
+                            ? `linear-gradient(to right, ${scenario.color} 0%, ${scenario.color} ${sliderProgress}%, rgb(51 65 85) ${sliderProgress}%, rgb(51 65 85) 100%)`
+                            : "rgb(51 65 85)",
+                    }}
+                />
+                <div className="flex justify-between text-[10px] text-slate-600">
+                    <span>{scenario.minAge}</span>
+                    <span>{scenario.maxAge}</span>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+// Interactive chart component for the landing page
+const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
+    scenarios,
+    onToggleScenario,
+    onChangeAge,
+}: {
+    scenarios: Scenario[];
+    onToggleScenario: (id: string) => void;
+    onChangeAge: (id: string, age: number) => void;
+}) {
+    const data = useMemo(() => generateProjection(scenarios), [scenarios]);
+    const [hoveredAge, setHoveredAge] = useState<number | null>(null);
+
+    const currentPoint = useMemo(() => {
+        const age = hoveredAge ?? 35;
+        return data.find((p) => p.age === age) ?? data[10];
+    }, [data, hoveredAge]);
+
+    const handleMouseMove = useCallback((state: unknown) => {
+        const chartState = state as { activePayload?: { payload?: ProjectionPoint }[] };
+        const age = chartState?.activePayload?.[0]?.payload?.age;
+        if (age !== undefined) setHoveredAge(age);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => setHoveredAge(null), []);
+
+    // Event markers for enabled scenarios
+    const eventMarkers = useMemo(() => 
+        scenarios.filter(s => s.enabled).map(s => ({ age: s.age, label: s.label, color: s.color })),
+        [scenarios]
+    );
+
+    // Calculate key metrics for display
+    const metrics = useMemo(() => {
+        const startPoint = data[0];
+        const endPoint = data[data.length - 1];
+        const peakNetWorth = Math.max(...data.map(d => d.netWorth));
+        const ageAtPeak = data.find(d => d.netWorth === peakNetWorth)?.age ?? 70;
+        return {
+            startNetWorth: startPoint?.netWorth ?? 0,
+            endNetWorth: endPoint?.netWorth ?? 0,
+            peakNetWorth,
+            ageAtPeak,
+            totalGrowth: ((endPoint?.netWorth ?? 0) - (startPoint?.netWorth ?? 0)),
+        };
+    }, [data]);
+
+    return (
+        <div className="space-y-6">
+            {/* Scenario Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {scenarios.map((scenario) => (
+                    <ScenarioCard
+                        key={scenario.id}
+                        scenario={scenario}
+                        onToggle={() => onToggleScenario(scenario.id)}
+                        onAgeChange={(age) => onChangeAge(scenario.id, age)}
+                    />
+                ))}
+            </div>
+
+            {/* Key Metrics Summary */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-center">
+                    <div className="text-xs text-slate-400 mb-1">Starting (Age 25)</div>
+                    <div className="text-lg font-bold text-white">{formatCurrency(metrics.startNetWorth)}</div>
+                </div>
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-center">
+                    <div className="text-xs text-slate-400 mb-1">Peak Wealth</div>
+                    <div className="text-lg font-bold text-emerald-400">{formatCurrency(metrics.peakNetWorth)}</div>
+                    <div className="text-[10px] text-slate-500">at age {metrics.ageAtPeak}</div>
+                </div>
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-center">
+                    <div className="text-xs text-slate-400 mb-1">At Retirement (70)</div>
+                    <div className="text-lg font-bold text-white">{formatCurrency(metrics.endNetWorth)}</div>
+                </div>
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-center">
+                    <div className="text-xs text-slate-400 mb-1">Total Growth</div>
+                    <div className="text-lg font-bold text-emerald-400">+{formatCurrency(metrics.totalGrowth)}</div>
+                </div>
+            </div>
+
+            {/* Chart */}
+            <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 md:p-6 overflow-hidden">
+                <ResponsiveContainer width="100%" height={350}>
+                    <ComposedChart
+                        data={data}
+                        margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        {CHART_GRADIENTS}
+                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                        <XAxis
+                            dataKey="age"
+                            tick={{ fontSize: 11, fill: "#94a3b8" }}
+                            tickLine={false}
+                            axisLine={{ stroke: "#334155" }}
+                            label={{
+                                value: "Age",
+                                position: "bottom",
+                                offset: 0,
+                                fontSize: 11,
+                                fill: "#94a3b8",
+                            }}
+                        />
+                        <YAxis
+                            domain={Y_DOMAIN}
+                            tickFormatter={(val) => {
+                                if (Math.abs(val) >= 1000000)
+                                    return `£${(val / 1000000).toFixed(1)}M`;
+                                return `£${(val / 1000).toFixed(0)}k`;
+                            }}
+                            tick={{ fontSize: 11, fill: "#94a3b8" }}
+                            tickLine={false}
+                            axisLine={false}
+                            width={60}
+                        />
+                        <Tooltip
+                            content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const d = payload[0]?.payload as ProjectionPoint;
+                                if (!d) return null;
+                                const hasEvents = d.events?.length > 0;
+                                return (
+                                    <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-xl text-xs min-w-[180px]">
+                                        <div className="font-semibold text-slate-100 mb-2 border-b border-slate-700 pb-1.5">
+                                            Age {d.age}
+                                        </div>
+                                        {hasEvents && (
+                                            <div className="mb-2 pb-2 border-b border-slate-700">
+                                                {d.events.map((event, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="text-amber-300 font-medium"
+                                                    >
+                                                        {event}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div className="space-y-1 mb-2">
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Cash</span>
+                                                <span style={{ color: CATEGORY_CONFIG.cash.color }}>{formatCurrency(d.cash)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Investments</span>
+                                                <span style={{ color: CATEGORY_CONFIG.investments.color }}>{formatCurrency(d.investments)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Property</span>
+                                                <span style={{ color: CATEGORY_CONFIG.property.color }}>{formatCurrency(d.property)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Pension</span>
+                                                <span style={{ color: CATEGORY_CONFIG.pension.color }}>{formatCurrency(d.pension)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Liabilities</span>
+                                                <span style={{ color: CATEGORY_CONFIG.liabilities.color }}>{formatCurrency(d.liabilities)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="pt-2 border-t border-slate-700 flex justify-between font-semibold">
+                                            <span className="text-slate-100">Net Worth</span>
+                                            <span className="text-emerald-400">{formatCurrency(d.netWorth)}</span>
+                                        </div>
+                                    </div>
+                                );
+                            }}
+                        />
+                        {/* Event markers */}
+                        {eventMarkers.map((marker) => (
+                            <ReferenceLine
+                                key={marker.age}
+                                x={marker.age}
+                                stroke={marker.color}
+                                strokeDasharray="4 4"
+                                strokeOpacity={0.7}
+                            />
+                        ))}
+                        {/* Stacked areas */}
+                        <Area
+                            type="monotone"
+                            dataKey="liabilities"
+                            stackId="1"
+                            stroke={CATEGORY_CONFIG.liabilities.color}
+                            fill="url(#liabilitiesGradient)"
+                            strokeWidth={0}
+                        />
+                        <Area
+                            type="monotone"
+                            dataKey="cash"
+                            stackId="2"
+                            stroke={CATEGORY_CONFIG.cash.color}
+                            fill="url(#cashGradient)"
+                            strokeWidth={0}
+                        />
+                        <Area
+                            type="monotone"
+                            dataKey="investments"
+                            stackId="2"
+                            stroke={CATEGORY_CONFIG.investments.color}
+                            fill="url(#investmentsGradient)"
+                            strokeWidth={0}
+                        />
+                        <Area
+                            type="monotone"
+                            dataKey="property"
+                            stackId="2"
+                            stroke={CATEGORY_CONFIG.property.color}
+                            fill="url(#propertyGradient)"
+                            strokeWidth={0}
+                        />
+                        <Area
+                            type="monotone"
+                            dataKey="pension"
+                            stackId="2"
+                            stroke={CATEGORY_CONFIG.pension.color}
+                            fill="url(#pensionGradient)"
+                            strokeWidth={0}
+                        />
+                        {/* Net worth line */}
+                        <Line
+                            type="monotone"
+                            dataKey="netWorth"
+                            stroke={CATEGORY_CONFIG.netWorth.color}
+                            strokeWidth={2.5}
+                            dot={false}
+                            activeDot={{
+                                r: 6,
+                                fill: CATEGORY_CONFIG.netWorth.color,
+                                stroke: "#1e293b",
+                                strokeWidth: 2,
+                            }}
+                        />
+                    </ComposedChart>
+                </ResponsiveContainer>
+
+                {/* Legend */}
+                <div className="flex flex-wrap justify-center gap-4 mt-4 text-xs">
+                    {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
+                        <div key={key} className="flex items-center gap-1.5">
+                            <span
+                                className={`w-3 h-3 rounded ${
+                                    key === "netWorth" ? "border-2 bg-transparent" : ""
+                                }`}
+                                style={{
+                                    backgroundColor:
+                                        key === "netWorth" ? "transparent" : config.color,
+                                    borderColor:
+                                        key === "netWorth" ? config.color : undefined,
+                                }}
+                            />
+                            <span className="text-slate-400">{config.label}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+});
+
+// GitHub-style feature slideshow component
+const FeatureSlideshow = memo(function FeatureSlideshow() {
     const [activeTab, setActiveTab] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
-    const [expandedFeature, setExpandedFeature] = useState<string | null>(
-        "aggregation"
-    );
-    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const [progress, setProgress] = useState(0);
+    const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+    const progressRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
-    // Reset and restart the auto-advance timer for tabs
-    const resetTimer = useCallback(() => {
-        if (timerRef.current) {
-            clearInterval(timerRef.current);
-        }
-        if (!isPaused) {
-            timerRef.current = setInterval(() => {
-                setActiveTab((prev) => (prev + 1) % featureTabs.length);
-            }, 5000);
-        }
-    }, [isPaused]);
-
+    // Auto-advance timer with progress tracking
     useEffect(() => {
-        resetTimer();
+        if (isPaused) {
+            if (progressRef.current) clearInterval(progressRef.current);
+            return;
+        }
+        
+        setProgress(0);
+        
+        // Progress bar updates every 50ms for smooth animation
+        progressRef.current = setInterval(() => {
+            setProgress((prev) => Math.min(prev + 1, 100));
+        }, 50);
+        
+        timerRef.current = setInterval(() => {
+            setActiveTab((prev) => (prev + 1) % FEATURE_TABS.length);
+            setProgress(0);
+        }, 5000);
+
         return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-            }
+            if (timerRef.current) clearInterval(timerRef.current);
+            if (progressRef.current) clearInterval(progressRef.current);
         };
-    }, [resetTimer]);
+    }, [isPaused, activeTab]);
 
-    const handleTabClick = (index: number) => {
+    const handleTabClick = useCallback((index: number) => {
         setActiveTab(index);
-        resetTimer();
-    };
+        setProgress(0);
+        // Timer will be reset by the useEffect due to activeTab change
+    }, []);
 
-    const togglePause = () => {
-        setIsPaused(!isPaused);
-    };
+    const togglePause = useCallback(() => setIsPaused((p) => !p), []);
 
-    const toggleFeature = (id: string) => {
-        setExpandedFeature(expandedFeature === id ? null : id);
-    };
+    return (
+        <div className="relative max-w-5xl mx-auto">
+            {/* Glow behind */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-blue-500/15 to-emerald-500/20 rounded-2xl blur-2xl opacity-60" />
+
+            {/* Tab buttons with progress indicators */}
+            <div className="flex justify-center gap-1 p-1 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-lg w-fit mx-auto mb-6">
+                {FEATURE_TABS.map((tab, index) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => handleTabClick(index)}
+                        className={`relative px-4 sm:px-6 py-2 text-sm font-medium rounded-md transition-all overflow-hidden ${
+                            index === activeTab
+                                ? "bg-slate-800 text-white"
+                                : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                        }`}
+                    >
+                        {tab.label}
+                        {/* Progress bar for active tab */}
+                        {index === activeTab && !isPaused && (
+                            <div 
+                                className="absolute bottom-0 left-0 h-0.5 bg-emerald-500 transition-all duration-75 ease-linear"
+                                style={{ width: `${progress}%` }}
+                            />
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            {/* Main preview container */}
+            <div className="relative">
+                {/* Pause button */}
+                <button
+                    onClick={togglePause}
+                    className="absolute top-4 right-4 z-20 p-2 bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-md text-slate-400 hover:text-white transition-colors"
+                    aria-label={isPaused ? "Play" : "Pause"}
+                >
+                    {isPaused ? <Play size={16} /> : <Pause size={16} />}
+                </button>
+
+                {/* Image container */}
+                <div className="relative rounded-xl overflow-hidden border border-slate-700/50 shadow-2xl shadow-black/50 bg-slate-900">
+                    {FEATURE_TABS.map((tab, index) => (
+                        <img
+                            key={tab.id}
+                            src={tab.image}
+                            alt={tab.label}
+                            className={`w-full h-auto transition-all duration-700 ${
+                                index === 0 ? "relative" : "absolute inset-0"
+                            } ${index === activeTab ? "opacity-100" : "opacity-0"}`}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Tab description - below image */}
+            <p className="text-center text-slate-400 max-w-xl mx-auto mt-6">
+                {FEATURE_TABS[activeTab].description}
+            </p>
+        </div>
+    );
+});
+
+export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
+    // Scenario state
+    const [scenarios, setScenarios] = useState<Scenario[]>([
+        {
+            id: "buyHouse",
+            label: "Buy a House",
+            icon: Home,
+            color: "#3B82F6",
+            enabled: true,
+            age: 32,
+            minAge: 26,
+            maxAge: 45,
+            description: "£350k property, £70k deposit",
+        },
+        {
+            id: "haveKids",
+            label: "Have Children",
+            icon: Baby,
+            color: "#EC4899",
+            enabled: false,
+            age: 34,
+            minAge: 27,
+            maxAge: 45,
+            description: "£1,200/month for 18 years",
+        },
+        {
+            id: "careerBreak",
+            label: "Career Break",
+            icon: Briefcase,
+            color: "#F59E0B",
+            enabled: false,
+            age: 40,
+            minAge: 28,
+            maxAge: 55,
+            description: "1 year sabbatical",
+        },
+    ]);
+
+    const handleToggleScenario = useCallback((id: string) => {
+        setScenarios((prev) =>
+            prev.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s))
+        );
+    }, []);
+
+    const handleChangeAge = useCallback((id: string, age: number) => {
+        setScenarios((prev) =>
+            prev.map((s) => (s.id === id ? { ...s, age } : s))
+        );
+    }, []);
 
     return (
         <div className="min-h-screen bg-slate-950 overflow-x-clip relative">
@@ -167,7 +800,8 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                             NetWorth
                         </span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    {/* Desktop navigation */}
+                    <div className="hidden sm:flex items-center gap-3">
                         <a
                             href="https://networth.tbushell.co.uk"
                             target="_blank"
@@ -184,9 +818,25 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                         </button>
                         <button
                             onClick={onGetStarted}
-                            className="text-sm font-semibold bg-white hover:bg-slate-100 text-slate-900 px-4 py-2 rounded-md transition-all"
+                            className="text-sm font-semibold bg-white hover:bg-slate-100 text-slate-900 px-4 py-2 rounded-md transition-all hover:scale-105 active:scale-95"
                         >
                             Sign up
+                        </button>
+                    </div>
+                    {/* Mobile navigation */}
+                    <div className="flex sm:hidden items-center gap-2">
+                        <button
+                            onClick={onGetStarted}
+                            className="text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-md transition-all"
+                        >
+                            Get started
+                        </button>
+                        <button
+                            onClick={onSignIn}
+                            className="p-2 text-slate-400 hover:text-white transition-colors"
+                            aria-label="Sign in"
+                        >
+                            <ChevronRight size={20} />
                         </button>
                     </div>
                 </div>
@@ -213,76 +863,49 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                         {/* CTA Button */}
                         <button
                             onClick={onGetStarted}
-                            className="h-12 px-8 text-base font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-all"
+                            className="group h-12 px-8 text-base font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-all hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-emerald-500/25"
                         >
-                            Get started
+                            <span className="flex items-center gap-2">
+                                Get started
+                                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            </span>
                         </button>
                     </div>
 
-                    {/* Feature Preview - Large centered image/video area */}
-                    <div className="relative max-w-5xl mx-auto">
+                    {/* Interactive Projection Demo */}
+                    <div className="relative max-w-5xl mx-auto mt-12">
                         {/* Glow behind */}
                         <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-blue-500/15 to-emerald-500/20 rounded-2xl blur-2xl opacity-60"></div>
 
-                        {/* Main preview container */}
+                        {/* Main demo container */}
                         <div className="relative">
-                            {/* Pause button */}
-                            <button
-                                onClick={togglePause}
-                                className="absolute top-4 right-4 z-20 p-2 bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-md text-slate-400 hover:text-white transition-colors"
-                                aria-label={isPaused ? "Play" : "Pause"}
-                            >
-                                {isPaused ? (
-                                    <Play size={16} />
-                                ) : (
-                                    <Pause size={16} />
-                                )}
-                            </button>
-
-                            {/* Image container */}
-                            <div className="relative rounded-xl overflow-hidden border border-slate-700/50 shadow-2xl shadow-black/50 bg-slate-900">
-                                {featureTabs.map((tab, index) => (
-                                    <img
-                                        key={tab.id}
-                                        src={tab.image}
-                                        alt={tab.label}
-                                        className={`w-full h-auto transition-all duration-700 ${
-                                            index === 0
-                                                ? "relative"
-                                                : "absolute inset-0"
-                                        } ${
-                                            index === activeTab
-                                                ? "opacity-100"
-                                                : "opacity-0"
-                                        }`}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Feature tabs below image */}
-                        <div className="mt-6">
-                            {/* Tab buttons */}
-                            <div className="flex justify-center gap-1 p-1 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-lg w-fit mx-auto mb-4">
-                                {featureTabs.map((tab, index) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => handleTabClick(index)}
-                                        className={`px-4 sm:px-6 py-2 text-sm font-medium rounded-md transition-all ${
-                                            index === activeTab
-                                                ? "bg-slate-800 text-white"
-                                                : "text-slate-400 hover:text-white"
-                                        }`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
+                            <div className="text-center mb-6">
+                                <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
+                                    See how life decisions impact your wealth
+                                </h2>
+                                <p className="text-sm text-slate-400">
+                                    Toggle scenarios and adjust ages to explore your financial future
+                                </p>
                             </div>
 
-                            {/* Tab description */}
-                            <p className="text-center text-slate-400 max-w-xl mx-auto">
-                                {featureTabs[activeTab].description}
-                            </p>
+                            <InteractiveProjectionChart
+                                scenarios={scenarios}
+                                onToggleScenario={handleToggleScenario}
+                                onChangeAge={handleChangeAge}
+                            />
+
+                            {/* CTA under projection */}
+                            <div className="text-center mt-8">
+                                <button
+                                    onClick={onGetStarted}
+                                    className="h-11 px-6 text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-all"
+                                >
+                                    Start planning your future
+                                </button>
+                                <p className="text-xs text-slate-500 mt-3">
+                                    Free to use • No credit card required
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -328,298 +951,10 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                 </div>
             </section>
 
-            {/* Features Accordion Section - GitHub Style */}
-            <section id="features" className="py-24 px-6">
+            {/* Feature Slideshow - GitHub Style */}
+            <section className="py-24 px-6">
                 <div className="max-w-[1280px] mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-                        {/* Left: Heading and Accordion */}
-                        <div>
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-white leading-tight">
-                                Everything you need to
-                                <br />
-                                <span className="text-emerald-400">
-                                    master your money
-                                </span>
-                            </h2>
-                            <p className="text-lg text-slate-400 mb-10">
-                                From automatic account syncing to smart
-                                insights, NetWorth gives you the tools to
-                                understand and grow your wealth.
-                            </p>
-
-                            {/* Accordion */}
-                            <div className="space-y-2">
-                                {accordionFeatures.map((feature) => {
-                                    const Icon = feature.icon;
-                                    const isExpanded =
-                                        expandedFeature === feature.id;
-                                    return (
-                                        <div
-                                            key={feature.id}
-                                            className={`border rounded-lg transition-all ${
-                                                isExpanded
-                                                    ? "border-emerald-500/50 bg-emerald-500/5"
-                                                    : "border-slate-800 hover:border-slate-700"
-                                            }`}
-                                        >
-                                            <button
-                                                onClick={() =>
-                                                    toggleFeature(feature.id)
-                                                }
-                                                className="w-full flex items-center justify-between p-4 text-left"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div
-                                                        className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                                                            isExpanded
-                                                                ? "bg-emerald-500/20"
-                                                                : "bg-slate-800"
-                                                        }`}
-                                                    >
-                                                        <Icon
-                                                            size={20}
-                                                            className={
-                                                                isExpanded
-                                                                    ? "text-emerald-400"
-                                                                    : "text-slate-400"
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <h3
-                                                        className={`font-semibold ${
-                                                            isExpanded
-                                                                ? "text-white"
-                                                                : "text-slate-300"
-                                                        }`}
-                                                    >
-                                                        {feature.title}
-                                                    </h3>
-                                                </div>
-                                                <ChevronDown
-                                                    size={20}
-                                                    className={`text-slate-500 transition-transform ${
-                                                        isExpanded
-                                                            ? "rotate-180"
-                                                            : ""
-                                                    }`}
-                                                />
-                                            </button>
-                                            {isExpanded && (
-                                                <div className="px-4 pb-4 pl-[68px]">
-                                                    <p className="text-slate-400 text-sm mb-3">
-                                                        {feature.description}
-                                                    </p>
-                                                    <a
-                                                        href={feature.link}
-                                                        className="inline-flex items-center gap-1 text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
-                                                    >
-                                                        {feature.linkText}
-                                                        <ArrowRight size={14} />
-                                                    </a>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Right: Feature visual */}
-                        <div className="relative lg:sticky lg:top-32">
-                            <div className="absolute -inset-4 bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl blur-2xl"></div>
-                            <div className="relative bg-slate-900 border border-slate-800 rounded-xl p-8 overflow-hidden">
-                                {/* Decorative elements */}
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl"></div>
-                                <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
-
-                                {/* Content based on expanded feature */}
-                                <div className="relative">
-                                    {expandedFeature === "aggregation" && (
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                                                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                                    <Landmark className="w-5 h-5 text-blue-400" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="text-sm font-medium text-white">
-                                                        Current Account
-                                                    </div>
-                                                    <div className="text-xs text-slate-500">
-                                                        Barclays
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-sm font-semibold text-emerald-400">
-                                                        £4,250.00
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                                                <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                                                    <PiggyBank className="w-5 h-5 text-emerald-400" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="text-sm font-medium text-white">
-                                                        Savings
-                                                    </div>
-                                                    <div className="text-xs text-slate-500">
-                                                        Marcus
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-sm font-semibold text-emerald-400">
-                                                        £12,500.00
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                                                <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                                                    <CreditCard className="w-5 h-5 text-red-400" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="text-sm font-medium text-white">
-                                                        Credit Card
-                                                    </div>
-                                                    <div className="text-xs text-slate-500">
-                                                        Amex
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-sm font-semibold text-red-400">
-                                                        -£1,200.00
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="pt-4 border-t border-slate-700/50">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-slate-400">
-                                                        Net Worth
-                                                    </span>
-                                                    <span className="text-2xl font-bold text-white">
-                                                        £15,550.00
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {expandedFeature === "realtime" && (
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-                                                <div className="flex items-center gap-2">
-                                                    <RefreshCw
-                                                        size={16}
-                                                        className="text-emerald-400 animate-spin"
-                                                        style={{
-                                                            animationDuration:
-                                                                "2s",
-                                                        }}
-                                                    />
-                                                    <span className="text-sm text-emerald-400">
-                                                        Syncing accounts...
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs text-slate-500">
-                                                    Last sync: 2 min ago
-                                                </span>
-                                            </div>
-                                            <div className="h-32 flex items-end gap-2">
-                                                {[
-                                                    40, 55, 45, 60, 50, 70, 65,
-                                                ].map((h, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="flex-1 bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t opacity-80"
-                                                        style={{
-                                                            height: `${h}%`,
-                                                        }}
-                                                    ></div>
-                                                ))}
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-3xl font-bold text-white">
-                                                    +£2,340
-                                                </div>
-                                                <div className="text-sm text-emerald-400">
-                                                    This month
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {expandedFeature === "alerts" && (
-                                        <div className="space-y-3">
-                                            <div className="p-3 bg-slate-800/50 rounded-lg border-l-2 border-emerald-500">
-                                                <div className="text-xs text-slate-500 mb-1">
-                                                    Just now
-                                                </div>
-                                                <div className="text-sm text-white">
-                                                    🎉 Milestone reached! You've
-                                                    hit £15,000 net worth
-                                                </div>
-                                            </div>
-                                            <div className="p-3 bg-slate-800/50 rounded-lg border-l-2 border-blue-500">
-                                                <div className="text-xs text-slate-500 mb-1">
-                                                    2 hours ago
-                                                </div>
-                                                <div className="text-sm text-white">
-                                                    💰 Salary deposited: £3,200
-                                                    to Barclays
-                                                </div>
-                                            </div>
-                                            <div className="p-3 bg-slate-800/50 rounded-lg border-l-2 border-yellow-500">
-                                                <div className="text-xs text-slate-500 mb-1">
-                                                    Yesterday
-                                                </div>
-                                                <div className="text-sm text-white">
-                                                    ⚠️ Large transaction: £450
-                                                    at Currys
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {expandedFeature === "security" && (
-                                        <div className="space-y-4 text-center">
-                                            <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
-                                                <Shield
-                                                    size={40}
-                                                    className="text-emerald-400"
-                                                />
-                                            </div>
-                                            <div>
-                                                <div className="text-xl font-bold text-white mb-2">
-                                                    Bank-grade security
-                                                </div>
-                                                <div className="text-sm text-slate-400">
-                                                    Your data is encrypted in
-                                                    transit and at rest with
-                                                    256-bit AES encryption
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3 pt-4">
-                                                <div className="p-3 bg-slate-800/50 rounded-lg">
-                                                    <Lock
-                                                        size={20}
-                                                        className="text-emerald-400 mx-auto mb-2"
-                                                    />
-                                                    <div className="text-xs text-slate-400">
-                                                        Read-only access
-                                                    </div>
-                                                </div>
-                                                <div className="p-3 bg-slate-800/50 rounded-lg">
-                                                    <Shield
-                                                        size={20}
-                                                        className="text-emerald-400 mx-auto mb-2"
-                                                    />
-                                                    <div className="text-xs text-slate-400">
-                                                        SOC 2 compliant
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <FeatureSlideshow />
                 </div>
             </section>
 
@@ -636,8 +971,8 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                     </div>
 
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-colors">
-                            <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
+                        <div className="group p-6 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/10">
+                            <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <Eye size={24} className="text-emerald-400" />
                             </div>
                             <h3 className="text-lg font-semibold text-white mb-2">
@@ -650,8 +985,8 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                             </p>
                         </div>
 
-                        <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-colors">
-                            <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4">
+                        <div className="group p-6 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10">
+                            <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <TrendingUp
                                     size={24}
                                     className="text-blue-400"
@@ -667,8 +1002,8 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                             </p>
                         </div>
 
-                        <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-colors">
-                            <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
+                        <div className="group p-6 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/10">
+                            <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <Target
                                     size={24}
                                     className="text-emerald-400"
@@ -684,8 +1019,8 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                             </p>
                         </div>
 
-                        <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-colors">
-                            <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4">
+                        <div className="group p-6 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10">
+                            <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <BarChart3
                                     size={24}
                                     className="text-blue-400"
@@ -713,6 +1048,10 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                         <div className="absolute inset-0 bg-slate-900/80"></div>
 
                         <div className="relative px-8 py-16 md:py-24 text-center">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+                                <Sparkles size={14} className="text-emerald-400" />
+                                <span className="text-xs font-medium text-emerald-400">Free forever for personal use</span>
+                            </div>
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-white">
                                 Start tracking your wealth today
                             </h2>
@@ -723,9 +1062,12 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                             </p>
                             <button
                                 onClick={onGetStarted}
-                                className="h-12 px-8 text-base font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-all"
+                                className="group h-12 px-8 text-base font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-all hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-emerald-500/25"
                             >
-                                Get started
+                                <span className="flex items-center gap-2">
+                                    Get started
+                                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                </span>
                             </button>
                             <p className="text-sm text-slate-500 mt-4">
                                 No credit card required • Bank-grade security •
