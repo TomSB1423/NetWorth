@@ -94,7 +94,7 @@ function AppRoutes() {
 
     // State to handle the exit animation of the funny loading screen
     const [showFunnyLoading, setShowFunnyLoading] = useState(
-        !!isOnboardingOrSyncing
+        !!isOnboardingOrSyncing,
     );
 
     useEffect(() => {
@@ -131,13 +131,13 @@ function AppRoutes() {
                             break;
                         }
                         await new Promise((resolve) =>
-                            setTimeout(resolve, pollInterval)
+                            setTimeout(resolve, pollInterval),
                         );
                     }
 
                     if (!accountsCreated) {
                         console.warn(
-                            "Accounts not created within timeout, proceeding anyway"
+                            "Accounts not created within timeout, proceeding anyway",
                         );
                     }
 
@@ -209,8 +209,8 @@ function AppRoutes() {
             institutionId || isSyncing
                 ? "Connecting to your bank..."
                 : !isProvisioned
-                ? "Setting up your account..."
-                : undefined;
+                  ? "Setting up your account..."
+                  : undefined;
 
         return (
             <LoadingScreen

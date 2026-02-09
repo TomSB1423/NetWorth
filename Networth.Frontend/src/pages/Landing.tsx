@@ -853,7 +853,10 @@ const FeatureSlideshow = memo(function FeatureSlideshow() {
     );
 
     // Reset progress when active tab or pause state changes (React recommended pattern)
-    const [prevState, setPrevState] = useState({ activeTab: 0, isPaused: false });
+    const [prevState, setPrevState] = useState({
+        activeTab: 0,
+        isPaused: false,
+    });
     if (activeTab !== prevState.activeTab || isPaused !== prevState.isPaused) {
         setPrevState({ activeTab, isPaused });
         if (!isPaused) setProgress(0);

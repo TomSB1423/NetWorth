@@ -25,11 +25,7 @@ export default function Transactions() {
     const pageSize = 20;
 
     // Fetch transactions for all accounts
-    const {
-        data,
-        isLoading,
-        error,
-    } = useQuery({
+    const { data, isLoading, error } = useQuery({
         queryKey: ["transactions", accounts.map((a) => a.id).join(","), page],
         queryFn: async () => {
             if (accounts.length === 0) return { items: [], totalPages: 0 };
@@ -37,18 +33,26 @@ export default function Transactions() {
             const promises = accounts.map((account) =>
                 api
                     .getTransactions(account.id, page, pageSize)
-                    .catch(() => ({ items: [], totalPages: 0, totalCount: 0, page: 1, pageSize, hasNextPage: false, hasPreviousPage: false }))
+                    .catch(() => ({
+                        items: [],
+                        totalPages: 0,
+                        totalCount: 0,
+                        page: 1,
+                        pageSize,
+                        hasNextPage: false,
+                        hasPreviousPage: false,
+                    })),
             );
 
             const results = await Promise.all(promises);
-            const allTransactions = results.flatMap(r => r.items);
-            const maxPages = Math.max(...results.map(r => r.totalPages));
+            const allTransactions = results.flatMap((r) => r.items);
+            const maxPages = Math.max(...results.map((r) => r.totalPages));
 
             // Sort by date descending
             const sortedTransactions = allTransactions.sort(
                 (a, b) =>
                     new Date(b.bookingDate ?? 0).getTime() -
-                    new Date(a.bookingDate ?? 0).getTime()
+                    new Date(a.bookingDate ?? 0).getTime(),
             );
 
             return { items: sortedTransactions, totalPages: maxPages };
@@ -93,7 +97,7 @@ export default function Transactions() {
         for (let i = 11; i >= 0; i--) {
             const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
             const monthKey = `${date.getFullYear()}-${String(
-                date.getMonth() + 1
+                date.getMonth() + 1,
             ).padStart(2, "0")}`;
             const monthName = date.toLocaleDateString("en-GB", {
                 month: "short",
@@ -106,7 +110,7 @@ export default function Transactions() {
             if (!tx.bookingDate) return;
             const txDate = new Date(tx.bookingDate);
             const txKey = `${txDate.getFullYear()}-${String(
-                txDate.getMonth() + 1
+                txDate.getMonth() + 1,
             ).padStart(2, "0")}`;
             const monthData = months.find((m) => m.monthKey === txKey);
             if (monthData) {
@@ -180,7 +184,7 @@ export default function Transactions() {
 
     const maxChartValue = Math.max(
         ...monthlyChartData.flatMap((d) => [d.income, d.expense]),
-        1
+        1,
     );
 
     return (
@@ -233,7 +237,7 @@ export default function Transactions() {
                                                 data.income > 0 ? "4px" : "0",
                                         }}
                                         title={`Income: ${formatCurrency(
-                                            data.income
+                                            data.income,
                                         )}`}
                                     />
                                     <div
@@ -244,7 +248,7 @@ export default function Transactions() {
                                                 data.expense > 0 ? "4px" : "0",
                                         }}
                                         title={`Expenses: ${formatCurrency(
-                                            data.expense
+                                            data.expense,
                                         )}`}
                                     />
                                 </div>
@@ -402,7 +406,9 @@ export default function Transactions() {
                                                 ? formatDate(tx.bookingDate)
                                                 : "Pending"}
                                         </span>
-                                        <span className="mx-1.5 text-slate-600">•</span>
+                                        <span className="mx-1.5 text-slate-600">
+                                            •
+                                        </span>
                                         <span className="text-slate-500">
                                             {getAccountName(tx.accountId)}
                                         </span>
@@ -418,7 +424,7 @@ export default function Transactions() {
                             >
                                 {formatCurrency(
                                     parseFloat(tx.amount),
-                                    tx.currency
+                                    tx.currency,
                                 )}
                             </div>
                         </div>
@@ -444,7 +450,9 @@ export default function Transactions() {
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        onClick={() =>
+                            setPage((p) => Math.min(totalPages, p + 1))
+                        }
                         disabled={page === totalPages || isLoading}
                         className="h-8 w-8 p-0"
                     >

@@ -40,7 +40,7 @@ export function NetWorthChart({
         const firstDate = new Date(dataPoints[0].date);
         const lastDate = new Date(dataPoints[dataPoints.length - 1].date);
         const spanDays = Math.ceil(
-            (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
+            (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24),
         );
         // Default to 1Y if we have enough data, otherwise "All"
         return spanDays >= 365 ? "1Y" : "All";
@@ -67,18 +67,21 @@ export function NetWorthChart({
     });
 
     // Only derive status after data has been fetched to avoid race conditions
-    const history = useMemo(() => historyResponse?.dataPoints ?? [], [historyResponse?.dataPoints]);
+    const history = useMemo(
+        () => historyResponse?.dataPoints ?? [],
+        [historyResponse?.dataPoints],
+    );
     const status = historyResponse?.status;
     const lastCalculated = historyResponse?.lastCalculated;
 
     const data = useMemo(() => {
         return [...history].sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
     }, [history]);
 
     const formatLastCalculated = (
-        dateString: string | null | undefined
+        dateString: string | null | undefined,
     ): string => {
         if (!dateString) return "Never";
         const date = new Date(dateString);
@@ -104,7 +107,7 @@ export function NetWorthChart({
     };
 
     const [selectedPeriod, setSelectedPeriod] = useState(() =>
-        getInitialPeriod(history)
+        getInitialPeriod(history),
     );
 
     const dataSpanDays = useMemo(() => {
@@ -112,7 +115,7 @@ export function NetWorthChart({
         const firstDate = new Date(data[0].date);
         const lastDate = new Date(data[data.length - 1].date);
         return Math.ceil(
-            (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
+            (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24),
         );
     }, [data]);
 
@@ -126,7 +129,7 @@ export function NetWorthChart({
     // Compute valid period - if current selection is unavailable, default to "All"
     const validSelectedPeriod = useMemo(() => {
         const isCurrentPeriodAvailable = availablePeriods.some(
-            (p) => p.label === selectedPeriod
+            (p) => p.label === selectedPeriod,
         );
         return isCurrentPeriodAvailable ? selectedPeriod : "All";
     }, [availablePeriods, selectedPeriod]);
@@ -148,7 +151,7 @@ export function NetWorthChart({
         const firstDate = new Date(filteredData[0].date);
         const lastDate = new Date(filteredData[filteredData.length - 1].date);
         return Math.ceil(
-            (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
+            (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24),
         );
     }, [filteredData]);
 
@@ -202,7 +205,9 @@ export function NetWorthChart({
                 month: "short",
             });
             const showYear = isJanuary || tickYear === firstDataYear;
-            return showYear ? `${dayMonth} '${String(tickYear).slice(-2)}` : dayMonth;
+            return showYear
+                ? `${dayMonth} '${String(tickYear).slice(-2)}`
+                : dayMonth;
         }
 
         // Longer periods: show "Jan '25" format for all ticks
@@ -242,8 +247,8 @@ export function NetWorthChart({
                         {isCalculationPending
                             ? "Calculating net worth..."
                             : isSyncing
-                            ? "Syncing account data..."
-                            : "Loading data..."}
+                              ? "Syncing account data..."
+                              : "Loading data..."}
                     </span>
                 </CardContent>
             </Card>
@@ -379,8 +384,10 @@ export function NetWorthChart({
                                 tickFormatter={formatCurrency}
                                 width={65}
                                 domain={[
-                                    (dataMin: number) => Math.floor(dataMin * 0.95),
-                                    (dataMax: number) => Math.ceil(dataMax * 1.02),
+                                    (dataMin: number) =>
+                                        Math.floor(dataMin * 0.95),
+                                    (dataMax: number) =>
+                                        Math.ceil(dataMax * 1.02),
                                 ]}
                                 tickCount={5}
                             />
@@ -397,7 +404,7 @@ export function NetWorthChart({
                                         "en-GB",
                                         {
                                             dateStyle: "medium",
-                                        }
+                                        },
                                     )
                                 }
                                 formatter={(value: number) => [

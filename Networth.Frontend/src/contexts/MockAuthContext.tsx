@@ -25,7 +25,7 @@ interface MockAuthContextType {
 }
 
 const MockAuthContext = createContext<MockAuthContextType | undefined>(
-    undefined
+    undefined,
 );
 
 // Session storage key for mock auth state
@@ -70,7 +70,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
             logout,
             getAccessToken,
         }),
-        [isAuthenticated, login, logout, getAccessToken]
+        [isAuthenticated, login, logout, getAccessToken],
     );
 
     return (

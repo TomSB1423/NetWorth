@@ -51,7 +51,7 @@ const realApi = {
         const headers = await getAuthHeaders();
         const response = await fetch(
             `${API_BASE_URL}/accounts/${accountId}/balances`,
-            { headers }
+            { headers },
         );
         if (!response.ok) throw new Error("Failed to fetch balances");
         return response.json();
@@ -67,7 +67,7 @@ const realApi = {
     },
 
     linkInstitution: async (
-        institutionId: string
+        institutionId: string,
     ): Promise<LinkInstitutionResponse> => {
         const headers = await getAuthHeaders();
         const response = await fetch(
@@ -75,7 +75,7 @@ const realApi = {
             {
                 method: "POST",
                 headers,
-            }
+            },
         );
         if (!response.ok)
             throw new Error("Failed to initiate institution linking");
@@ -89,7 +89,7 @@ const realApi = {
             {
                 method: "POST",
                 headers,
-            }
+            },
         );
         if (!response.ok) throw new Error("Failed to sync institution");
         // 202 Accepted returns no body, so don't try to parse JSON
@@ -98,7 +98,7 @@ const realApi = {
     getTransactions: async (
         accountId: string,
         page: number = 1,
-        pageSize: number = 50
+        pageSize: number = 50,
     ): Promise<PagedResponse<Transaction>> => {
         const params = new URLSearchParams({
             page: page.toString(),
@@ -107,7 +107,7 @@ const realApi = {
         const headers = await getAuthHeaders();
         const response = await fetch(
             `${API_BASE_URL}/accounts/${accountId}/transactions?${params}`,
-            { headers }
+            { headers },
         );
         if (!response.ok) throw new Error("Failed to fetch transactions");
         return response.json();
@@ -163,7 +163,7 @@ const realApi = {
         updates: {
             displayName?: string;
             category?: AccountCategory;
-        }
+        },
     ): Promise<Account> => {
         const headers = await getAuthHeaders();
         const response = await fetch(`${API_BASE_URL}/accounts/${accountId}`, {
@@ -189,6 +189,6 @@ export const api = config.useMockData ? mockApi : realApi;
 if (config.useMockData) {
     console.log(
         "%c[API] Mock mode enabled - using local mock data",
-        "color: #f59e0b; font-weight: bold"
+        "color: #f59e0b; font-weight: bold",
     );
 }

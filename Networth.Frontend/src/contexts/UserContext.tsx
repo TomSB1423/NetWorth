@@ -31,15 +31,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     // Initialize from session storage to prevent loading flash on reload
     const [hasProvisioned, setHasProvisioned] = useState(() => {
         return sessionStorage.getItem("user_provisioned") === "true";
     });
-    
-    const [cachedOnboardingStatus, setCachedOnboardingStatus] = useState<boolean>(() => {
-        return sessionStorage.getItem("user_onboarding_complete") === "true";
-    });
+
+    const [cachedOnboardingStatus, setCachedOnboardingStatus] =
+        useState<boolean>(() => {
+            return (
+                sessionStorage.getItem("user_onboarding_complete") === "true"
+            );
+        });
 
     const provisionUser = useCallback(async () => {
         if (!isReady || (hasProvisioned && user)) return;
@@ -53,7 +56,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             setUser(createdUser);
             setHasProvisioned(true);
             sessionStorage.setItem("user_provisioned", "true");
-            
+
             if (createdUser.hasCompletedOnboarding) {
                 setCachedOnboardingStatus(true);
                 sessionStorage.setItem("user_onboarding_complete", "true");
@@ -61,7 +64,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } catch (err) {
             console.error("Failed to provision user:", err);
             setError(
-                err instanceof Error ? err.message : "Failed to provision user"
+                err instanceof Error ? err.message : "Failed to provision user",
             );
         } finally {
             setIsLoading(false);
@@ -84,7 +87,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } catch (err) {
             console.error("Failed to fetch user:", err);
             setError(
-                err instanceof Error ? err.message : "Failed to fetch user"
+                err instanceof Error ? err.message : "Failed to fetch user",
             );
         } finally {
             setIsLoading(false);
@@ -140,7 +143,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 isAuthLoading ||
                 (isAuthenticated && !hasProvisioned),
             isProvisioned: hasProvisioned,
-            hasCompletedOnboarding: user?.hasCompletedOnboarding ?? cachedOnboardingStatus,
+            hasCompletedOnboarding:
+                user?.hasCompletedOnboarding ?? cachedOnboardingStatus,
             error,
             refetchUser,
             updateUser,
@@ -154,7 +158,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             cachedOnboardingStatus,
             error,
             refetchUser,
-        ]
+        ],
     );
 
     return (
