@@ -123,14 +123,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isReady = isAuthenticated && isTokenGetterConfigured;
 
     // Convert Firebase User to our UserInfo type
-    const userInfo: FirebaseUserInfo | null = user
-        ? {
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName,
-              photoURL: user.photoURL,
-          }
-        : null;
+    const userInfo = useMemo<FirebaseUserInfo | null>(
+        () =>
+            user
+                ? {
+                      uid: user.uid,
+                      email: user.email,
+                      displayName: user.displayName,
+                      photoURL: user.photoURL,
+                  }
+                : null,
+        [user]
+    );
 
     const value = useMemo(
         () => ({

@@ -16,8 +16,37 @@ const getEnvVar = (key: string, defaultValue?: string): string => {
     return value;
 };
 
+/**
+ * Check whether Firebase credentials are available.
+ * When VITE_USE_MOCK_DATA is false but credentials are missing,
+ * we fall back to mock mode with a console warning instead of crashing.
+ */
+function hasFirebaseCredentials(): boolean {
+    const apiKey = import.meta.env.VITE_FIREBASE_API_KEY as string | undefined;
+    const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as
+        | string
+        | undefined;
+    const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID as
+        | string
+        | undefined;
+    return !!(apiKey && authDomain && projectId);
+}
+
+const firebaseMissing = !useMockData && !hasFirebaseCredentials();
+
+if (firebaseMissing) {
+    console.warn(
+        "%c[Auth] Firebase credentials missing (VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID). " +
+            "Falling back to mock authentication. Set VITE_USE_MOCK_DATA=true or provide Firebase credentials.",
+        "color: #f59e0b; font-weight: bold",
+    );
+}
+
+/** Effective mock mode: explicit opt-in OR forced by missing credentials. */
+const effectiveUseMockData = useMockData || firebaseMissing;
+
 // Firebase configuration - only used in non-mock mode
-const firebaseConfig = useMockData
+const firebaseConfig = effectiveUseMockData
     ? {
           apiKey: "mock-api-key",
           authDomain: "mock.firebaseapp.com",
@@ -33,9 +62,9 @@ const firebaseConfig = useMockData
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 
-if (!useMockData) {
+if (!effectiveUseMockData) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
 }
 
-export { app, auth, firebaseConfig, useMockData };
+export { app, auth, firebaseConfig, effectiveUseMockData as useMockData };

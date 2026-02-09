@@ -97,8 +97,7 @@ public class JwtAuthenticationMiddleware : IFunctionsWorkerMiddleware
 
             if (!result.IsValid || result.SecurityToken is not JwtSecurityToken jwt)
             {
-                _logger.LogWarning("Token validation failed. IsValid: {IsValid}, Exception: {Exception}", 
-                    result.IsValid, result.Exception?.Message);
+                _logger.LogWarning("Token validation failed. IsValid: {IsValid}, Exception: {Exception}", result.IsValid, result.Exception?.Message);
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return;
             }

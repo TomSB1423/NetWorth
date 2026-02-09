@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, useMemo, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { Account, AccountBalances } from "../types";
@@ -49,13 +49,19 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         enabled: canFetch && accounts.length > 0,
     });
 
-    const value = {
-        accounts,
-        balances,
-        isLoading: isLoadingAccounts || isLoadingBalances,
-        hasAccounts: accounts.length > 0,
-        error: accountsError as Error | null,
-    };
+    const isLoading = isLoadingAccounts || isLoadingBalances;
+    const hasAccounts = accounts.length > 0;
+
+    const value = useMemo(
+        () => ({
+            accounts,
+            balances,
+            isLoading,
+            hasAccounts,
+            error: accountsError as Error | null,
+        }),
+        [accounts, balances, isLoading, hasAccounts, accountsError]
+    );
 
     return (
         <AccountContext.Provider value={value}>

@@ -1,8 +1,11 @@
+import { useMockData as effectiveMockData } from "./firebaseConfig";
+
 interface Config {
     api: {
         baseUrl: string;
     };
-    /** Enable mock API data for development/demo purposes */
+    /** Enable mock API data for development/demo purposes.
+     *  Also true when Firebase credentials are missing (graceful fallback). */
     useMockData: boolean;
 }
 
@@ -15,17 +18,9 @@ const getEnvVar = (key: string, defaultValue?: string): string => {
     return value;
 };
 
-const getBoolEnvVar = (key: string, defaultValue: boolean = false): boolean => {
-    const value = import.meta.env[key] as string | undefined;
-    if (value === undefined || value === "") {
-        return defaultValue;
-    }
-    return value.toLowerCase() === "true" || value === "1";
-};
-
 export const config: Config = {
     api: {
         baseUrl: getEnvVar("VITE_API_URL", "http://localhost:7071"),
     },
-    useMockData: getBoolEnvVar("VITE_USE_MOCK_DATA", false),
+    useMockData: effectiveMockData,
 };

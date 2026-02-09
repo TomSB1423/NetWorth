@@ -18,7 +18,6 @@ const API_BASE_URL = `${config.api.baseUrl}/api`;
 let getAccessTokenFn: (() => Promise<string>) | null = null;
 
 export const setTokenGetter = (fn: () => Promise<string>) => {
-    console.log("Token getter set");
     getAccessTokenFn = fn;
 };
 
@@ -28,13 +27,12 @@ const getAuthHeaders = async (): Promise<Record<string, string>> => {
     }
     try {
         const token = await getAccessTokenFn();
-        console.log("Got access token, length:", token.length);
         return {
             Authorization: `Bearer ${token}`,
         };
     } catch (error) {
-        console.error("Failed to get access token:", error);
-        throw error; // Propagate the error instead of silently returning empty headers
+        console.error("Failed to get access token");
+        throw error;
     }
 };
 
@@ -44,12 +42,7 @@ const getAuthHeaders = async (): Promise<Record<string, string>> => {
 const realApi = {
     getAccounts: async (): Promise<Account[]> => {
         const headers = await getAuthHeaders();
-        console.log(
-            "Making API call to /accounts with headers:",
-            JSON.stringify(headers)
-        );
         const response = await fetch(`${API_BASE_URL}/accounts`, { headers });
-        console.log("API response status:", response.status);
         if (!response.ok) throw new Error("Failed to fetch accounts");
         return response.json();
     },

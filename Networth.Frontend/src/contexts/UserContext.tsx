@@ -49,9 +49,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         try {
             // Create/ensure user exists in backend
-            console.log("Making createUser API call...");
             const createdUser = await api.createUser();
-            console.log("User provisioned:", createdUser);
             setUser(createdUser);
             setHasProvisioned(true);
             sessionStorage.setItem("user_provisioned", "true");
@@ -97,11 +95,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (isReady) {
             if (!hasProvisioned) {
-                console.log("Auth is ready, provisioning user...");
                 provisionUser();
             } else if (!user) {
                 // If we have provisioned flag but no user data (e.g. reload), fetch user
-                console.log("Restoring user data...");
                 refetchUser();
             }
         }

@@ -63,6 +63,7 @@ var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "d
     .WithEnvironment("VITE_FIREBASE_API_KEY", firebaseApiKey)
     .WithEnvironment("VITE_FIREBASE_AUTH_DOMAIN", firebaseAuthDomain)
     .WithEnvironment("VITE_FIREBASE_PROJECT_ID", firebaseProjectId)
+    .WithEnvironment("VITE_USE_MOCK_DATA", mockAuthentication)
     .WithHttpEndpoint(env: "PORT", port: 3000)
     .WithExternalHttpEndpoints();
 

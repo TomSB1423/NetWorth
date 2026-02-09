@@ -46,20 +46,17 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     });
 
     const login = useCallback(async () => {
-        console.log("[MockAuth] Login called - setting authenticated");
         sessionStorage.setItem(MOCK_AUTH_KEY, "true");
         setIsAuthenticated(true);
     }, []);
 
     const logout = useCallback(async () => {
-        console.log("[MockAuth] Logout called - clearing auth state");
         sessionStorage.removeItem(MOCK_AUTH_KEY);
         sessionStorage.removeItem("welcome_shown");
         setIsAuthenticated(false);
     }, []);
 
     const getAccessToken = useCallback(async () => {
-        console.log("[MockAuth] Returning mock token");
         return "mock-access-token";
     }, []);
 

@@ -61,25 +61,29 @@ const FEATURE_TABS = [
     {
         id: "track",
         label: "Track",
-        description: "See your complete financial picture in real-time. All accounts, all balances, one dashboard.",
+        description:
+            "See your complete financial picture in real-time. All accounts, all balances, one dashboard.",
         image: "/dashboard-preview.png",
     },
     {
         id: "connect",
         label: "Connect",
-        description: "Link your bank accounts securely with read-only access. Automatic sync keeps everything up to date.",
+        description:
+            "Link your bank accounts securely with read-only access. Automatic sync keeps everything up to date.",
         image: "/accounts-preview.png",
     },
     {
         id: "analyze",
         label: "Analyze",
-        description: "Understand your spending patterns and track your wealth trajectory over time.",
+        description:
+            "Understand your spending patterns and track your wealth trajectory over time.",
         image: "/transactions-preview.png",
     },
     {
         id: "grow",
         label: "Grow",
-        description: "Set financial goals, track milestones, and watch your net worth grow.",
+        description:
+            "Set financial goals, track milestones, and watch your net worth grow.",
         image: "/dashboard-preview.png",
     },
 ] as const;
@@ -96,22 +100,70 @@ const CATEGORY_CONFIG = {
 
 // Bank logos for the scrolling carousel - using Google Favicon API for reliability
 const BANK_LOGOS = [
-    { name: "HSBC", logo: "https://www.google.com/s2/favicons?domain=hsbc.com&sz=128" },
-    { name: "Barclays", logo: "https://www.google.com/s2/favicons?domain=barclays.co.uk&sz=128" },
-    { name: "Lloyds", logo: "https://www.google.com/s2/favicons?domain=lloydsbank.com&sz=128" },
-    { name: "NatWest", logo: "https://www.google.com/s2/favicons?domain=natwest.com&sz=128" },
-    { name: "Santander", logo: "https://www.google.com/s2/favicons?domain=santander.co.uk&sz=128" },
-    { name: "Nationwide", logo: "https://www.google.com/s2/favicons?domain=nationwide.co.uk&sz=128" },
-    { name: "Monzo", logo: "https://www.google.com/s2/favicons?domain=monzo.com&sz=128" },
-    { name: "Starling", logo: "https://www.google.com/s2/favicons?domain=starlingbank.com&sz=128" },
-    { name: "Revolut", logo: "https://www.google.com/s2/favicons?domain=revolut.com&sz=128" },
-    { name: "Chase", logo: "https://www.google.com/s2/favicons?domain=chase.com&sz=128" },
-    { name: "Metro Bank", logo: "https://www.google.com/s2/favicons?domain=metrobankonline.co.uk&sz=128" },
-    { name: "TSB", logo: "https://www.google.com/s2/favicons?domain=tsb.co.uk&sz=128" },
-    { name: "Halifax", logo: "https://www.google.com/s2/favicons?domain=halifax.co.uk&sz=128" },
-    { name: "First Direct", logo: "https://www.google.com/s2/favicons?domain=firstdirect.com&sz=128" },
-    { name: "Co-op Bank", logo: "https://www.google.com/s2/favicons?domain=co-operativebank.co.uk&sz=128" },
-    { name: "Virgin Money", logo: "https://www.google.com/s2/favicons?domain=virginmoney.com&sz=128" },
+    {
+        name: "HSBC",
+        logo: "https://www.google.com/s2/favicons?domain=hsbc.com&sz=128",
+    },
+    {
+        name: "Barclays",
+        logo: "https://www.google.com/s2/favicons?domain=barclays.co.uk&sz=128",
+    },
+    {
+        name: "Lloyds",
+        logo: "https://www.google.com/s2/favicons?domain=lloydsbank.com&sz=128",
+    },
+    {
+        name: "NatWest",
+        logo: "https://www.google.com/s2/favicons?domain=natwest.com&sz=128",
+    },
+    {
+        name: "Santander",
+        logo: "https://www.google.com/s2/favicons?domain=santander.co.uk&sz=128",
+    },
+    {
+        name: "Nationwide",
+        logo: "https://www.google.com/s2/favicons?domain=nationwide.co.uk&sz=128",
+    },
+    {
+        name: "Monzo",
+        logo: "https://www.google.com/s2/favicons?domain=monzo.com&sz=128",
+    },
+    {
+        name: "Starling",
+        logo: "https://www.google.com/s2/favicons?domain=starlingbank.com&sz=128",
+    },
+    {
+        name: "Revolut",
+        logo: "https://www.google.com/s2/favicons?domain=revolut.com&sz=128",
+    },
+    {
+        name: "Chase",
+        logo: "https://www.google.com/s2/favicons?domain=chase.com&sz=128",
+    },
+    {
+        name: "Metro Bank",
+        logo: "https://www.google.com/s2/favicons?domain=metrobankonline.co.uk&sz=128",
+    },
+    {
+        name: "TSB",
+        logo: "https://www.google.com/s2/favicons?domain=tsb.co.uk&sz=128",
+    },
+    {
+        name: "Halifax",
+        logo: "https://www.google.com/s2/favicons?domain=halifax.co.uk&sz=128",
+    },
+    {
+        name: "First Direct",
+        logo: "https://www.google.com/s2/favicons?domain=firstdirect.com&sz=128",
+    },
+    {
+        name: "Co-op Bank",
+        logo: "https://www.google.com/s2/favicons?domain=co-operativebank.co.uk&sz=128",
+    },
+    {
+        name: "Virgin Money",
+        logo: "https://www.google.com/s2/favicons?domain=virginmoney.com&sz=128",
+    },
 ];
 
 // Format currency for display
@@ -171,7 +223,11 @@ function generateProjection(scenarios: Scenario[]): ProjectionPoint[] {
         }
 
         // Have kids scenario - ongoing impact
-        if (haveKids?.enabled && age >= haveKids.age && age < haveKids.age + 18) {
+        if (
+            haveKids?.enabled &&
+            age >= haveKids.age &&
+            age < haveKids.age + 18
+        ) {
             const kidsImpact = 1200; // Monthly cost
             monthlySavings -= kidsImpact / 12;
             if (age === haveKids.age) {
@@ -180,7 +236,11 @@ function generateProjection(scenarios: Scenario[]): ProjectionPoint[] {
         }
 
         // Career break scenario
-        if (careerBreak?.enabled && age >= careerBreak.age && age < careerBreak.age + 1) {
+        if (
+            careerBreak?.enabled &&
+            age >= careerBreak.age &&
+            age < careerBreak.age + 1
+        ) {
             monthlySavings = -2000; // Spending savings
             monthlyPensionContrib = 0;
             if (age === careerBreak.age) {
@@ -204,7 +264,10 @@ function generateProjection(scenarios: Scenario[]): ProjectionPoint[] {
             const monthlyMortgage =
                 (mortgageBalance * (mortgageRate / 12)) /
                 (1 - Math.pow(1 + mortgageRate / 12, -mortgageTerm * 12));
-            mortgageBalance = Math.max(0, mortgageBalance - monthlyMortgage * 3);
+            mortgageBalance = Math.max(
+                0,
+                mortgageBalance - monthlyMortgage * 3,
+            );
         }
 
         // Reduce other liabilities over time
@@ -235,24 +298,64 @@ const Y_DOMAIN: [number, number] = [-500000, 2500000];
 const CHART_GRADIENTS = (
     <defs>
         <linearGradient id="cashGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={CATEGORY_CONFIG.cash.color} stopOpacity={0.8} />
-            <stop offset="95%" stopColor={CATEGORY_CONFIG.cash.color} stopOpacity={0.3} />
+            <stop
+                offset="5%"
+                stopColor={CATEGORY_CONFIG.cash.color}
+                stopOpacity={0.8}
+            />
+            <stop
+                offset="95%"
+                stopColor={CATEGORY_CONFIG.cash.color}
+                stopOpacity={0.3}
+            />
         </linearGradient>
         <linearGradient id="investmentsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={CATEGORY_CONFIG.investments.color} stopOpacity={0.8} />
-            <stop offset="95%" stopColor={CATEGORY_CONFIG.investments.color} stopOpacity={0.3} />
+            <stop
+                offset="5%"
+                stopColor={CATEGORY_CONFIG.investments.color}
+                stopOpacity={0.8}
+            />
+            <stop
+                offset="95%"
+                stopColor={CATEGORY_CONFIG.investments.color}
+                stopOpacity={0.3}
+            />
         </linearGradient>
         <linearGradient id="propertyGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={CATEGORY_CONFIG.property.color} stopOpacity={0.8} />
-            <stop offset="95%" stopColor={CATEGORY_CONFIG.property.color} stopOpacity={0.3} />
+            <stop
+                offset="5%"
+                stopColor={CATEGORY_CONFIG.property.color}
+                stopOpacity={0.8}
+            />
+            <stop
+                offset="95%"
+                stopColor={CATEGORY_CONFIG.property.color}
+                stopOpacity={0.3}
+            />
         </linearGradient>
         <linearGradient id="pensionGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={CATEGORY_CONFIG.pension.color} stopOpacity={0.8} />
-            <stop offset="95%" stopColor={CATEGORY_CONFIG.pension.color} stopOpacity={0.3} />
+            <stop
+                offset="5%"
+                stopColor={CATEGORY_CONFIG.pension.color}
+                stopOpacity={0.8}
+            />
+            <stop
+                offset="95%"
+                stopColor={CATEGORY_CONFIG.pension.color}
+                stopOpacity={0.3}
+            />
         </linearGradient>
         <linearGradient id="liabilitiesGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={CATEGORY_CONFIG.liabilities.color} stopOpacity={0.6} />
-            <stop offset="95%" stopColor={CATEGORY_CONFIG.liabilities.color} stopOpacity={0.2} />
+            <stop
+                offset="5%"
+                stopColor={CATEGORY_CONFIG.liabilities.color}
+                stopOpacity={0.6}
+            />
+            <stop
+                offset="95%"
+                stopColor={CATEGORY_CONFIG.liabilities.color}
+                stopOpacity={0.2}
+            />
         </linearGradient>
     </defs>
 );
@@ -269,7 +372,9 @@ const ScenarioCard = memo(function ScenarioCard({
 }) {
     const Icon = scenario.icon;
     const [localAge, setLocalAge] = useState(scenario.age);
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+        undefined,
+    );
 
     // Sync local age with prop changes (e.g., reset)
     useEffect(() => {
@@ -283,15 +388,20 @@ const ScenarioCard = memo(function ScenarioCard({
         };
     }, []);
 
-    const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const newAge = parseInt(e.target.value);
-        setLocalAge(newAge);
-        
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => onAgeChange(newAge), 50);
-    }, [onAgeChange]);
+    const handleSliderChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const newAge = parseInt(e.target.value);
+            setLocalAge(newAge);
 
-    const sliderProgress = ((localAge - scenario.minAge) / (scenario.maxAge - scenario.minAge)) * 100;
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            debounceRef.current = setTimeout(() => onAgeChange(newAge), 50);
+        },
+        [onAgeChange],
+    );
+
+    const sliderProgress =
+        ((localAge - scenario.minAge) / (scenario.maxAge - scenario.minAge)) *
+        100;
 
     return (
         <div
@@ -315,7 +425,9 @@ const ScenarioCard = memo(function ScenarioCard({
                         <Icon
                             size={20}
                             style={{
-                                color: scenario.enabled ? scenario.color : "#64748b",
+                                color: scenario.enabled
+                                    ? scenario.color
+                                    : "#64748b",
                             }}
                         />
                     </div>
@@ -336,7 +448,7 @@ const ScenarioCard = memo(function ScenarioCard({
                 />
             </div>
 
-            <div 
+            <div
                 className={`space-y-2 transition-opacity duration-300 ${scenario.enabled ? "" : "opacity-40 pointer-events-none"}`}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -344,7 +456,11 @@ const ScenarioCard = memo(function ScenarioCard({
                     <span className="text-slate-400">Age</span>
                     <span
                         className="font-medium"
-                        style={{ color: scenario.enabled ? scenario.color : "#64748b" }}
+                        style={{
+                            color: scenario.enabled
+                                ? scenario.color
+                                : "#64748b",
+                        }}
                     >
                         {localAge}
                     </span>
@@ -391,7 +507,9 @@ const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
     }, [data, hoveredAge]);
 
     const handleMouseMove = useCallback((state: unknown) => {
-        const chartState = state as { activePayload?: { payload?: ProjectionPoint }[] };
+        const chartState = state as {
+            activePayload?: { payload?: ProjectionPoint }[];
+        };
         const age = chartState?.activePayload?.[0]?.payload?.age;
         if (age !== undefined) setHoveredAge(age);
     }, []);
@@ -399,23 +517,33 @@ const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
     const handleMouseLeave = useCallback(() => setHoveredAge(null), []);
 
     // Event markers for enabled scenarios
-    const eventMarkers = useMemo(() => 
-        scenarios.filter(s => s.enabled).map(s => ({ age: s.age, label: s.label, color: s.color })),
-        [scenarios]
+    const eventMarkers = useMemo(
+        () =>
+            scenarios
+                .filter((s) => s.enabled)
+                .map((s) => ({
+                    id: s.id,
+                    age: s.age,
+                    label: s.label,
+                    color: s.color,
+                })),
+        [scenarios],
     );
 
     // Calculate key metrics for display
     const metrics = useMemo(() => {
         const startPoint = data[0];
         const endPoint = data[data.length - 1];
-        const peakNetWorth = Math.max(...data.map(d => d.netWorth));
-        const ageAtPeak = data.find(d => d.netWorth === peakNetWorth)?.age ?? 70;
+        const peakNetWorth = Math.max(...data.map((d) => d.netWorth));
+        const ageAtPeak =
+            data.find((d) => d.netWorth === peakNetWorth)?.age ?? 70;
         return {
             startNetWorth: startPoint?.netWorth ?? 0,
             endNetWorth: endPoint?.netWorth ?? 0,
             peakNetWorth,
             ageAtPeak,
-            totalGrowth: ((endPoint?.netWorth ?? 0) - (startPoint?.netWorth ?? 0)),
+            totalGrowth:
+                (endPoint?.netWorth ?? 0) - (startPoint?.netWorth ?? 0),
         };
     }, [data]);
 
@@ -436,21 +564,39 @@ const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
             {/* Key Metrics Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-slate-400 mb-1">Starting (Age 25)</div>
-                    <div className="text-lg font-bold text-white">{formatCurrency(metrics.startNetWorth)}</div>
+                    <div className="text-xs text-slate-400 mb-1">
+                        Starting (Age 25)
+                    </div>
+                    <div className="text-lg font-bold text-white">
+                        {formatCurrency(metrics.startNetWorth)}
+                    </div>
                 </div>
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-slate-400 mb-1">Peak Wealth</div>
-                    <div className="text-lg font-bold text-emerald-400">{formatCurrency(metrics.peakNetWorth)}</div>
-                    <div className="text-[10px] text-slate-500">at age {metrics.ageAtPeak}</div>
+                    <div className="text-xs text-slate-400 mb-1">
+                        Peak Wealth
+                    </div>
+                    <div className="text-lg font-bold text-emerald-400">
+                        {formatCurrency(metrics.peakNetWorth)}
+                    </div>
+                    <div className="text-[10px] text-slate-500">
+                        at age {metrics.ageAtPeak}
+                    </div>
                 </div>
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-slate-400 mb-1">At Retirement (70)</div>
-                    <div className="text-lg font-bold text-white">{formatCurrency(metrics.endNetWorth)}</div>
+                    <div className="text-xs text-slate-400 mb-1">
+                        At Retirement (70)
+                    </div>
+                    <div className="text-lg font-bold text-white">
+                        {formatCurrency(metrics.endNetWorth)}
+                    </div>
                 </div>
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-slate-400 mb-1">Total Growth</div>
-                    <div className="text-lg font-bold text-emerald-400">+{formatCurrency(metrics.totalGrowth)}</div>
+                    <div className="text-xs text-slate-400 mb-1">
+                        Total Growth
+                    </div>
+                    <div className="text-lg font-bold text-emerald-400">
+                        +{formatCurrency(metrics.totalGrowth)}
+                    </div>
                 </div>
             </div>
 
@@ -493,7 +639,8 @@ const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
                         <Tooltip
                             content={({ active, payload }) => {
                                 if (!active || !payload?.length) return null;
-                                const d = payload[0]?.payload as ProjectionPoint;
+                                const d = payload[0]
+                                    ?.payload as ProjectionPoint;
                                 if (!d) return null;
                                 const hasEvents = d.events?.length > 0;
                                 return (
@@ -515,29 +662,82 @@ const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
                                         )}
                                         <div className="space-y-1 mb-2">
                                             <div className="flex justify-between">
-                                                <span className="text-slate-400">Cash</span>
-                                                <span style={{ color: CATEGORY_CONFIG.cash.color }}>{formatCurrency(d.cash)}</span>
+                                                <span className="text-slate-400">
+                                                    Cash
+                                                </span>
+                                                <span
+                                                    style={{
+                                                        color: CATEGORY_CONFIG
+                                                            .cash.color,
+                                                    }}
+                                                >
+                                                    {formatCurrency(d.cash)}
+                                                </span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-slate-400">Investments</span>
-                                                <span style={{ color: CATEGORY_CONFIG.investments.color }}>{formatCurrency(d.investments)}</span>
+                                                <span className="text-slate-400">
+                                                    Investments
+                                                </span>
+                                                <span
+                                                    style={{
+                                                        color: CATEGORY_CONFIG
+                                                            .investments.color,
+                                                    }}
+                                                >
+                                                    {formatCurrency(
+                                                        d.investments,
+                                                    )}
+                                                </span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-slate-400">Property</span>
-                                                <span style={{ color: CATEGORY_CONFIG.property.color }}>{formatCurrency(d.property)}</span>
+                                                <span className="text-slate-400">
+                                                    Property
+                                                </span>
+                                                <span
+                                                    style={{
+                                                        color: CATEGORY_CONFIG
+                                                            .property.color,
+                                                    }}
+                                                >
+                                                    {formatCurrency(d.property)}
+                                                </span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-slate-400">Pension</span>
-                                                <span style={{ color: CATEGORY_CONFIG.pension.color }}>{formatCurrency(d.pension)}</span>
+                                                <span className="text-slate-400">
+                                                    Pension
+                                                </span>
+                                                <span
+                                                    style={{
+                                                        color: CATEGORY_CONFIG
+                                                            .pension.color,
+                                                    }}
+                                                >
+                                                    {formatCurrency(d.pension)}
+                                                </span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-slate-400">Liabilities</span>
-                                                <span style={{ color: CATEGORY_CONFIG.liabilities.color }}>{formatCurrency(d.liabilities)}</span>
+                                                <span className="text-slate-400">
+                                                    Liabilities
+                                                </span>
+                                                <span
+                                                    style={{
+                                                        color: CATEGORY_CONFIG
+                                                            .liabilities.color,
+                                                    }}
+                                                >
+                                                    {formatCurrency(
+                                                        d.liabilities,
+                                                    )}
+                                                </span>
                                             </div>
                                         </div>
                                         <div className="pt-2 border-t border-slate-700 flex justify-between font-semibold">
-                                            <span className="text-slate-100">Net Worth</span>
-                                            <span className="text-emerald-400">{formatCurrency(d.netWorth)}</span>
+                                            <span className="text-slate-100">
+                                                Net Worth
+                                            </span>
+                                            <span className="text-emerald-400">
+                                                {formatCurrency(d.netWorth)}
+                                            </span>
                                         </div>
                                     </div>
                                 );
@@ -546,7 +746,7 @@ const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
                         {/* Event markers */}
                         {eventMarkers.map((marker) => (
                             <ReferenceLine
-                                key={marker.age}
+                                key={marker.id}
                                 x={marker.age}
                                 stroke={marker.color}
                                 strokeDasharray="4 4"
@@ -617,16 +817,24 @@ const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
                         <div key={key} className="flex items-center gap-1.5">
                             <span
                                 className={`w-3 h-3 rounded ${
-                                    key === "netWorth" ? "border-2 bg-transparent" : ""
+                                    key === "netWorth"
+                                        ? "border-2 bg-transparent"
+                                        : ""
                                 }`}
                                 style={{
                                     backgroundColor:
-                                        key === "netWorth" ? "transparent" : config.color,
+                                        key === "netWorth"
+                                            ? "transparent"
+                                            : config.color,
                                     borderColor:
-                                        key === "netWorth" ? config.color : undefined,
+                                        key === "netWorth"
+                                            ? config.color
+                                            : undefined,
                                 }}
                             />
-                            <span className="text-slate-400">{config.label}</span>
+                            <span className="text-slate-400">
+                                {config.label}
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -640,8 +848,12 @@ const FeatureSlideshow = memo(function FeatureSlideshow() {
     const [activeTab, setActiveTab] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [progress, setProgress] = useState(0);
-    const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
-    const progressRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+    const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(
+        undefined,
+    );
+    const progressRef = useRef<ReturnType<typeof setInterval> | undefined>(
+        undefined,
+    );
 
     // Auto-advance timer with progress tracking
     useEffect(() => {
@@ -649,14 +861,14 @@ const FeatureSlideshow = memo(function FeatureSlideshow() {
             if (progressRef.current) clearInterval(progressRef.current);
             return;
         }
-        
+
         setProgress(0);
-        
+
         // Progress bar updates every 50ms for smooth animation
         progressRef.current = setInterval(() => {
             setProgress((prev) => Math.min(prev + 1, 100));
         }, 50);
-        
+
         timerRef.current = setInterval(() => {
             setActiveTab((prev) => (prev + 1) % FEATURE_TABS.length);
             setProgress(0);
@@ -696,7 +908,7 @@ const FeatureSlideshow = memo(function FeatureSlideshow() {
                         {tab.label}
                         {/* Progress bar for active tab */}
                         {index === activeTab && !isPaused && (
-                            <div 
+                            <div
                                 className="absolute bottom-0 left-0 h-0.5 bg-emerald-500 transition-all duration-75 ease-linear"
                                 style={{ width: `${progress}%` }}
                             />
@@ -743,26 +955,26 @@ const FeatureSlideshow = memo(function FeatureSlideshow() {
 const BankLogoCarousel = memo(function BankLogoCarousel() {
     // Duplicate the logos for seamless infinite scroll
     const duplicatedLogos = [...BANK_LOGOS, ...BANK_LOGOS];
-    
+
     return (
         <div className="relative overflow-hidden py-8">
             {/* Gradient fade edges */}
             <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-slate-950 to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-950 to-transparent z-10 pointer-events-none" />
-            
+
             {/* Scrolling container */}
-            <div 
+            <div
                 className="flex gap-12 animate-scroll"
                 style={{
                     width: "fit-content",
                 }}
             >
                 {duplicatedLogos.map((bank, index) => (
-                    <div 
+                    <div
                         key={`${bank.name}-${index}`}
                         className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-4 opacity-70 hover:opacity-100 transition-all duration-300"
                     >
-                        <img 
+                        <img
                             src={bank.logo}
                             alt={bank.name}
                             className="h-10 w-10 object-contain"
@@ -770,14 +982,16 @@ const BankLogoCarousel = memo(function BankLogoCarousel() {
                             onError={(e) => {
                                 // Hide image if it fails to load
                                 const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
+                                target.style.display = "none";
                             }}
                         />
-                        <span className="text-slate-400 font-semibold text-xs whitespace-nowrap">{bank.name}</span>
+                        <span className="text-slate-400 font-semibold text-xs whitespace-nowrap">
+                            {bank.name}
+                        </span>
                     </div>
                 ))}
             </div>
-            
+
             {/* CSS for infinite scroll animation */}
             <style>{`
                 @keyframes scroll {
@@ -836,15 +1050,17 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
 
     const handleToggleScenario = useCallback((id: string) => {
         setScenarios((prev) =>
-            prev.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s))
+            prev.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s)),
         );
     }, []);
 
     const handleChangeAge = useCallback((id: string, age: number) => {
         setScenarios((prev) =>
-            prev.map((s) => (s.id === id ? { ...s, age } : s))
+            prev.map((s) => (s.id === id ? { ...s, age } : s)),
         );
     }, []);
+
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-slate-950 overflow-x-clip relative">
@@ -909,14 +1125,55 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                             Get started
                         </button>
                         <button
-                            onClick={onSignIn}
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             className="p-2 text-slate-400 hover:text-white transition-colors"
-                            aria-label="Sign in"
+                            aria-label={
+                                mobileMenuOpen ? "Close menu" : "Open menu"
+                            }
                         >
-                            <ChevronRight size={20} />
+                            {mobileMenuOpen ? (
+                                <X size={20} />
+                            ) : (
+                                <Menu size={20} />
+                            )}
                         </button>
                     </div>
                 </div>
+
+                {/* Mobile menu dropdown */}
+                {mobileMenuOpen && (
+                    <div className="sm:hidden border-t border-slate-800/50 bg-slate-950/95 backdrop-blur-xl">
+                        <div className="px-6 py-4 flex flex-col gap-3">
+                            <a
+                                href="https://networth.tbushell.co.uk"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-medium text-slate-400 hover:text-white transition-colors py-2"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Docs
+                            </a>
+                            <button
+                                onClick={() => {
+                                    onSignIn();
+                                    setMobileMenuOpen(false);
+                                }}
+                                className="text-sm font-medium text-slate-300 hover:text-white transition-colors py-2 text-left"
+                            >
+                                Sign in
+                            </button>
+                            <button
+                                onClick={() => {
+                                    onGetStarted();
+                                    setMobileMenuOpen(false);
+                                }}
+                                className="text-sm font-semibold bg-white hover:bg-slate-100 text-slate-900 px-4 py-2.5 rounded-md transition-all text-center"
+                            >
+                                Sign up
+                            </button>
+                        </div>
+                    </div>
+                )}
             </header>
 
             {/* Hero Section - GitHub Style */}
@@ -944,7 +1201,10 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                         >
                             <span className="flex items-center gap-2">
                                 Get started
-                                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                <ChevronRight
+                                    size={18}
+                                    className="group-hover:translate-x-1 transition-transform"
+                                />
                             </span>
                         </button>
                     </div>
@@ -961,7 +1221,8 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                                     See how life decisions impact your wealth
                                 </h2>
                                 <p className="text-sm text-slate-400">
-                                    Toggle scenarios and adjust ages to explore your financial future
+                                    Toggle scenarios and adjust ages to explore
+                                    your financial future
                                 </p>
                             </div>
 
@@ -1078,7 +1339,9 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                             Connect with 2,500+ banks
                         </h3>
                         <p className="text-slate-400 text-base max-w-lg mx-auto">
-                            Securely link all your accounts with read-only access. From high-street banks to digital challengers.
+                            Securely link all your accounts with read-only
+                            access. From high-street banks to digital
+                            challengers.
                         </p>
                     </div>
                     <BankLogoCarousel />
@@ -1146,10 +1409,15 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                         {/* Left side - Content */}
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
-                                <Sparkles size={16} className="text-emerald-400" />
-                                <span className="text-sm font-medium text-emerald-400">Free forever for personal use</span>
+                                <Sparkles
+                                    size={16}
+                                    className="text-emerald-400"
+                                />
+                                <span className="text-sm font-medium text-emerald-400">
+                                    Free forever for personal use
+                                </span>
                             </div>
-                            
+
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 text-white leading-tight">
                                 Your wealth journey
                                 <br />
@@ -1157,10 +1425,11 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                                     starts here
                                 </span>
                             </h2>
-                            
+
                             <p className="text-lg text-slate-400 mb-8 max-w-lg">
-                                Join thousands who've taken control of their finances. 
-                                Connect your accounts in minutes and see your complete financial picture.
+                                Join thousands who've taken control of their
+                                finances. Connect your accounts in minutes and
+                                see your complete financial picture.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
@@ -1170,7 +1439,10 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                                 >
                                     <span className="flex items-center justify-center gap-2">
                                         Create free account
-                                        <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                        <ChevronRight
+                                            size={20}
+                                            className="group-hover:translate-x-1 transition-transform"
+                                        />
                                     </span>
                                 </button>
                                 <button
@@ -1183,20 +1455,44 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
 
                             <div className="flex flex-wrap gap-6 justify-center lg:justify-start text-sm text-slate-500">
                                 <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    <svg
+                                        className="w-5 h-5 text-emerald-500"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clipRule="evenodd"
+                                        />
                                     </svg>
                                     <span>No credit card</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    <svg
+                                        className="w-5 h-5 text-emerald-500"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clipRule="evenodd"
+                                        />
                                     </svg>
                                     <span>Bank-grade security</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    <svg
+                                        className="w-5 h-5 text-emerald-500"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clipRule="evenodd"
+                                        />
                                     </svg>
                                     <span>Read-only access</span>
                                 </div>
@@ -1210,18 +1506,25 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                                 <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-2xl p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
-                                            <p className="text-sm text-slate-400">Total Net Worth</p>
-                                            <p className="text-3xl font-bold text-white">£247,832</p>
+                                            <p className="text-sm text-slate-400">
+                                                Total Net Worth
+                                            </p>
+                                            <p className="text-3xl font-bold text-white">
+                                                £247,832
+                                            </p>
                                         </div>
                                         <div className="flex items-center gap-1 text-emerald-400 text-sm font-medium">
                                             <TrendingUp size={16} />
                                             <span>+12.4%</span>
                                         </div>
                                     </div>
-                                    
+
                                     {/* Mini chart visualization */}
                                     <div className="h-24 flex items-end gap-1">
-                                        {[35, 42, 38, 55, 48, 62, 58, 70, 65, 78, 72, 85].map((height, i) => (
+                                        {[
+                                            35, 42, 38, 55, 48, 62, 58, 70, 65,
+                                            78, 72, 85,
+                                        ].map((height, i) => (
                                             <div
                                                 key={i}
                                                 className="flex-1 bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t opacity-80"
@@ -1229,19 +1532,31 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                                             />
                                         ))}
                                     </div>
-                                    
+
                                     <div className="mt-6 grid grid-cols-3 gap-4">
                                         <div className="text-center p-3 bg-slate-900/50 rounded-lg">
-                                            <p className="text-xs text-slate-500 mb-1">Cash</p>
-                                            <p className="text-sm font-semibold text-white">£18,420</p>
+                                            <p className="text-xs text-slate-500 mb-1">
+                                                Cash
+                                            </p>
+                                            <p className="text-sm font-semibold text-white">
+                                                £18,420
+                                            </p>
                                         </div>
                                         <div className="text-center p-3 bg-slate-900/50 rounded-lg">
-                                            <p className="text-xs text-slate-500 mb-1">Investments</p>
-                                            <p className="text-sm font-semibold text-white">£89,412</p>
+                                            <p className="text-xs text-slate-500 mb-1">
+                                                Investments
+                                            </p>
+                                            <p className="text-sm font-semibold text-white">
+                                                £89,412
+                                            </p>
                                         </div>
                                         <div className="text-center p-3 bg-slate-900/50 rounded-lg">
-                                            <p className="text-xs text-slate-500 mb-1">Property</p>
-                                            <p className="text-sm font-semibold text-white">£140,000</p>
+                                            <p className="text-xs text-slate-500 mb-1">
+                                                Property
+                                            </p>
+                                            <p className="text-sm font-semibold text-white">
+                                                £140,000
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -1249,20 +1564,32 @@ export default function Landing({ onGetStarted, onSignIn }: LandingPageProps) {
                                 {/* Floating account cards */}
                                 <div className="absolute -top-4 -left-8 bg-slate-800 border border-slate-700 rounded-xl p-3 shadow-xl transform -rotate-6">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">B</div>
+                                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                                            B
+                                        </div>
                                         <div>
-                                            <p className="text-xs text-slate-400">Barclays</p>
-                                            <p className="text-sm font-semibold text-white">£4,230</p>
+                                            <p className="text-xs text-slate-400">
+                                                Barclays
+                                            </p>
+                                            <p className="text-sm font-semibold text-white">
+                                                £4,230
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="absolute -bottom-4 -right-4 bg-slate-800 border border-slate-700 rounded-xl p-3 shadow-xl transform rotate-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">M</div>
+                                        <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                                            M
+                                        </div>
                                         <div>
-                                            <p className="text-xs text-slate-400">Monzo</p>
-                                            <p className="text-sm font-semibold text-white">£1,847</p>
+                                            <p className="text-xs text-slate-400">
+                                                Monzo
+                                            </p>
+                                            <p className="text-sm font-semibold text-white">
+                                                £1,847
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

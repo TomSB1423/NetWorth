@@ -111,7 +111,6 @@ function AppRoutes() {
         const handleCallback = async () => {
             if (institutionId && canSync && !isSyncing) {
                 setIsSyncing(true);
-                console.log("Syncing institution:", institutionId);
                 try {
                     await api.syncInstitution(institutionId);
 
@@ -129,17 +128,8 @@ function AppRoutes() {
                         const accounts = await api.getAccounts();
                         if (accounts.length > 0) {
                             accountsCreated = true;
-                            console.log(
-                                `Accounts found after ${attempt + 1} attempt(s)`
-                            );
                             break;
                         }
-
-                        console.log(
-                            `Waiting for accounts... attempt ${
-                                attempt + 1
-                            }/${maxAttempts}`
-                        );
                         await new Promise((resolve) =>
                             setTimeout(resolve, pollInterval)
                         );
@@ -158,12 +148,9 @@ function AppRoutes() {
                     await queryClient.invalidateQueries({
                         queryKey: ["balances"],
                     });
-                    console.log("Institution sync completed");
-
                     // Mark onboarding as complete if not already
                     if (!hasCompletedOnboarding) {
                         await updateUser({ hasCompletedOnboarding: true });
-                        console.log("Onboarding marked as complete");
                     }
 
                     // Remove the institutionId from the URL and navigate to dashboard
