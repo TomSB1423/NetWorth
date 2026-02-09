@@ -67,7 +67,7 @@ export function NetWorthChart({
     });
 
     // Only derive status after data has been fetched to avoid race conditions
-    const history = historyResponse?.dataPoints ?? [];
+    const history = useMemo(() => historyResponse?.dataPoints ?? [], [historyResponse?.dataPoints]);
     const status = historyResponse?.status;
     const lastCalculated = historyResponse?.lastCalculated;
 

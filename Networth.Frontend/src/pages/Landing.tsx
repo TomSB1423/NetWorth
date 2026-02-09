@@ -372,14 +372,16 @@ const ScenarioCard = memo(function ScenarioCard({
 }) {
     const Icon = scenario.icon;
     const [localAge, setLocalAge] = useState(scenario.age);
+    const [prevScenarioAge, setPrevScenarioAge] = useState(scenario.age);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined,
     );
 
-    // Sync local age with prop changes (e.g., reset)
-    useEffect(() => {
+    // Sync local age with prop changes (e.g., reset) — React recommended pattern
+    if (scenario.age !== prevScenarioAge) {
+        setPrevScenarioAge(scenario.age);
         setLocalAge(scenario.age);
-    }, [scenario.age]);
+    }
 
     // Cleanup debounce on unmount
     useEffect(() => {
@@ -499,12 +501,7 @@ const InteractiveProjectionChart = memo(function InteractiveProjectionChart({
     onChangeAge: (id: string, age: number) => void;
 }) {
     const data = useMemo(() => generateProjection(scenarios), [scenarios]);
-    const [hoveredAge, setHoveredAge] = useState<number | null>(null);
-
-    const currentPoint = useMemo(() => {
-        const age = hoveredAge ?? 35;
-        return data.find((p) => p.age === age) ?? data[10];
-    }, [data, hoveredAge]);
+    const [, setHoveredAge] = useState<number | null>(null);
 
     const handleMouseMove = useCallback((state: unknown) => {
         const chartState = state as {
@@ -855,14 +852,19 @@ const FeatureSlideshow = memo(function FeatureSlideshow() {
         undefined,
     );
 
+    // Reset progress when active tab or pause state changes (React recommended pattern)
+    const [prevState, setPrevState] = useState({ activeTab: 0, isPaused: false });
+    if (activeTab !== prevState.activeTab || isPaused !== prevState.isPaused) {
+        setPrevState({ activeTab, isPaused });
+        if (!isPaused) setProgress(0);
+    }
+
     // Auto-advance timer with progress tracking
     useEffect(() => {
         if (isPaused) {
             if (progressRef.current) clearInterval(progressRef.current);
             return;
         }
-
-        setProgress(0);
 
         // Progress bar updates every 50ms for smooth animation
         progressRef.current = setInterval(() => {

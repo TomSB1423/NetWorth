@@ -56,7 +56,7 @@ export default function Transactions() {
         enabled: accounts.length > 0,
     });
 
-    const transactions = data?.items ?? [];
+    const transactions = useMemo(() => data?.items ?? [], [data?.items]);
     const totalPages = data?.totalPages ?? 0;
 
     // Calculate most recent sync time
