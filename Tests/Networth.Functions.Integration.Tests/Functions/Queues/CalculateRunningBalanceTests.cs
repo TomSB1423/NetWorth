@@ -13,6 +13,7 @@ using Xunit.Abstractions;
 
 namespace Networth.Functions.Tests.Integration.Functions.Queues;
 
+[Collection("Integration")]
 public class CalculateRunningBalanceTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {

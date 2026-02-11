@@ -65,7 +65,7 @@ public static class SystemTestFactory
         var functionsResource = builder.Resources.FirstOrDefault(r => r.Name == ResourceNames.Functions);
         functionsResource?.Annotations.Add(new EnvironmentCallbackAnnotation(context =>
         {
-            context.EnvironmentVariables["Networth__MockAuthentication"] = "true";
+            context.EnvironmentVariables["Networth__UseAuthentication"] = "false";
             // Disable sandbox mode for system tests - use real Institutions table with API sync
             context.EnvironmentVariables["Institutions__UseSandbox"] = "false";
         }));

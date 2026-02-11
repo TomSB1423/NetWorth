@@ -12,6 +12,7 @@ namespace Networth.Functions.Tests.Integration.Functions.Http.Institutions;
 /// <summary>
 ///     Integration tests for the Azure Functions backend using shared Mockoon fixture.
 /// </summary>
+[Collection("Integration")]
 public class FunctionsIntegrationTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {

@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Networth.Functions.Tests.Integration.Functions.Http.Institutions;
 
+[Collection("Integration")]
 public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {

@@ -17,6 +17,7 @@ namespace Networth.Functions.Tests.Integration.Authentication;
 ///     Integration tests for custom mock user configuration.
 ///     Verifies that mock user settings can be customized via environment variables.
 /// </summary>
+[Collection("Integration")]
 public class CustomMockUserConfigurationTests : IAsyncLifetime
 {
     private const string CustomFirebaseUid = "custom-test-uid-456";

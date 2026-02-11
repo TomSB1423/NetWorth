@@ -18,6 +18,7 @@ using Transaction = Networth.Infrastructure.Data.Entities.Transaction;
 
 namespace Networth.Functions.Tests.Integration.Functions.Http.Statistics;
 
+[Collection("Integration")]
 public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {

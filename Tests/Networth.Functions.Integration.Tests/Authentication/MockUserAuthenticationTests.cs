@@ -11,6 +11,7 @@ namespace Networth.Functions.Tests.Integration.Authentication;
 ///     Integration tests for mock user authentication configuration.
 ///     Verifies that when UseAuthentication=false, the mock user is injected correctly.
 /// </summary>
+[Collection("Integration")]
 public class MockUserAuthenticationTests : IntegrationTestBase
 {
     private HttpClient _httpClient = null!;

@@ -12,6 +12,7 @@ using DomainTransaction = Networth.Domain.Entities.Transaction;
 
 namespace Networth.Functions.Tests.Integration;
 
+[Collection("Integration")]
 public class TransactionRepositoryTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
