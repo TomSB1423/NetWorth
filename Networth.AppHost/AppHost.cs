@@ -40,6 +40,7 @@ storage.AddQueue(ResourceNames.CalculateRunningBalanceQueue);
 
 IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .AddAzureFunctionsProject<Networth_Functions>(ResourceNames.Functions)
+    .WithHostStorage(storage)
     .WithExternalHttpEndpoints()
     .WithReference(postgresdb)
     .WaitFor(postgresdb)
@@ -47,7 +48,6 @@ IResourceBuilder<AzureFunctionsProjectResource> functions = builder
     .WithReference(blobs)
     .WithReference(tables)
     .WaitFor(queues)
-    .WithEnvironment("AzureWebJobsStorage", blobs.Resource.ConnectionStringExpression)
     .WithHttpHealthCheck("/api/health");
 
 // Configure GoCardless and Firebase
