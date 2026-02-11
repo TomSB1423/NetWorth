@@ -97,6 +97,7 @@ public class CustomMockUserConfigurationTests : IAsyncLifetime
             {
                 hostSettings.EnvironmentName = "Development";
                 appOptions.DisableDashboard = true;
+                appOptions.AllowUnsecuredTransport = true;
             });
 
         // Provide default values for all required parameters
@@ -124,6 +125,9 @@ public class CustomMockUserConfigurationTests : IAsyncLifetime
             .OfType<ProjectResource>()
             .First(r => r.Name == ResourceNames.Functions);
 
+        // Disable non-essential resources to avoid port conflicts in CI
+        DistributedApplicationTestFactory.DisableNonEssentialResources(builder);
+
         // Configure custom mock user via environment variables
         functionsResource.Annotations.Add(new EnvironmentCallbackAnnotation(env =>
         {
@@ -132,6 +136,8 @@ public class CustomMockUserConfigurationTests : IAsyncLifetime
             env.EnvironmentVariables["Networth__MockUser__Name"] = CustomName;
             env.EnvironmentVariables["Networth__MockUser__Email"] = CustomEmail;
             env.EnvironmentVariables["Firebase__ProjectId"] = "disabled";
+            // Override Frontend__Url since frontend is disabled in tests
+            env.EnvironmentVariables["Frontend__Url"] = "http://localhost:3000";
 
             // Configure Gocardless for basic operation
             env.EnvironmentVariables[$"Gocardless:{nameof(GocardlessOptions.BankAccountDataBaseUrl)}"] = "https://mock.invalid/api/v2";

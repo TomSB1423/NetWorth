@@ -121,7 +121,7 @@ jobs:
           reporter: dotnet-trx
 
       - name: Copy DCP logs
-        if: (success() || steps.test.conclusion == 'failure')
+        if: always()
         shell: bash
         run: |
           mkdir -p ./TestResults/DCPLogs

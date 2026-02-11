@@ -14,8 +14,9 @@ namespace Networth.Functions.Tests.Integration.Infrastructure;
 /// <summary>
 ///     Base class for integration tests that require a distributed application.
 ///     Handles the lifecycle of the application and provides Mockoon support.
+///     The MockoonTestFixture is shared via ICollectionFixture in IntegrationTestCollection.
 /// </summary>
-public abstract class IntegrationTestBase : IAsyncLifetime, IClassFixture<MockoonTestFixture>
+public abstract class IntegrationTestBase : IAsyncLifetime
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="IntegrationTestBase"/> class.

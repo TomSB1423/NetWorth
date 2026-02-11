@@ -27,6 +27,25 @@ public static class DistributedApplicationTestFactory
         bool disableFunctions = false)
         => CreateAsync(testOutput, mockoonBaseUrl, true, enableDashboard, disableFunctions);
 
+    /// <summary>
+    ///     Disables non-essential resources (frontend, docs) in the test builder to avoid
+    ///     port conflicts and unnecessary resource usage during integration tests.
+    ///     Changes fixed ports to null (random) so they don't conflict across test classes.
+    /// </summary>
+    internal static void DisableNonEssentialResources(IDistributedApplicationTestingBuilder builder)
+    {
+        HashSet<string> nonEssentialNames = [ResourceNames.React, ResourceNames.Docs, "api-reference"];
+
+        foreach (IResource resource in builder.Resources.Where(r => nonEssentialNames.Contains(r.Name)))
+        {
+            // Replace fixed port assignments with null (random) to avoid conflicts
+            foreach (EndpointAnnotation endpoint in resource.Annotations.OfType<EndpointAnnotation>())
+            {
+                endpoint.Port = null;
+            }
+        }
+    }
+
     private static async Task<DistributedApplication> CreateAsync(
         ITestOutputHelper? testOutput,
         string? mockoonBaseUrl,
@@ -40,7 +59,7 @@ public static class DistributedApplicationTestFactory
             {
                 hostSettings.EnvironmentName = "Development";
                 appOptions.DisableDashboard = !enableDashboard;
-                appOptions.AllowUnsecuredTransport = enableDashboard;
+                appOptions.AllowUnsecuredTransport = true;
             });
 
         // Provide default values for all required parameters to avoid resolution failures
@@ -75,11 +94,19 @@ public static class DistributedApplicationTestFactory
             .OfType<ProjectResource>()
             .First(r => r.Name == ResourceNames.Functions);
 
+        // Disable non-essential resources to avoid port conflicts in CI.
+        // The frontend (port 3000) and docs (port 3001) are NpmApp resources that
+        // are not needed for integration tests and cause port binding issues when
+        // multiple test classes create separate Aspire apps sequentially.
+        DisableNonEssentialResources(builder);
+
         // Disable real authentication for integration tests (use mock user)
         functionsResource.Annotations.Add(new EnvironmentCallbackAnnotation(env =>
         {
             env.EnvironmentVariables["Networth__UseAuthentication"] = "false";
             env.EnvironmentVariables["Firebase__ProjectId"] = "disabled";
+            // Override Frontend__Url since frontend is disabled in tests
+            env.EnvironmentVariables["Frontend__Url"] = "http://localhost:3000";
         }));
 
         // Configure Mockoon for Functions resource if requested
