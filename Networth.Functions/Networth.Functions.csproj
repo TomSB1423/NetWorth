@@ -1,29 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!-- .NET 10 is now supported in Azure Functions isolated worker -->
+    <TargetFramework>net10.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
     <UserSecretsId>09bd123b-3401-4507-b92c-0b283b95b537</UserSecretsId>
     <RootNamespace>Networth.Functions</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
-    <PackageReference Include="Aspire.Npgsql"/>
-    <PackageReference Include="Aspire.Azure.Storage.Queues"/>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker"/>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http"/>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore"/>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi"/>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues"/>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk"/>
-    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService"/>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights"/>
-    <PackageReference Include="Microsoft.Azure.Functions.Extensions"/>
-    <PackageReference Include="FluentValidation"/>
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
-    <PackageReference Include="Serilog"/>
-    <PackageReference Include="Serilog.Extensions.Hosting"/>
-    <PackageReference Include="Serilog.Sinks.Console"/>
-    <PackageReference Include="Serilog.Settings.Configuration"/>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+    <PackageReference Include="Aspire.Npgsql" />
+    <PackageReference Include="Aspire.Azure.Storage.Queues" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" />
+    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" />
+    <PackageReference Include="Microsoft.Azure.Functions.Extensions" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
@@ -35,15 +39,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
+    <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Networth.Application\Networth.Application.csproj"/>
-    <ProjectReference Include="..\Networth.Infrastructure\Networth.Infrastructure.csproj"/>
-    <ProjectReference Include="..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj"/>
+    <ProjectReference Include="..\Networth.Application\Networth.Application.csproj" />
+    <ProjectReference Include="..\Networth.Infrastructure\Networth.Infrastructure.csproj" />
+    <ProjectReference Include="..\Networth.ServiceDefaults\Networth.ServiceDefaults.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Functions\Http\" />
-    <Folder Include="Models\Requests\"/>
+    <Folder Include="Models\Requests\" />
   </ItemGroup>
 </Project>

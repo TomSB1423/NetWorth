@@ -68,7 +68,7 @@ public class SyncAccountCommandHandler(
         };
     }
 
-    private async Task<bool> SyncAccountMetadataAsync(string accountId, string userId, CancellationToken cancellationToken)
+    private async Task<bool> SyncAccountMetadataAsync(string accountId, Guid userId, CancellationToken cancellationToken)
     {
         var account = await financialProvider.GetAccountAsync(accountId, cancellationToken);
 
@@ -137,7 +137,7 @@ public class SyncAccountCommandHandler(
 
     private async Task<int?> SyncAccountTransactionsAsync(
         string accountId,
-        string userId,
+        Guid userId,
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,
         CancellationToken cancellationToken)

@@ -12,6 +12,7 @@ using DomainTransaction = Networth.Domain.Entities.Transaction;
 
 namespace Networth.Functions.Tests.Integration;
 
+[Collection("Integration")]
 public class TransactionRepositoryTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
@@ -31,11 +32,11 @@ public class TransactionRepositoryTests(MockoonTestFixture mockoonTestFixture, I
 
         var repository = new TransactionRepository(dbContext, NullLogger<TransactionRepository>.Instance);
 
-        var userId = "test-user";
+        var userId = Guid.NewGuid();
         var accountId = "test-account";
 
         // Seed parent entities to satisfy foreign keys
-        dbContext.Users.Add(new User { Id = userId, Name = "Test User" });
+        dbContext.Users.Add(new User { Id = userId, Name = "Test User", FirebaseUid = "test-firebase-uid", Email = "test@example.com" });
         dbContext.Accounts.Add(new Account
         {
             Id = accountId,

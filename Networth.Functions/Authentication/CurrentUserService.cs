@@ -1,38 +1,82 @@
 using System.Security.Claims;
-using Microsoft.Azure.Functions.Worker;
+using Networth.Domain.Repositories;
 
 namespace Networth.Functions.Authentication;
 
 /// <summary>
 ///     Implementation of <see cref="ICurrentUserService"/> for Azure Functions.
+///     Supports Firebase token authentication via JwtAuthenticationMiddleware
+///     and mock users via MockUserMiddleware in development.
 /// </summary>
-public class CurrentUserService : ICurrentUserService
+public class CurrentUserService(
+    IFunctionContextAccessor functionContextAccessor,
+    IUserRepository userRepository) : ICurrentUserService
 {
-    private ClaimsPrincipal? _user;
+    /// <inheritdoc />
+    public Guid? InternalUserId { get; private set; }
 
     /// <inheritdoc />
-    public ClaimsPrincipal? User => _user;
+    public ClaimsPrincipal? User
+    {
+        get
+        {
+            // User is set by either MockUserMiddleware or JwtAuthenticationMiddleware
+            if (functionContextAccessor.FunctionContext?.Items.TryGetValue("User", out var contextUser) == true
+                && contextUser is ClaimsPrincipal principal
+                && principal.Identity?.IsAuthenticated == true)
+            {
+                return principal;
+            }
+
+            return null;
+        }
+    }
 
     /// <inheritdoc />
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 
     /// <inheritdoc />
-    public string UserId => User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+    public string FirebaseUid =>
+        // Firebase tokens use 'sub' claim for user identification (Firebase UID)
+        User?.FindFirst("sub")?.Value
+        ?? User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
         ?? throw new InvalidOperationException("User is not authenticated");
 
     /// <inheritdoc />
-    public string? Name => User?.FindFirst(ClaimTypes.Name)?.Value;
+    public string Name =>
+        User?.FindFirst("name")?.Value
+        ?? User?.FindFirst(ClaimTypes.Name)?.Value
+        ?? throw new InvalidOperationException("User is not authenticated or name claim is missing");
 
-    /// <summary>
-    ///     Sets the function context to extract user information from.
-    /// </summary>
-    /// <param name="context">The function context.</param>
-    public void SetContext(FunctionContext context)
+    /// <inheritdoc />
+    public string Email =>
+        User?.FindFirst("email")?.Value
+        ?? User?.FindFirst(ClaimTypes.Email)?.Value
+        ?? throw new InvalidOperationException("User is not authenticated or email claim is missing");
+
+    /// <inheritdoc />
+    public void SetInternalUserId(Guid userId)
     {
-        if (context.Items.TryGetValue("User", out object? user) && user is ClaimsPrincipal principal)
+        InternalUserId = userId;
+    }
+
+    /// <inheritdoc />
+    public async Task<Guid> GetInternalUserIdAsync(CancellationToken cancellationToken = default)
+    {
+        // Return cached value if available (set by middleware or previous call)
+        if (InternalUserId.HasValue)
         {
-            _user = principal;
+            return InternalUserId.Value;
         }
+
+        var user = await userRepository.GetUserByFirebaseUidAsync(FirebaseUid, cancellationToken);
+        if (user is null)
+        {
+            throw new InvalidOperationException($"User with Firebase UID '{FirebaseUid}' not found in database. Ensure the user is created first.");
+        }
+
+        InternalUserId = user.Id;
+        return user.Id;
     }
 }
 

@@ -1,3 +1,4 @@
+using Aspire.Hosting.ApplicationModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +14,13 @@ namespace Networth.SystemTests.Infrastructure;
 
 /// <summary>
 ///     Factory for creating configured distributed applications for system testing.
-///     System tests use real external services (GoCardless sandbox API) rather than mocks.
+///     System tests use the real GoCardless API (not mocks) with proper database migrations.
 /// </summary>
 public static class SystemTestFactory
 {
     /// <summary>
     ///     Creates and starts a distributed application configured for system testing.
-    ///     Uses GoCardless sandbox credentials from user secrets.
+    ///     Uses real GoCardless credentials from user secrets with production-like configuration.
     /// </summary>
     /// <param name="testOutput">Optional test output helper for capturing logs.</param>
     /// <param name="enableDashboard">Whether to enable the Aspire dashboard.</param>
@@ -39,6 +40,35 @@ public static class SystemTestFactory
 
         // Ensure user secrets are loaded from the AppHost assembly
         builder.Configuration.AddUserSecrets<Networth_AppHost>();
+
+        // Provide default values for Firebase parameters to avoid resolution failures
+        // These will be overridden by user secrets if available
+        if (string.IsNullOrEmpty(builder.Configuration["Parameters:firebase-api-key"]))
+        {
+            builder.Configuration["Parameters:firebase-api-key"] = "test-api-key";
+        }
+
+        if (string.IsNullOrEmpty(builder.Configuration["Parameters:firebase-auth-domain"]))
+        {
+            builder.Configuration["Parameters:firebase-auth-domain"] = "test.firebaseapp.com";
+        }
+
+        if (string.IsNullOrEmpty(builder.Configuration["Parameters:firebase-project-id"]))
+        {
+            builder.Configuration["Parameters:firebase-project-id"] = "test-project";
+        }
+
+        builder.Configuration["Parameters:mock-authentication"] = "true";
+
+        // Override the environment variables on the Functions resource directly
+        // This bypasses the parameter resolution which seems to fail in test context
+        var functionsResource = builder.Resources.FirstOrDefault(r => r.Name == ResourceNames.Functions);
+        functionsResource?.Annotations.Add(new EnvironmentCallbackAnnotation(context =>
+        {
+            context.EnvironmentVariables["Networth__UseAuthentication"] = "false";
+            // Disable sandbox mode for system tests - use real Institutions table with API sync
+            context.EnvironmentVariables["Institutions__UseSandbox"] = "false";
+        }));
 
         // Apply standard system test setup
         // Random volume names ensure test isolation from development environment
@@ -90,18 +120,6 @@ public static class SystemTestFactory
         }
 
         return connectionString;
-    }
-
-    /// <summary>
-    ///     Ensures the database is created and ready for testing.
-    ///     Note: Since we use random volume names, we start with a fresh DB for each test,
-    ///     so we don't need to delete/recreate it.
-    /// </summary>
-    public static async Task ResetDatabaseAsync(string connectionString)
-    {
-        await using var dbContext = CreateDbContext(connectionString);
-
-        await dbContext.Database.EnsureCreatedAsync();
     }
 
     /// <summary>

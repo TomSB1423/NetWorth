@@ -5,11 +5,31 @@
         "description": "This is the OpenAPI Document on Azure Functions",
         "version": "1.0.0"
     },
-    "host": "localhost:59024",
+    "host": "localhost:55590",
     "basePath": "/api",
     "schemes": ["http"],
     "paths": {
-        "/user/me": {
+        "/users": {
+            "post": {
+                "tags": ["Users"],
+                "summary": "Create or ensure user exists",
+                "description": "Creates a new user record or returns the existing user. Call this after successful authentication to ensure the user exists in the system.",
+                "operationId": "CreateUser",
+                "produces": ["application/json"],
+                "responses": {
+                    "200": {
+                        "description": "User created or already exists",
+                        "schema": {
+                            "$ref": "#/definitions/createUserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "User is not authenticated"
+                    }
+                }
+            }
+        },
+        "/users/me": {
             "get": {
                 "tags": ["User"],
                 "summary": "Get current authenticated user",
@@ -22,6 +42,58 @@
                         "schema": {
                             "$ref": "#/definitions/currentUserResponse"
                         }
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Users"],
+                "summary": "Update user fields",
+                "description": "Updates the current user's fields such as name and onboarding status.",
+                "operationId": "UpdateUser",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "The fields to update",
+                        "schema": {
+                            "$ref": "#/definitions/updateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/updateUserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "User is not authenticated"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/statistics/net-worth": {
+            "get": {
+                "tags": ["Statistics"],
+                "summary": "Get net worth history",
+                "description": "Retrieves the daily net worth history for the current authenticated user.",
+                "operationId": "GetNetWorthHistory",
+                "produces": ["application/json"],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved net worth history",
+                        "schema": {
+                            "$ref": "#/definitions/netWorthHistoryResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "User is not authenticated"
                     }
                 }
             }
@@ -65,7 +137,7 @@
             "get": {
                 "tags": ["Institutions"],
                 "summary": "Get financial institutions",
-                "description": "Retrieves a list of available financial institutions for account linking.",
+                "description": "Retrieves a list of available financial institutions for account linking. Already linked institutions are excluded.",
                 "operationId": "GetInstitutions",
                 "produces": ["application/json"],
                 "responses": {
@@ -84,13 +156,44 @@
                 }
             }
         },
+        "/institutions/{institutionId}/link": {
+            "post": {
+                "tags": ["Institutions"],
+                "summary": "Link institution",
+                "description": "Links an institution by creating an agreement with the financial institution and then creating a requisition for account access.",
+                "operationId": "LinkInstitution",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "institutionId",
+                        "description": "The institution ID to link",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully linked institution",
+                        "schema": {
+                            "$ref": "#/definitions/linkInstitutionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/institutions/{institutionId}/sync": {
             "post": {
                 "tags": ["Institutions"],
                 "summary": "Sync institution accounts",
                 "description": "Enqueues sync operations for all accounts belonging to the specified institution for the authenticated user.",
                 "operationId": "SyncInstitution",
-                "produces": ["application/json"],
                 "parameters": [
                     {
                         "in": "path",
@@ -101,11 +204,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Successfully enqueued account syncs",
-                        "schema": {
-                            "$ref": "#/definitions/syncInstitutionResponse"
-                        }
+                    "202": {
+                        "description": "Successfully enqueued institution sync"
                     },
                     "400": {
                         "description": "Invalid request parameters"
@@ -150,6 +250,48 @@
                     },
                     "500": {
                         "description": "Internal server error"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Accounts"],
+                "summary": "Update account fields",
+                "description": "Updates an account's user-defined fields such as display name and account type.",
+                "operationId": "UpdateAccount",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "accountId",
+                        "description": "The account ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "The fields to update",
+                        "schema": {
+                            "$ref": "#/definitions/updateAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/userAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "401": {
+                        "description": "User is not authenticated"
+                    },
+                    "404": {
+                        "description": "Account not found"
                     }
                 }
             }
@@ -257,7 +399,7 @@
             "get": {
                 "tags": ["Accounts"],
                 "summary": "Get account transactions",
-                "description": "Retrieves transactions for a specific bank account with optional date range filtering.",
+                "description": "Retrieves paginated transactions for a specific bank account.",
                 "operationId": "GetAccountTransactions",
                 "produces": ["application/json"],
                 "parameters": [
@@ -270,68 +412,31 @@
                     },
                     {
                         "in": "query",
-                        "name": "dateFrom",
-                        "description": "Start date for transaction filtering",
-                        "required": true,
-                        "type": "string"
+                        "name": "page",
+                        "description": "Page number (1-based, default: 1)",
+                        "type": "integer",
+                        "format": "int32"
                     },
                     {
                         "in": "query",
-                        "name": "dateTo",
-                        "description": "End date for transaction filtering",
-                        "required": true,
-                        "type": "string"
+                        "name": "pageSize",
+                        "description": "Number of items per page (default: 50, max: 100)",
+                        "type": "integer",
+                        "format": "int32"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved account transactions",
+                        "description": "Successfully retrieved paginated account transactions",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/transactionResponse"
-                            }
+                            "$ref": "#/definitions/pagedResponse_transactionResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid account ID or date format"
+                        "description": "Invalid parameters"
                     },
                     "404": {
                         "description": "Account not found"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                }
-            }
-        },
-        "/account/link": {
-            "post": {
-                "tags": ["Accounts"],
-                "summary": "Link bank account",
-                "description": "Links a bank account by creating an agreement with the financial institution and then creating a requisition for account access.",
-                "operationId": "LinkAccount",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "Account linking parameters",
-                        "schema": {
-                            "$ref": "#/definitions/linkAccountRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully linked account",
-                        "schema": {
-                            "$ref": "#/definitions/linkAccountResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request parameters"
                     },
                     "500": {
                         "description": "Internal server error"
@@ -406,16 +511,38 @@
                 }
             }
         },
-        "currentUserResponse": {
+        "createUserResponse": {
             "type": "object",
             "properties": {
                 "userId": {
+                    "format": "uuid",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "isAuthenticated": {
+                "isNewUser": {
+                    "type": "boolean"
+                },
+                "hasCompletedOnboarding": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "currentUserResponse": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "format": "uuid",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "hasCompletedOnboarding": {
                     "type": "boolean"
                 }
             }
@@ -434,15 +561,7 @@
                 }
             }
         },
-        "linkAccountRequest": {
-            "type": "object",
-            "properties": {
-                "institutionId": {
-                    "type": "string"
-                }
-            }
-        },
-        "linkAccountResponse": {
+        "linkInstitutionResponse": {
             "type": "object",
             "properties": {
                 "authorizationLink": {
@@ -451,8 +570,81 @@
                 "status": {
                     "format": "int32",
                     "default": 0,
-                    "enum": [0, 1, 2, 3],
+                    "enum": [0, 1, 2, 3, 4, 5],
                     "type": "integer"
+                },
+                "isAlreadyLinked": {
+                    "type": "boolean"
+                },
+                "existingRequisitionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "netWorthHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "dataPoints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/netWorthPointResponse"
+                    }
+                },
+                "status": {
+                    "format": "int32",
+                    "default": 0,
+                    "enum": [0, 1, 2],
+                    "type": "integer"
+                },
+                "lastCalculated": {
+                    "format": "date-time",
+                    "type": "string"
+                }
+            }
+        },
+        "netWorthPointResponse": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "amount": {
+                    "format": "double",
+                    "type": "number"
+                }
+            }
+        },
+        "pagedResponse_transactionResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/transactionResponse"
+                    }
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "hasNextPage": {
+                    "type": "boolean"
+                },
+                "hasPreviousPage": {
+                    "type": "boolean"
                 }
             }
         },
@@ -482,24 +674,6 @@
                 },
                 "authenticationLink": {
                     "type": "string"
-                }
-            }
-        },
-        "syncInstitutionResponse": {
-            "type": "object",
-            "properties": {
-                "institutionId": {
-                    "type": "string"
-                },
-                "accountsEnqueued": {
-                    "format": "int32",
-                    "type": "integer"
-                },
-                "accountIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -581,6 +755,46 @@
                 }
             }
         },
+        "updateAccountRequest": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "category": {
+                    "format": "int32",
+                    "default": 0,
+                    "enum": [0, 1, 2],
+                    "type": "integer"
+                }
+            }
+        },
+        "updateUserRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "hasCompletedOnboarding": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "updateUserResponse": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "format": "uuid",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "hasCompletedOnboarding": {
+                    "type": "boolean"
+                }
+            }
+        },
         "userAccountResponse": {
             "type": "object",
             "properties": {
@@ -596,8 +810,23 @@
                 "institutionId": {
                     "type": "string"
                 },
+                "institutionName": {
+                    "type": "string"
+                },
+                "institutionLogo": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "category": {
+                    "format": "int32",
+                    "default": 0,
+                    "enum": [0, 1, 2],
+                    "type": "integer"
                 },
                 "iban": {
                     "type": "string"
@@ -606,6 +835,10 @@
                     "type": "string"
                 },
                 "product": {
+                    "type": "string"
+                },
+                "lastSynced": {
+                    "format": "date-time",
                     "type": "string"
                 }
             }

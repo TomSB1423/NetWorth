@@ -5,13 +5,22 @@ namespace Networth.Infrastructure.Data.Configurations;
 
 /// <summary>
 ///     Entity Framework configuration for the InstitutionMetadata entity.
+///     Table name is determined by <see cref="UseSandboxTable"/> - either "Institutions" or "SandboxInstitution".
 /// </summary>
 public class InstitutionMetadataConfiguration : IEntityTypeConfiguration<Entities.InstitutionMetadata>
 {
+    /// <summary>
+    ///     Gets or sets a value indicating whether to use the sandbox table.
+    ///     This is set during DbContext configuration based on environment/options.
+    /// </summary>
+    public static bool UseSandboxTable { get; set; }
+
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Entities.InstitutionMetadata> builder)
     {
-        builder.ToTable("Institutions");
+        // Use SandboxInstitution table in sandbox mode, Institutions table otherwise
+        var tableName = UseSandboxTable ? Constants.TableNames.SandboxInstitution : Constants.TableNames.Institutions;
+        builder.ToTable(tableName);
 
         builder.HasKey(i => new { i.Id, i.CountryCode });
 

@@ -8,7 +8,7 @@ namespace Networth.Application.Queries;
 public class GetAccountsQuery : IRequest<GetAccountsQueryResult>
 {
     /// <summary>
-    ///     Gets the user ID to retrieve accounts for.
+    ///     Gets the internal user ID to retrieve accounts for.
     /// </summary>
-    public required string UserId { get; init; }
+    public required Guid UserId { get; init; }
 }

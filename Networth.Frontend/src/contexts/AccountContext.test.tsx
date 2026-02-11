@@ -12,6 +12,16 @@ vi.mock("../services/api", () => ({
     },
 }));
 
+// Mock AuthContext
+vi.mock("./AuthContext", () => ({
+    useAuth: () => ({ isReady: true }),
+}));
+
+// Mock UserContext
+vi.mock("./UserContext", () => ({
+    useUser: () => ({ isProvisioned: true }),
+}));
+
 const TestComponent = () => {
     const { accounts, balances, isLoading, hasAccounts } = useAccounts();
     if (isLoading) return <div>Loading...</div>;

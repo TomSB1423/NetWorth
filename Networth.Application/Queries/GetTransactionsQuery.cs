@@ -3,22 +3,22 @@ using Networth.Application.Interfaces;
 namespace Networth.Application.Queries;
 
 /// <summary>
-///     The get transactions query.
+///     Query to get paginated transactions for an account.
 /// </summary>
 public class GetTransactionsQuery : IRequest<GetTransactionsQueryResult>
 {
     /// <summary>
-    ///     Gets the account to retrieve transactions from.
+    ///     Gets the account ID to retrieve transactions from.
     /// </summary>
     public required string AccountId { get; init; }
 
     /// <summary>
-    ///     Gets the start date of the transactions.
+    ///     Gets the page number (1-based).
     /// </summary>
-    public required DateTimeOffset DateFrom { get; init; }
+    public int Page { get; init; } = 1;
 
     /// <summary>
-    ///     Gets the end date of the transactions.
+    ///     Gets the number of items per page.
     /// </summary>
-    public required DateTimeOffset DateTo { get; init; }
+    public int PageSize { get; init; } = 50;
 }

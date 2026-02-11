@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Plus, LogOut, RefreshCw } from "lucide-react";
 import { MetricCard } from "../components/dashboard/MetricCard";
 import { NetWorthChart } from "../components/dashboard/NetWorthChart";
 import { AssetAllocationChart } from "../components/dashboard/AssetAllocationChart";
@@ -9,12 +10,17 @@ import { GoalsSection } from "../components/dashboard/GoalsSection";
 import { FinancialHealthMetrics } from "../components/dashboard/FinancialHealthMetrics";
 import { PerformanceMetrics } from "../components/dashboard/PerformanceMetrics";
 import { useAccounts } from "../contexts/AccountContext";
+import { useAuth } from "../contexts/AuthContext";
 import { Account, AccountBalances, Balance } from "../types";
 
 export default function Index() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { accounts, balances, isLoading } = useAccounts();
+    const { logout } = useAuth();
+    const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+    // Determine if we're waiting for data to sync
     const isSyncing = useMemo(() => {
         const hasAnyBalance = balances.some((b) => b.balances.length > 0);
         if (hasAnyBalance) return false;
@@ -23,6 +29,27 @@ export default function Index() {
             accounts.length > 0 && accounts.every((a: Account) => !a.lastSynced)
         );
     }, [accounts, balances]);
+
+    // Poll for data when syncing
+    useEffect(() => {
+        if (isSyncing && !pollIntervalRef.current) {
+            pollIntervalRef.current = setInterval(async () => {
+                console.log("Polling for balance updates...");
+                await queryClient.invalidateQueries({ queryKey: ["accounts"] });
+                await queryClient.invalidateQueries({ queryKey: ["balances"] });
+            }, 15000); // Poll every 15 seconds
+        } else if (!isSyncing && pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+        }
+
+        return () => {
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+            }
+        };
+    }, [isSyncing, queryClient]);
 
     const metrics = useMemo(() => {
         let totalAssets = 0;
@@ -79,31 +106,62 @@ export default function Index() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
+            {/* Syncing Banner */}
+            {isSyncing && (
+                <div className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white py-3 px-4">
+                    <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
+                        <RefreshCw className="w-5 h-5 animate-spin" />
+                        <span className="font-medium">
+                            Syncing your accounts...
+                        </span>
+                        <span className="text-blue-100">
+                            This may take a few moments. We'll refresh
+                            automatically.
+                        </span>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <header className="border-b border-slate-800 sticky top-0 z-50 bg-slate-950/95 backdrop-blur">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">
-                            Financial Dashboard
-                        </h1>
-                        <p className="text-sm text-gray-400 mt-1">
-                            Real-time portfolio overview
-                        </p>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                        <img src="/networth-icon.svg" alt="NetWorth" className="w-7 h-7" />
+                        <div>
+                            <h1 className="text-lg font-bold text-white">
+                                NetWorth
+                            </h1>
+                            <p className="text-[11px] text-gray-400">
+                                Real-time portfolio overview
+                            </p>
+                        </div>
                     </div>
-                    <button
-                        onClick={() => navigate("/select-bank")}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors"
-                    >
-                        <Plus size={18} />
-                        <span className="text-sm">Add Account</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => navigate("/select-bank")}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition-colors text-sm"
+                        >
+                            <Plus size={16} />
+                            <span className="font-medium">Add Account</span>
+                        </button>
+                        <button
+                            onClick={async () => {
+                                await logout();
+                                navigate("/", { replace: true });
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 text-gray-300 hover:text-white hover:border-slate-600 transition-colors text-sm"
+                        >
+                            <LogOut size={16} />
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                 {/* Top Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
                     <MetricCard
                         label="NET WORTH"
                         value={
@@ -160,14 +218,14 @@ export default function Index() {
                 </div>
 
                 {/* Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
                     {/* Left Column - Charts */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-5">
                         {/* Net Worth Trend */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
-                            <div className="flex items-center justify-between mb-6">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
+                            <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white">
+                                    <h3 className="text-base font-semibold text-white">
                                         Net Worth Trend
                                     </h3>
                                 </div>
@@ -179,33 +237,33 @@ export default function Index() {
                         </div>
 
                         {/* Top Accounts */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
                             <TopAccounts isSyncing={isSyncing} />
                         </div>
 
                         {/* Performance Metrics */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
                             <PerformanceMetrics />
                         </div>
                     </div>
 
                     {/* Right Column - Side Panels */}
-                    <div className="space-y-8">
+                    <div className="space-y-5">
                         {/* Asset Allocation */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
-                            <h3 className="text-lg font-semibold text-white mb-6">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
+                            <h3 className="text-base font-semibold text-white mb-4">
                                 Asset Allocation
                             </h3>
                             <AssetAllocationChart isSyncing={isSyncing} />
                         </div>
 
                         {/* Goals */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
                             <GoalsSection />
                         </div>
 
                         {/* Financial Health */}
-                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-6 backdrop-blur-sm">
+                        <div className="bg-slate-800/40 rounded-lg border border-slate-700/50 p-4 backdrop-blur-sm">
                             <FinancialHealthMetrics />
                         </div>
                     </div>

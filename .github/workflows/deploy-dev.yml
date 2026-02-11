@@ -1,0 +1,141 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_USE_OIDC: true
+  TF_VAR_postgres_admin_password: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD }}
+  TF_VAR_gocardless_secret_id: ${{ secrets.TF_VAR_GOCARDLESS_SECRET_ID }}
+  TF_VAR_gocardless_secret_key: ${{ secrets.TF_VAR_GOCARDLESS_SECRET_KEY }}
+  TF_VAR_firebase_project_id: ${{ vars.TF_VAR_FIREBASE_PROJECT_ID }}
+  TF_VAR_firebase_api_key: ${{ secrets.TF_VAR_FIREBASE_API_KEY }}
+  TF_VAR_firebase_auth_domain: ${{ vars.TF_VAR_FIREBASE_AUTH_DOMAIN }}
+  TF_VAR_firebase_storage_bucket: ${{ vars.TF_VAR_FIREBASE_STORAGE_BUCKET }}
+  TF_VAR_firebase_messaging_sender_id: ${{ vars.TF_VAR_FIREBASE_MESSAGING_SENDER_ID }}
+  TF_VAR_firebase_app_id: ${{ vars.TF_VAR_FIREBASE_APP_ID }}
+
+jobs:
+  terraform:
+    name: "Terraform (Dev)"
+    runs-on: ubuntu-latest
+    environment: dev
+    outputs:
+      resource_group_name: ${{ steps.terraform.outputs.resource_group_name }}
+      container_app_name: ${{ steps.terraform.outputs.container_app_name }}
+      container_app_url: ${{ steps.terraform.outputs.container_app_url }}
+      acr_name: ${{ steps.terraform.outputs.acr_name }}
+      acr_login_server: ${{ steps.terraform.outputs.acr_login_server }}
+      frontend_swa_name: ${{ steps.terraform.outputs.frontend_swa_name }}
+      frontend_swa_url: ${{ steps.terraform.outputs.frontend_swa_url }}
+      postgres_fqdn: ${{ steps.terraform.outputs.postgres_fqdn }}
+      key_vault_name: ${{ steps.terraform.outputs.key_vault_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Terraform Apply
+        id: terraform
+        uses: ./.github/actions/terraform-apply
+        with:
+          environment: dev
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  migrate-database:
+    name: "Apply Migrations"
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Database Password from Key Vault
+        id: get-password
+        run: |
+          PASSWORD=$(az keyvault secret show --name postgres-admin-password --vault-name "${{ needs.terraform.outputs.key_vault_name }}" --query value -o tsv)
+          echo "::add-mask::$PASSWORD"
+          echo "db-password=$PASSWORD" >> $GITHUB_OUTPUT
+
+      - name: Apply Database Migrations
+        run: |
+          CONNECTION_STRING="Host=${{ needs.terraform.outputs.postgres_fqdn }};Database=networth-db;Username=networthadmin;Password=${{ steps.get-password.outputs.db-password }};SSL Mode=Require;Trust Server Certificate=true"
+          dotnet build Networth.Infrastructure/Networth.Infrastructure.csproj --no-restore
+          dotnet ef database update \
+            --project Networth.Infrastructure/Networth.Infrastructure.csproj \
+            --connection "$CONNECTION_STRING" \
+            --no-build \
+            --verbose
+
+  deploy-functions:
+    needs: [terraform, migrate-database]
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Functions
+        uses: ./.github/actions/deploy-functions
+        with:
+          acr-name: ${{ needs.terraform.outputs.acr_name }}
+          acr-login-server: ${{ needs.terraform.outputs.acr_login_server }}
+          container-app-name: ${{ needs.terraform.outputs.container_app_name }}
+          resource-group: ${{ needs.terraform.outputs.resource_group_name }}
+          image-name: networth-functions
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  deploy-frontend:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Frontend
+        uses: ./.github/actions/deploy-static-site
+        with:
+          swa-name: ${{ needs.terraform.outputs.frontend_swa_name }}
+          resource-group: ${{ needs.terraform.outputs.resource_group_name }}
+          working-directory: Networth.Frontend
+          build-output: dist
+          api-url: ${{ needs.terraform.outputs.container_app_url }}
+          firebase-api-key: ${{ secrets.TF_VAR_FIREBASE_API_KEY }}
+          firebase-auth-domain: ${{ vars.TF_VAR_FIREBASE_AUTH_DOMAIN }}
+          firebase-project-id: ${{ vars.TF_VAR_FIREBASE_PROJECT_ID }}
+          firebase-storage-bucket: ${{ vars.TF_VAR_FIREBASE_STORAGE_BUCKET }}
+          firebase-messaging-sender-id: ${{ vars.TF_VAR_FIREBASE_MESSAGING_SENDER_ID }}
+          firebase-app-id: ${{ vars.TF_VAR_FIREBASE_APP_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

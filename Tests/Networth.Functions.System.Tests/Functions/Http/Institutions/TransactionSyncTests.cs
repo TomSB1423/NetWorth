@@ -22,8 +22,9 @@ public class TransactionSyncTests(ITestOutputHelper testOutput)
     [Fact]
     public async Task SyncTransactions_PersistsRunningBalance()
     {
-        LinkAccountResponse linkResult = await Client.LinkAccountAsync(SandboxInstitutionId);
+        LinkInstitutionResponse linkResult = await Client.LinkInstitutionAsync(SandboxInstitutionId);
 
+        Assert.NotNull(linkResult.AuthorizationLink);
         await using GoCardlessSandboxAuthorizer authorizer = new();
         await authorizer.AuthorizeRequisitionAsync(linkResult.AuthorizationLink);
 

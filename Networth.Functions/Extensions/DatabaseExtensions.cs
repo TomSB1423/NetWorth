@@ -11,32 +11,24 @@ namespace Networth.Functions.Extensions;
 public static class DatabaseExtensions
 {
     /// <summary>
-    /// Ensures the database exists and sets up initial data (mock user, queues).
+    /// Ensures a user exists in the database, creating them if they don't exist.
+    /// This is called on first authenticated request to auto-provision the user record.
     /// </summary>
-    public static async Task EnsureDatabaseSetupAsync(this IServiceProvider serviceProvider)
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="firebaseUid">The Firebase UID from the authentication token.</param>
+    /// <param name="userName">The user name from the authentication token.</param>
+    /// <param name="email">The user email from the authentication token.</param>
+    public static async Task EnsureUserExistsAsync(this NetworthDbContext dbContext, string firebaseUid, string userName, string email)
     {
-        await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
-        await using NetworthDbContext dbContext = scope.ServiceProvider.GetRequiredService<NetworthDbContext>();
-
-        // Ensure database exists
-        await dbContext.Database.EnsureCreatedAsync();
-
-        // Ensure mock user exists
-        await EnsureMockUserExistsAsync(dbContext);
-    }
-
-    /// <summary>
-    /// Ensures the mock development user exists in the database.
-    /// </summary>
-    public static async Task EnsureMockUserExistsAsync(this NetworthDbContext dbContext)
-    {
-        const string mockUserId = "mock-user-123";
-        if (!await dbContext.Users.AnyAsync(u => u.Id == mockUserId))
+        if (!await dbContext.Users.AnyAsync(u => u.FirebaseUid == firebaseUid))
         {
             dbContext.Users.Add(new User
             {
-                Id = mockUserId,
-                Name = "Mock Development User",
+                Id = Guid.NewGuid(),
+                FirebaseUid = firebaseUid,
+                Name = userName,
+                Email = email,
+                CreatedAt = DateTime.UtcNow,
             });
             await dbContext.SaveChangesAsync();
         }

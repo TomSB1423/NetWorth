@@ -1,5 +1,6 @@
 using Networth.Application.Interfaces;
 using Networth.Application.Queries;
+using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 
 namespace Networth.Application.Handlers;
@@ -16,6 +17,23 @@ public class GetNetWorthHistoryQueryHandler(ITransactionRepository transactionRe
         CancellationToken cancellationToken)
     {
         var history = await transactionRepository.GetNetWorthHistoryAsync(request.UserId, cancellationToken);
-        return new GetNetWorthHistoryQueryResult(history);
+        var dataPoints = history.ToList();
+
+        // Determine status and last calculated date
+        NetWorthCalculationStatus status;
+        DateTime? lastCalculated;
+
+        if (dataPoints.Count == 0)
+        {
+            status = NetWorthCalculationStatus.NotCalculated;
+            lastCalculated = null;
+        }
+        else
+        {
+            status = NetWorthCalculationStatus.Calculated;
+            lastCalculated = dataPoints.Max(p => p.Date);
+        }
+
+        return new GetNetWorthHistoryQueryResult(dataPoints, status, lastCalculated);
     }
 }

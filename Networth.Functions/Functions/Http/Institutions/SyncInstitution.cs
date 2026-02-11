@@ -49,7 +49,7 @@ public class SyncInstitution(
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "institutions/{institutionId}/sync")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "institutions/{institutionId}/sync")]
         HttpRequest req,
         string institutionId)
     {
@@ -59,12 +59,14 @@ public class SyncInstitution(
             return new UnauthorizedResult();
         }
 
+        var userId = currentUserService.InternalUserId!.Value;
+
         logger.LogInformation(
             "Received request to sync institution {InstitutionId} for user {UserId}",
             institutionId,
-            currentUserService.UserId);
+            userId);
 
-        await queueService.EnqueueInstitutionSyncAsync(institutionId, currentUserService.UserId);
+        await queueService.EnqueueInstitutionSyncAsync(institutionId, userId);
 
         logger.LogInformation(
             "Successfully enqueued institution sync for institution {InstitutionId}",

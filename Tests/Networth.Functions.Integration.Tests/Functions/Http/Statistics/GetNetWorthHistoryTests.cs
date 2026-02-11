@@ -18,6 +18,7 @@ using Transaction = Networth.Infrastructure.Data.Entities.Transaction;
 
 namespace Networth.Functions.Tests.Integration.Functions.Http.Statistics;
 
+[Collection("Integration")]
 public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
@@ -39,15 +40,15 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
 
         await dbContext.Database.EnsureCreatedAsync();
 
-        // Seed Data for Constants.MockUserId (used by MockAuthenticationMiddleware)
-        string userId = Constants.MockUserId;
+        // Seed Data for Constants.MockUserId
+        Guid userId = Constants.MockUserId;
         var accountId1 = "acc-1";
         var accountId2 = "acc-2";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User" };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -161,10 +162,13 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         await dbContext.SaveChangesAsync();
 
         // Act
-        var historyList = await Client.GetNetWorthHistoryAsync();
+        var historyResponse = await Client.GetNetWorthHistoryAsync();
 
         // Assert
-        Assert.NotNull(historyList);
+        Assert.NotNull(historyResponse);
+        var historyList = historyResponse.DataPoints.ToList();
+        Assert.Equal(Networth.Domain.Enums.NetWorthCalculationStatus.Calculated, historyResponse.Status);
+        Assert.NotNull(historyResponse.LastCalculated);
 
         // Expected:
         // Day 1: Acc1(100) + Acc2(50) = 150
@@ -207,13 +211,13 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var accountId = "acc-single";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User Single" };
+            user = new User { Id = userId, Name = "Mock User Single", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -296,9 +300,11 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        IEnumerable<NetWorthPoint>? history = await response.Content.ReadFromJsonAsync<IEnumerable<NetWorthPoint>>();
-        Assert.NotNull(history);
-        var historyList = history.ToList();
+        var historyResponse = await response.Content.ReadFromJsonAsync<Networth.Functions.Models.Responses.NetWorthHistoryResponse>();
+        Assert.NotNull(historyResponse);
+        var historyList = historyResponse.DataPoints.ToList();
+        Assert.Equal(Networth.Domain.Enums.NetWorthCalculationStatus.Calculated, historyResponse.Status);
+        Assert.NotNull(historyResponse.LastCalculated);
 
         var p1 = historyList.FirstOrDefault(p => p.Date.Date == day1);
         var p2 = historyList.FirstOrDefault(p => p.Date.Date == day2);
@@ -328,7 +334,7 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
 
         await dbContext.Database.EnsureCreatedAsync();
 
-        string userId = "sparse-user";
+        Guid userId = Guid.NewGuid();
         string accountId = "sparse-acc";
         string institutionId = "inst-1";
         string agreementId = "agree-1";
@@ -337,7 +343,10 @@ public class GetNetWorthHistoryTests(MockoonTestFixture mockoonTestFixture, ITes
         // Seed User, Institution, Agreement, Requisition, Account
         dbContext.Users.Add(new User
         {
-            Id = userId, Name = "Sparse User",
+            Id = userId,
+            Name = "Sparse User",
+            FirebaseUid = "sparse-firebase-uid",
+            Email = "sparse@example.com",
         });
 
         dbContext.Institutions.Add(new InstitutionMetadata

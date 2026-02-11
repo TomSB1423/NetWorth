@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Networth.Application.Interfaces;
+using Networth.Application.Options;
 using Networth.Application.Queries;
 using Networth.Domain.Entities;
 using Networth.Domain.Repositories;
@@ -13,6 +15,8 @@ public class GetInstitutionsQueryHandler(
     IFinancialProvider financialProvider,
     ICacheMetadataRepository cacheMetadataRepository,
     IInstitutionMetadataRepository institutionMetadataRepository,
+    IRequisitionRepository requisitionRepository,
+    IOptions<InstitutionsOptions> institutionsOptions,
     ILogger<GetInstitutionsQueryHandler> logger)
     : IRequestHandler<GetInstitutionsQuery, GetInstitutionsQueryResult>
 {
@@ -25,17 +29,60 @@ public class GetInstitutionsQueryHandler(
     {
         logger.LogInformation("Retrieving institutions for country {CountryCode}", query.CountryCode);
 
-        string cacheKey = $"institutions_{query.CountryCode}";
+        GetInstitutionsQueryResult result;
 
-        // Check if cache is fresh (less than 30 days old)
-        bool isCacheFresh = await cacheMetadataRepository.IsCacheFreshAsync(cacheKey, CacheMaxAgeDays, cancellationToken);
-
-        if (isCacheFresh)
+        if (institutionsOptions.Value.UseSandbox)
         {
-            return await GetCachedInstitutionsAsync(query, cancellationToken);
+            // Sandbox mode: read directly from sandbox table
+            var institutions = await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
+            result = new GetInstitutionsQueryResult { Institutions = institutions.ToList() };
+        }
+        else
+        {
+            string cacheKey = $"institutions_{query.CountryCode}";
+            bool isCacheFresh = await cacheMetadataRepository.IsCacheFreshAsync(cacheKey, CacheMaxAgeDays, cancellationToken);
+
+            result = isCacheFresh
+                ? await GetCachedInstitutionsAsync(query, cancellationToken)
+                : await FetchAndCacheInstitutionsAsync(query, cacheKey, cancellationToken);
         }
 
-        return await FetchAndCacheInstitutionsAsync(query, cacheKey, cancellationToken);
+        // Filter out linked institutions if requested
+        if (query.ExcludeLinked && query.UserId.HasValue)
+        {
+            result = await FilterOutLinkedInstitutionsAsync(result, query.UserId.Value, cancellationToken);
+        }
+
+        return result;
+    }
+
+    private async Task<GetInstitutionsQueryResult> FilterOutLinkedInstitutionsAsync(
+        GetInstitutionsQueryResult result,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        // Get all linked institution IDs for this user
+        var linkedInstitutionIds = await requisitionRepository.GetLinkedInstitutionIdsForUserAsync(userId, cancellationToken);
+        var linkedSet = linkedInstitutionIds.ToHashSet();
+
+        if (linkedSet.Count == 0)
+        {
+            return result;
+        }
+
+        logger.LogInformation(
+            "Filtering out {Count} already linked institutions for user {UserId}",
+            linkedSet.Count,
+            userId);
+
+        var filteredInstitutions = result.Institutions
+            .Where(i => !linkedSet.Contains(i.Id))
+            .ToList();
+
+        return new GetInstitutionsQueryResult
+        {
+            Institutions = filteredInstitutions,
+        };
     }
 
     private async Task<GetInstitutionsQueryResult> GetCachedInstitutionsAsync(GetInstitutionsQuery query, CancellationToken cancellationToken)
@@ -45,12 +92,6 @@ public class GetInstitutionsQueryHandler(
         IEnumerable<InstitutionMetadata> cachedInstitutions =
             await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
         List<InstitutionMetadata> cachedList = cachedInstitutions.ToList();
-
-        // In development, add sandbox institution if requested
-        if (query.IncludeSandbox)
-        {
-            AddSandboxInstitution(cachedList);
-        }
 
         return new GetInstitutionsQueryResult
         {
@@ -69,43 +110,21 @@ public class GetInstitutionsQueryHandler(
         var institutions = await financialProvider.GetInstitutionsAsync(query.CountryCode, cancellationToken);
         var institutionsList = institutions.ToList();
 
-        // Save to database
+        // Save API results to database
         await institutionMetadataRepository.SaveInstitutionsAsync(query.CountryCode, institutionsList, cancellationToken);
 
+        // Query DB to get complete list
+        var allInstitutions = await institutionMetadataRepository.GetByCountryAsync(query.CountryCode, cancellationToken);
+        var allInstitutionsList = allInstitutions.ToList();
+
         // Update cache metadata
-        await cacheMetadataRepository.UpsertAsync(cacheKey, institutionsList.Count, cancellationToken);
+        await cacheMetadataRepository.UpsertAsync(cacheKey, allInstitutionsList.Count, cancellationToken);
 
-        logger.LogInformation("Successfully refreshed cache for country {CountryCode} with {Count} institutions", query.CountryCode, institutionsList.Count);
-
-        var resultInstitutions = institutionsList;
-
-        // In development, add sandbox institution if requested
-        if (query.IncludeSandbox)
-        {
-            AddSandboxInstitution(resultInstitutions);
-        }
+        logger.LogInformation("Successfully refreshed cache for country {CountryCode} with {Count} institutions", query.CountryCode, allInstitutionsList.Count);
 
         return new GetInstitutionsQueryResult
         {
-            Institutions = resultInstitutions,
+            Institutions = allInstitutionsList,
         };
-    }
-
-    private void AddSandboxInstitution(List<InstitutionMetadata> institutions)
-    {
-        const string sandboxId = "SANDBOXFINANCE_SFIN0000";
-        if (institutions.Any(i => i.Id == sandboxId))
-        {
-            return;
-        }
-
-        institutions.Insert(0, new InstitutionMetadata
-        {
-            Id = sandboxId,
-            Name = "Sandbox Finance",
-            LogoUrl = "https://cdn.iconscout.com/icon/free/png-256/free-code-sandbox-logo-icon-svg-download-png-3031688.png",
-            Countries = ["GB"],
-        });
-        logger.LogInformation("Added sandbox institution to results");
     }
 }

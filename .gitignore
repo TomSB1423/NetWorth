@@ -437,7 +437,7 @@ FodyWeavers.xsd
 # Python virtual environment files
 **/.venv/*
 .azure
-local.settings.json
+settings.local.json
 Networth.Frontend/Networth.Frontend.React/.env
 .vscode
 .aspire
@@ -456,3 +456,14 @@ Networth.Docs/.docusaurus/
 Networth.Docs/build/
 Networth.Docs/node_modules/
 Networth.Docs/.cache/
+
+# Firebase service account credentials
+**/*-firebase-*.json
+
+# Development and local settings
+appsettings.Development.json
+appsettings.Local.json
+settings.local.json
+local.settings.json
+.env
+.env.*

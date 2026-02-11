@@ -14,5 +14,5 @@ public interface IAgreementRepository : IBaseRepository<Agreement, string>
     /// <param name="userId">The user ID who owns this agreement.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A task representing the async operation.</returns>
-    Task SaveAgreementAsync(Agreement agreement, string userId, CancellationToken cancellationToken = default);
+    Task SaveAgreementAsync(Agreement agreement, Guid userId, CancellationToken cancellationToken = default);
 }

@@ -49,7 +49,7 @@ public class GetRequisition(IMediator mediator, ILogger<GetRequisition> logger)
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "requisitions/{requisitionId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "requisitions/{requisitionId}")]
         HttpRequest req,
         string requisitionId)
     {

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
 using DomainInstitutionMetadata = Networth.Domain.Entities.InstitutionMetadata;
@@ -13,14 +14,17 @@ namespace Networth.Infrastructure.Data.Repositories;
 public class InstitutionMetadataRepository : IInstitutionMetadataRepository
 {
     private readonly NetworthDbContext _context;
+    private readonly ILogger<InstitutionMetadataRepository> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="InstitutionMetadataRepository"/> class.
     /// </summary>
     /// <param name="context">The database context.</param>
-    public InstitutionMetadataRepository(NetworthDbContext context)
+    /// <param name="logger">The logger.</param>
+    public InstitutionMetadataRepository(NetworthDbContext context, ILogger<InstitutionMetadataRepository> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc />
@@ -36,12 +40,45 @@ public class InstitutionMetadataRepository : IInstitutionMetadataRepository
     /// <inheritdoc />
     public async Task SaveInstitutionsAsync(string countryCode, IEnumerable<DomainInstitutionMetadata> institutions, CancellationToken cancellationToken = default)
     {
-        // Delete existing institutions for this country
-        await DeleteByCountryAsync(countryCode, cancellationToken);
+        var incoming = institutions.ToList();
 
-        // Add new institutions
-        var entities = institutions.Select(i => MapToInfrastructure(i, countryCode));
-        await _context.Institutions.AddRangeAsync(entities, cancellationToken);
+        var existingEntities = await _context.Institutions
+            .Where(i => i.CountryCode == countryCode)
+            .ToDictionaryAsync(i => i.Id, cancellationToken);
+
+        foreach (var domainInst in incoming)
+        {
+            if (existingEntities.TryGetValue(domainInst.Id, out var entity))
+            {
+                // Update existing
+                entity.Name = domainInst.Name;
+                entity.LogoUrl = domainInst.LogoUrl;
+                entity.Bic = domainInst.Bic;
+                entity.Countries = JsonSerializer.Serialize(domainInst.Countries);
+                entity.LastUpdated = DateTime.UtcNow;
+
+                existingEntities.Remove(domainInst.Id);
+            }
+            else
+            {
+                // Insert new
+                var newEntity = MapToInfrastructure(domainInst, countryCode);
+                await _context.Institutions.AddAsync(newEntity, cancellationToken);
+            }
+        }
+
+        // Institutions removed from API are logged and deleted
+        if (existingEntities.Count > 0)
+        {
+            _logger.LogWarning(
+                "{Count} institution(s) for country {CountryCode} no longer in API response: {InstitutionIds}. Deleting.",
+                existingEntities.Count,
+                countryCode,
+                string.Join(", ", existingEntities.Keys));
+
+            _context.Institutions.RemoveRange(existingEntities.Values);
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 

@@ -1,13 +1,14 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FluentValidation;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Networth.Application.Extensions;
-using Networth.Functions.Authentication;
 using Networth.Functions.Extensions;
 using Networth.Functions.Middleware;
+using Networth.Functions.Options;
 using Networth.Infrastructure.Extensions;
 using Networth.ServiceDefaults;
 using Serilog;
@@ -18,20 +19,61 @@ builder.ConfigureFunctionsWebApplication();
 
 builder.AddServiceDefaults();
 
-// Middleware
-if (builder.Environment.IsDevelopment())
-{
-    builder.UseMiddleware<MockAuthenticationMiddleware>();
-}
-
+// FunctionContextMiddleware must be first to capture the context for DI
+builder.UseMiddleware<FunctionContextMiddleware>();
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
-// Configure additional app settings
+// Configure additional app settings before reading options
 builder.Configuration
     .AddJsonFile("settings.json", false, true)
-    .AddJsonFile("local.settings.json", true, true)
     .AddEnvironmentVariables()
     .AddUserSecrets<Program>();
+
+// Read authentication setting early to decide which auth middleware to use
+var networthOptions = new NetworthOptions();
+builder.Configuration.GetSection(NetworthOptions.SectionName).Bind(networthOptions);
+
+// Use mock auth in development when UseAuthentication is disabled, otherwise use real JWT auth
+if (builder.Environment.IsDevelopment() && !networthOptions.UseAuthentication)
+{
+    // Mock user middleware injects a default mock user for all requests
+    builder.UseMiddleware<MockUserMiddleware>();
+}
+else
+{
+    // JWT authentication for production and when testing with real Firebase tokens
+    builder.UseWhen<JwtAuthenticationMiddleware>(context =>
+    {
+        var isHttpTrigger = context.FunctionDefinition.InputBindings.Values
+            .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
+
+        string[] excludedFunctions = ["GetHealth", "RenderSwaggerDocument", "RenderSwaggerUI", "RenderOpenApiDocument"];
+        return isHttpTrigger && !excludedFunctions.Contains(context.FunctionDefinition.Name);
+    });
+}
+
+// Resolve internal user ID after JWT authentication (for endpoints that require an existing user)
+builder.UseWhen<UserResolutionMiddleware>(context =>
+{
+    var isHttpTrigger = context.FunctionDefinition.InputBindings.Values
+        .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
+
+    // Exclude endpoints that handle user resolution themselves or don't require a user:
+    // - CreateUser: Creates the user, so they don't exist yet
+    // - GetCurrentUser: Returns 404 itself if user not found
+    // - GetInstitutions: Works with or without a user (filters already-linked institutions if user exists)
+    string[] excludedFunctions =
+    [
+        "GetHealth",
+        "RenderSwaggerDocument",
+        "RenderSwaggerUI",
+        "RenderOpenApiDocument",
+        "CreateUser",
+        "GetCurrentUser",
+        "GetInstitutions",
+    ];
+    return isHttpTrigger && !excludedFunctions.Contains(context.FunctionDefinition.Name);
+});
 
 builder.Services.Configure<JsonSerializerOptions>(options =>
 {
@@ -52,17 +94,23 @@ builder.AddAzureQueueServiceClient(ResourceNames.Queues);
 builder.Services
     .AddSerilog(configuration => { configuration.ReadFrom.Configuration(builder.Configuration); })
     .AddApplicationInsightsTelemetryWorkerService()
-    .AddScoped<ICurrentUserService, CurrentUserService>()
+    .AddAppAuthentication(builder.Configuration)
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructure(builder.Configuration);
 
-IHost host = builder.Build();
+// Register validators from the Functions assembly
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-IHostEnvironment environment = host.Services.GetRequiredService<IHostEnvironment>();
-if (environment.IsDevelopment())
-{
-    await host.Services.EnsureDatabaseSetupAsync();
-    await host.Services.EnsureQueuesCreatedAsync();
-}
+// Configure Firebase options
+builder.Services.AddOptions<FirebaseOptions>()
+    .Bind(builder.Configuration.GetSection(FirebaseOptions.SectionName))
+    .ValidateFluently()
+    .ValidateOnStart();
+
+// Configure Networth options (simple boolean flag, no validation needed)
+builder.Services.AddOptions<NetworthOptions>()
+    .Bind(builder.Configuration.GetSection(NetworthOptions.SectionName));
+
+IHost host = builder.Build();
 
 await host.RunAsync();

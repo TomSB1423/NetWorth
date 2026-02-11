@@ -75,26 +75,23 @@ public class NetworthClient
     }
 
     /// <summary>
-    ///     Links a bank account by creating an agreement and requisition.
+    ///     Links an institution by creating an agreement and requisition.
     /// </summary>
     /// <param name="institutionId">The institution ID to link.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The link account response with authorization link.</returns>
-    public async Task<LinkAccountResponse?> LinkAccountAsync(
+    /// <returns>The link institution response with authorization link.</returns>
+    public async Task<LinkInstitutionResponse?> LinkInstitutionAsync(
         string institutionId,
         CancellationToken cancellationToken = default)
     {
-        var requestBody = new { institutionId };
-
-        var response = await _httpClient.PostAsJsonAsync(
-            "/api/account/link",
-            requestBody,
-            _jsonOptions,
+        var response = await _httpClient.PostAsync(
+            $"/api/institutions/{institutionId}/link",
+            null,
             cancellationToken);
 
         await EnsureSuccessStatusCodeWithBodyAsync(response, cancellationToken);
 
-        var result = await response.Content.ReadFromJsonAsync<LinkAccountResponse>(
+        var result = await response.Content.ReadFromJsonAsync<LinkInstitutionResponse>(
             _jsonOptions,
             cancellationToken);
 
@@ -105,15 +102,15 @@ public class NetworthClient
     ///     Gets the net worth history.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>List of net worth points.</returns>
-    public async Task<List<Domain.Entities.NetWorthPoint>?> GetNetWorthHistoryAsync(
+    /// <returns>Net worth history response with data points, status, and last calculated.</returns>
+    public async Task<NetWorthHistoryResponse?> GetNetWorthHistoryAsync(
         CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.GetAsync("api/statistics/net-worth", cancellationToken);
 
         await EnsureSuccessStatusCodeWithBodyAsync(response, cancellationToken);
 
-        var result = await response.Content.ReadFromJsonAsync<List<Domain.Entities.NetWorthPoint>>(
+        var result = await response.Content.ReadFromJsonAsync<NetWorthHistoryResponse>(
             _jsonOptions,
             cancellationToken);
 

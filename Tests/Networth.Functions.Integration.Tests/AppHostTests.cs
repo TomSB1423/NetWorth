@@ -7,6 +7,7 @@ namespace Networth.Functions.Tests.Integration;
 /// <summary>
 ///     Tests for the AppHost configuration and infrastructure.
 /// </summary>
+[Collection("Integration")]
 public class AppHostTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {

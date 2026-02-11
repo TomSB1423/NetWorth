@@ -17,17 +17,12 @@ public class GetTransactionsQueryValidator : AbstractValidator<GetTransactionsQu
             .NotEmpty()
             .WithMessage("Account ID is required");
 
-        RuleFor(x => x.DateFrom)
-            .NotEmpty()
-            .WithMessage("Start date is required");
+        RuleFor(x => x.Page)
+            .GreaterThanOrEqualTo(1)
+            .WithMessage("Page must be at least 1");
 
-        RuleFor(x => x.DateTo)
-            .NotEmpty()
-            .WithMessage("End date is required");
-
-        RuleFor(x => x)
-            .Must(query => query.DateFrom <= query.DateTo)
-            .WithMessage("Start date cannot be greater than end date")
-            .When(x => x.DateFrom != default && x.DateTo != default);
+        RuleFor(x => x.PageSize)
+            .InclusiveBetween(1, 100)
+            .WithMessage("Page size must be between 1 and 100");
     }
 }

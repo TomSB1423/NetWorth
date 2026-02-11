@@ -13,6 +13,7 @@ using Xunit.Abstractions;
 
 namespace Networth.Functions.Tests.Integration.Functions.Queues;
 
+[Collection("Integration")]
 public class CalculateRunningBalanceTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
@@ -40,11 +41,14 @@ public class CalculateRunningBalanceTests(MockoonTestFixture mockoonTestFixture,
 
         // Seed Data
         var accountId = Guid.NewGuid().ToString();
-        var userId = "test-user";
+        var userId = Guid.NewGuid();
 
         var user = new User
         {
-            Id = userId, Name = "Test User",
+            Id = userId,
+            Name = "Test User",
+            FirebaseUid = "test-firebase-uid",
+            Email = "test@example.com",
         };
         dbContext.Users.Add(user);
 

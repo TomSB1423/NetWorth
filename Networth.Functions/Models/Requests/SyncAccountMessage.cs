@@ -11,7 +11,7 @@ public class SyncAccountMessage
     public required string AccountId { get; set; }
 
     /// <summary>
-    ///     Gets or sets the user ID who owns the account.
+    ///     Gets or sets the internal user ID who owns the account.
     /// </summary>
-    public required string UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

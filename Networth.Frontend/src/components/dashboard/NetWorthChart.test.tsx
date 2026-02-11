@@ -54,20 +54,58 @@ describe("NetWorthChart", () => {
     });
 
     it("shows loading state when isSyncing is true", async () => {
-        (api.getNetWorthHistory as Mock).mockResolvedValue([]);
+        (api.getNetWorthHistory as Mock).mockResolvedValue({
+            dataPoints: [],
+            status: "NotCalculated",
+            lastCalculated: null,
+        });
         renderWithClient(<NetWorthChart isSyncing={true} />);
 
         // Wait for the effect to finish to avoid act warnings
         await waitFor(() => expect(api.getNetWorthHistory).toHaveBeenCalled());
 
-        expect(screen.getByText(/Loading data/i)).toBeInTheDocument();
+        expect(screen.getByText(/Syncing account data/i)).toBeInTheDocument();
+    });
+
+    it("shows loading state when status is Calculating", async () => {
+        (api.getNetWorthHistory as Mock).mockResolvedValue({
+            dataPoints: [],
+            status: "Calculating",
+            lastCalculated: null,
+        });
+        renderWithClient(<NetWorthChart isSyncing={false} />);
+
+        await waitFor(() => expect(api.getNetWorthHistory).toHaveBeenCalled());
+
+        await waitFor(() => {
+            expect(screen.getByText(/Calculating net worth/i)).toBeInTheDocument();
+        });
+    });
+
+    it("shows loading state and polls when status is NotCalculated", async () => {
+        (api.getNetWorthHistory as Mock).mockResolvedValue({
+            dataPoints: [],
+            status: "NotCalculated",
+            lastCalculated: null,
+        });
+        renderWithClient(<NetWorthChart isSyncing={false} />);
+
+        await waitFor(() => expect(api.getNetWorthHistory).toHaveBeenCalled());
+
+        await waitFor(() => {
+            expect(screen.getByText(/Calculating net worth/i)).toBeInTheDocument();
+        });
     });
 
     it("renders chart when data is loaded", async () => {
-        const mockData = [
-            { date: "2023-01-01", value: 1000 },
-            { date: "2023-01-02", value: 1100 },
-        ];
+        const mockData = {
+            dataPoints: [
+                { date: "2023-01-01", amount: 1000 },
+                { date: "2023-01-02", amount: 1100 },
+            ],
+            status: "Calculated",
+            lastCalculated: "2023-01-02T12:00:00Z",
+        };
         (api.getNetWorthHistory as Mock).mockResolvedValue(mockData);
 
         renderWithClient(<NetWorthChart isSyncing={false} />);
@@ -92,7 +130,16 @@ describe("NetWorthChart", () => {
     });
 
     it("allows changing time periods", async () => {
-        (api.getNetWorthHistory as Mock).mockResolvedValue([]);
+        // Provide data spanning more than 30 days to show 1M period
+        const mockData = {
+            dataPoints: [
+                { date: "2023-01-01", amount: 1000 },
+                { date: "2023-02-15", amount: 1100 },
+            ],
+            status: "Calculated",
+            lastCalculated: "2023-02-15T12:00:00Z",
+        };
+        (api.getNetWorthHistory as Mock).mockResolvedValue(mockData);
         renderWithClient(<NetWorthChart isSyncing={false} />);
 
         await waitFor(() => {

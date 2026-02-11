@@ -7,5 +7,9 @@ export default defineConfig({
     server: {
         host: true,
         port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+        headers: {
+            "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+            "Cross-Origin-Embedder-Policy": "unsafe-none",
+        },
     }
 })

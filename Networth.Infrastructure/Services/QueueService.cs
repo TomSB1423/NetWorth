@@ -24,7 +24,7 @@ public class QueueService : IQueueService
     /// <inheritdoc />
     public async Task EnqueueAccountSyncAsync(
         string accountId,
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation(
@@ -39,7 +39,8 @@ public class QueueService : IQueueService
 
         var message = new
         {
-            AccountId = accountId, UserId = userId,
+            AccountId = accountId,
+            UserId = userId,
         };
 
         var messageJson = JsonSerializer.Serialize(message);
@@ -58,7 +59,7 @@ public class QueueService : IQueueService
     /// <inheritdoc />
     public async Task EnqueueInstitutionSyncAsync(
         string institutionId,
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation(
@@ -73,7 +74,8 @@ public class QueueService : IQueueService
 
         var message = new
         {
-            InstitutionId = institutionId, UserId = userId,
+            InstitutionId = institutionId,
+            UserId = userId,
         };
 
         var messageJson = JsonSerializer.Serialize(message);

@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Networth.Functions.Tests.Integration.Functions.Http.Institutions;
 
+[Collection("Integration")]
 public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOutputHelper testOutput)
     : IntegrationTestBase(mockoonTestFixture, testOutput)
 {
@@ -31,13 +32,13 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var institutionId = "inst-1";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User" };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -94,7 +95,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
 
         await Client.SyncInstitutionAsync(institutionId);
 
-        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, "123");
+        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, institutionId);
     }
 
     [Fact]
@@ -117,13 +118,13 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var institutionId = "inst-1";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User" };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -167,7 +168,7 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
 
         await Client.SyncInstitutionAsync(institutionId);
 
-        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, "123");
+        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, institutionId);
     }
 
     [Fact]
@@ -190,13 +191,13 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
         await dbContext.Database.EnsureCreatedAsync();
 
         // Seed Data
-        string userId = Constants.MockUserId;
+        Guid userId = Constants.MockUserId;
         var institutionId = "inst-1";
 
         var user = await dbContext.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Name = "Mock User" };
+            user = new User { Id = userId, Name = "Mock User", FirebaseUid = Constants.MockFirebaseUid, Email = "mock@example.com" };
             dbContext.Users.Add(user);
         }
 
@@ -227,6 +228,6 @@ public class SyncInstitutionTests(MockoonTestFixture mockoonTestFixture, ITestOu
 
         await Client.SyncInstitutionAsync(institutionId);
 
-        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, "123");
+        await AssertQueueMessageReceivedAsync(ResourceNames.InstitutionSyncQueue, institutionId);
     }
 }

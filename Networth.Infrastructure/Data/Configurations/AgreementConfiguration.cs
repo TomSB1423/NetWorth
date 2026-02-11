@@ -20,8 +20,7 @@ public class AgreementConfiguration : IEntityTypeConfiguration<Entities.Agreemen
             .HasMaxLength(255);
 
         builder.Property(a => a.UserId)
-            .IsRequired()
-            .HasMaxLength(255);
+            .IsRequired();
 
         builder.Property(a => a.InstitutionId)
             .IsRequired()

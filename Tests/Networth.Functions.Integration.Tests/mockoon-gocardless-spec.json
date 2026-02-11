@@ -16,6 +16,30 @@
             "endpoint": "api/v2/accounts/:id/",
             "responses": [
                 {
+                    "uuid": "static-mock-account-001",
+                    "body": "{\n  \"id\": \"mock-account-001\",\n  \"created\": \"2025-01-01T00:00:00Z\",\n  \"last_accessed\": \"2025-01-01T00:00:00Z\",\n  \"iban\": \"GB82WEST12345698765432\",\n  \"bban\": \"WEST12345698765432\",\n  \"status\": \"READY\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"owner_name\": \"John Doe\",\n  \"name\": \"Mock Current Account\",\n  \"currency\": \"GBP\"\n}",
+                    "latency": 0,
+                    "statusCode": 200,
+                    "label": "Account mock-account-001",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
                     "uuid": "custom-acc-single-response",
                     "body": "{\n  \"id\": \"acc-single\",\n  \"created\": \"2023-01-01T00:00:00Z\",\n  \"last_accessed\": \"2023-01-01T00:00:00Z\",\n  \"iban\": \"IBAN-SINGLE\",\n  \"bban\": \"BBAN-SINGLE\",\n  \"status\": \"READY\",\n  \"institution_id\": \"inst-1\",\n  \"owner_name\": \"Owner Single\",\n  \"name\": \"Account Single\",\n  \"currency\": \"EUR\"\n}",
                     "latency": 0,
@@ -113,7 +137,7 @@
                 },
                 {
                     "uuid": "dec3b5a6-cc63-4395-8657-b8c49361eb69",
-                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{faker 'date.recent' 365}}\",\n  \"last_accessed\": \"{{faker 'date.recent' 365}}\",\n  \"iban\": \"\",\n  \"bban\": \"\",\n  \"status\": \"\",\n  \"institution_id\": \"\",\n  \"owner_name\": \"\",\n  \"name\": \"\"\n}",
+                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{dateFormat (faker 'date.recent') \"yyyy-MM-dd'T'HH:mm:ss'Z'\"}}\",\n  \"last_accessed\": \"{{dateFormat (faker 'date.recent') \"yyyy-MM-dd'T'HH:mm:ss'Z'\"}}\",\n  \"iban\": \"{{faker 'finance.iban'}}\",\n  \"bban\": \"{{faker 'finance.bic'}}\",\n  \"status\": \"READY\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"owner_name\": \"{{faker 'person.fullName'}}\",\n  \"name\": \"{{faker 'finance.accountName'}}\"\n}",
                     "latency": 0,
                     "statusCode": 200,
                     "label": "Sample account metadata",
@@ -364,8 +388,32 @@
             "endpoint": "api/v2/accounts/:id/balances/",
             "responses": [
                 {
+                    "uuid": "static-mock-account-001-balances",
+                    "body": "{\n  \"balances\": [\n    {\n      \"balanceAmount\": {\n        \"amount\": \"1234.56\",\n        \"currency\": \"GBP\"\n      },\n      \"balanceType\": \"expected\",\n      \"creditLimitIncluded\": false,\n      \"referenceDate\": \"2025-01-01\"\n    }\n  ]\n}",
+                    "latency": 0,
+                    "statusCode": 200,
+                    "label": "Balances for mock-account-001",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
                     "uuid": "95c4a188-e249-4c36-959f-9d4162bde002",
-                    "body": "{\n  \"balances\": [\n    {\n      \"balanceAmount\": {\n        \"amount\": \"\",\n        \"currency\": \"\"\n      },\n      \"balanceType\": \"\",\n      \"creditLimitIncluded\": {{faker 'datatype.boolean'}},\n      \"lastChangeDateTime\": \"\",\n      \"referenceDate\": \"\",\n      \"lastCommittedTransaction\": \"\"\n    }\n  ]\n}",
+                    "body": "{\n  \"balances\": [\n    {\n      \"balanceAmount\": {\n        \"amount\": \"{{faker 'finance.amount'}}\",\n        \"currency\": \"{{faker 'finance.currencyCode'}}\"\n      },\n      \"balanceType\": \"expected\",\n      \"creditLimitIncluded\": false,\n      \"referenceDate\": \"{{dateFormat (faker 'date.recent') 'yyyy-MM-dd'}}\"\n    }\n  ]\n}",
                     "latency": 0,
                     "statusCode": 200,
                     "label": "Sample account balances",
@@ -1071,6 +1119,30 @@
             "method": "get",
             "endpoint": "api/v2/accounts/:id/details/",
             "responses": [
+                {
+                    "uuid": "static-mock-account-001-details",
+                    "body": "{\n  \"account\": {\n    \"resourceId\": \"mock-account-001\",\n    \"iban\": \"GB82WEST12345698765432\",\n    \"bban\": \"WEST12345698765432\",\n    \"currency\": \"GBP\",\n    \"ownerName\": \"John Doe\",\n    \"name\": \"Mock Current Account\",\n    \"product\": \"Current Account\",\n    \"cashAccountType\": \"CACC\",\n    \"status\": \"enabled\"\n  }\n}",
+                    "latency": 0,
+                    "statusCode": 200,
+                    "label": "Details for mock-account-001",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
                 {
                     "uuid": "e7f8d2d8-0a1c-49fb-9204-af421a73d99e",
                     "body": "{\n  \"account\": {\n    \"resourceId\": \"\",\n    \"iban\": \"\",\n    \"bban\": \"\",\n    \"scan\": \"\",\n    \"msisdn\": \"\",\n    \"currency\": \"\",\n    \"ownerName\": \"\",\n    \"name\": \"\",\n    \"displayName\": \"\",\n    \"product\": \"\",\n    \"cashAccountType\": \"\",\n    \"status\": \"\",\n    \"bic\": \"\",\n    \"linkedAccounts\": \"\",\n    \"maskedPan\": \"\",\n    \"usage\": \"\",\n    \"details\": \"\",\n    \"ownerAddressUnstructured\": [\n      \"\"\n    ],\n    \"ownerAddressStructured\": {\n      \"streetName\": \"\",\n      \"buildingNumber\": \"\",\n      \"townName\": \"\",\n      \"postCode\": \"\",\n      \"country\": \"\"\n    },\n    \"additionalAccountData\": {\n      \"secondaryIdentification\": \"\"\n    }\n  }\n}",
@@ -1780,8 +1852,32 @@
             "endpoint": "api/v2/accounts/:id/transactions/",
             "responses": [
                 {
+                    "uuid": "static-mock-account-001-transactions",
+                    "body": "{\n  \"transactions\": {\n    \"booked\": [\n      {\n        \"transactionId\": \"mock-txn-001\",\n        \"bookingDate\": \"2025-01-01\",\n        \"valueDate\": \"2025-01-01\",\n        \"transactionAmount\": {\n          \"amount\": \"-50.00\",\n          \"currency\": \"GBP\"\n        },\n        \"creditorName\": \"Tesco Stores\",\n        \"remittanceInformationUnstructured\": \"Grocery shopping\",\n        \"internalTransactionId\": \"mock-internal-001\"\n      },\n      {\n        \"transactionId\": \"mock-txn-002\",\n        \"bookingDate\": \"2025-01-02\",\n        \"valueDate\": \"2025-01-02\",\n        \"transactionAmount\": {\n          \"amount\": \"2500.00\",\n          \"currency\": \"GBP\"\n        },\n        \"debtorName\": \"ACME Corp\",\n        \"remittanceInformationUnstructured\": \"Salary January\",\n        \"internalTransactionId\": \"mock-internal-002\"\n      }\n    ],\n    \"pending\": []\n  }\n}",
+                    "latency": 0,
+                    "statusCode": 200,
+                    "label": "Transactions for mock-account-001",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
                     "uuid": "42b0d8ce-07a7-49e5-a000-965a64bf89aa",
-                    "body": "{\n  \"transactions\": {\n    \"booked\": [\n      {\n        \"transactionId\": \"\",\n        \"entryReference\": \"\",\n        \"endToEndId\": \"\",\n        \"mandateId\": \"\",\n        \"checkId\": \"\",\n        \"creditorId\": \"\",\n        \"bookingDate\": \"\",\n        \"valueDate\": \"\",\n        \"bookingDateTime\": \"\",\n        \"valueDateTime\": \"\",\n        \"transactionAmount\": {\n          \"amount\": \"\",\n          \"currency\": \"\"\n        },\n        \"currencyExchange\": [\n          {\n            \"sourceCurrency\": \"\",\n            \"exchangeRate\": \"\",\n            \"unitCurrency\": \"\",\n            \"targetCurrency\": \"\",\n            \"quotationDate\": \"\",\n            \"contractIdentification\": \"\"\n          }\n        ],\n        \"creditorName\": \"\",\n        \"creditorAccount\": {\n          \"iban\": \"\",\n          \"bban\": \"\",\n          \"pan\": \"\",\n          \"maskedPan\": \"\",\n          \"msisdn\": \"\",\n          \"currency\": \"\"\n        },\n        \"ultimateCreditor\": \"\",\n        \"debtorName\": \"\",\n        \"debtorAccount\": {\n          \"iban\": \"\",\n          \"bban\": \"\",\n          \"pan\": \"\",\n          \"maskedPan\": \"\",\n          \"msisdn\": \"\",\n          \"currency\": \"\"\n        },\n        \"ultimateDebtor\": \"\",\n        \"remittanceInformationUnstructured\": \"\",\n        \"remittanceInformationUnstructuredArray\": [\n          \"\"\n        ],\n        \"remittanceInformationStructured\": \"\",\n        \"remittanceInformationStructuredArray\": [\n          \"\"\n        ],\n        \"additionalInformation\": \"\",\n        \"purposeCode\": \"\",\n        \"bankTransactionCode\": \"\",\n        \"proprietaryBankTransactionCode\": \"\",\n        \"internalTransactionId\": \"\",\n        \"balanceAfterTransaction\": {\n          \"amount\": \"\",\n          \"currency\": \"\"\n        }\n      }\n    ],\n    \"pending\": [\n      {\n        \"transactionId\": \"\",\n        \"entryReference\": \"\",\n        \"endToEndId\": \"\",\n        \"mandateId\": \"\",\n        \"checkId\": \"\",\n        \"creditorId\": \"\",\n        \"bookingDate\": \"\",\n        \"valueDate\": \"\",\n        \"bookingDateTime\": \"\",\n        \"valueDateTime\": \"\",\n        \"transactionAmount\": {\n          \"amount\": \"\",\n          \"currency\": \"\"\n        },\n        \"currencyExchange\": [\n          {\n            \"sourceCurrency\": \"\",\n            \"exchangeRate\": \"\",\n            \"unitCurrency\": \"\",\n            \"targetCurrency\": \"\",\n            \"quotationDate\": \"\",\n            \"contractIdentification\": \"\"\n          }\n        ],\n        \"creditorName\": \"\",\n        \"creditorAccount\": {\n          \"iban\": \"\",\n          \"bban\": \"\",\n          \"pan\": \"\",\n          \"maskedPan\": \"\",\n          \"msisdn\": \"\",\n          \"currency\": \"\"\n        },\n        \"ultimateCreditor\": \"\",\n        \"debtorName\": \"\",\n        \"debtorAccount\": {\n          \"iban\": \"\",\n          \"bban\": \"\",\n          \"pan\": \"\",\n          \"maskedPan\": \"\",\n          \"msisdn\": \"\",\n          \"currency\": \"\"\n        },\n        \"ultimateDebtor\": \"\",\n        \"remittanceInformationUnstructured\": \"\",\n        \"remittanceInformationUnstructuredArray\": [\n          \"\"\n        ],\n        \"remittanceInformationStructured\": \"\",\n        \"remittanceInformationStructuredArray\": [\n          \"\"\n        ],\n        \"additionalInformation\": \"\",\n        \"purposeCode\": \"\",\n        \"bankTransactionCode\": \"\",\n        \"proprietaryBankTransactionCode\": \"\",\n        \"internalTransactionId\": \"\",\n        \"balanceAfterTransaction\": {\n          \"amount\": \"\",\n          \"currency\": \"\"\n        }\n      }\n    ]\n  },\n  \"last_updated\": \"{{faker 'date.recent' 365}}\"\n}",
+                    "body": "{\n  \"transactions\": {\n    \"booked\": [\n      {\n        \"transactionId\": \"{{faker 'string.uuid'}}\",\n        \"bookingDate\": \"{{dateFormat (faker 'date.recent') 'yyyy-MM-dd'}}\",\n        \"valueDate\": \"{{dateFormat (faker 'date.recent') 'yyyy-MM-dd'}}\",\n        \"transactionAmount\": {\n          \"amount\": \"{{faker 'finance.amount'}}\",\n          \"currency\": \"{{faker 'finance.currencyCode'}}\"\n        },\n        \"creditorName\": \"{{faker 'company.name'}}\",\n        \"debtorName\": \"{{faker 'person.fullName'}}\",\n        \"remittanceInformationUnstructured\": \"{{faker 'finance.transactionDescription'}}\",\n        \"internalTransactionId\": \"{{faker 'string.uuid'}}\"\n      }\n    ],\n    \"pending\": []\n  }\n}",
                     "latency": 0,
                     "statusCode": 200,
                     "label": "Sample account transactions",
@@ -2512,11 +2608,11 @@
             "endpoint": "api/v2/agreements/enduser/",
             "responses": [
                 {
-                    "uuid": "76d29462-29c1-47b0-98e7-2de8a9400711",
-                    "body": "{\n  \"count\": 123,\n  \"next\": \"https://bankaccountdata.gocardless.com/api/v2/agreements/enduser/?limit=100&offset=0\",\n  \"previous\": \"https://bankaccountdata.gocardless.com/api/v2/agreements/enduser/?limit=100&offset=0\",\n  \"results\": [\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"created\": \"{{faker 'date.recent' 365}}\",\n      \"institution_id\": \"\",\n      \"max_historical_days\": 90,\n      \"access_valid_for_days\": 90,\n      \"access_scope\": [\n        \"balances\",\n        \"details\",\n        \"transactions\"\n      ],\n      \"accepted\": \"{{faker 'date.recent' 365}}\",\n      \"reconfirmation\": {{faker 'datatype.boolean'}}\n    }\n  ]\n}",
+                    "uuid": "static-agreements-list",
+                    "body": "{\n  \"count\": 1,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": \"mock-agreement-001\",\n      \"created\": \"2025-01-01T00:00:00Z\",\n      \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n      \"max_historical_days\": 90,\n      \"access_valid_for_days\": 90,\n      \"access_scope\": [\n        \"balances\",\n        \"details\",\n        \"transactions\"\n      ],\n      \"accepted\": null\n    }\n  ]\n}",
                     "latency": 0,
                     "statusCode": 200,
-                    "label": "Retrieve all end user agreements",
+                    "label": "Static agreements list",
                     "headers": [
                         {
                             "key": "Content-Type",
@@ -2532,6 +2628,38 @@
                     "disableTemplating": false,
                     "fallbackTo404": false,
                     "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
+                    "uuid": "76d29462-29c1-47b0-98e7-2de8a9400711",
+                    "body": "{\n  \"count\": 1,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"created\": \"{{dateFormat (faker 'date.recent') \"yyyy-MM-dd'T'HH:mm:ss'Z'\"}}\",\n      \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n      \"max_historical_days\": {{faker 'number.int' min=30 max=730}},\n      \"access_valid_for_days\": {{faker 'number.int' min=30 max=180}},\n      \"access_scope\": [\n        \"balances\",\n        \"details\",\n        \"transactions\"\n      ],\n      \"accepted\": null\n    }\n  ]\n}",
+                    "latency": 0,
+                    "statusCode": 200,
+                    "label": "Dynamic agreements list",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [
+                        {
+                            "target": "header",
+                            "modifier": "X-Mock-Dynamic",
+                            "value": "true",
+                            "invert": false,
+                            "operator": "equals"
+                        }
+                    ],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": false,
                     "crudKey": "id",
                     "callbacks": []
                 },
@@ -2740,11 +2868,11 @@
             "endpoint": "api/v2/agreements/enduser/",
             "responses": [
                 {
-                    "uuid": "e046500c-238e-4d02-b9cc-7a4fa5b0baca",
-                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{faker 'date.recent' 365}}\",\n  \"institution_id\": \"\",\n  \"max_historical_days\": 90,\n  \"access_valid_for_days\": 90,\n  \"access_scope\": [\n    \"balances\",\n    \"details\",\n    \"transactions\"\n  ],\n  \"accepted\": \"{{faker 'date.recent' 365}}\",\n  \"reconfirmation\": {{faker 'datatype.boolean'}}\n}",
+                    "uuid": "static-post-agreement",
+                    "body": "{\n  \"id\": \"mock-agreement-001\",\n  \"created\": \"2025-01-01T00:00:00Z\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"max_historical_days\": 90,\n  \"access_valid_for_days\": 90,\n  \"access_scope\": [\n    \"balances\",\n    \"details\",\n    \"transactions\"\n  ],\n  \"accepted\": null\n}",
                     "latency": 0,
                     "statusCode": 201,
-                    "label": "Create enduser agreement",
+                    "label": "Static create agreement",
                     "headers": [
                         {
                             "key": "Content-Type",
@@ -2760,6 +2888,38 @@
                     "disableTemplating": false,
                     "fallbackTo404": false,
                     "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
+                    "uuid": "e046500c-238e-4d02-b9cc-7a4fa5b0baca",
+                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{dateFormat (faker 'date.recent') \"yyyy-MM-dd'T'HH:mm:ss'Z'\"}}\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"max_historical_days\": {{faker 'number.int' min=30 max=730}},\n  \"access_valid_for_days\": {{faker 'number.int' min=30 max=180}},\n  \"access_scope\": [\n    \"balances\",\n    \"details\",\n    \"transactions\"\n  ],\n  \"accepted\": null\n}",
+                    "latency": 0,
+                    "statusCode": 201,
+                    "label": "Dynamic create agreement",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [
+                        {
+                            "target": "header",
+                            "modifier": "X-Mock-Dynamic",
+                            "value": "true",
+                            "invert": false,
+                            "operator": "equals"
+                        }
+                    ],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": false,
                     "crudKey": "id",
                     "callbacks": []
                 },
@@ -3184,11 +3344,11 @@
             "endpoint": "api/v2/agreements/enduser/:id/",
             "responses": [
                 {
-                    "uuid": "426db4c3-7792-439c-b69e-51698935b22a",
-                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{faker 'date.recent' 365}}\",\n  \"institution_id\": \"\",\n  \"max_historical_days\": 90,\n  \"access_valid_for_days\": 90,\n  \"access_scope\": [\n    \"balances\",\n    \"details\",\n    \"transactions\"\n  ],\n  \"accepted\": \"{{faker 'date.recent' 365}}\",\n  \"reconfirmation\": {{faker 'datatype.boolean'}}\n}",
+                    "uuid": "static-get-agreement-by-id",
+                    "body": "{\n  \"id\": \"mock-agreement-001\",\n  \"created\": \"2025-01-01T00:00:00Z\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"max_historical_days\": 90,\n  \"access_valid_for_days\": 90,\n  \"access_scope\": [\n    \"balances\",\n    \"details\",\n    \"transactions\"\n  ],\n  \"accepted\": null\n}",
                     "latency": 0,
                     "statusCode": 200,
-                    "label": "Retrieve end user agreement by ID",
+                    "label": "Static agreement by ID",
                     "headers": [
                         {
                             "key": "Content-Type",
@@ -3204,6 +3364,38 @@
                     "disableTemplating": false,
                     "fallbackTo404": false,
                     "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
+                    "uuid": "426db4c3-7792-439c-b69e-51698935b22a",
+                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{dateFormat (faker 'date.recent') \"yyyy-MM-dd'T'HH:mm:ss'Z'\"}}\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"max_historical_days\": {{faker 'number.int' min=30 max=730}},\n  \"access_valid_for_days\": {{faker 'number.int' min=30 max=180}},\n  \"access_scope\": [\n    \"balances\",\n    \"details\",\n    \"transactions\"\n  ],\n  \"accepted\": null\n}",
+                    "latency": 0,
+                    "statusCode": 200,
+                    "label": "Dynamic agreement by ID",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [
+                        {
+                            "target": "header",
+                            "modifier": "X-Mock-Dynamic",
+                            "value": "true",
+                            "invert": false,
+                            "operator": "equals"
+                        }
+                    ],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": false,
                     "crudKey": "id",
                     "callbacks": []
                 },
@@ -3785,7 +3977,7 @@
             "responses": [
                 {
                     "uuid": "cb163e70-61bb-4a69-b7db-7efb07e2adfd",
-                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{faker 'date.recent' 365}}\",\n  \"institution_id\": \"\",\n  \"max_historical_days\": 90,\n  \"access_valid_for_days\": 90,\n  \"access_scope\": [\n    \"balances\",\n    \"details\",\n    \"transactions\"\n  ],\n  \"accepted\": \"{{faker 'date.recent' 365}}\",\n  \"reconfirmation\": {{faker 'datatype.boolean'}}\n}",
+                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"2025-01-01T00:00:00Z\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"max_historical_days\": 90,\n  \"access_valid_for_days\": 90,\n  \"access_scope\": [\n    \"balances\",\n    \"details\",\n    \"transactions\"\n  ],\n  \"accepted\": \"2025-01-01T00:00:00Z\"\n}",
                     "latency": 0,
                     "statusCode": 200,
                     "label": "Accept end user agreement",
@@ -4133,7 +4325,7 @@
             "responses": [
                 {
                     "uuid": "8985d9e1-ade3-40b8-bfca-7e46beb8cca8",
-                    "body": "{\n  \"reconfirmation_url\": \"\",\n  \"created\": \"{{faker 'date.recent' 365}}\",\n  \"url_valid_from\": \"{{faker 'date.recent' 365}}\",\n  \"url_valid_to\": \"{{faker 'date.recent' 365}}\",\n  \"redirect\": \"\",\n  \"last_accessed\": \"{{faker 'date.recent' 365}}\",\n  \"last_submitted\": \"{{faker 'date.recent' 365}}\",\n  \"accounts\": {\n    \"64a985ae-4427-4a27-bd36-fd625fe6e1fc\": {\n      \"reconfirmed\": \"2025-01-14T15:20:56.942817Z\",\n      \"rejected\": \"\"\n    },\n    \"cd2fbd71-15f7-4607-bea2-fbd80311a013\": {\n      \"reconfirmed\": \"\",\n      \"rejected\": \"\"\n    }\n  }\n}",
+                    "body": "{\n  \"reconfirmation_url\": \"https://example.com/reconfirm\",\n  \"created\": \"2025-01-01T00:00:00Z\",\n  \"url_valid_from\": \"2025-01-01T00:00:00Z\",\n  \"url_valid_to\": \"2025-12-31T00:00:00Z\",\n  \"redirect\": \"http://localhost:3000/callback\",\n  \"last_accessed\": \"2025-01-01T00:00:00Z\",\n  \"last_submitted\": \"2025-01-01T00:00:00Z\",\n  \"accounts\": {\n    \"64a985ae-4427-4a27-bd36-fd625fe6e1fc\": {\n      \"reconfirmed\": \"2025-01-14T15:20:56.942817Z\",\n      \"rejected\": \"\"\n    }\n  }\n}",
                     "latency": 0,
                     "statusCode": 200,
                     "label": "Reconfirmation details",
@@ -4457,7 +4649,7 @@
             "responses": [
                 {
                     "uuid": "c6fb80bb-d277-4353-8e17-ae6bfc6b2df0",
-                    "body": "{\n  \"reconfirmation_url\": \"\",\n  \"created\": \"{{faker 'date.recent' 365}}\",\n  \"url_valid_from\": \"{{faker 'date.recent' 365}}\",\n  \"url_valid_to\": \"{{faker 'date.recent' 365}}\",\n  \"redirect\": \"\",\n  \"last_accessed\": \"{{faker 'date.recent' 365}}\",\n  \"last_submitted\": \"{{faker 'date.recent' 365}}\",\n  \"accounts\": {\n    \"64a985ae-4427-4a27-bd36-fd625fe6e1fc\": {\n      \"reconfirmed\": \"2025-01-14T15:20:56.942817Z\",\n      \"rejected\": \"\"\n    },\n    \"cd2fbd71-15f7-4607-bea2-fbd80311a013\": {\n      \"reconfirmed\": \"\",\n      \"rejected\": \"\"\n    }\n  }\n}",
+                    "body": "{\n  \"reconfirmation_url\": \"https://example.com/reconfirm\",\n  \"created\": \"2025-01-01T00:00:00Z\",\n  \"url_valid_from\": \"2025-01-01T00:00:00Z\",\n  \"url_valid_to\": \"2025-12-31T00:00:00Z\",\n  \"redirect\": \"http://localhost:3000/callback\",\n  \"last_accessed\": \"2025-01-01T00:00:00Z\",\n  \"last_submitted\": \"2025-01-01T00:00:00Z\",\n  \"accounts\": {\n    \"64a985ae-4427-4a27-bd36-fd625fe6e1fc\": {\n      \"reconfirmed\": \"2025-01-14T15:20:56.942817Z\",\n      \"rejected\": \"\"\n    }\n  }\n}",
                     "latency": 0,
                     "statusCode": 201,
                     "label": "Reconfirmation created",
@@ -5500,11 +5692,11 @@
             "endpoint": "api/v2/requisitions/",
             "responses": [
                 {
-                    "uuid": "bef2467c-cbf0-4fd5-b014-325804c352f7",
-                    "body": "{\n  \"count\": 123,\n  \"next\": \"https://bankaccountdata.gocardless.com/api/v2/requisitions/?limit=100&offset=0\",\n  \"previous\": \"https://bankaccountdata.gocardless.com/api/v2/requisitions/?limit=100&offset=0\",\n  \"results\": [\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"created\": \"{{faker 'date.recent' 365}}\",\n      \"redirect\": \"\",\n      \"status\": \"{{oneOf (array 'CR' 'ID' 'LN' 'RJ' 'ER' 'SU' 'EX' 'GC' 'UA' 'GA' 'SA')}}\",\n      \"institution_id\": \"\",\n      \"agreement\": \"{{faker 'string.uuid'}}\",\n      \"reference\": \"\",\n      \"accounts\": [\n        \"{{faker 'string.uuid'}}\"\n      ],\n      \"user_language\": \"\",\n      \"link\": \"https://ob.gocardless.com/psd2/start/3fa85f64-5717-4562-b3fc-2c963f66afa6/SANDBOXFINANCE_SFIN0000\",\n      \"ssn\": \"\",\n      \"account_selection\": {{faker 'datatype.boolean'}},\n      \"redirect_immediate\": {{faker 'datatype.boolean'}}\n    }\n  ]\n}",
+                    "uuid": "static-requisitions-list",
+                    "body": "{\n  \"count\": 1,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": \"mock-requisition-001\",\n      \"created\": \"2025-01-01T00:00:00Z\",\n      \"redirect\": \"https://example.com/callback\",\n      \"status\": \"LN\",\n      \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n      \"agreement\": \"mock-agreement-001\",\n      \"reference\": \"mock-ref-001\",\n      \"accounts\": [\n        \"mock-account-001\"\n      ],\n      \"user_language\": \"EN\",\n      \"link\": \"https://ob.gocardless.com/psd2/start/mock-requisition-001/SANDBOXFINANCE_SFIN0000\",\n      \"ssn\": null,\n      \"account_selection\": false,\n      \"redirect_immediate\": false\n    }\n  ]\n}",
                     "latency": 0,
                     "statusCode": 200,
-                    "label": "Retrieve all requisitions",
+                    "label": "Static requisitions list",
                     "headers": [
                         {
                             "key": "Content-Type",
@@ -5520,6 +5712,38 @@
                     "disableTemplating": false,
                     "fallbackTo404": false,
                     "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
+                    "uuid": "bef2467c-cbf0-4fd5-b014-325804c352f7",
+                    "body": "{\n  \"count\": 1,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"created\": \"{{dateFormat (faker 'date.recent') \"yyyy-MM-dd'T'HH:mm:ss'Z'\"}}\",\n      \"redirect\": \"{{faker 'internet.url'}}\",\n      \"status\": \"LN\",\n      \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n      \"agreement\": \"{{faker 'string.uuid'}}\",\n      \"reference\": \"{{faker 'string.alphanumeric' length=12}}\",\n      \"accounts\": [\n        \"{{faker 'string.uuid'}}\"\n      ],\n      \"user_language\": \"EN\",\n      \"link\": \"https://ob.gocardless.com/psd2/start/{{faker 'string.uuid'}}/SANDBOXFINANCE_SFIN0000\",\n      \"ssn\": null,\n      \"account_selection\": false,\n      \"redirect_immediate\": false\n    }\n  ]\n}",
+                    "latency": 0,
+                    "statusCode": 200,
+                    "label": "Dynamic requisitions list",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [
+                        {
+                            "target": "header",
+                            "modifier": "X-Mock-Dynamic",
+                            "value": "true",
+                            "invert": false,
+                            "operator": "equals"
+                        }
+                    ],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": false,
                     "crudKey": "id",
                     "callbacks": []
                 },
@@ -5776,11 +6000,11 @@
             "endpoint": "api/v2/requisitions/",
             "responses": [
                 {
-                    "uuid": "e884af7b-4df7-46d2-99e4-29826e691a4b",
-                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{faker 'date.recent' 365}}\",\n  \"redirect\": \"\",\n  \"status\": \"{{oneOf (array 'CR' 'ID' 'LN' 'RJ' 'ER' 'SU' 'EX' 'GC' 'UA' 'GA' 'SA')}}\",\n  \"institution_id\": \"\",\n  \"agreement\": \"{{faker 'string.uuid'}}\",\n  \"reference\": \"\",\n  \"accounts\": [],\n  \"user_language\": \"\",\n  \"link\": \"https://ob.gocardless.com/psd2/start/3fa85f64-5717-4562-b3fc-2c963f66afa6/SANDBOXFINANCE_SFIN0000\",\n  \"ssn\": \"\",\n  \"account_selection\": {{faker 'datatype.boolean'}},\n  \"redirect_immediate\": {{faker 'datatype.boolean'}}\n}",
+                    "uuid": "static-post-requisition",
+                    "body": "{\n  \"id\": \"mock-requisition-001\",\n  \"created\": \"2025-01-01T00:00:00Z\",\n  \"redirect\": \"http://localhost:3000/callback\",\n  \"status\": \"CR\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"agreement\": \"mock-agreement-001\",\n  \"reference\": \"mock-ref-001\",\n  \"accounts\": [],\n  \"user_language\": \"EN\",\n  \"link\": \"https://ob.gocardless.com/psd2/start/mock-requisition-001/SANDBOXFINANCE_SFIN0000\",\n  \"ssn\": null,\n  \"account_selection\": false,\n  \"redirect_immediate\": false\n}",
                     "latency": 0,
                     "statusCode": 201,
-                    "label": "Requisition has been successfully created",
+                    "label": "Static create requisition",
                     "headers": [
                         {
                             "key": "Content-Type",
@@ -5796,6 +6020,38 @@
                     "disableTemplating": false,
                     "fallbackTo404": false,
                     "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
+                    "uuid": "e884af7b-4df7-46d2-99e4-29826e691a4b",
+                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{dateFormat (faker 'date.recent') \"yyyy-MM-dd'T'HH:mm:ss'Z'\"}}\",\n  \"redirect\": \"http://localhost:3000/callback\",\n  \"status\": \"CR\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"agreement\": \"{{faker 'string.uuid'}}\",\n  \"reference\": \"{{faker 'string.alphanumeric' length=12}}\",\n  \"accounts\": [],\n  \"user_language\": \"EN\",\n  \"link\": \"https://ob.gocardless.com/psd2/start/{{faker 'string.uuid'}}/SANDBOXFINANCE_SFIN0000\",\n  \"ssn\": null,\n  \"account_selection\": false,\n  \"redirect_immediate\": false\n}",
+                    "latency": 0,
+                    "statusCode": 201,
+                    "label": "Dynamic create requisition",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [
+                        {
+                            "target": "header",
+                            "modifier": "X-Mock-Dynamic",
+                            "value": "true",
+                            "invert": false,
+                            "operator": "equals"
+                        }
+                    ],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": false,
                     "crudKey": "id",
                     "callbacks": []
                 },
@@ -6292,6 +6548,30 @@
             "endpoint": "api/v2/requisitions/:id/",
             "responses": [
                 {
+                    "uuid": "static-get-requisition-by-id",
+                    "body": "{\n  \"id\": \"mock-requisition-001\",\n  \"created\": \"2025-01-01T00:00:00Z\",\n  \"redirect\": \"https://example.com/callback\",\n  \"status\": \"LN\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"agreement\": \"mock-agreement-001\",\n  \"reference\": \"mock-ref-001\",\n  \"accounts\": [\n    \"mock-account-001\"\n  ],\n  \"user_language\": \"EN\",\n  \"link\": \"https://ob.gocardless.com/psd2/start/mock-requisition-001/SANDBOXFINANCE_SFIN0000\",\n  \"ssn\": null,\n  \"account_selection\": false,\n  \"redirect_immediate\": false\n}",
+                    "latency": 0,
+                    "statusCode": 200,
+                    "label": "Static requisition by ID",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ],
+                    "bodyType": "INLINE",
+                    "filePath": "",
+                    "databucketID": "",
+                    "sendFileAsBody": false,
+                    "rules": [],
+                    "rulesOperator": "OR",
+                    "disableTemplating": false,
+                    "fallbackTo404": false,
+                    "default": true,
+                    "crudKey": "id",
+                    "callbacks": []
+                },
+                {
                     "uuid": "custom-req-single-response",
                     "body": "{\n  \"id\": \"req-single\",\n  \"created\": \"2023-01-01T00:00:00Z\",\n  \"redirect\": \"\",\n  \"status\": \"LN\",\n  \"institution_id\": \"inst-1\",\n  \"agreement\": \"agr-1\",\n  \"reference\": \"ref-single\",\n  \"accounts\": [\n    \"acc-single\"\n  ],\n  \"user_language\": \"en\",\n  \"link\": \"https://example.com\",\n  \"ssn\": \"\",\n  \"account_selection\": false,\n  \"redirect_immediate\": false\n}",
                     "latency": 0,
@@ -6389,7 +6669,7 @@
                 },
                 {
                     "uuid": "95b7a5bc-dbdb-43c7-9983-8068d2ae8196",
-                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{faker 'date.recent' 365}}\",\n  \"redirect\": \"\",\n  \"status\": \"{{oneOf (array 'CR' 'ID' 'LN' 'RJ' 'ER' 'SU' 'EX' 'GC' 'UA' 'GA' 'SA')}}\",\n  \"institution_id\": \"\",\n  \"agreement\": \"{{faker 'string.uuid'}}\",\n  \"reference\": \"\",\n  \"accounts\": [\n    \"{{faker 'string.uuid'}}\"\n  ],\n  \"user_language\": \"\",\n  \"link\": \"https://ob.gocardless.com/psd2/start/3fa85f64-5717-4562-b3fc-2c963f66afa6/SANDBOXFINANCE_SFIN0000\",\n  \"ssn\": \"\",\n  \"account_selection\": {{faker 'datatype.boolean'}},\n  \"redirect_immediate\": {{faker 'datatype.boolean'}}\n}",
+                    "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"created\": \"{{dateFormat (faker 'date.recent') \"yyyy-MM-dd'T'HH:mm:ss'Z'\"}}\",\n  \"redirect\": \"{{faker 'internet.url'}}\",\n  \"status\": \"LN\",\n  \"institution_id\": \"SANDBOXFINANCE_SFIN0000\",\n  \"agreement\": \"{{faker 'string.uuid'}}\",\n  \"reference\": \"{{faker 'string.alphanumeric' length=12}}\",\n  \"accounts\": [\n    \"{{faker 'string.uuid'}}\"\n  ],\n  \"user_language\": \"EN\",\n  \"link\": \"https://ob.gocardless.com/psd2/start/{{faker 'string.uuid'}}/SANDBOXFINANCE_SFIN0000\",\n  \"ssn\": null,\n  \"account_selection\": false,\n  \"redirect_immediate\": false\n}",
                     "latency": 0,
                     "statusCode": 200,
                     "label": "Get requisition by ID",

@@ -1,0 +1,22 @@
+# Networth Terraform Variables
+# Copy to terraform.tfvars and fill in values. Never commit terraform.tfvars!
+
+# General
+location     = "uksouth"
+environment  = "dev"
+project_name = "networth"
+
+# Database
+postgres_admin_password = "ChangeMe123!"
+
+# GoCardless (https://bankaccountdata.gocardless.com/)
+gocardless_secret_id  = "your-secret-id"
+gocardless_secret_key = "your-secret-key"
+
+# Firebase (https://console.firebase.google.com/)
+firebase_project_id           = "your-project-id"
+firebase_api_key              = "AIzaSy..."  # sensitive (for frontend only)
+firebase_auth_domain          = "your-project.firebaseapp.com"
+firebase_storage_bucket       = "your-project.appspot.com"
+firebase_messaging_sender_id  = "123456789"
+firebase_app_id               = "1:123456789:web:abc123"

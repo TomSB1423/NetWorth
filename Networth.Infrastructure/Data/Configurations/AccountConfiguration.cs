@@ -21,7 +21,6 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .IsRequired();
 
         builder.Property(a => a.UserId)
-            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(a => a.RequisitionId)
@@ -35,6 +34,12 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(a => a.Name)
             .HasMaxLength(200)
             .IsRequired();
+
+        builder.Property(a => a.DisplayName)
+            .HasMaxLength(200);
+
+        builder.Property(a => a.Category)
+            .HasMaxLength(50);
 
         builder.Property(a => a.Iban)
             .HasMaxLength(34);

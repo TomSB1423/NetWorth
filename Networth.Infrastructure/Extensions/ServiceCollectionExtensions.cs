@@ -3,12 +3,15 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Networth.Application.Extensions;
 using Networth.Application.Interfaces;
+using Networth.Application.Options;
 using Networth.Domain.Repositories;
+using Networth.Infrastructure.Data.Configurations;
 using Networth.Infrastructure.Data.Context;
 using Networth.Infrastructure.Data.Repositories;
 using Networth.Infrastructure.Gocardless;
@@ -26,6 +29,12 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Read options manually to set static flag (Options are registered in Application layer)
+        var institutionsOptions = configuration.GetSection(InstitutionsOptions.SectionName).Get<InstitutionsOptions>() ?? new InstitutionsOptions();
+
+        // Set the static flag for EF Core configuration BEFORE DbContext is created
+        InstitutionMetadataConfiguration.UseSandboxTable = institutionsOptions.UseSandbox;
+
         // Configure GoCardless options from settings with FluentValidation
         services.AddSingleton<IValidator<GocardlessOptions>, GocardlessOptionsValidator>();
 
@@ -90,6 +99,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<ICacheMetadataRepository, CacheMetadataRepository>();
         services.AddScoped<IInstitutionMetadataRepository, InstitutionMetadataRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         // Use DB - with Aspire NpgsqlDataSource
         services.AddDbContext<NetworthDbContext>((serviceProvider, dbContextOptionsBuilder) =>
@@ -99,6 +109,10 @@ public static class ServiceCollectionExtensions
             {
                 npgsqlOptions.CommandTimeout(30);
             });
+
+            // Suppress warning about pending model changes as migrations are managed separately
+            dbContextOptionsBuilder.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
         services.AddScoped<IDbConnection>(sp =>

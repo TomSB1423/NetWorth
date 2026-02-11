@@ -14,7 +14,7 @@ public interface IRequisitionRepository : IBaseRepository<Requisition, string>
     /// <param name="userId">The user ID who owns this requisition.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A task representing the async operation.</returns>
-    Task SaveRequisitionAsync(Requisition requisition, string userId, CancellationToken cancellationToken = default);
+    Task SaveRequisitionAsync(Requisition requisition, Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Updates an existing requisition in the database.
@@ -41,6 +41,16 @@ public interface IRequisitionRepository : IBaseRepository<Requisition, string>
     /// <returns>A collection of requisitions for the institution and user.</returns>
     Task<IEnumerable<Requisition>> GetRequisitionsByInstitutionAndUserAsync(
         string institutionId,
-        string userId,
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Gets the institution IDs that a user has linked (has requisitions with Linked status and accounts).
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A collection of institution IDs that are linked for the user.</returns>
+    Task<IEnumerable<string>> GetLinkedInstitutionIdsForUserAsync(
+        Guid userId,
         CancellationToken cancellationToken = default);
 }

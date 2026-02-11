@@ -1,0 +1,93 @@
+name: "Deploy Static Site"
+description: "Build and deploy a static site (React or Docusaurus) to Azure Static Web App"
+
+inputs:
+  swa-name:
+    description: "Name of the Static Web App"
+    required: true
+  resource-group:
+    description: "Resource group name"
+    required: true
+  working-directory:
+    description: "Directory containing the static site source"
+    required: true
+  build-output:
+    description: "Build output directory relative to working-directory (e.g., 'dist' or 'build')"
+    required: true
+  api-url:
+    description: "Backend API URL (sets VITE_API_URL)"
+    required: true
+  firebase-api-key:
+    description: "Firebase API Key (sets VITE_FIREBASE_API_KEY)"
+    required: true
+  firebase-auth-domain:
+    description: "Firebase Auth Domain (sets VITE_FIREBASE_AUTH_DOMAIN)"
+    required: true
+  firebase-project-id:
+    description: "Firebase Project ID (sets VITE_FIREBASE_PROJECT_ID)"
+    required: true
+  firebase-storage-bucket:
+    description: "Firebase Storage Bucket (sets VITE_FIREBASE_STORAGE_BUCKET)"
+    required: true
+  firebase-messaging-sender-id:
+    description: "Firebase Messaging Sender ID (sets VITE_FIREBASE_MESSAGING_SENDER_ID)"
+    required: true
+  firebase-app-id:
+    description: "Firebase App ID (sets VITE_FIREBASE_APP_ID)"
+    required: true
+  azure-client-id:
+    description: "Azure Client ID"
+    required: true
+  azure-tenant-id:
+    description: "Azure Tenant ID"
+    required: true
+  azure-subscription-id:
+    description: "Azure Subscription ID"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install and Build
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        VITE_API_URL: ${{ inputs.api-url }}
+        VITE_USE_MOCK_DATA: "false"
+        VITE_FIREBASE_API_KEY: ${{ inputs.firebase-api-key }}
+        VITE_FIREBASE_AUTH_DOMAIN: ${{ inputs.firebase-auth-domain }}
+        VITE_FIREBASE_PROJECT_ID: ${{ inputs.firebase-project-id }}
+        VITE_FIREBASE_STORAGE_BUCKET: ${{ inputs.firebase-storage-bucket }}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ inputs.firebase-messaging-sender-id }}
+        VITE_FIREBASE_APP_ID: ${{ inputs.firebase-app-id }}
+      run: |
+        npm ci
+        npm run build
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Get SWA Deployment Token
+      id: get-token
+      shell: bash
+      run: |
+        TOKEN=$(az staticwebapp secrets list --name ${{ inputs.swa-name }} --resource-group ${{ inputs.resource-group }} --query "properties.apiKey" -o tsv)
+        echo "::add-mask::$TOKEN"
+        echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+    - name: Deploy to Static Web App
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ steps.get-token.outputs.token }}
+        action: "upload"
+        app_location: "./${{ inputs.working-directory }}/${{ inputs.build-output }}"
+        skip_app_build: true

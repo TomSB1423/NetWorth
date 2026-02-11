@@ -21,14 +21,12 @@ public class RequisitionConfiguration : IEntityTypeConfiguration<Requisition>
             .IsRequired();
 
         builder.Property(r => r.UserId)
-            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(r => r.Created)
             .IsRequired();
 
         builder.Property(r => r.Status)
-            .HasConversion<string>()
             .HasMaxLength(50)
             .IsRequired();
 

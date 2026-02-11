@@ -6,9 +6,9 @@ namespace Networth.Functions.Models.Responses;
 public class CurrentUserResponse
 {
     /// <summary>
-    ///     Gets or sets the user ID.
+    ///     Gets or sets the internal user ID.
     /// </summary>
-    public required string UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     ///     Gets or sets the user's name.
@@ -16,7 +16,12 @@ public class CurrentUserResponse
     public string? Name { get; set; }
 
     /// <summary>
-    ///     Gets or sets a value indicating whether the user is authenticated.
+    ///     Gets or sets the user's email address.
     /// </summary>
-    public bool IsAuthenticated { get; set; }
+    public string? Email { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether the user has completed onboarding.
+    /// </summary>
+    public bool HasCompletedOnboarding { get; set; }
 }

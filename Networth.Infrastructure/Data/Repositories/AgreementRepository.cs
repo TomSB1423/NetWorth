@@ -21,7 +21,7 @@ public class AgreementRepository : BaseRepository<DomainAgreement, string>, IAgr
     }
 
     /// <inheritdoc />
-    public async Task SaveAgreementAsync(DomainAgreement agreement, string userId, CancellationToken cancellationToken = default)
+    public async Task SaveAgreementAsync(DomainAgreement agreement, Guid userId, CancellationToken cancellationToken = default)
     {
         var entity = new InfrastructureAgreement
         {

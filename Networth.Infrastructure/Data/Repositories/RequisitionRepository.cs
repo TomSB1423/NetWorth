@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Networth.Domain.Enums;
 using Networth.Domain.Repositories;
 using Networth.Infrastructure.Data.Context;
 using DomainRequisition = Networth.Domain.Entities.Requisition;
@@ -22,7 +23,7 @@ public class RequisitionRepository : BaseRepository<DomainRequisition, string>, 
     }
 
     /// <inheritdoc />
-    public async Task SaveRequisitionAsync(DomainRequisition requisition, string userId, CancellationToken cancellationToken = default)
+    public async Task SaveRequisitionAsync(DomainRequisition requisition, Guid userId, CancellationToken cancellationToken = default)
     {
         var entity = new InfrastructureRequisition
         {
@@ -90,7 +91,7 @@ public class RequisitionRepository : BaseRepository<DomainRequisition, string>, 
     /// <inheritdoc />
     public async Task<IEnumerable<DomainRequisition>> GetRequisitionsByInstitutionAndUserAsync(
         string institutionId,
-        string userId,
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         var entities = await Context.Requisitions
@@ -111,5 +112,17 @@ public class RequisitionRepository : BaseRepository<DomainRequisition, string>, 
             AuthenticationLink = entity.Link,
             AccountSelection = entity.AccountSelection ? "true" : null,
         });
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<string>> GetLinkedInstitutionIdsForUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await Context.Requisitions
+            .Where(r => r.UserId == userId && r.Status == AccountLinkStatus.Linked)
+            .Select(r => r.InstitutionId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
     }
 }

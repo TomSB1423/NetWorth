@@ -42,7 +42,7 @@ public class GetAccounts(
         HttpStatusCode.InternalServerError,
         Description = "Internal server error")]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "accounts")]
         HttpRequest req)
     {
         if (!currentUserService.IsAuthenticated)
@@ -53,7 +53,7 @@ public class GetAccounts(
 
         var query = new GetAccountsQuery
         {
-            UserId = currentUserService.UserId,
+            UserId = currentUserService.InternalUserId!.Value,
         };
 
         var result = await mediator.Send<GetAccountsQuery, GetAccountsQueryResult>(query);
@@ -64,10 +64,15 @@ public class GetAccounts(
             UserId = a.UserId,
             RequisitionId = a.RequisitionId,
             InstitutionId = a.InstitutionId,
+            InstitutionName = a.InstitutionName,
+            InstitutionLogo = a.InstitutionLogo,
             Name = a.Name,
+            DisplayName = a.DisplayName,
+            Category = a.Category,
             Iban = a.Iban,
             Currency = a.Currency,
             Product = a.Product,
+            LastSynced = a.LastSynced,
         });
 
         return new OkObjectResult(response);

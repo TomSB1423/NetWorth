@@ -1,101 +1,198 @@
 # High Level Flow
 
+The Networth application is a personal finance aggregator built with a **React Frontend** and a **.NET 9 Azure Functions** backend. The system leverages the **GoCardless Bank Account Data API** (formerly Nordigen) to securely connect to user bank accounts across Europe.
+
+## Core Architecture
+
+```mermaid
+graph TD
+    %% Nodes
+    User([User])
+
+    subgraph Client_Side [Client Side]
+        Browser["Browser / React SPA"]
+    end
+
+    subgraph Azure_Infrastructure [Azure Infrastructure]
+        style Azure_Infrastructure fill:#f5f5f5,stroke:#0072C6,stroke-width:2px
+
+        Auth["Azure App Service Auth<br/>(Easy Auth)"]
+
+        subgraph Backend [Serverless Backend]
+            HttpFunc["HTTP Functions<br/>(API Layer)"]
+            QueueFunc["Queue Functions<br/>(Background Workers)"]
+        end
+
+        Queue["Azure Storage Queue<br/>(account-sync)"]
+        DB[("PostgreSQL Database")]
+    end
+
+    subgraph External [External Providers]
+        GoCardless["GoCardless API<br/>(Bank Data)"]
+    end
+
+    %% Relationships
+    User -->|Interacts| Browser
+    Browser -->|HTTPS / API Calls| Auth
+    Auth -->|Authenticated Request| HttpFunc
+
+    HttpFunc -->|Read/Write Data| DB
+    HttpFunc -->|Dispatch Sync Job| Queue
+
+    Queue -->|Trigger| QueueFunc
+    QueueFunc -->|Fetch Financial Data| GoCardless
+    QueueFunc -->|Persist Data| DB
+
+    Browser -.->|OAuth Flow| GoCardless
+```
+
+The backend is built on the **Azure Functions Isolated Worker Model** and is divided into two functional areas:
+
+1. **HTTP API Functions**: Serve the React frontend, handling user interactions, data retrieval, and the account linking flow.
+    * *Key Domains*: Accounts, Institutions, Requisitions, Users, Statistics.
+2. **Queue Trigger Functions**: Handle long-running background tasks to synchronize data from external banks without blocking the UI.
+    * *Key Processes*: Account Sync, Institution Sync, Balance Calculation.
+
+**Data Persistence**:
+
+* **PostgreSQL**: Acts as the primary data store, caching bank data (accounts, transactions, balances) to provide a fast user experience and historical tracking.
+* **Azure Queue Storage**: Decouples the frontend from the heavy lifting of data synchronization.
+
+**Security**:
+
+* **Azure App Service Authentication (Easy Auth)**: Handles user identity (Microsoft Entra ID), passing authenticated user context to the functions.
+
+## Major Workflows
+
+### 1. Account Linking Flow (Onboarding)
+
+This flow connects a user's real-world bank account to the application.
+
+1. **Discovery**: User searches for their bank (Institution) via `GetInstitutions`.
+2. **Initiation**: User selects a bank. The app calls `LinkAccount`, which:
+    * Creates an **End User Agreement** with GoCardless (defining access scope and duration).
+    * Creates a **Requisition** (a session for the bank link).
+3. **Authorization**: User is redirected to GoCardless/Bank portal to approve access.
+4. **Completion**: User returns to the app. The app calls `GetRequisition` to verify status and retrieve the linked **Account IDs**.
+5. **Storage**: The app stores the Account metadata and links it to the User in PostgreSQL.
+
+### 2. Data Synchronization Flow (Background)
+
+Ensures the application has up-to-date financial data.
+
+1. **Trigger**: Can be manual (User clicks "Sync") or scheduled.
+2. **Orchestration**: `SyncInstitution` receives the request and identifies all accounts for that institution. It enqueues a message for *each* account into the `account-sync` queue.
+3. **Processing**: The `SyncAccount` function picks up the message:
+    * Fetches latest **Balances** from GoCardless.
+    * Fetches **Account Details** (owner name, currency, IBAN).
+    * Fetches **Transactions** for the requested date range.
+4. **Persistence**: All data is upserted into PostgreSQL. Transactions are deduplicated.
+5. **Post-Processing**: (Optional) Triggers `CalculateRunningBalance` to update historical net worth points.
+
+### 3. User Dashboard Flow (Consumption)
+
+Provides a responsive view of the user's finances.
+
+1. **Authentication**: User logs in via Easy Auth.
+2. **Data Retrieval**: Frontend calls `GetAccounts`, `GetAccountBalances`, and `GetNetWorthHistory`.
+3. **Performance**: These endpoints query the **PostgreSQL database** directly (not the external Bank API), ensuring sub-second response times.
+
 institution id: HSBC_HBUKGB4B
 
 link: <https://ob.gocardless.com/ob-psd2/start/55b865e1-334b-4779-a9bb-a18fffd5f5fe/HSBC_HBUKGB4B>
 
 ## Mock Initialisation Data
 
-- All Institutions
-- Single Agreement
-- Single Requisition
-- Single Account with Balances, Details, Transactions
+* All Institutions
+* Single Agreement
+* Single Requisition
+* Single Account with Balances, Details, Transactions
 
 ## Data tables
 
-- User
-  - id
-  - name
-- InstitutionMetadata
-  - id
-  - institution_id
-  - name
-  - bic
-  - logo_url
-  - transaction_total_days
-  - max_access_valid_for_days
-  - countries
-  - supported_features
-- Agreement
-  - id
-  - institution_id
-  - max_historical_days
-  - access_valid_for_days
-  - access_scope
-  - reconfirmation
-  - created
-  - accepted
-- Requisition
-  - id
-  - redirect
-  - status
-  - institution_id
-  - agreement_id
-  - reference
-  - accounts (list of account ids)
-  - user_language
-  - link
-  - ssn
-  - account_selection
-  - redirect_immediate
-  - created
-- Account
-  - id
-  - institution_id
-  - user_id
-  - iban
-  - currency
-  - product
-  - cash_account_type
-  - additional_account_data
-- Transaction
-  - id
-  - account_id
-  - transaction_id
-  - debtor_name
-  - debtor_account_iban
-  - amount
-  - currency
-  - bank_transaction_code
-  - booking_date
-  - value_date
-  - remittance_information_unstructured
-  - status (booked/pending)
-- AccountBalance
-  - id
-  - account_id
-  - balance_type
-  - amount
-  - currency
-  - reference_date
+* User
+  * id
+  * name
+* InstitutionMetadata
+  * id
+  * institution_id
+  * name
+  * bic
+  * logo_url
+  * transaction_total_days
+  * max_access_valid_for_days
+  * countries
+  * supported_features
+* Agreement
+  * id
+  * institution_id
+  * max_historical_days
+  * access_valid_for_days
+  * access_scope
+  * reconfirmation
+  * created
+  * accepted
+* Requisition
+  * id
+  * redirect
+  * status
+  * institution_id
+  * agreement_id
+  * reference
+  * accounts (list of account ids)
+  * user_language
+  * link
+  * ssn
+  * account_selection
+  * redirect_immediate
+  * created
+* Account
+  * id
+  * institution_id
+  * user_id
+  * iban
+  * currency
+  * product
+  * cash_account_type
+  * additional_account_data
+* Transaction
+  * id
+  * account_id
+  * transaction_id
+  * debtor_name
+  * debtor_account_iban
+  * amount
+  * currency
+  * bank_transaction_code
+  * booking_date
+  * value_date
+  * remittance_information_unstructured
+  * status (booked/pending)
+* AccountBalance
+  * id
+  * account_id
+  * balance_type
+  * amount
+  * currency
+  * reference_date
 
 ## Architecture Overview
 
 ### HTTP Functions (Azure Functions)
 
-- `GetInstitutions` - GET /api/institutions?country={country}
-- `LinkAccount` - POST /api/accounts/link
-- `GetRequisition` - GET /api/requisitions/{requisitionId}
-- `GetAccount` - GET /api/accounts/{accountId}
-- `GetAccountBalances` - GET /api/accounts/{accountId}/balances
-- `GetAccountDetails` - GET /api/accounts/{accountId}/details
-- `GetAccountTransactions` - GET /api/accounts/{accountId}/transactions
-- `GetAccounts` - GET /api/accounts?userId={userId}
-- `SyncInstitution` - POST /api/institutions/{institutionId}/sync
+* `GetInstitutions` - GET /api/institutions?country={country}
+* `LinkAccount` - POST /api/accounts/link
+* `GetRequisition` - GET /api/requisitions/{requisitionId}
+* `GetAccount` - GET /api/accounts/{accountId}
+* `GetAccountBalances` - GET /api/accounts/{accountId}/balances
+* `GetAccountDetails` - GET /api/accounts/{accountId}/details
+* `GetAccountTransactions` - GET /api/accounts/{accountId}/transactions
+* `GetAccounts` - GET /api/accounts?userId={userId}
+* `SyncInstitution` - POST /api/institutions/{institutionId}/sync
 
 ### Queue Functions (Background Jobs)
 
-- `SyncAccount` - Processes account sync from queue (account-sync)
+* `SyncAccount` - Processes account sync from queue (account-sync)
 
 ### Data Flow
 
@@ -380,36 +477,36 @@ graph LR
 
 #### 1. **Database Persistence Layer**
 
-- ❌ **IInstitutionRepository** - Cache institutions from GoCardless
-- ❌ **IAgreementRepository** - Store created agreements
-- ❌ **IAccountBalanceRepository** - Cache balance data with timestamps
-- ❌ **IAccountDetailRepository** - Cache account detail data
-- ❌ **IAccountRepository.CreateAccountAsync()** - Store linked accounts after requisition
-- ❌ **IAccountRepository.GetAccountsByInstitutionAsync()** - Query accounts for SyncInstitution
+* ❌ **IInstitutionRepository** - Cache institutions from GoCardless
+* ❌ **IAgreementRepository** - Store created agreements
+* ❌ **IAccountBalanceRepository** - Cache balance data with timestamps
+* ❌ **IAccountDetailRepository** - Cache account detail data
+* ❌ **IAccountRepository.CreateAccountAsync()** - Store linked accounts after requisition
+* ❌ **IAccountRepository.GetAccountsByInstitutionAsync()** - Query accounts for SyncInstitution
 
 #### 2. **Database Entities**
 
-- ❌ **Agreement** (Infrastructure entity) - Store agreement records
-- ❌ **Institution** (Infrastructure entity) - Cache institution data
-- ❌ **AccountBalance** (Infrastructure entity) - Cache balance snapshots
-- ❌ **AccountDetail** (Infrastructure entity) - Cache account detail data
+* ❌ **Agreement** (Infrastructure entity) - Store agreement records
+* ❌ **Institution** (Infrastructure entity) - Cache institution data
+* ❌ **AccountBalance** (Infrastructure entity) - Cache balance snapshots
+* ❌ **AccountDetail** (Infrastructure entity) - Cache account detail data
 
 #### 3. **Handler Logic Gaps**
 
-- ❌ **LinkAccountCommandHandler** - Missing DB persistence:
-  - Store Agreement to database
-  - Store Requisition to database
-- ❌ **GetRequisitionQueryHandler** - Missing DB persistence:
-  - Store/update linked accounts when status = LN
-- ❌ **GetInstitutionsQueryHandler** - Missing caching:
-  - Check cache before calling GoCardless
-  - Store results in cache
+* ❌ **LinkAccountCommandHandler** - Missing DB persistence:
+  * Store Agreement to database
+  * Store Requisition to database
+* ❌ **GetRequisitionQueryHandler** - Missing DB persistence:
+  * Store/update linked accounts when status = LN
+* ❌ **GetInstitutionsQueryHandler** - Missing caching:
+  * Check cache before calling GoCardless
+  * Store results in cache
 
 #### 4. **Queue Infrastructure**
 
-- ✅ **SyncAccount queue function** exists
-- ✅ **IQueueService** interface exists
-- ⚠️ Need to verify queue implementation stores to correct queue name
+* ✅ **SyncAccount queue function** exists
+* ✅ **IQueueService** interface exists
+* ⚠️ Need to verify queue implementation stores to correct queue name
 
 ### 🗑️ Can Be Removed/Simplified
 
