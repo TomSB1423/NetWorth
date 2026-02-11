@@ -105,6 +105,9 @@ public class CustomMockUserConfigurationTests : IAsyncLifetime
         builder.Configuration["Parameters:firebase-auth-domain"] = "test.firebaseapp.com";
         builder.Configuration["Parameters:firebase-project-id"] = "test-project";
         builder.Configuration["Parameters:mock-authentication"] = "true";
+        builder.Configuration["Parameters:postgres-password"] = "test-password-123!";
+        builder.Configuration["Parameters:gocardless-secret-id"] = "test-secret-id";
+        builder.Configuration["Parameters:gocardless-secret-key"] = "test-secret-key";
 
         builder.WithRandomVolumeNames();
 
