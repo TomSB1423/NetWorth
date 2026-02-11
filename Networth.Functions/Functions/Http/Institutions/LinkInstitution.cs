@@ -50,9 +50,14 @@ public class LinkInstitution(IMediator mediator, ICurrentUserService currentUser
         HttpRequest req,
         string institutionId)
     {
+        if (!currentUserService.IsAuthenticated || currentUserService.InternalUserId is null)
+        {
+            return new UnauthorizedResult();
+        }
+
         var command = new LinkInstitutionCommand
         {
-            UserId = currentUserService.InternalUserId!.Value,
+            UserId = currentUserService.InternalUserId.Value,
             InstitutionId = institutionId,
         };
         var result = await mediator.Send<LinkInstitutionCommand, LinkInstitutionCommandResult>(command);

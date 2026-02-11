@@ -55,7 +55,7 @@ functions
     .WithEnvironment("Gocardless__SecretId", gocardlessSecretId)
     .WithEnvironment("Gocardless__SecretKey", gocardlessSecretKey)
     .WithEnvironment("Firebase__ProjectId", firebaseProjectId)
-    .WithEnvironment("Networth__MockAuthentication", mockAuthentication);
+    .WithEnvironment("Networth__UseAuthentication", mockAuthentication);
 
 var frontend = builder.AddNpmApp(ResourceNames.React, "../Networth.Frontend", "dev")
     .WithReference(functions)

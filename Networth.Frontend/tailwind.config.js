@@ -23,8 +23,8 @@ export default {
                     '50%': { transform: 'translateY(-4px)' },
                 },
                 'float': {
-                    '0%, 100%': { transform: 'translateY(0) opacity(0.4)' },
-                    '50%': { transform: 'translateY(-20px) opacity(1)' },
+                    '0%, 100%': { transform: 'translateY(0)', opacity: '0.4' },
+                    '50%': { transform: 'translateY(-20px)', opacity: '1' },
                 },
                 'fade-in': {
                     '0%': { opacity: '0', transform: 'translateY(5px)' },

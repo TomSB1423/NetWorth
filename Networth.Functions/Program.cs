@@ -23,6 +23,12 @@ builder.AddServiceDefaults();
 builder.UseMiddleware<FunctionContextMiddleware>();
 builder.UseMiddleware<ExceptionHandlerMiddleware>();
 
+// Configure additional app settings before reading options
+builder.Configuration
+    .AddJsonFile("settings.json", false, true)
+    .AddEnvironmentVariables()
+    .AddUserSecrets<Program>();
+
 // Read authentication setting early to decide which auth middleware to use
 var networthOptions = new NetworthOptions();
 builder.Configuration.GetSection(NetworthOptions.SectionName).Bind(networthOptions);
@@ -68,12 +74,6 @@ builder.UseWhen<UserResolutionMiddleware>(context =>
     ];
     return isHttpTrigger && !excludedFunctions.Contains(context.FunctionDefinition.Name);
 });
-
-// Configure additional app settings
-builder.Configuration
-    .AddJsonFile("settings.json", false, true)
-    .AddEnvironmentVariables()
-    .AddUserSecrets<Program>();
 
 builder.Services.Configure<JsonSerializerOptions>(options =>
 {
