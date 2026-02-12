@@ -22,9 +22,9 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
         id: filter
         with:
           filters: |
@@ -48,21 +48,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     name: Build & Test - Backend
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_NOLOGO: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+      ASPIRE_ALLOW_UNSECURED_TRANSPORT: true
+      SuppressNETCoreSdkPreviewMessage: true
+      DCP_DIAGNOSTICS_LOG_LEVEL: debug
+      TESTCONTAINERS_RYUK_DISABLED: false
+      TESTCONTAINERS_HOST_OVERRIDE: localhost
+      DOCKER_HOST: unix:///var/run/docker.sock
     steps:
-      - uses: actions/checkout@v4
-      - name: Set Environment Variables
-        shell: bash
-        run: |
-          echo "DOTNET_CLI_TELEMETRY_OPTOUT=true" >> $GITHUB_ENV
-          echo "DOTNET_NOLOGO=true" >> $GITHUB_ENV
-          echo "DOTNET_MULTILEVEL_LOOKUP=false" >> $GITHUB_ENV
-          echo "ASPIRE_ALLOW_UNSECURED_TRANSPORT=true" >> $GITHUB_ENV
-          echo "SuppressNETCoreSdkPreviewMessage=true" >> $GITHUB_ENV
-          echo "DCP_DIAGNOSTICS_LOG_LEVEL=debug" >> $GITHUB_ENV
-          echo "TESTCONTAINERS_RYUK_DISABLED=false" >> $GITHUB_ENV
-          echo "TESTCONTAINERS_HOST_OVERRIDE=localhost" >> $GITHUB_ENV
-          echo "DOCKER_HOST=unix:///var/run/docker.sock" >> $GITHUB_ENV
-          echo "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=false" >> $GITHUB_ENV
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Build Environment
         uses: ./.github/actions/setup-build-env
